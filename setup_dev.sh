@@ -73,15 +73,38 @@ fi
 # Run schema migration if schema.sql exists
 if [ -f app/db/schema.sql ]; then
     echo "📊 Running database schema migration..."
-    if docker-compose exec -T postgres psql -U dyn365hunter -d dyn365hunter -f /app/db/schema.sql 2>/dev/null || \
-       docker compose exec -T postgres psql -U dyn365hunter -d dyn365hunter -f /app/db/schema.sql 2>/dev/null; then
-        echo "✅ Schema migration completed"
+    # Try Python migration script first (preferred method)
+    if [ -f app/db/migrate.py ]; then
+        echo "   Using Python migration script..."
+        if docker-compose exec -T api python3 -m app.db.migrate 2>/dev/null || \
+           docker compose exec -T api python3 -m app.db.migrate 2>/dev/null; then
+            echo "✅ Schema migration completed (via Python script)"
+        else
+            echo "⚠️  Python migration failed, trying direct SQL..."
+            # Fallback to direct SQL execution
+            if docker-compose exec -T postgres psql -U dyn365hunter -d dyn365hunter < app/db/schema.sql 2>/dev/null || \
+               docker compose exec -T postgres psql -U dyn365hunter -d dyn365hunter < app/db/schema.sql 2>/dev/null; then
+                echo "✅ Schema migration completed (via direct SQL)"
+            else
+                echo "❌ Schema migration failed"
+                echo "   You can run it manually: docker-compose exec api python3 -m app.db.migrate"
+                exit 1
+            fi
+        fi
     else
-        echo "⚠️  Schema migration failed (schema.sql may need to be copied into container)"
-        echo "   You can run it manually: docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -f /app/db/schema.sql"
+        # Fallback to direct SQL execution if migrate.py doesn't exist
+        echo "   Using direct SQL execution..."
+        if docker-compose exec -T postgres psql -U dyn365hunter -d dyn365hunter < app/db/schema.sql 2>/dev/null || \
+           docker compose exec -T postgres psql -U dyn365hunter -d dyn365hunter < app/db/schema.sql 2>/dev/null; then
+            echo "✅ Schema migration completed"
+        else
+            echo "❌ Schema migration failed"
+            echo "   You can run it manually: docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter < app/db/schema.sql"
+            exit 1
+        fi
     fi
 else
-    echo "ℹ️  Schema migration skipped (app/db/schema.sql not found - will be created in G2)"
+    echo "ℹ️  Schema migration skipped (app/db/schema.sql not found)"
 fi
 
 # Wait for FastAPI to be ready

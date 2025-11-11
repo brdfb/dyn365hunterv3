@@ -42,6 +42,9 @@ Thumbs.db
 # Project specific
 *.plan.md
 
+# Cursor specific
+.cursor/howto/
+
 # Keep .env.example
 !.env.example
 

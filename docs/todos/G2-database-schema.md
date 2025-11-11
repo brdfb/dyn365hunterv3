@@ -6,10 +6,10 @@
 
 ## Tasks
 
-- [ ] Create `app/db/schema.sql` (CREATE TABLE: raw_leads, companies, domain_signals, lead_scores, VIEW: leads_ready)
-- [ ] Create `app/db/models.py` (SQLAlchemy models: RawLead, Company, DomainSignal, LeadScore)
-- [ ] Create schema migration script (Python script for automatic migration)
-- [ ] Update `setup_dev.sh` (schema.sql migration otomatik çalışsın)
+- [x] Create `app/db/schema.sql` (CREATE TABLE: raw_leads, companies, domain_signals, lead_scores, VIEW: leads_ready)
+- [x] Create `app/db/models.py` (SQLAlchemy models: RawLead, Company, DomainSignal, LeadScore)
+- [x] Create schema migration script (Python script for automatic migration)
+- [x] Update `setup_dev.sh` (schema.sql migration otomatik çalışsın)
 
 ## Test/Acceptance
 
