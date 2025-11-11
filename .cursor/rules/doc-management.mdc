@@ -1,0 +1,96 @@
+---
+alwaysApply: true
+---
+# Documentation Management Rules
+
+## Purpose
+Efficient documentation lifecycle management to optimize token usage and maintain clear project context.
+
+## Documentation Lifecycle
+
+1. **Active** (`docs/active/`) - Current phase only
+2. **Archive** (`docs/archive/`) - Completed phases (date-prefixed)
+3. **Prompts** (`docs/prompts/`) - Important conversations (date-prefixed)
+4. **TODOs** (`docs/todos/`) - Task tracking (archive when complete)
+
+## Archive Rules
+
+### When to Archive
+- ✅ Phase complete → Archive TODO and phase documentation
+- ✅ Prompt no longer actively referenced → Archive prompt
+- ✅ Feature complete → Archive related documentation
+
+### Archive Format
+- Date prefix: `YYYY-MM-DD-filename.md`
+- Use `scripts/manage_docs.sh archive-*` commands
+
+## Active Documentation Guidelines
+
+### Keep Minimal
+- Only current phase documentation in `active/`
+- Maximum 5-7 active files
+- Archive immediately when phase completes
+
+### What to Keep Active
+- Current phase TODO
+- Current phase roadmap section
+- Active prompts (if actively referenced)
+- Current acceptance criteria
+
+## Prompt Management
+
+### Save Important Prompts
+- Complex decisions
+- Architecture discussions
+- Important context
+- Format: `YYYY-MM-DD-prompt-name.md`
+
+### Archive Prompts
+- When no longer actively referenced
+- After decisions are implemented
+- Use `scripts/manage_docs.sh archive-prompt <file>`
+
+## TODO Management
+
+### Create TODOs
+- One TODO per phase: `G1-foundation.md`, `G2-database.md`, etc.
+- Update status: In Progress → Completed → Archived
+- Use `scripts/manage_docs.sh create-todo <phase> <name>`
+
+### Archive TODOs
+- When phase is complete
+- Move to `docs/archive/` with date prefix
+- Use `scripts/manage_docs.sh archive-todo <file>`
+
+## Memory Optimization
+
+### Token Efficiency
+- Don't repeat archived information
+- Reference archived docs when needed
+- Keep active context minimal
+- Archive immediately when done
+
+### Context Management
+- Reference `docs/active/` for current work
+- Check `docs/archive/` for historical context
+- Use `docs/prompts/` for important decisions
+- Use `docs/todos/` for task tracking
+
+## Commands
+
+```bash
+# List documentation
+scripts/manage_docs.sh list
+
+# Archive TODO
+scripts/manage_docs.sh archive-todo G1-foundation.md
+
+# Archive prompt
+scripts/manage_docs.sh archive-prompt 2025-11-12-initial-setup.md
+
+# Create TODO
+scripts/manage_docs.sh create-todo G2 database-schema
+
+# Create prompt
+scripts/manage_docs.sh create-prompt api-design
+```
