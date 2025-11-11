@@ -1,0 +1,196 @@
+---
+alwaysApply: true
+# Dyn365Hunter MVP - Cursor Rules
+
+## Project Context
+- **MVP Scope**: FastAPI + PostgreSQL, rule-based scoring, DNS/WHOIS analysis
+- **Target**: ≤2 minute "kahvelik" analysis flow for sales team
+- **Out of Scope (Post-MVP)**: D365 adapter, Redis/Queue, UI, webhook, bulk scan, CSV export
+
+## Code Style & Standards
+
+### Python
+- Use type hints for all functions
+- Follow PEP 8 (black formatter preferred)
+- Use f-strings for string formatting
+- Prefer explicit over implicit (no magic numbers/strings)
+
+### FastAPI
+- Use Pydantic models for request/response validation
+- Use dependency injection for DB sessions (`get_db()`)
+- Return proper HTTP status codes (201 Created, 400 Bad Request, 404 Not Found, 500 Internal Server Error)
+- Use async/await only if needed (DB I/O can be sync for MVP)
+
+### Database
+- Use SQLAlchemy ORM (no raw SQL except in schema.sql)
+- Domain is UNIQUE key in `companies` table
+- Use idempotent upsert for companies (ON CONFLICT DO UPDATE)
+- Always use transactions for multi-step operations
+
+### Error Handling
+- DNS timeout: 10s max, return None/error status, set `scan_status='dns_timeout'`
+- WHOIS timeout: 5s max, graceful fail (return None), set `scan_status='whois_failed'`
+- Invalid domain: Return 400 Bad Request with clear error message
+- Never crash on external API failures (DNS/WHOIS) - continue with partial data
+
+### Logging & PII
+- **CRITICAL**: Log only domain, NEVER log email or company_name
+- Use structured logging (JSON format preferred)
+- Log level: INFO for normal operations, ERROR for failures, DEBUG for development
+
+### Testing
+- Write tests for all core functions (normalizer, analyzer, scorer)
+- Test edge cases: invalid domains, timeouts, malformed CSV, missing MX records
+- Use pytest with pytest-mock for mocking DNS/WHOIS
+- Target: ≥70% code coverage for core modules
+
+## MVP Scope Discipline
+
+### ✅ IN SCOPE
+- Single domain ingestion (`POST /ingest/domain`)
+- CSV ingestion (`POST /ingest/csv`) - parse + normalize + insert only
+- Single domain scan (`POST /scan/domain`) - DNS + WHOIS + scoring
+- Leads query (`GET /leads` with filters)
+- Single lead query (`GET /lead/{domain}`)
+- Docker Compose setup
+- Basic tests (3 test files)
+
+### ❌ OUT OF SCOPE (Post-MVP)
+- UI (Phase 6)
+- Webhook endpoint (`/ingest/webhook`)
+- Bulk scan endpoint (`/scan/bulk`)
+- CSV export endpoint (`POST /export`)
+- `app/core/exporter.py` module
+- `scripts/demo_run.sh`
+- D365 adapter
+- Redis/Queue
+- Scheduler
+
+## File Structure Rules
+
+### Required Files (P0)
+- `Dockerfile`, `docker-compose.yml`, `.dockerignore`
+- `setup_dev.sh` (one-command setup)
+- `.env.example` (all required env vars)
+- `requirements.txt` (pinned versions)
+- `app/main.py` (FastAPI app + `/healthz`)
+- `app/config.py` (Pydantic Settings)
+- `app/db/schema.sql` (PostgreSQL DDL)
+- `app/db/models.py` (SQLAlchemy models)
+- `app/db/session.py` (DB session factory)
+- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`
+- `app/api/ingest.py`, `scan.py`, `leads.py`
+- `app/data/providers.json`, `rules.json`
+- `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`
+- `README.md`
+
+### File Naming
+- Use snake_case for Python files
+- Use kebab-case for shell scripts (`setup_dev.sh`)
+- Use lowercase for JSON config files (`providers.json`, `rules.json`)
+
+## Implementation Priorities
+
+### P0 (Must Have)
+- Docker setup, DB schema, FastAPI skeleton
+- Domain normalization, ingestion endpoints
+- DNS/WHOIS analyzers, provider mapping, scoring
+- Scan endpoint, leads API
+- Basic tests, README
+
+### P1 (Should Have)
+- Edge case tests, error handling improvements
+- Healthcheck improvements, logging enhancements
+
+### P2 (Nice to Have)
+- Performance optimizations, additional test coverage
+
+## Performance Targets
+- Single domain scan: ≤10s (cold: ≤15s acceptable)
+- API response: <1s for `/leads` query
+- CSV ingestion: Parse + normalize + insert only (scan separate)
+
+## Data Files
+
+### providers.json
+- Must contain 10+ providers (M365, Google, Yandex, Hosting, Local, Unknown)
+- Include MX root examples for each provider
+- Format: `{"providers": [{"name": "M365", "mx_roots": ["outlook.com", "protection.outlook.com"], ...}]}`
+
+### rules.json
+- Must contain: `base_score`, `provider_points`, `signal_points`, `segment_rules`
+- Segment rules order matters (evaluate top to bottom)
+- Format: `{"base_score": 0, "provider_points": {"M365": 50, ...}, "signal_points": {"spf": 10, ...}, "segment_rules": [...]}`
+
+## Docker & Development
+
+### Docker Compose
+- PostgreSQL 15-alpine with healthcheck
+- FastAPI service with healthcheck
+- Use `depends_on.condition: service_healthy` (not just `depends_on`)
+- Volume mounts for hot-reload: `./app:/app/app`
+
+### setup_dev.sh
+- Check Docker/Docker Compose availability
+- Copy `.env.example` to `.env` if not exists
+- `docker-compose up -d`
+- Wait for PostgreSQL healthcheck (max 30s)
+- Run schema migration automatically (Python script or Alembic, NOT manual docker-compose exec)
+- Verify `/healthz` endpoint
+- Print access URLs
+
+## Code Review Checklist
+
+Before marking code as done, verify:
+- [ ] Type hints added
+- [ ] Error handling implemented (timeouts, invalid input)
+- [ ] No PII in logs (domain only)
+- [ ] Tests written for new functions
+- [ ] MVP scope respected (no UI, webhook, bulk, export)
+- [ ] Docker Compose still works
+- [ ] `/healthz` still responds
+
+## Common Patterns
+
+### Domain Normalization
+```python
+def normalize_domain(domain: str) -> str:
+    # punycode decode, strip www, lowercase
+    # return normalized domain
+```
+
+### DNS Analysis
+```python
+def analyze_dns(domain: str) -> Dict[str, Any]:
+    # timeout: 10s
+    # return: {"mx_root": str, "spf": bool, "dkim": bool, "dmarc_policy": str}
+    # on timeout: return None, set scan_status='dns_timeout'
+```
+
+### WHOIS Analysis
+```python
+def get_whois_info(domain: str) -> Optional[Dict[str, Any]]:
+    # timeout: 5s
+    # return: {"registrar": str, "expires_at": datetime, "nameservers": List[str]}
+    # on fail: return None, set scan_status='whois_failed', continue scoring
+```
+
+### Scoring
+```python
+def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
+    # load rules.json
+    # calculate base_score + provider_points + signal_points
+    # determine segment (order matters)
+    # return: {"score": int, "segment": str, "reason": str}
+```
+
+## Questions to Ask Before Implementing
+
+1. Is this in MVP scope? (Check Cut List)
+2. Does this require external API calls? (Handle timeouts/errors)
+3. Will this log PII? (Only log domain)
+4. Is this testable? (Write tests)
+5. Does this break Docker setup? (Verify setup_dev.sh still works)
+
+
+---

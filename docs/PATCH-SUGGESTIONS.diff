@@ -1,0 +1,148 @@
+--- a/.cursor/plans/dyn365hunter-mvp-plan-b73499ec.plan.md
++++ b/.cursor/plans/dyn365hunter-mvp-plan-b73499ec.plan.md
+@@ -14,7 +14,7 @@
+ - **Backend**: FastAPI (Python)
+ - **Database**: PostgreSQL (SQLAlchemy ORM)
+ - **DNS Analysis**: dnspython
+-- **WHOIS**: python-whois
++- **WHOIS**: python-whois (optional, graceful fail)
+ - **No Redis/Queue**: Sequential processing for bulk operations
+ - **Deployment**: Docker Compose (self-contained, single command startup)
+ - **Development**: WSL2 (DynHnt) + Docker Desktop integration
+@@ -28,7 +28,7 @@
+ │   ├── config.py               # Settings (DB, env vars)
+ │   ├── api/
+ │   │   ├── __init__.py
+-│   │   ├── ingest.py           # POST /ingest/csv, /ingest/domain, /ingest/webhook
++│   │   ├── ingest.py           # POST /ingest/csv, /ingest/domain (webhook → Post-MVP)
+ │   │   ├── scan.py             # POST /scan/domain, /scan/bulk
+ │   │   └── leads.py            # GET /leads, GET /lead/{domain}, POST /export
+ │   ├── core/
+@@ -39,7 +39,7 @@
+ │   │   ├── analyzer_whois.py    # WHOIS lookup (python-whois)
+ │   │   ├── provider_map.py     # MX root → provider classification
+ │   │   ├── scorer.py           # Rule-based scoring engine
+-│   │   ├── merger.py           # raw_leads → companies dedupe/upsert
++│   │   ├── merger.py           # raw_leads → companies dedupe/upsert (domain unique key)
+ │   │   └── exporter.py         # CSV export generation
+ │   ├── db/
+ │   │   ├── __init__.py
+@@ -52,7 +52,7 @@
+ │   │   └── rules.json          # Scoring rules and segment logic
+ ├── tests/
+ │   ├── __init__.py
+-│   ├── test_scan_single.py     # Test DNS/WHOIS analysis for single domain
++│   ├── test_scan_single.py     # Test DNS/WHOIS analysis for single domain (edge cases)
+ │   ├── test_scorer_rules.py    # Test scoring rules and segments
+ │   └── test_ingest_csv.py      # Test CSV ingestion and normalization
+ ├── scripts/
+@@ -89,7 +89,7 @@
+ - `app/api/ingest.py`:
+   - `POST /ingest/csv`: multipart file upload, parse CSV (pandas), normalize, insert raw_leads
+   - `POST /ingest/domain`: JSON body `{domain, company_name}`, normalize, insert raw_leads
+-  - `POST /ingest/webhook`: JSON payload, extract domain/email, normalize, insert raw_leads
++  - `POST /ingest/webhook`: **Post-MVP** (removed from MVP scope)
+ - `app/core/merger.py`: `upsert_companies()` - domain unique key, merge raw_leads → companies
+ 
+ ### Phase 3: DNS & WHOIS Analyzer
+@@ -100,7 +100,7 @@
+   - `check_dkim()`: TXT record DKIM check (selector-based)
+   - `check_dmarc()`: `_dmarc.{domain}` TXT record, extract policy
+   - `analyze_dns()`: Combined DNS analysis, timeout handling (10s)
+-- `app/core/analyzer_whois.py`:
++- `app/core/analyzer_whois.py`:
+   - `get_whois_info()`: Domain WHOIS lookup
+   - Extract: registrar, expires_at, nameservers
+   - Handle timeouts and errors gracefully (timeout: 5s, fail → None, scoring continues)
+@@ -108,7 +108,7 @@
+   - `POST /scan/domain`: Single domain analysis (DNS + WHOIS → domain_signals)
+   - `POST /scan/bulk`: Array of domains, sequential processing
++- `POST /scan/bulk`: **Post-MVP** (removed from MVP scope, async queue later)
+ 
+ ### Phase 4: Provider Mapping & Scoring
+ 
+@@ -130,7 +130,7 @@
+ - `app/api/leads.py`:
+   - `GET /leads`: Query params `segment`, `min_score`, `provider` → filter `leads_ready` view
+   - `GET /lead/{domain}`: Single lead details (signals + score + reason)
+-  - `POST /export`: Generate CSV from filtered leads, return file path or download
++  - `POST /export`: **Post-MVP** (removed from MVP scope, JSON response sufficient)
+ - `app/core/exporter.py`: CSV generation (pandas DataFrame → CSV)
++- `app/core/exporter.py`: **Post-MVP** (removed from MVP scope)
+ 
+ ### Phase 6: Optional UI (Single Page)
+ 
+@@ -151,7 +151,7 @@
+ - `RawLead`: id, source, company_name, email, website, domain, payload (JSONB), ingested_at
+ - `Company`: id, canonical_name, domain (UNIQUE), provider, country, updated_at
+ - `DomainSignal`: id, domain (FK), spf, dkim, dmarc_policy, mx_root, registrar, expires_at, nameservers[], scan_status, scanned_at
++- `DomainSignal.scan_status`: enum('pending', 'success', 'dns_timeout', 'whois_failed', 'invalid_domain')
+ - `LeadScore`: id, domain (FK), readiness_score, segment, reason, updated_at
+ 
+ ### Scoring Logic
+@@ -166,7 +166,7 @@
+    - If provider == 'M365' → Existing, score_override=55
+    - If provider in ['Google','Yandex','Hosting','Local'] → Migration
+    - If mx_missing or domain_inactive → Skip, score_override=20
+-   - If score < 60 → Cold
++   - If score < 60 → Cold (default segment)
+ 
+ ### Error Handling
+ 
+@@ -174,6 +174,7 @@
+ - WHOIS failures: Graceful degradation, continue without WHOIS data
+ - Invalid domains: Return 400 with error message
+ - PII masking: Log only domain, never email/company_name in logs
++- Schema migration: Automatic via Python script or Alembic (not manual docker-compose exec)
+ 
+ ### Performance Targets
+ 
+@@ -181,7 +182,7 @@
+ - CSV 100 rows: First 20 processed in ≤2min (sequential)
+ - API response: <1s for `/leads` query
++- CSV ingestion: Parse + normalize + insert only (scan separate endpoint)
+ 
+ ## Acceptance Criteria
+ 
+@@ -192,6 +193,7 @@
+ - No PII in logs (domain only)
+ - Docker Compose setup works with single command (`bash setup_dev.sh`)
++- Demo scenario: 3 domain ingest → scan → leads query → ≥1 Migration lead ≥70 score
+ 
+ ## Dependencies (requirements.txt)
+ 
+@@ -203,6 +205,7 @@
+ pydantic-settings==2.1.0
+ pandas==2.1.3
+ python-multipart==0.0.6
++pytest==7.4.3
++pytest-mock==3.12.0
+ ```
+ 
+ ## Environment Variables (.env.example)
+@@ -234,7 +237,7 @@
+ 1. Check Docker/Docker Compose availability
+ 2. Copy `.env.example` to `.env` if not exists
+ 3. `docker-compose up -d` (detached mode)
+-4. Wait for PostgreSQL to be ready (healthcheck, max 30s)
++4. Wait for PostgreSQL to be ready (healthcheck, max 30s), wait for FastAPI healthcheck
+ 5. Run `schema.sql` migration via `docker-compose exec postgres psql`
++5. Run `schema.sql` migration via Python script or Alembic (automatic, not manual)
+ 6. Verify `/healthz` endpoint responds (curl or wget)
+ 7. Print access URLs (http://localhost:8000, API docs: http://localhost:8000/docs)
+ 
+@@ -312,6 +315,7 @@
+ - [ ] Phase 1: Create Docker setup (Dockerfile, docker-compose.yml, .dockerignore, setup_dev.sh), FastAPI skeleton, PostgreSQL connection, SQLAlchemy models, schema.sql, default providers.json and rules.json, /healthz endpoint
+ - [ ] Phase 2: Implement normalizer (domain normalization, email→domain extraction), ingest endpoints (CSV, domain, webhook), merger (raw_leads → companies upsert)
++- [ ] Phase 2: Implement normalizer (domain normalization, email→domain extraction), ingest endpoints (CSV, domain), merger (raw_leads → companies upsert) - webhook removed
+ - [ ] Phase 3: Implement DNS analyzer (MX/SPF/DKIM/DMARC with dnspython), WHOIS analyzer (python-whois), scan endpoints (/scan/domain, /scan/bulk)
++- [ ] Phase 3: Implement DNS analyzer (MX/SPF/DKIM/DMARC with dnspython), WHOIS analyzer (python-whois, graceful fail), scan endpoint (/scan/domain) - bulk removed
+ - [ ] Phase 4: Implement provider mapping (MX root → provider classification), scorer (rule-based scoring engine with rules.json), integrate into scan flow
+ - [ ] Phase 5: Implement leads API (GET /leads with filters, GET /lead/{domain}, POST /export CSV), exporter module
++- [ ] Phase 5: Implement leads API (GET /leads with filters, GET /lead/{domain}) - export removed
+ - [ ] Phase 6: Optional single-page UI (CSV upload, domain input, results table)
++- [ ] Phase 6: **Removed from MVP** (Post-MVP)
+ - [ ] Phase 7: Write tests (test_scan_single, test_scorer_rules, test_ingest_csv), create README.md with WSL2 + Docker setup and demo instructions
++- [ ] Phase 7: Write tests (test_scan_single with edge cases, test_scorer_rules, test_ingest_csv), create README.md with WSL2 + Docker setup and demo instructions
+ 
+

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables (ignore actual .env, but allow .env.example)
+.env
+.env.local
+.env.*.local
+
+# Docker volumes and logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
+# Keep .env.example for reference
+!.env.example
+
