@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- DNS resolver: Added public DNS servers (8.8.8.8, 1.1.1.1, etc.) for reliable DNS resolution in containers
+- Lead endpoint: Fixed `/lead/{domain}` endpoint - changed from VIEW query to direct JOIN for better reliability
+- CHANGELOG: Added missing G3 phase documentation
+
+### Changed
+- DNS analyzer: All DNS queries now use public DNS servers for consistent resolution
+- Lead endpoint: Improved error handling and query reliability
+
+### Removed
+- Removed temporary test script (`test_google_domain.sh`) - archived
+- Removed demo script (`scripts/demo.sh`) - archived
+- Removed completed action items (`docs/active/ACTIONS.json`) - archived
+
+## [0.2.0] - 2025-11-12
+
 ### Added
 - G4: Ingest Endpoints (CSV + Domain)
   - `app/core/merger.py` - Company upsert utilities (upsert_companies with domain unique key)
@@ -54,8 +70,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `tests/test_scan_single.py` - DNS/WHOIS analyzer tests with mocks
   - `tests/test_scorer_rules.py` - Scoring rules and segment logic tests
   - `tests/test_ingest_csv.py` - CSV parsing and normalization tests
+  - `tests/test_api_endpoints.py` - API endpoint integration tests (ingest, scan, leads)
   - Edge case coverage: timeouts, invalid domains, malformed CSV, missing MX records
-  - Test coverage ≥70% target
+  - Test coverage: 71% (75 tests passed, target ≥70% achieved)
+
+- G10: Documentation & Demo
+  - Complete README.md with setup instructions, API documentation, and example usage
+  - WSL2 + Docker setup guide
+  - Virtual environment setup instructions
+  - Complete API endpoint documentation with examples
+  - Demo scenario: 3 domain ingest → scan → leads query workflow
+  - Development environment guide (`docs/active/DEVELOPMENT-ENVIRONMENT.md`)
+  - WSL guide (`docs/active/WSL-GUIDE.md`)
 
 - CI/CD Pipeline
   - `.github/workflows/ci.yml` - Complete CI pipeline:
@@ -69,13 +95,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - MyPy type checking
 
 ### Changed
-- Updated `requirements.txt` to include `idna`, `pandas`, `python-multipart` for ingestion
-- Updated `app/main.py` to register all API routers (ingest, scan, leads)
-- Updated README.md with complete API documentation and example usage
-- Updated documentation paths to reflect `docs/active/` structure
-- Enhanced `.gitignore` and `.cursorignore` with comprehensive Python, testing, and IDE exclusions
-- Added virtual environment setup script (`setup_venv.sh`) with Windows/Linux/Mac compatibility
-- Updated `setup_dev.sh` to support optional venv setup with `--with-venv` flag
+- **Dependencies**: Updated `requirements.txt` to include `idna`, `pandas`, `python-multipart`, `httpx` for ingestion and testing
+- **API**: Updated `app/main.py` to register all API routers (ingest, scan, leads)
+- **Documentation**: 
+  - Updated README.md with complete API documentation and example usage
+  - Updated documentation paths to reflect `docs/active/` structure
+- **Development Tools**:
+  - Enhanced `.gitignore` and `.cursorignore` with comprehensive Python, testing, and IDE exclusions
+  - Added virtual environment setup script (`setup_venv.sh`) with Windows/Linux/Mac compatibility
+  - Updated `setup_dev.sh` to support optional venv setup with `--with-venv` flag
+  - Updated `docker-compose.yml` to mount `tests/` directory for container-based testing
+- **Testing**: Improved test isolation: API endpoint tests use transaction rollback instead of table drops
 
 ### Fixed
 - WHOIS analyzer exception handling (graceful fail for all exceptions)
@@ -87,6 +117,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed duplicate `scripts/wsl-setup-venv.sh` (functionality merged into `setup_venv.sh`)
 - Consolidated WSL documentation: merged 3 separate files into single `docs/active/WSL-GUIDE.md`
 - Simplified `setup_venv.sh`: removed redundant Python detection logic and WSL-specific warnings
+
+### Deprecated
+- N/A
+
+### Security
+- N/A
 
 ## [0.1.0] - 2025-11-12
 
@@ -107,6 +143,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `leads_ready` - View for querying ready leads
   - SQLAlchemy models (`app/db/models.py`): RawLead, Company, DomainSignal, LeadScore
   - Automatic schema migration script (`app/db/migrate.py`)
+
+- G3: Domain Normalization & Data Files
+  - `app/core/normalizer.py` - Domain normalization utilities:
+    - `normalize_domain()` - Punycode decode, www stripping, lowercase
+    - `extract_domain_from_email()` - Domain extraction from email addresses
+    - `extract_domain_from_website()` - Domain extraction from website URLs
+  - `app/core/provider_map.py` - Provider classification:
+    - `load_providers()` - Load provider definitions from JSON
+    - `classify_provider()` - Classify provider from MX root domain
+  - `app/core/scorer.py` - Rule-based scoring engine:
+    - `load_rules()` - Load scoring rules from JSON
+    - `calculate_score()` - Calculate readiness score
+    - `determine_segment()` - Determine lead segment (Migration, Existing, Cold, Skip)
+    - `score_domain()` - Complete scoring workflow
+  - `app/data/providers.json` - Provider definitions (10+ providers: M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun, Hosting, Local, Unknown)
+  - `app/data/rules.json` - Scoring rules (base_score, provider_points, signal_points, segment_rules)
 
 ### Changed
 - N/A

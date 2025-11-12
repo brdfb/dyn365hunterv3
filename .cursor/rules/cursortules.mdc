@@ -184,6 +184,28 @@ def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
     # return: {"score": int, "segment": str, "reason": str}
 ```
 
+## Documentation Management
+
+### Phase Completion Workflow
+When a phase is completed (TODO status = "Completed"):
+1. **Archive TODO**: `scripts/manage_docs.sh phase-complete <phase> <name>`
+2. **Update CHANGELOG.md**: Add phase changes under `[Unreleased]` → `### Added`
+3. **Update README.md**: Mark completed features in Features section
+4. **Update docs/README.md**: Add phase to "Archived Documentation" section
+5. **Archive related docs**: Move phase-specific docs from `docs/active/` to `docs/archive/`
+
+### Documentation Structure
+- `docs/active/` - Current phase documentation (keep minimal, max 5-7 files)
+- `docs/archive/` - Completed phase documentation (date-prefixed)
+- `docs/prompts/` - Important prompts (date-prefixed, archive when done)
+- `docs/todos/` - TODO lists (archive when phase complete)
+- `docs/plans/` - Project plans
+
+### When to Archive
+- Phase complete → Run phase completion workflow (see above)
+- Prompt no longer referenced → Archive prompt
+- Keep only active/current documentation visible
+
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
@@ -191,32 +213,7 @@ def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
 3. Will this log PII? (Only log domain)
 4. Is this testable? (Write tests)
 5. Does this break Docker setup? (Verify setup_dev.sh still works)
-
-## Documentation Management
-
-### Documentation Structure
-- `docs/active/` - Current phase documentation (keep minimal)
-- `docs/archive/` - Completed phase documentation (date-prefixed)
-- `docs/prompts/` - Important prompts (date-prefixed, archive when done)
-- `docs/todos/` - TODO lists (archive when phase complete)
-- `docs/plans/` - Project plans
-
-### Documentation Rules
-- **Archive completed phases**: Move to `docs/archive/` with date prefix (YYYY-MM-DD-)
-- **Keep active minimal**: Only current phase docs in `active/`
-- **Save important prompts**: Save to `docs/prompts/` with date prefix
-- **Track TODOs**: Create in `docs/todos/`, archive when complete
-- **Use management script**: `scripts/manage_docs.sh` for archiving
-
-### When to Archive
-- Phase complete → Archive TODO and phase docs
-- Prompt no longer referenced → Archive prompt
-- Keep only active/current documentation visible
-
-### Memory Management
-- Don't repeat archived information
-- Reference archived docs when needed
-- Keep token usage efficient by archiving completed work
+6. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
 
 
 ---

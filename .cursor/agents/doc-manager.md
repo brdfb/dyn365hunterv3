@@ -7,8 +7,12 @@ Automatic documentation lifecycle management agent. Keeps documentation organize
 
 ### 1. Phase Completion Detection
 - Monitor TODO files in `docs/todos/` for status changes
-- When status changes to "Completed" → Auto-archive TODO
-- Check if phase documentation in `docs/active/` should be archived
+- When status changes to "Completed" → Run phase completion workflow:
+  1. Archive TODO file
+  2. Update CHANGELOG.md with phase changes
+  3. Update README.md Features section
+  4. Update docs/README.md with archived documentation
+  5. Check if phase documentation in `docs/active/` should be archived
 
 ### 2. New Phase Initiation
 - When new phase starts (e.g., "G2 başlıyor") → Auto-create TODO
@@ -72,13 +76,17 @@ scripts/manage_docs.sh list
 ## Examples
 
 ### Example 1: Phase Complete
-**User**: "G1 tamamlandı"
+**User**: "G1 tamamlandı" or "G1 bitti"
 **Agent Action**:
 1. Check `docs/todos/G1-foundation.md` status
-2. If "Completed" → `scripts/manage_docs.sh archive-todo G1-foundation.md`
+2. If "Completed" → Run phase completion workflow:
+   - `scripts/manage_docs.sh phase-complete G1 foundation`
+   - Update CHANGELOG.md with G1 changes
+   - Update README.md Features section (mark G1 features as ✅)
+   - Update docs/README.md (add G1 to archived docs)
 3. Check `docs/active/` for G1-related docs
 4. Archive if needed
-5. Confirm: "✅ G1 TODO archived"
+5. Confirm: "✅ G1 phase completed - TODO archived, documentation updated"
 
 ### Example 2: New Phase
 **User**: "G2 başlıyor"

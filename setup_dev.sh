@@ -5,6 +5,17 @@ set -e  # Exit on error
 
 echo "🚀 Setting up Dyn365Hunter MVP development environment..."
 
+# Check if virtual environment setup is requested
+if [ "$1" == "--with-venv" ] || [ "$1" == "-v" ]; then
+    echo "🐍 Setting up Python virtual environment..."
+    if [ -f "setup_venv.sh" ]; then
+        bash setup_venv.sh
+        echo ""
+    else
+        echo "⚠️  setup_venv.sh not found, skipping venv setup"
+    fi
+fi
+
 # Check Docker availability
 if ! command -v docker &> /dev/null; then
     echo "❌ Docker is not installed or not in PATH"
@@ -48,7 +59,23 @@ fi
 
 # Start Docker Compose services
 echo "🐳 Starting Docker Compose services..."
+
+# Stop and remove existing containers (force remove if needed)
+echo "🧹 Cleaning up existing containers..."
 docker-compose down 2>/dev/null || docker compose down 2>/dev/null
+
+# Also remove containers by name if they exist (from previous runs)
+if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "dyn365hunter-postgres"; then
+    echo "   Removing existing dyn365hunter-postgres container..."
+    docker rm -f dyn365hunter-postgres 2>/dev/null || true
+fi
+if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "dyn365hunter-api"; then
+    echo "   Removing existing dyn365hunter-api container..."
+    docker rm -f dyn365hunter-api 2>/dev/null || true
+fi
+
+# Start services
+echo "🚀 Starting Docker Compose services..."
 docker-compose up -d || docker compose up -d
 
 echo "⏳ Waiting for PostgreSQL to be ready (max 30s)..."

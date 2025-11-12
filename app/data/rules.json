@@ -1,0 +1,56 @@
+{
+  "base_score": 0,
+  "provider_points": {
+    "M365": 50,
+    "Google": 50,
+    "Yandex": 30,
+    "Zoho": 30,
+    "Amazon": 20,
+    "SendGrid": 20,
+    "Mailgun": 20,
+    "Hosting": 10,
+    "Local": 0,
+    "Unknown": 0
+  },
+  "signal_points": {
+    "spf": 10,
+    "dkim": 10,
+    "dmarc_quarantine": 15,
+    "dmarc_reject": 20,
+    "dmarc_none": 0
+  },
+  "segment_rules": [
+    {
+      "segment": "Migration",
+      "condition": {
+        "min_score": 70,
+        "provider_in": ["M365", "Google", "Yandex", "Zoho"]
+      },
+      "description": "High readiness score with known cloud provider"
+    },
+    {
+      "segment": "Existing",
+      "condition": {
+        "min_score": 50,
+        "provider_in": ["M365", "Google", "Yandex", "Zoho", "Amazon", "SendGrid", "Mailgun"]
+      },
+      "description": "Moderate readiness with cloud/hosting provider"
+    },
+    {
+      "segment": "Cold",
+      "condition": {
+        "min_score": 20,
+        "max_score": 49
+      },
+      "description": "Low readiness score, needs more signals"
+    },
+    {
+      "segment": "Skip",
+      "condition": {
+        "max_score": 19
+      },
+      "description": "Very low readiness, skip for now"
+    }
+  ]
+}
+

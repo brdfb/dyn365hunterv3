@@ -182,6 +182,38 @@ def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
     # return: {"score": int, "segment": str, "reason": str}
 ```
 
+## Documentation Management
+
+### ⚠️ AUTOMATIC DOCUMENTATION UPDATES (ALWAYS ACTIVE)
+**IMPORTANT**: When you create/modify code, ALWAYS update documentation automatically:
+
+1. **New API endpoints** (`app/api/*.py`) → Update README.md API Endpoints section
+2. **New test files** (`tests/*.py`) → Update CHANGELOG.md under "Added" → "G9: Tests"
+3. **New core modules** (`app/core/*.py`) → Update CHANGELOG.md with module description
+4. **Phase completion** (TODO status = "Completed") → Run full phase completion workflow
+
+**DO NOT WAIT** for user to ask - update documentation immediately after code changes.
+
+### Phase Completion Workflow
+When a phase is completed (TODO status = "Completed"):
+1. **Archive TODO**: `scripts/manage_docs.sh phase-complete <phase> <name>`
+2. **Update CHANGELOG.md**: Add phase changes under `[Unreleased]` → `### Added`
+3. **Update README.md**: Mark completed features in Features section
+4. **Update docs/README.md**: Add phase to "Archived Documentation" section
+5. **Archive related docs**: Move phase-specific docs from `docs/active/` to `docs/archive/`
+
+### Documentation Structure
+- `docs/active/` - Current phase documentation (keep minimal, max 5-7 files)
+- `docs/archive/` - Completed phase documentation (date-prefixed)
+- `docs/prompts/` - Important prompts (date-prefixed, archive when done)
+- `docs/todos/` - TODO lists (archive when phase complete)
+- `docs/plans/` - Project plans
+
+### When to Archive
+- Phase complete → Run phase completion workflow (see above)
+- Prompt no longer referenced → Archive prompt
+- Keep only active/current documentation visible
+
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
@@ -189,4 +221,5 @@ def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
 3. Will this log PII? (Only log domain)
 4. Is this testable? (Write tests)
 5. Does this break Docker setup? (Verify setup_dev.sh still works)
+6. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
 

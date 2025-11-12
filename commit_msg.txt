@@ -1,0 +1,13 @@
+fix: DNS resolver and lead endpoint improvements
+
+- Fix DNS resolver: Add public DNS servers for reliable resolution in containers
+- Fix lead endpoint: Change from VIEW to direct JOIN query for better reliability
+- Fix CHANGELOG: Add missing G3 phase documentation
+- Clean up: Archive temporary test scripts and completed action items
+
+Fixes:
+- DNS MX record lookup failures in Docker containers
+- Lead endpoint 404 errors for scanned domains
+
+Tested with google.com domain - all working correctly.
+

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.db.session import get_db, engine
+from app.api import ingest, scan, leads
 
 # Create FastAPI app
 app = FastAPI(
@@ -11,6 +12,11 @@ app = FastAPI(
     description="Lead intelligence engine for domain-based analysis",
     version="0.1.0"
 )
+
+# Register routers
+app.include_router(ingest.router)
+app.include_router(scan.router)
+app.include_router(leads.router)
 
 
 @app.get("/healthz")

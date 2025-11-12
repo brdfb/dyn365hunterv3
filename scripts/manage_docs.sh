@@ -162,6 +162,40 @@ EOF
     echo "✅ Created prompt: $filepath"
 }
 
+function phase_complete() {
+    local phase=$1
+    local phase_name=$2
+    
+    if [ -z "$phase" ] || [ -z "$phase_name" ]; then
+        echo "Usage: $0 phase-complete <phase> <phase-name>"
+        echo "Example: $0 phase-complete G2 database-schema"
+        return 1
+    fi
+    
+    echo "🔄 Phase completion workflow for ${phase}: ${phase_name}"
+    echo ""
+    
+    # 1. Archive TODO
+    local todo_file="${phase}-${phase_name}.md"
+    if [ -f "$TODOS_DIR/$todo_file" ]; then
+        echo "📋 Step 1: Archiving TODO..."
+        archive_todo "$todo_file"
+    else
+        echo "⚠️  TODO file not found: $todo_file"
+    fi
+    
+    echo ""
+    echo "📝 Step 2: Update project documentation..."
+    echo "   ⚠️  Manual steps required:"
+    echo "   1. Update CHANGELOG.md with ${phase} changes"
+    echo "   2. Update README.md Features section"
+    echo "   3. Update docs/README.md with archived documentation"
+    echo ""
+    echo "💡 Tip: Use 'git diff' to see what changed in ${phase}"
+    echo ""
+    echo "✅ Phase completion workflow initiated"
+}
+
 # Main command handler
 case "$1" in
     list)
@@ -183,6 +217,9 @@ case "$1" in
     create-prompt)
         create_prompt "$2"
         ;;
+    phase-complete)
+        phase_complete "$2" "$3"
+        ;;
     *)
         echo "Documentation Management Script"
         echo ""
@@ -195,12 +232,14 @@ case "$1" in
         echo "  archive-active <file>   - Archive an active documentation file"
         echo "  create-todo <phase> <name> - Create a new TODO file"
         echo "  create-prompt <name>    - Create a new prompt file"
+        echo "  phase-complete <phase> <name> - Complete phase workflow (archive TODO + update docs)"
         echo ""
         echo "Examples:"
         echo "  $0 list"
         echo "  $0 archive-todo G1-foundation.md"
         echo "  $0 create-todo G2 database-schema"
         echo "  $0 create-prompt api-design"
+        echo "  $0 phase-complete G2 database-schema"
         ;;
 esac
 

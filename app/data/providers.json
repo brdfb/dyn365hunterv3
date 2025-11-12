@@ -1,0 +1,96 @@
+{
+  "providers": [
+    {
+      "name": "M365",
+      "mx_roots": [
+        "outlook.com",
+        "protection.outlook.com",
+        "outlook.office365.com",
+        "mail.protection.outlook.com",
+        "outlook-com.olc.protection.outlook.com"
+      ],
+      "description": "Microsoft 365 / Office 365"
+    },
+    {
+      "name": "Google",
+      "mx_roots": [
+        "google.com",
+        "googlemail.com",
+        "aspmx.l.google.com",
+        "alt1.aspmx.l.google.com",
+        "alt2.aspmx.l.google.com",
+        "gmail.com"
+      ],
+      "description": "Google Workspace / Gmail"
+    },
+    {
+      "name": "Yandex",
+      "mx_roots": [
+        "yandex.ru",
+        "yandex.net",
+        "mx.yandex.ru",
+        "mx.yandex.net"
+      ],
+      "description": "Yandex Mail"
+    },
+    {
+      "name": "Zoho",
+      "mx_roots": [
+        "zoho.com",
+        "zoho.eu",
+        "zoho.in",
+        "mx.zoho.com"
+      ],
+      "description": "Zoho Mail"
+    },
+    {
+      "name": "Amazon",
+      "mx_roots": [
+        "amazonses.com",
+        "amazonaws.com",
+        "mail.amazonses.com"
+      ],
+      "description": "Amazon SES"
+    },
+    {
+      "name": "SendGrid",
+      "mx_roots": [
+        "sendgrid.net",
+        "mail.sendgrid.net"
+      ],
+      "description": "SendGrid Email Service"
+    },
+    {
+      "name": "Mailgun",
+      "mx_roots": [
+        "mailgun.org",
+        "mailgun.com",
+        "mxa.mailgun.org"
+      ],
+      "description": "Mailgun Email Service"
+    },
+    {
+      "name": "Hosting",
+      "mx_roots": [
+        "cpanel.net",
+        "plesk.com",
+        "hostgator.com",
+        "godaddy.com",
+        "bluehost.com",
+        "hostinger.com"
+      ],
+      "description": "Generic hosting providers"
+    },
+    {
+      "name": "Local",
+      "mx_roots": [],
+      "description": "Self-hosted or custom mail servers (no known provider match)"
+    },
+    {
+      "name": "Unknown",
+      "mx_roots": [],
+      "description": "Unknown or unrecognized mail provider"
+    }
+  ]
+}
+
