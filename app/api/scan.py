@@ -111,7 +111,8 @@ async def scan_domain(
         scoring_result = score_domain(
             domain=domain,
             provider=provider,
-            signals=signals
+            signals=signals,
+            mx_records=dns_result.get("mx_records", [])
         )
         
         # Upsert domain_signals

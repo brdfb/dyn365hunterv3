@@ -7,19 +7,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- DNS resolver: Added public DNS servers (8.8.8.8, 1.1.1.1, etc.) for reliable DNS resolution in containers
-- Lead endpoint: Fixed `/lead/{domain}` endpoint - changed from VIEW query to direct JOIN for better reliability
-- CHANGELOG: Added missing G3 phase documentation
+### Post-MVP (High Priority)
+- CSV Export - Endpoint design needs detail
+- Bulk Scan - Requires async queue (risks identified)
+
+### Post-MVP (Low Priority)
+- Email Templates, Notes/Tags, Favorites, Reminders - Requirements specified
+
+## [0.5.0] - 2025-01-27
+
+### Added
+- **Hard-Fail Rules**: Domains with missing MX records are automatically assigned Skip segment
+  - `check_hard_fail()` function in `app/core/scorer.py`
+  - Hard-fail check happens before scoring calculation
+  - Returns Skip segment with score 0 and clear reason message
+
+- **Risk Scoring**: Negative points for missing security signals
+  - `risk_points` section in `app/data/rules.json`
+  - Risk penalties: no SPF (-10), no DKIM (-10), DMARC none (-10), hosting MX weak (-10)
+  - Risk scoring applied in `calculate_score()` function
 
 ### Changed
-- DNS analyzer: All DNS queries now use public DNS servers for consistent resolution
-- Lead endpoint: Improved error handling and query reliability
+- **Provider Points**: Updated provider point values
+  - Hosting: 10 → **20** (better reflects hosting provider value)
+  - Local: 0 → **10** (self-hosted domains have some value)
 
-### Removed
-- Removed temporary test script (`test_google_domain.sh`) - archived
-- Removed demo script (`scripts/demo.sh`) - archived
-- Removed completed action items (`docs/active/ACTIONS.json`) - archived
+- **Scoring Logic**: Enhanced scoring calculation
+  - `calculate_score()` now applies risk points (negative)
+  - Score is floored at 0 and capped at 100
+  - `score_domain()` checks hard-fail conditions first
+
+- **API**: Updated `POST /scan/domain` endpoint
+  - Now passes `mx_records` to `score_domain()` for hard-fail checking
+
+### Testing
+- Added comprehensive tests for hard-fail rules (`TestHardFailRules`)
+- Added comprehensive tests for risk scoring (`TestRiskScoring`)
+- Added tests for updated provider points (`TestProviderPointsUpdate`)
+- All 33 tests passing
+
+### Documentation
+- Updated `docs/SEGMENT-GUIDE.md` with risk scoring and hard-fail rules
+- Updated `docs/plans/2025-01-27-phase0-hotfix-scoring.md` with implementation plan
+
+## [0.4.0] - 2025-01-27
+
+### Added
+- Dashboard endpoint (`GET /dashboard`)
+  - `app/api/dashboard.py` - Dashboard statistics endpoint
+  - Segment distribution (Migration, Existing, Cold, Skip counts)
+  - Average readiness score calculation
+  - High priority leads count (Migration + score >= 70)
+  - Empty database handling
+  - Uses `leads_ready` VIEW for efficient aggregation
+
+- Priority Score feature
+  - `app/core/priority.py` - Priority score calculation module
+  - `calculate_priority_score()` - Priority scoring logic based on segment and score
+  - Priority levels: 1 (highest) to 6 (lowest)
+  - Integration with `GET /leads` and `GET /leads/{domain}` endpoints
+  - `LeadResponse` model updated with `priority_score` field
+
+### Changed
+- **API**: Updated `app/main.py` to register dashboard router
+- **API**: Updated `app/api/leads.py` to include priority score in responses
+- **Models**: Added `priority_score: Optional[int]` to `LeadResponse` model
+
+## [0.3.0] - 2025-01-27
+
+### Changed
+- **Documentation**: Organized and archived completed MVP documentation
+  - Archived: MVP-TRIMMED-ROADMAP.md, GO-NO-GO-CHECKLIST.md, PROJECT-EVALUATION.md, SALES-TEAM-EVALUATION.md, CRITIQUE.md
+  - Active: SALES-FEATURE-REQUESTS.md, SALES-FEATURE-REQUESTS-CRITIQUE.md (MVP scope features)
+  - Active: DEVELOPMENT-ENVIRONMENT.md, WSL-GUIDE.md (setup guides)
 
 ## [0.2.0] - 2025-11-12
 
@@ -62,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - G8: Leads API
   - `app/api/leads.py` - Lead query endpoints:
     - `GET /leads` - Filtered lead list (segment, min_score, provider filters)
-    - `GET /lead/{domain}` - Single lead details
+    - `GET /leads/{domain}` - Single lead details
   - Uses `leads_ready` VIEW for efficient querying
   - Response time <1s for filtered queries
 

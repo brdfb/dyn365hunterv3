@@ -1,6 +1,12 @@
 """Tests for scoring rules and segment logic."""
 import pytest
-from app.core.scorer import calculate_score, determine_segment, score_domain, load_rules
+from app.core.scorer import (
+    calculate_score, 
+    determine_segment, 
+    score_domain, 
+    load_rules,
+    check_hard_fail
+)
 from app.core.provider_map import classify_provider, load_providers
 
 
@@ -76,39 +82,66 @@ class TestScoringRules:
 class TestSegmentLogic:
     """Test segment determination logic."""
     
+    def test_determine_segment_existing(self):
+        """Test Existing segment determination."""
+        # M365 should always be Existing (regardless of score)
+        segment, reason = determine_segment(85, "M365")
+        
+        # Segment should be Existing
+        assert segment == "Existing"
+        assert len(reason) > 0  # Reason should not be empty
+        
+        # Even low score M365 should be Existing
+        segment2, _ = determine_segment(10, "M365")
+        assert segment2 == "Existing"
+    
     def test_determine_segment_migration(self):
         """Test Migration segment determination."""
-        # High score with M365 should be Migration
-        segment, reason = determine_segment(85, "M365")
+        # High score with Google should be Migration
+        segment, reason = determine_segment(75, "Google")
         
         # Segment should be Migration (reason content may vary)
         assert segment == "Migration"
         assert len(reason) > 0  # Reason should not be empty
     
-    def test_determine_segment_existing(self):
-        """Test Existing segment determination."""
-        # Medium score with M365 might be Existing
-        segment, reason = determine_segment(50, "M365")
-        
-        # Should match one of the segment rules
-        assert segment in ["Migration", "Existing", "Cold", "Skip"]
-    
     def test_determine_segment_cold(self):
         """Test Cold segment determination."""
-        # Low score should be Cold
+        # Score 40-69 should be Cold
+        segment, reason = determine_segment(50, "Unknown")
+        
+        assert segment == "Cold"
+        
+        # Score 40 should be Cold
+        segment2, _ = determine_segment(40, "Unknown")
+        assert segment2 == "Cold"
+        
+        # Score 69 should be Cold
+        segment3, _ = determine_segment(69, "Unknown")
+        assert segment3 == "Cold"
+    
+    def test_determine_segment_skip(self):
+        """Test Skip segment determination."""
+        # Score <40 should be Skip
         segment, reason = determine_segment(20, "Unknown")
         
-        assert segment in ["Cold", "Skip"]
+        assert segment == "Skip"
+        
+        # Score 39 should be Skip
+        segment2, _ = determine_segment(39, "Unknown")
+        assert segment2 == "Skip"
     
     def test_segment_rules_order_matters(self):
         """Test that segment rules are evaluated in order."""
-        # First matching rule should win
+        # M365 should be Existing (first rule), not Migration
         segment1, _ = determine_segment(75, "M365")
-        segment2, _ = determine_segment(75, "Google")
+        assert segment1 == "Existing"
         
-        # Both should match a rule (order matters)
-        assert segment1 in ["Migration", "Existing", "Cold", "Skip"]
-        assert segment2 in ["Migration", "Existing", "Cold", "Skip"]
+        # Google with high score should be Migration
+        segment2, _ = determine_segment(75, "Google")
+        assert segment2 == "Migration"
+        
+        # Order matters: Existing is checked before Migration
+        # So M365 never becomes Migration even with high score
 
 
 class TestScoreDomain:
@@ -199,4 +232,164 @@ class TestScorerEdgeCases:
         # Should return a valid segment (likely "Skip")
         assert segment in ["Migration", "Existing", "Cold", "Skip"]
         assert "Skip" in reason or segment == "Skip"
+
+
+class TestHardFailRules:
+    """Test hard-fail rules that force Skip segment."""
+    
+    def test_hard_fail_mx_missing(self):
+        """Test hard-fail when MX records are missing."""
+        result = score_domain(
+            domain="example.com",
+            provider="Unknown",
+            signals={"spf": False, "dkim": False, "dmarc_policy": None},
+            mx_records=[]  # No MX records
+        )
+        assert result["segment"] == "Skip"
+        assert "Hard-fail" in result["reason"]
+        assert result["score"] == 0
+    
+    def test_hard_fail_mx_none(self):
+        """Test hard-fail when mx_records is None."""
+        result = score_domain(
+            domain="example.com",
+            provider="Unknown",
+            signals={"spf": False, "dkim": False, "dmarc_policy": None},
+            mx_records=None  # None instead of empty list
+        )
+        assert result["segment"] == "Skip"
+        assert "Hard-fail" in result["reason"]
+        assert result["score"] == 0
+    
+    def test_check_hard_fail_function(self):
+        """Test check_hard_fail() function directly."""
+        # MX missing
+        reason = check_hard_fail([])
+        assert reason is not None
+        assert "MX" in reason or "mx" in reason.lower()
+        
+        # MX present
+        reason = check_hard_fail(["mail.example.com"])
+        assert reason is None
+
+
+class TestRiskScoring:
+    """Test risk scoring (negative points)."""
+    
+    def test_risk_scoring_no_spf(self):
+        """Test risk scoring when SPF is missing."""
+        # Provider: Local (10 points)
+        # No SPF: -10 risk
+        # Expected: 10 - 10 = 0
+        result = score_domain(
+            domain="example.com",
+            provider="Local",
+            signals={"spf": False, "dkim": False, "dmarc_policy": None},
+            mx_records=["mail.example.com"]
+        )
+        assert result["score"] == 0  # 10 (Local) - 10 (no_spf) = 0
+    
+    def test_risk_scoring_no_dkim(self):
+        """Test risk scoring when DKIM is missing."""
+        # Provider: Local (10 points)
+        # SPF present: +10
+        # No DKIM: -10 risk
+        # Expected: 10 + 10 - 10 = 10
+        result = score_domain(
+            domain="example.com",
+            provider="Local",
+            signals={"spf": True, "dkim": False, "dmarc_policy": None},
+            mx_records=["mail.example.com"]
+        )
+        assert result["score"] == 10  # 10 (Local) + 10 (SPF) - 10 (no_dkim) = 10
+    
+    def test_risk_scoring_dmarc_none(self):
+        """Test risk scoring when DMARC policy is 'none'."""
+        # Provider: Local (10 points)
+        # SPF present: +10
+        # DKIM present: +10
+        # DMARC none: -10 risk (in addition to signal_points which is 0)
+        # Expected: 10 + 10 + 10 - 10 = 20
+        result = score_domain(
+            domain="example.com",
+            provider="Local",
+            signals={"spf": True, "dkim": True, "dmarc_policy": "none"},
+            mx_records=["mail.example.com"]
+        )
+        assert result["score"] == 20  # 10 + 10 + 10 - 10 = 20
+    
+    def test_risk_scoring_hosting_mx_weak(self):
+        """Test risk scoring for weak hosting MX."""
+        # Provider: Hosting (20 points)
+        # No SPF: -10 risk
+        # No DKIM: -10 risk
+        # Hosting MX weak: -10 risk
+        # Expected: 20 - 10 - 10 - 10 = -10 → 0 (floored)
+        result = score_domain(
+            domain="example.com",
+            provider="Hosting",
+            signals={"spf": False, "dkim": False, "dmarc_policy": None},
+            mx_records=["mail.hosting.com"]
+        )
+        assert result["score"] == 0  # 20 - 10 - 10 - 10 = -10 → 0
+    
+    def test_risk_scoring_hosting_with_spf(self):
+        """Test that hosting_mx_weak risk doesn't apply if SPF exists."""
+        # Provider: Hosting (20 points)
+        # SPF present: +10
+        # No DKIM: -10 risk
+        # Hosting MX weak: NOT applied (SPF exists)
+        # Expected: 20 + 10 - 10 = 20
+        result = score_domain(
+            domain="example.com",
+            provider="Hosting",
+            signals={"spf": True, "dkim": False, "dmarc_policy": None},
+            mx_records=["mail.hosting.com"]
+        )
+        assert result["score"] == 20  # 20 + 10 - 10 = 20
+
+
+class TestProviderPointsUpdate:
+    """Test updated provider points."""
+    
+    def test_provider_points_hosting_updated(self):
+        """Test that Hosting provider points are updated to 20."""
+        rules = load_rules()
+        provider_points = rules.get("provider_points", {})
+        assert provider_points.get("Hosting") == 20
+    
+    def test_provider_points_local_updated(self):
+        """Test that Local provider points are updated to 10."""
+        rules = load_rules()
+        provider_points = rules.get("provider_points", {})
+        assert provider_points.get("Local") == 10
+    
+    def test_provider_points_hosting_scoring(self):
+        """Test scoring with updated Hosting provider points."""
+        # Provider: Hosting (20 points)
+        # SPF present: +10
+        # DKIM present: +10
+        # DMARC reject: +20
+        # Expected: 20 + 10 + 10 + 20 = 60
+        result = score_domain(
+            domain="example.com",
+            provider="Hosting",
+            signals={"spf": True, "dkim": True, "dmarc_policy": "reject"},
+            mx_records=["mail.hosting.com"]
+        )
+        assert result["score"] == 60
+    
+    def test_provider_points_local_scoring(self):
+        """Test scoring with updated Local provider points."""
+        # Provider: Local (10 points)
+        # SPF present: +10
+        # DKIM present: +10
+        # Expected: 10 + 10 + 10 = 30
+        result = score_domain(
+            domain="example.com",
+            provider="Local",
+            signals={"spf": True, "dkim": True, "dmarc_policy": None},
+            mx_records=["mail.example.com"]
+        )
+        assert result["score"] == 30
 

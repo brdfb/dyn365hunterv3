@@ -36,12 +36,52 @@ def load_rules() -> Dict:
     return _RULES_CACHE
 
 
+def check_hard_fail(
+    mx_records: Optional[List[str]],
+    domain_signals: Optional[Dict[str, Any]] = None
+) -> Optional[str]:
+    """
+    Check hard-fail conditions that force Skip segment.
+    
+    Hard-fail rules are evaluated before scoring. If any hard-fail
+    condition is met, the domain is immediately assigned Skip segment
+    with score 0, regardless of other signals.
+    
+    Args:
+        mx_records: List of MX record hostnames (or None/empty list)
+        domain_signals: Optional domain signals (for future hard-fail rules)
+    
+    Returns:
+        Reason string if hard-fail condition is met, None otherwise
+    """
+    rules = load_rules()
+    hard_fail_rules = rules.get("hard_fail_rules", [])
+    
+    # Check each hard-fail rule
+    for rule in hard_fail_rules:
+        condition = rule.get("condition", "")
+        description = rule.get("description", "")
+        
+        # MX missing check
+        if condition == "mx_missing":
+            if not mx_records or len(mx_records) == 0:
+                return description or "MX kaydı yok"
+    
+    # Future: domain_valid, parked domain, whois_age checks (Phase 1+)
+    
+    return None
+
+
 def calculate_score(
     provider: str,
-    signals: Dict[str, Any]
+    signals: Dict[str, Any],
+    mx_records: Optional[List[str]] = None
 ) -> int:
     """
     Calculate readiness score based on provider and signals.
+    
+    Applies positive points (provider + signals) and negative points (risks).
+    Score is floored at 0 and capped at 100.
     
     Args:
         provider: Provider name (e.g., "M365", "Google", "Local")
@@ -49,6 +89,7 @@ def calculate_score(
                  - spf: bool (SPF record exists)
                  - dkim: bool (DKIM record exists)
                  - dmarc_policy: str ("none", "quarantine", "reject", or None)
+        mx_records: Optional list of MX records (for risk scoring)
     
     Returns:
         Readiness score (0-100)
@@ -62,7 +103,7 @@ def calculate_score(
     provider_points = rules.get("provider_points", {})
     score += provider_points.get(provider, 0)
     
-    # Add signal points
+    # Add signal points (positive)
     signal_points = rules.get("signal_points", {})
     
     # SPF
@@ -84,8 +125,27 @@ def calculate_score(
         elif dmarc_policy_lower == "none":
             score += signal_points.get("dmarc_none", 0)
     
-    # Cap score at 100
-    return min(score, 100)
+    # Apply risk points (negative)
+    risk_points = rules.get("risk_points", {})
+    
+    # No SPF risk
+    if not signals.get("spf"):
+        score += risk_points.get("no_spf", 0)
+    
+    # No DKIM risk
+    if not signals.get("dkim"):
+        score += risk_points.get("no_dkim", 0)
+    
+    # DMARC none risk (additional to signal_points)
+    if dmarc_policy and dmarc_policy.lower() == "none":
+        score += risk_points.get("dmarc_none", 0)
+    
+    # Hosting MX weak risk (Hosting provider + no SPF + no DKIM)
+    if provider == "Hosting" and not signals.get("spf") and not signals.get("dkim"):
+        score += risk_points.get("hosting_mx_weak", 0)
+    
+    # Floor at 0, cap at 100
+    return max(0, min(score, 100))
 
 
 def determine_segment(score: int, provider: str) -> Tuple[str, str]:
@@ -140,10 +200,14 @@ def determine_segment(score: int, provider: str) -> Tuple[str, str]:
 def score_domain(
     domain: str,
     provider: str,
-    signals: Dict[str, Any]
+    signals: Dict[str, Any],
+    mx_records: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
     Calculate score and determine segment for a domain.
+    
+    Hard-fail rules are checked first. If any hard-fail condition
+    is met, returns Skip segment with score 0 immediately.
     
     Args:
         domain: Domain name (for logging/reference)
@@ -152,6 +216,7 @@ def score_domain(
                  - spf: bool
                  - dkim: bool
                  - dmarc_policy: str or None
+        mx_records: Optional list of MX record hostnames
     
     Returns:
         Dictionary with:
@@ -159,8 +224,17 @@ def score_domain(
         - segment: str ("Migration", "Existing", "Cold", "Skip")
         - reason: str (human-readable explanation)
     """
-    # Calculate score
-    score = calculate_score(provider, signals)
+    # Check hard-fail conditions FIRST
+    hard_fail_reason = check_hard_fail(mx_records)
+    if hard_fail_reason:
+        return {
+            "score": 0,
+            "segment": "Skip",
+            "reason": f"Hard-fail: {hard_fail_reason}"
+        }
+    
+    # Calculate score (includes risk scoring)
+    score = calculate_score(provider, signals, mx_records)
     
     # Determine segment
     segment, reason = determine_segment(score, provider)
