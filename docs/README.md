@@ -58,7 +58,12 @@ docs/
 - `2025-01-27-phase0-hotfix-scoring.md` - Phase 0: Enhanced Scoring & Hard-Fail Rules (Completed)
 - `2025-01-27-SALES-FEATURE-REQUESTS.md` - Sales team feature requests (MVP scope completed, Post-MVP planning)
 - `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests
+- `2025-01-27-IMPORTER-EMAIL-IMPLEMENTATION-PLAN.md` - Importer + Email Module Implementation Plan (v2, Prioritized)
+- `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches
 
 ### TODOs
-- (No active TODOs - All MVP phases completed, MVP scope features completed)
+- `G11-importer-email.md` - Importer + Email Module Implementation (G11-G13)
+  - **Status:** Pending
+  - **Priority:** P0 (Importer), P1 (Email Generator), P2 (Email Validator)
+  - **Created:** 2025-01-27
 

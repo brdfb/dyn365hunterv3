@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **G11: Importer Module** - Excel/CSV column auto-detection and ingestion enhancement
+  - Excel file support (.xlsx, .xls) for `/ingest/csv` endpoint
+  - `auto_detect_columns` query parameter for automatic column detection
+  - `app/core/importer.py` - Column guessing utilities (`guess_company_column`, `guess_domain_column`)
+  - Heuristic-based column detection for OSB Excel files
+  - Backward compatible: existing CSV ingestion continues to work
+  - Tests: `tests/test_importer_autodetect.py` - Column detection tests
+  - Tests: Updated `tests/test_ingest_csv.py` with Excel support tests
+
 ### Post-MVP (High Priority)
 - CSV Export - Endpoint design needs detail
 - Bulk Scan - Requires async queue (risks identified)

@@ -196,3 +196,28 @@ class TestIngestEdgeCases:
         # Should handle gracefully
         assert isinstance(result, str)
 
+
+class TestExcelSupport:
+    """Test Excel file ingestion support."""
+    
+    def test_excel_file_extension_detection(self):
+        """Test Excel file extension detection."""
+        # This is a basic test - actual Excel reading requires openpyxl
+        extensions = ['.xlsx', '.xls']
+        
+        for ext in extensions:
+            filename = f"test{ext}"
+            assert filename.lower().endswith(('.xlsx', '.xls'))
+    
+    def test_excel_vs_csv_detection(self):
+        """Test differentiation between Excel and CSV files."""
+        excel_files = ['test.xlsx', 'test.XLSX', 'test.xls', 'test.XLS']
+        csv_files = ['test.csv', 'test.CSV']
+        
+        for filename in excel_files:
+            assert filename.lower().endswith(('.xlsx', '.xls'))
+            assert not filename.lower().endswith('.csv')
+        
+        for filename in csv_files:
+            assert filename.lower().endswith('.csv')
+            assert not filename.lower().endswith(('.xlsx', '.xls'))

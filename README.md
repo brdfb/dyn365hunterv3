@@ -18,7 +18,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Domain normalization (punycode, www stripping, email/URL extraction)
 - ✅ Provider mapping (M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun, Hosting, Local, Unknown)
 - ✅ Rule-based scoring engine with segment classification
-- ✅ Domain ingestion (CSV + single domain endpoints)
+- ✅ Domain ingestion (CSV + Excel + single domain endpoints)
+- ✅ Excel/CSV column auto-detection for OSB files
 - ✅ DNS analysis (MX/SPF/DKIM/DMARC with 10s timeout)
 - ✅ WHOIS lookup (graceful fail with 5s timeout)
 - ✅ Lead segmentation API with filtering
@@ -134,10 +135,12 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - `POST /ingest/domain` - Ingest single domain
   - Request body: `{"domain": "example.com", "company_name": "Example Inc", "email": "user@example.com", "website": "https://example.com"}`
   - Returns: `{"domain": "example.com", "company_id": 1, "message": "Domain ingested successfully"}`
-- `POST /ingest/csv` - Ingest domains from CSV file
-  - Multipart form data with CSV file
-  - Required column: `domain`
+- `POST /ingest/csv` - Ingest domains from CSV or Excel file
+  - Multipart form data with CSV (.csv) or Excel (.xlsx, .xls) file
+  - Query parameter: `auto_detect_columns` (optional, default: false) - Auto-detect company/domain columns for OSB Excel files
+  - Required column: `domain` (when `auto_detect_columns=false`)
   - Optional columns: `company_name`, `email`, `website`
+  - When `auto_detect_columns=true`: Automatically detects company and domain columns using heuristics
   - Returns: `{"ingested": 5, "total_rows": 5, "errors": null}`
 
 ### Scan

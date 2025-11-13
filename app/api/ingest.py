@@ -1,6 +1,6 @@
 """Ingest endpoints for domain and CSV data ingestion."""
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
@@ -12,6 +12,7 @@ from app.core.normalizer import (
     extract_domain_from_website
 )
 from app.core.merger import upsert_companies
+from app.core.importer import guess_company_column, guess_domain_column
 
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -125,42 +126,79 @@ async def ingest_domain(
 
 @router.post("/csv", status_code=201)
 async def ingest_csv(
-    file: UploadFile = File(..., description="CSV file to ingest"),
+    file: UploadFile = File(..., description="CSV or Excel file to ingest"),
+    auto_detect_columns: bool = Query(False, description="Auto-detect company/domain columns (for OSB Excel files)"),
     db: Session = Depends(get_db)
 ):
     """
-    Ingest domains from a CSV file.
+    Ingest domains from a CSV or Excel file.
     
-    Expected CSV columns:
+    Supported formats:
+    - CSV (.csv)
+    - Excel (.xlsx, .xls)
+    
+    Expected columns (when auto_detect_columns=False):
     - domain (required): Domain name
     - company_name (optional): Company name
     - email (optional): Email address
     - website (optional): Website URL
     
+    When auto_detect_columns=True:
+    - Automatically detects company and domain columns using heuristics
+    - Useful for OSB Excel files with varying column names
+    
     Args:
-        file: CSV file upload
+        file: CSV or Excel file upload
+        auto_detect_columns: If True, auto-detect company/domain columns
         db: Database session
         
     Returns:
         Dictionary with ingestion results
     """
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="File must be a CSV file")
+    # Validate file type
+    filename_lower = file.filename.lower() if file.filename else ""
+    is_excel = filename_lower.endswith(('.xlsx', '.xls'))
+    is_csv = filename_lower.endswith('.csv')
+    
+    if not (is_csv or is_excel):
+        raise HTTPException(
+            status_code=400,
+            detail="File must be CSV (.csv) or Excel (.xlsx, .xls)"
+        )
     
     try:
-        # Read CSV file
+        # Read file
         contents = await file.read()
-        df = pd.read_csv(pd.io.common.BytesIO(contents))
+        
+        if is_excel:
+            df = pd.read_excel(pd.io.common.BytesIO(contents))
+        else:
+            df = pd.read_csv(pd.io.common.BytesIO(contents))
+        
+        # Column detection (if auto_detect_columns=True)
+        if auto_detect_columns:
+            company_col = guess_company_column(df)
+            domain_col = guess_domain_column(df)
+            
+            if not company_col or not domain_col:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not detect columns. Company: {company_col}, Domain: {domain_col}. "
+                           f"Available columns: {list(df.columns)}"
+                )
+            
+            # Rename columns to standard names for processing
+            df = df.rename(columns={company_col: 'company_name', domain_col: 'domain'})
+        
+        # Normalize column names (case-insensitive)
+        df.columns = df.columns.str.lower().str.strip()
         
         # Validate required columns
         if 'domain' not in df.columns:
             raise HTTPException(
                 status_code=400,
-                detail="CSV must contain a 'domain' column"
+                detail="CSV must contain a 'domain' column (or use auto_detect_columns=true)"
             )
-        
-        # Normalize column names (case-insensitive)
-        df.columns = df.columns.str.lower().str.strip()
         
         # Process each row
         ingested_count = 0
