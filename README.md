@@ -13,21 +13,33 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 ## Features
 
+### Core Functionality
 - ✅ Docker Compose setup with PostgreSQL and FastAPI
-- ✅ Database schema with 4 tables and 1 view
+- ✅ Database schema with 5 tables (companies, domain_signals, lead_scores, raw_leads, provider_change_history)
 - ✅ Domain normalization (punycode, www stripping, email/URL extraction)
 - ✅ Provider mapping (M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun, Hosting, Local, Unknown)
 - ✅ Rule-based scoring engine with segment classification
 - ✅ Domain ingestion (CSV + Excel + single domain endpoints)
 - ✅ Excel/CSV column auto-detection for OSB files
-- ✅ Generic email generation for domains
-- ✅ Email validation (syntax, MX, optional SMTP)
+
+### Analysis & Scoring
 - ✅ DNS analysis (MX/SPF/DKIM/DMARC with 10s timeout)
 - ✅ WHOIS lookup (graceful fail with 5s timeout)
+- ✅ Generic email generation for domains
+- ✅ Email validation (syntax, MX, optional SMTP)
+- ✅ Priority score calculation for lead prioritization
+
+### Data Quality & Tracking
+- ✅ **Provider change tracking** - Automatic detection and history logging when domains switch providers
+- ✅ **Duplicate prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
+- ✅ **Domain validation** - Enhanced validation to filter invalid domains (nan, web sitesi, etc.)
+
+### API & UI
 - ✅ Lead segmentation API with filtering
 - ✅ Dashboard endpoint with aggregated statistics
-- ✅ Priority score calculation for lead prioritization
 - ✅ CSV/Excel export endpoint (`GET /leads/export`) - Export leads with filters
+- ✅ Mini UI (HTML + Vanilla JS) - Simple web interface for demo and internal use
+- ✅ **Progress tracking** - Real-time progress updates for CSV ingestion and scanning operations
 
 ## Tech Stack
 
@@ -128,6 +140,23 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
      "environment": "development"
    }
    ```
+
+## Mini UI
+
+A simple web interface for demo and internal use:
+
+**Access**: `http://localhost:8000/mini-ui/`
+
+**Features**:
+- CSV/Excel file upload
+- Single domain scan (with auto-ingest)
+- Leads table with filters (segment, min score, provider)
+- CSV export
+- Dashboard statistics (KPI)
+
+**Documentation**: See [mini-ui/README-mini-ui.md](mini-ui/README-mini-ui.md)
+
+---
 
 ## API Endpoints
 
@@ -311,12 +340,18 @@ curl "http://localhost:8000/dashboard"
 - [Sales Demo Script](scripts/sales-demo.sh) - Quick demo script
 
 ### For Developers
-- [Sales Feature Requests](docs/active/SALES-FEATURE-REQUESTS.md) - MVP scope features (Dashboard, Priority Score) and Post-MVP roadmap
-- [Sales Feature Requests Critique](docs/active/SALES-FEATURE-REQUESTS-CRITIQUE.md) - Technical analysis and recommendations
+
+#### Feature Documentation
+- [Provider Change Tracking](docs/active/PROVIDER-CHANGE-TRACKING.md) - Automatic detection and logging of provider changes
+- [Duplicate Prevention](docs/active/DUPLICATE-PREVENTION.md) - Automatic cleanup of duplicate records
+- [Domain Validation](docs/active/DOMAIN-VALIDATION.md) - Enhanced domain validation and filtering
+
+#### Development Guides
 - [Development Environment](docs/active/DEVELOPMENT-ENVIRONMENT.md) - Setup guide
 - [WSL Guide](docs/active/WSL-GUIDE.md) - WSL2 setup and troubleshooting
 - [Testing Guide](docs/active/TESTING.md) - How to run tests
 - [Docker Troubleshooting](docs/active/DOCKER-TROUBLESHOOTING.md) - Common Docker issues and solutions
+- [Mini UI README](mini-ui/README-mini-ui.md) - Mini UI usage guide and documentation
 
 ## License
 

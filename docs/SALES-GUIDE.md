@@ -32,6 +32,51 @@ curl http://localhost:8000/healthz
 
 ---
 
+## 🖥️ Mini UI (Web Arayüzü) - YENİ
+
+**Tarayıcıdan kullanım için basit web arayüzü:**
+
+### Mini UI'ye Erişim
+
+Tarayıcınızda açın:
+```
+http://localhost:8000/mini-ui/
+```
+
+### Özellikler
+
+1. **CSV/Excel Upload**
+   - Dosya seçme (CSV, Excel)
+   - Otomatik kolon tespiti (OSB dosyaları için)
+   - Yükleme sonrası otomatik lead listesi güncelleme
+
+2. **Tek Domain Scan**
+   - Domain ve şirket adı girişi
+   - Otomatik ingest (domain yoksa)
+   - Tarama sonucu gösterimi (skor, segment, provider)
+   - Otomatik lead listesi güncelleme
+
+3. **Leads Table + Filtreler**
+   - Segment filtresi (Migration, Existing, Cold, Skip)
+   - Min skor filtresi
+   - Provider filtresi
+   - Tablo görüntüleme (Domain, Şirket, Provider, Segment, Skor)
+
+4. **Export CSV**
+   - Filtrelenmiş lead'leri CSV olarak export
+   - Otomatik dosya indirme
+
+5. **Dashboard Stats (KPI)**
+   - Toplam lead sayısı
+   - Migration lead sayısı
+   - En yüksek skor
+
+**Detaylı bilgi için:** [mini-ui/README-mini-ui.md](../../mini-ui/README-mini-ui.md)
+
+**Not:** Mini UI demo ve iç kullanım için tasarlandı. API endpoint'leri de kullanılabilir (curl komutları aşağıda).
+
+---
+
 ## 📋 Temel İş Akışı
 
 ### Senaryo: Yeni Bir Domain Analiz Etmek
@@ -59,9 +104,10 @@ curl -X POST http://localhost:8000/ingest/domain \
 ```
 
 **Önemli Notlar:**
-- `domain` zorunlu (otomatik normalize edilir: büyük/küçük harf, www kaldırılır)
+- `domain` zorunlu (otomatik normalize edilir: büyük/küçük harf, www kaldırılır, URL'lerden domain çıkarılır)
 - `company_name`, `email`, `website` opsiyonel
 - Email veya website'den domain otomatik çıkarılır
+- **Domain validation**: Geçersiz domain'ler (nan, web sitesi, vb.) otomatik olarak filtrelenir
 
 **Başarılı Yanıt:**
 ```json
@@ -75,13 +121,38 @@ curl -X POST http://localhost:8000/ingest/domain \
 ### CSV/Excel ile Toplu Ekleme
 
 ```bash
-# CSV dosyası
-curl -X POST http://localhost:8000/ingest/csv \
+# CSV dosyası (otomatik scan ile)
+curl -X POST "http://localhost:8000/ingest/csv?auto_scan=true" \
   -F "file=@domain-listesi.csv"
 
-# Excel dosyası (.xlsx, .xls)
-curl -X POST http://localhost:8000/ingest/csv \
+# Excel dosyası (.xlsx, .xls) - otomatik scan ile
+curl -X POST "http://localhost:8000/ingest/csv?auto_scan=true" \
   -F "file=@domain-listesi.xlsx"
+```
+
+**Otomatik Scan (`auto_scan=true`):**
+- Domain'ler yüklendikten sonra otomatik olarak scan edilir
+- Her domain için DNS/WHOIS analizi yapılır ve skor hesaplanır
+- Sonuçlar otomatik olarak lead listesine eklenir
+- **Progress tracking**: İşlem sırasında ilerleme takibi yapılabilir (job_id ile)
+
+**Progress Tracking:**
+```bash
+# CSV yükleme sonrası job_id alınır
+# İlerleme durumunu kontrol etmek için:
+curl "http://localhost:8000/jobs/{job_id}"
+
+# Yanıt:
+{
+  "job_id": "...",
+  "status": "processing",
+  "processed": 50,
+  "total": 100,
+  "successful": 48,
+  "failed": 2,
+  "progress_percent": 50.0,
+  "message": "İşleniyor: 50/100 domain yüklendi"
+}
 ```
 
 **CSV/Excel Formatı:**
@@ -132,8 +203,10 @@ curl -X POST http://localhost:8000/scan/domain \
 - DNS kayıtlarını kontrol eder (MX, SPF, DKIM, DMARC)
 - WHOIS bilgilerini çeker (opsiyonel, başarısız olursa devam eder)
 - Provider'ı tespit eder (M365, Google, Yandex, vb.)
+- **Provider değişikliği tespit eder** - Eğer domain daha önce farklı bir provider kullanıyorsa, bu değişiklik otomatik olarak kaydedilir
 - **Readiness Score** hesaplar (0-100)
 - **Segment** belirler (Migration, Existing, Cold, Skip)
+- **Duplicate önleme** - Aynı domain için eski kayıtları temizler, yeni sonuçları kaydeder
 
 **Süre:** 10-15 saniye (soğuk başlangıç: 15-20 saniye)
 
@@ -524,7 +597,12 @@ curl -X POST http://localhost:8000/email/generate-and-validate \
 
 ---
 
-## 📖 API Dokümantasyonu
+## 📖 Dokümantasyon
+
+### Mini UI Dokümantasyonu
+- [Mini UI README](../../mini-ui/README-mini-ui.md) - Kullanım kılavuzu ve özellikler
+
+### API Dokümantasyonu
 
 Tarayıcınızda açın:
 ```
@@ -599,6 +677,25 @@ Bu script:
 
 ## 🎯 Özet: 3 Adımda Başlayın
 
+### Yöntem 1: Mini UI (Önerilen - Kolay) 🖥️
+
+1. **Mini UI'yi Aç**
+   ```
+   http://localhost:8000/mini-ui/
+   ```
+
+2. **CSV Yükle veya Domain Tara**
+   - CSV/Excel dosyası yükle
+   - Veya tek domain tara (otomatik ingest + scan)
+
+3. **Lead'leri Gör ve Export Et**
+   - Filtrelerle lead listesini görüntüle
+   - Export butonu ile CSV indir
+
+**Hepsi bu kadar! 🎉**
+
+### Yöntem 2: API (curl komutları) 💻
+
 1. **Domain Ekle**
    ```bash
    curl -X POST http://localhost:8000/ingest/domain \
@@ -625,9 +722,8 @@ Bu script:
    curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
    ```
 
-**Hepsi bu kadar! 🎉**
-
 **İpuçları:**
+- **Mini UI kullanın** - Daha kolay ve hızlı! 🖥️
 - Priority Score 1-2 olan lead'lere öncelik verin!
 - Lead'leri Excel'e export edip detaylı analiz yapabilirsiniz!
 

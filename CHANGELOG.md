@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Provider Change Tracking** - Automatic detection and logging of provider changes
+  - `ProviderChangeHistory` model in `app/db/models.py` to track provider changes over time
+  - Automatic detection when domain is scanned (via `/scan/domain` or CSV ingestion with `auto_scan=true`)
+  - Provider changes logged to `provider_change_history` table (domain, previous_provider, new_provider, changed_at)
+  - Implementation: Provider change detection in `app/api/scan.py` and `app/api/ingest.py`
+  - Use cases: Migration opportunity detection, customer behavior tracking, sales follow-up
+  - Documentation: `docs/active/PROVIDER-CHANGE-TRACKING.md`
+
+- **Duplicate Prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
+  - Delete existing records before creating new ones (prevents duplicates on re-scan)
+  - Implementation: Explicit delete queries in `app/api/scan.py` and `app/api/ingest.py`
+  - Ensures only one current record per domain for both `lead_scores` and `domain_signals` tables
+  - Benefits: Data quality, accurate lead counts, always reflects most recent scan
+  - Documentation: `docs/active/DUPLICATE-PREVENTION.md`
+
+- **Domain Validation** - Enhanced validation to filter invalid domains
+  - `is_valid_domain()` function in `app/core/normalizer.py` to validate domain format
+  - Filters invalid values: nan, n/a, web sitesi, website, http, https, etc.
+  - URL extraction: Automatically extracts domain from URLs (http://example.com/ → example.com)
+  - Validation integrated into CSV ingestion and scan endpoints
+  - Invalid domains are skipped with descriptive error messages
+  - Documentation: `docs/active/DOMAIN-VALIDATION.md`
+
+- **Progress Tracking** - Real-time progress updates for CSV ingestion and scanning operations
+  - In-memory job tracking system (`app/api/jobs.py`) for job status and progress
+  - `GET /jobs/{job_id}` endpoint (`app/api/progress.py`) to query job progress
+  - Progress updates during CSV ingestion and auto-scan operations
+  - Frontend polling mechanism in Mini UI for real-time progress bar
+  - Progress metrics: processed, total, successful, failed, remaining, progress_percent, message
+  - Status: queued, processing, completed, failed
+
+- **Auto-Scan Feature** - Automatic domain scanning after CSV ingestion
+  - `auto_scan=true` query parameter for `/ingest/csv` endpoint (default: true)
+  - Automatically scans all ingested domains (DNS + WHOIS + scoring)
+  - Results automatically added to lead list
+  - Integrated with progress tracking for long-running operations
+  - Frontend: Mini UI automatically enables auto-scan
+
 - **G14: CSV Export** - Lead data export to CSV and Excel formats
   - `GET /leads/export` endpoint for exporting leads to CSV or Excel format
   - Filter parameters: `segment`, `min_score`, `provider` (same as GET /leads)
@@ -17,6 +55,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implementation: Export endpoint added to `app/api/leads.py` router
   - Tests: `tests/test_export.py` - Comprehensive export tests (9 test cases)
   - Post-MVP feature (low-risk, core-independent)
+
+- **G14: Mini UI** - Simple web interface for demo and internal use
+  - HTML + Vanilla JavaScript + CSS (no framework)
+  - `mini-ui/` directory structure with modular JS (api.js, ui-leads.js, ui-forms.js, app.js)
+  - Features:
+    - CSV/Excel file upload with auto-detect columns option
+    - Single domain scan with auto-ingest (if company name provided)
+    - Leads table with filters (segment, min score, provider)
+    - CSV export button
+    - Dashboard statistics (KPI: total leads, migration count, max score)
+  - Static file serving via FastAPI (`app.mount("/mini-ui", ...)`)
+  - Responsive design (mobile-friendly)
+  - BEM CSS pattern for maintainability
+  - API-first approach (all business logic in backend)
+  - Documentation: `mini-ui/README-mini-ui.md`, `mini-ui/TEST-CHECKLIST.md`
+  - Post-MVP feature (low-risk, core-independent, demo-ready)
 
 - **G11: Importer Module** - Excel/CSV column auto-detection and ingestion enhancement
   - Excel file support (.xlsx, .xls) for `/ingest/csv` endpoint
@@ -47,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Post-MVP (High Priority)
 - ✅ CSV Export - **Completed** (G14) - CSV and Excel export with filters
+- ✅ Mini UI - **Completed** (G14) - Simple web interface for demo and internal use
 - Bulk Scan - Requires async queue (risks identified)
 
 ### Post-MVP (Low Priority)

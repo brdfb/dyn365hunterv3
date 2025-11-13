@@ -9,6 +9,46 @@
 ### Durum
 Satış ekibi yeni bir lead listesi aldı (100 domain). Hangi domain'ler öncelikli?
 
+### Mini UI ile Hızlı Analiz (Önerilen) 🖥️
+
+1. **Mini UI'yi Aç**
+   ```
+   http://localhost:8000/mini-ui/
+   ```
+
+2. **CSV/Excel Yükle**
+   - Dosya seç (CSV veya Excel)
+   - Otomatik kolon tespiti (OSB dosyaları için checkbox'ı işaretle)
+   - "Yükle ve İşle" butonuna tıkla
+   - **Progress bar** ile ilerlemeyi takip et (işlenen, kalan, başarılı, başarısız)
+   - Başarı mesajını bekle (domain'ler otomatik olarak scan edilir)
+
+3. **Domain'leri Tara (Opsiyonel)**
+   - Her domain için "Tek Domain Tara" formunu kullan
+   - Domain + şirket adı gir
+   - "Tara" butonuna tıkla (otomatik ingest + scan yapar)
+   - Sonuçları gör
+   - **Not:** CSV upload ile otomatik scan yapıldıysa, bu adım gerekli değildir
+
+4. **Lead'leri Gör ve Filtrele**
+   - Segment filtresi: Migration
+   - Min skor: 70
+   - "Filtrele" butonuna tıkla
+   - Tabloda yüksek öncelikli lead'leri gör
+
+5. **Export Et**
+   - Filtreleri ayarla
+   - "Export CSV" butonuna tıkla
+   - Dosya otomatik indirilir
+
+**Avantajlar:**
+- ✅ Kolay kullanım (tarayıcıdan)
+- ✅ Görsel arayüz
+- ✅ Otomatik refresh
+- ✅ Hızlı export
+
+### API ile Analiz (Alternatif) 💻
+
 ### Dashboard ile Hızlı Kontrol
 ```bash
 # Önce dashboard'a bak, genel durumu gör
@@ -35,16 +75,43 @@ curl "http://localhost:8000/dashboard"
 
 ### Adımlar
 
-#### 1. CSV/Excel'den Domain'leri Ekle
+#### 1. CSV/Excel'den Domain'leri Ekle (Otomatik Scan ile) ⚡ YENİ
 ```bash
-# CSV dosyası
-curl -X POST http://localhost:8000/ingest/csv \
+# CSV dosyası (otomatik scan ile - önerilen)
+curl -X POST "http://localhost:8000/ingest/csv?auto_scan=true" \
   -F "file=@yeni-leadler.csv"
 
-# Excel dosyası (OSB formatı için otomatik kolon tespiti)
-curl -X POST "http://localhost:8000/ingest/csv?auto_detect_columns=true" \
+# Excel dosyası (OSB formatı için otomatik kolon tespiti + otomatik scan)
+curl -X POST "http://localhost:8000/ingest/csv?auto_detect_columns=true&auto_scan=true" \
   -F "file=@yeni-leadler.xlsx"
 ```
+
+**Otomatik Scan (`auto_scan=true`):**
+- ✅ Domain'ler yüklendikten sonra otomatik olarak scan edilir
+- ✅ Her domain için DNS/WHOIS analizi yapılır ve skor hesaplanır
+- ✅ Sonuçlar otomatik olarak lead listesine eklenir
+- ✅ **Progress tracking**: İşlem sırasında ilerleme takibi yapılabilir (job_id ile)
+
+**Progress Tracking:**
+```bash
+# CSV yükleme sonrası job_id alınır
+# İlerleme durumunu kontrol etmek için:
+curl "http://localhost:8000/jobs/{job_id}"
+
+# Yanıt:
+{
+  "job_id": "...",
+  "status": "processing",
+  "processed": 50,
+  "total": 100,
+  "successful": 48,
+  "failed": 2,
+  "progress_percent": 50.0,
+  "message": "İşleniyor: 50/100 domain yüklendi"
+}
+```
+
+**Not:** `auto_scan=false` (default) → Sadece domain'leri ekler, scan yapmaz (eski davranış).
 
 **CSV/Excel Formatı:**
 ```csv
@@ -59,9 +126,13 @@ firma3.com,,info@firma3.com,
 - Firma/şirket ve domain kolonlarını otomatik tespit eder
 - Standart CSV formatı için `auto_detect_columns=false` (default) yeterli
 
-#### 2. Toplu Analiz (Script ile)
+#### 2. Toplu Analiz (Artık Gerekli Değil - Otomatik Scan Kullanın) ⚡ YENİ
+
+**Not:** `auto_scan=true` kullanıyorsanız, bu adım gerekli değildir. Domain'ler otomatik olarak scan edilir.
+
+**Manuel Scan (Sadece Gerekirse):**
 ```bash
-# Her domain için analiz yap
+# Eğer auto_scan=false kullandıysanız, manuel scan yapabilirsiniz
 while IFS=, read -r domain rest; do
   if [ "$domain" != "domain" ]; then
     echo "Analiz ediliyor: $domain"
@@ -72,6 +143,10 @@ while IFS=, read -r domain rest; do
   fi
 done < yeni-leadler.csv
 ```
+
+**Provider Değişikliği Tespiti:**
+- Scan sırasında provider değişiklikleri otomatik olarak tespit edilir ve kaydedilir
+- Örnek: Google → M365 geçişi otomatik olarak `provider_change_history` tablosuna kaydedilir
 
 #### 3. Öncelikli Lead'leri Görüntüle
 ```bash
@@ -124,6 +199,31 @@ Bir müşteri adayından domain aldınız. Hızlıca kontrol etmek istiyorsunuz.
 
 **Hızlı Kontrol Akışı:**
 1. Domain ekle → Analiz et → Priority Score'a bak → Aksiyon al
+
+### Mini UI ile Hızlı Kontrol (Önerilen) 🖥️
+
+1. **Mini UI'yi Aç**
+   ```
+   http://localhost:8000/mini-ui/
+   ```
+
+2. **Domain Tara**
+   - "Tek Domain Tara" formunda domain gir
+   - Şirket adı (opsiyonel) gir
+   - "Tara" butonuna tıkla
+   - Sonuç panelinde skor, segment, provider görüntülenir
+
+3. **Sonucu Yorumla**
+   - Skor 70+ → Yüksek hazırlık
+   - Segment Migration → Hemen aksiyon
+   - Priority Score 1-2 → En yüksek öncelik
+
+**Avantajlar:**
+- ✅ Tek tıkla tarama (otomatik ingest + scan)
+- ✅ Anında sonuç görüntüleme
+- ✅ Lead listesi otomatik güncellenir
+
+### API ile Kontrol (Alternatif) 💻
 
 ### Adımlar
 
@@ -409,6 +509,25 @@ curl -X POST http://localhost:8000/email/generate-and-validate \
 
 ## 💡 En İyi Pratikler
 
+### 0. Mini UI Kullanın (Önerilen) 🖥️
+
+**Mini UI avantajları:**
+- ✅ Kolay kullanım (tarayıcıdan)
+- ✅ Görsel arayüz (tablo, filtreler, KPI)
+- ✅ Otomatik refresh (upload/scan sonrası)
+- ✅ Hızlı export (tek tıkla CSV indirme)
+- ✅ Hata mesajları görsel
+
+**Ne Zaman API Kullanılır?**
+- Script'ler ve otomasyon için
+- Toplu işlemler için
+- Entegrasyonlar için
+
+**Erişim:**
+```
+http://localhost:8000/mini-ui/
+```
+
 ### 1. Öncelik Sıralaması (Priority Score)
 1. **Priority 1**: Migration + Skor 80+ → En yüksek öncelik, hemen aksiyon
 2. **Priority 2**: Migration + Skor 70-79 → Yüksek öncelik, hemen aksiyon
@@ -439,9 +558,10 @@ curl -X POST http://localhost:8000/email/generate-and-validate \
 - Provider değişikliklerini değerlendirin
 
 ### 5. Veri Kalitesi
-- Domain'leri normalize edin (www, büyük/küçük harf)
+- Domain'leri normalize edin (www, büyük/küçük harf, URL'lerden domain çıkarılır)
 - Email ve website'den domain çıkarın
-- Duplicate domain'leri kontrol edin
+- **Domain validation**: Geçersiz domain'ler (nan, web sitesi, vb.) otomatik olarak filtrelenir
+- **Duplicate prevention**: Aynı domain için eski kayıtlar otomatik olarak temizlenir (tekrar scan edildiğinde)
 
 ### 6. Email Üretme ve Doğrulama
 - **Light validation** kullanın (use_smtp=false) - Hızlı ve yeterli
@@ -550,9 +670,9 @@ Domain: ornek-firma.com
 **A:** Evet, domain'in DNS/WHOIS bilgileri değiştiğinde skor da değişir. Düzenli kontrol önerilir.
 
 ### Q: CSV'den ekledim, otomatik analiz olmuyor mu?
-**A:** Hayır. CSV sadece domain'leri ekler. Analiz için `/scan/domain` endpoint'ini kullanmalısınız.
+**A:** `auto_scan=true` parametresi ile CSV upload sonrası otomatik analiz yapılır. Varsayılan olarak `auto_scan=true` kullanılır (Mini UI'de otomatik). Eğer `auto_scan=false` kullandıysanız, manuel olarak `/scan/domain` endpoint'ini kullanmalısınız.
 
 ---
 
-**Son Güncelleme:** 2025-01-27
+**Son Güncelleme:** 2025-01-28
 

@@ -26,13 +26,20 @@ docs/
 
 ## 📝 Current Status
 
-### Active Documentation (Reference Guides)
+### Active Documentation
+
+#### Feature Documentation
+- `PROVIDER-CHANGE-TRACKING.md` - Automatic detection and logging of provider changes
+- `DUPLICATE-PREVENTION.md` - Automatic cleanup of duplicate records
+- `DOMAIN-VALIDATION.md` - Enhanced domain validation and filtering
+
+#### Reference Guides
 - `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
 - `WSL-GUIDE.md` - WSL2 setup and configuration guide
 - `TESTING.md` - Testing guide and troubleshooting
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
 
-**Note:** Active documentation now contains only reference guides (setup, troubleshooting, testing). Phase-specific and planning documentation has been moved to `plans/` and `archive/`.
+**Note:** Active documentation contains feature documentation and reference guides. Phase-specific and planning documentation has been moved to `plans/` and `archive/`.
 
 ### Archived Documentation
 - `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
@@ -65,8 +72,10 @@ docs/
 - `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests
 - `2025-01-27-IMPORTER-EMAIL-IMPLEMENTATION-PLAN.md` - Importer + Email Module Implementation Plan (v2, Prioritized)
 - `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches
-- `2025-01-28-POST-MVP-SPRINT1-PLAN.md` - Post-MVP Sprint 1: CSV Export + UI Mini (In Progress)
+- `2025-01-28-POST-MVP-SPRINT1-PLAN.md` - Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
+- `2025-01-28-MINI-UI-IMPLEMENTATION-PLAN.md` - Mini UI Implementation Plan (Completed)
+- `2025-01-28-MINI-UI-CRITIQUE.md` - Mini UI Approach Critique and Alternatives
 
 ### TODOs
-- `G14-post-mvp-sprint1.md` - Post-MVP Sprint 1: CSV Export + UI Mini (In Progress)
+- `G14-post-mvp-sprint1.md` - Post-MVP Sprint 1: CSV Export + UI Mini (Implementation Completed, Manual Testing Pending)
 

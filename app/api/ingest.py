@@ -1,6 +1,7 @@
 """Ingest endpoints for domain and CSV data ingestion."""
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+import asyncio
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
@@ -13,6 +14,12 @@ from app.core.normalizer import (
 )
 from app.core.merger import upsert_companies
 from app.core.importer import guess_company_column, guess_domain_column
+from app.core.analyzer_dns import analyze_dns
+from app.core.analyzer_whois import get_whois_info
+from app.core.provider_map import classify_provider
+from app.core.scorer import score_domain
+from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
+from app.api.jobs import create_job, update_job_progress, start_job, complete_job, JobStatus
 
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -124,10 +131,12 @@ async def ingest_domain(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@router.post("/csv", status_code=201)
+@router.post("/csv", status_code=202)
 async def ingest_csv(
     file: UploadFile = File(..., description="CSV or Excel file to ingest"),
     auto_detect_columns: bool = Query(False, description="Auto-detect company/domain columns (for OSB Excel files)"),
+    auto_scan: bool = Query(True, description="Automatically scan domains after ingestion (creates leads)"),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db)
 ):
     """
@@ -200,9 +209,16 @@ async def ingest_csv(
                 detail="CSV must contain a 'domain' column (or use auto_detect_columns=true)"
             )
         
+        # Create job for progress tracking
+        total_domains = len(df) + (len(df) if auto_scan else 0)  # Ingest + scan
+        job_id = create_job(total_domains, "CSV ingestion and scanning")
+        start_job(job_id)
+        
         # Process each row
         ingested_count = 0
+        scanned_count = 0
         errors: List[str] = []
+        scanned_domains: List[str] = []
         
         for idx, row in df.iterrows():
             try:
@@ -215,7 +231,13 @@ async def ingest_csv(
                 # Normalize domain
                 normalized_domain = normalize_domain(domain)
                 if not normalized_domain:
-                    errors.append(f"Row {idx + 1}: Invalid domain '{domain}'")
+                    errors.append(f"Row {idx + 1}: Invalid domain format '{domain}' (geçersiz domain formatı)")
+                    continue
+                
+                # Additional validation: check if normalized domain is still valid
+                from app.core.normalizer import is_valid_domain
+                if not is_valid_domain(normalized_domain):
+                    errors.append(f"Row {idx + 1}: Invalid domain after normalization '{normalized_domain}' (normalizasyon sonrası geçersiz)")
                     continue
                 
                 # Get optional fields
@@ -261,17 +283,157 @@ async def ingest_csv(
                 )
                 db.add(raw_lead)
                 ingested_count += 1
+                scanned_domains.append(final_domain)
+                
+                # Update progress
+                update_job_progress(
+                    job_id,
+                    processed=ingested_count,
+                    successful=ingested_count,
+                    message=f"İşleniyor: {ingested_count}/{len(df)} domain yüklendi"
+                )
                 
             except Exception as e:
-                errors.append(f"Row {idx + 1}: {str(e)}")
+                error_msg = f"Row {idx + 1}: {str(e)}"
+                errors.append(error_msg)
+                update_job_progress(
+                    job_id,
+                    processed=ingested_count + len(errors),
+                    failed=len(errors),
+                    error=error_msg
+                )
                 continue
         
         # Commit all successful ingestions
         db.commit()
+        update_job_progress(
+            job_id,
+            processed=ingested_count,
+            message=f"Yükleme tamamlandı: {ingested_count} domain. Scan başlıyor..."
+        )
+        
+        # Auto-scan domains if requested
+        if auto_scan and scanned_domains:
+            scan_index = 0
+            for domain in scanned_domains:
+                scan_index += 1
+                try:
+                    # Perform DNS analysis
+                    dns_result = analyze_dns(domain)
+                    
+                    # Perform WHOIS lookup (optional, graceful fail)
+                    whois_result = get_whois_info(domain)
+                    
+                    # Determine scan status
+                    scan_status = dns_result.get("status", "success")
+                    if scan_status == "success" and whois_result is None:
+                        scan_status = "whois_failed"
+                    
+                    # Classify provider based on MX root
+                    mx_root = dns_result.get("mx_root")
+                    provider = classify_provider(mx_root)
+                    
+                    # Update company provider if we have new information
+                    company = db.query(Company).filter(Company.domain == domain).first()
+                    previous_provider = company.provider if company else None
+                    provider_changed = False
+                    
+                    if company and provider and provider != "Unknown":
+                        if previous_provider != provider:
+                            provider_changed = True
+                        company.provider = provider
+                    
+                    # Prepare signals for scoring
+                    signals = {
+                        "spf": dns_result.get("spf", False),
+                        "dkim": dns_result.get("dkim", False),
+                        "dmarc_policy": dns_result.get("dmarc_policy")
+                    }
+                    
+                    # Calculate score and determine segment
+                    scoring_result = score_domain(
+                        domain=domain,
+                        provider=provider,
+                        signals=signals,
+                        mx_records=dns_result.get("mx_records", [])
+                    )
+                    
+                    # Delete any existing domain_signals for this domain (prevent duplicates)
+                    db.query(DomainSignal).filter(DomainSignal.domain == domain).delete()
+                    
+                    # Create new domain_signal
+                    domain_signal = DomainSignal(
+                        domain=domain,
+                        spf=dns_result.get("spf", False),
+                        dkim=dns_result.get("dkim", False),
+                        dmarc_policy=dns_result.get("dmarc_policy"),
+                        mx_root=mx_root,
+                        registrar=whois_result.get("registrar") if whois_result else None,
+                        expires_at=whois_result.get("expires_at") if whois_result else None,
+                        nameservers=whois_result.get("nameservers") if whois_result else None,
+                        scan_status=scan_status
+                    )
+                    db.add(domain_signal)
+                    
+                    # Delete any existing lead_scores for this domain (prevent duplicates)
+                    db.query(LeadScore).filter(LeadScore.domain == domain).delete()
+                    
+                    # Create new lead_score
+                    lead_score = LeadScore(
+                        domain=domain,
+                        readiness_score=scoring_result["score"],
+                        segment=scoring_result["segment"],
+                        reason=scoring_result["reason"]
+                    )
+                    db.add(lead_score)
+                    
+                    # Log provider change if detected
+                    if provider_changed and previous_provider:
+                        change_history = ProviderChangeHistory(
+                            domain=domain,
+                            previous_provider=previous_provider,
+                            new_provider=provider
+                        )
+                        db.add(change_history)
+                    
+                    scanned_count += 1
+                    
+                    # Update progress
+                    total_processed = ingested_count + scan_index
+                    update_job_progress(
+                        job_id,
+                        processed=total_processed,
+                        successful=ingested_count + scanned_count,
+                        message=f"Taranıyor: {scan_index}/{len(scanned_domains)} domain scan edildi"
+                    )
+                    
+                except Exception as e:
+                    error_msg = f"Scan error for {domain}: {str(e)}"
+                    errors.append(error_msg)
+                    total_processed = ingested_count + scan_index
+                    update_job_progress(
+                        job_id,
+                        processed=total_processed,
+                        failed=len(errors),
+                        error=error_msg
+                    )
+                    continue
+            
+            # Commit all scan results
+            db.commit()
+        
+        # Complete job
+        complete_job(job_id, success=True)
+        update_job_progress(
+            job_id,
+            message=f"Tamamlandı! {ingested_count} domain yüklendi, {scanned_count} domain scan edildi."
+        )
         
         return {
+            "job_id": job_id,
             "message": f"CSV ingestion completed",
             "ingested": ingested_count,
+            "scanned": scanned_count if auto_scan else 0,
             "total_rows": len(df),
             "errors": errors if errors else None
         }

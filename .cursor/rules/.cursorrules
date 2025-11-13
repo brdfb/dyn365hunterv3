@@ -3,7 +3,8 @@
 ## Project Context
 - **MVP Scope**: FastAPI + PostgreSQL, rule-based scoring, DNS/WHOIS analysis
 - **Target**: ≤2 minute "kahvelik" analysis flow for sales team
-- **Out of Scope (Post-MVP)**: D365 adapter, Redis/Queue, UI, webhook, bulk scan, CSV export
+- **Out of Scope (Post-MVP)**: D365 adapter, Redis/Queue, webhook, bulk scan
+- **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation
 
 ## Code Style & Standards
 
@@ -24,6 +25,8 @@
 - Domain is UNIQUE key in `companies` table
 - Use idempotent upsert for companies (ON CONFLICT DO UPDATE)
 - Always use transactions for multi-step operations
+- **Duplicate Prevention**: Delete existing LeadScore/DomainSignal before creating new ones (prevents duplicates)
+- **Provider Change Tracking**: Log provider changes to `provider_change_history` table when detected
 
 ### Error Handling
 - DNS timeout: 10s max, return None/error status, set `scan_status='dns_timeout'`
@@ -47,29 +50,36 @@
 ### ✅ IN SCOPE
 - Health check (`GET /healthz`) - Database connection status
 - Single domain ingestion (`POST /ingest/domain`)
-- CSV/Excel ingestion (`POST /ingest/csv`) - parse + normalize + insert only
+- CSV/Excel ingestion (`POST /ingest/csv`) - parse + normalize + insert + optional auto-scan
   - CSV support (.csv)
   - Excel support (.xlsx, .xls)
   - Auto-detect columns (`auto_detect_columns` query parameter) for OSB Excel files
+  - Auto-scan (`auto_scan=true` query parameter) - Automatically scan domains after ingestion
+  - Progress tracking - Real-time job progress updates via `/jobs/{job_id}`
 - Single domain scan (`POST /scan/domain`) - DNS + WHOIS + scoring
+  - Provider change detection and logging
+  - Duplicate prevention (delete old records before creating new ones)
 - Leads query (`GET /leads` with filters)
 - Single lead query (`GET /leads/{domain}`)
 - Dashboard endpoint (`GET /dashboard`) - Aggregated statistics
 - Priority Score feature - Lead prioritization (1-6 scale)
 - Email generation (`POST /email/generate`) - Generic email addresses for domains
 - Email validation (`POST /email/generate-and-validate`) - Syntax, MX, optional SMTP validation
+- **Mini UI** (`/mini-ui/`) - Simple web interface for demo and internal use
+- **CSV/Excel export** (`GET /leads/export`) - Export leads with filters
+- **Provider change tracking** - Automatic detection and history logging
+- **Duplicate prevention** - Automatic cleanup of duplicate records
+- **Domain validation** - Enhanced validation to filter invalid domains
 - Docker Compose setup
 - Basic tests (8 test files)
 
 ### ❌ OUT OF SCOPE (Post-MVP)
-- UI (Phase 6) - **Note:** UI Mini in progress (Sprint 1)
 - Webhook endpoint (`/ingest/webhook`)
 - Bulk scan endpoint (`/scan/bulk`)
-- ~~CSV export endpoint (`POST /export`)~~ - **✅ COMPLETED** (G14: `GET /leads/export`)
 - `app/core/exporter.py` module - **Note:** Export logic in `app/api/leads.py`
 - `scripts/demo_run.sh`
 - D365 adapter
-- Redis/Queue
+- Redis/Queue (currently using in-memory job tracking)
 - Scheduler
 
 ## File Structure Rules
@@ -82,10 +92,10 @@
 - `app/main.py` (FastAPI app + `/healthz`)
 - `app/config.py` (Pydantic Settings)
 - `app/db/schema.sql` (PostgreSQL DDL)
-- `app/db/models.py` (SQLAlchemy models)
+- `app/db/models.py` (SQLAlchemy models) - Includes `ProviderChangeHistory` model
 - `app/db/session.py` (DB session factory)
-- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`, `importer.py`, `email_generator.py`, `email_validator.py`
-- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`, `email_tools.py`
+- `app/core/normalizer.py` (includes `is_valid_domain()`), `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`, `importer.py`, `email_generator.py`, `email_validator.py`
+- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`, `email_tools.py`, `progress.py`, `jobs.py`
 - `app/data/providers.json`, `rules.json`
 - `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`, `test_api_endpoints.py`, `test_priority.py`, `test_importer_autodetect.py`, `test_email_generator.py`, `test_email_validator.py`
 - `README.md`
@@ -166,8 +176,15 @@ Before marking code as done, verify:
 ### Domain Normalization
 ```python
 def normalize_domain(domain: str) -> str:
+    # Extract domain from URL if needed
     # punycode decode, strip www, lowercase
-    # return normalized domain
+    # validate domain format
+    # return normalized domain or empty string if invalid
+
+def is_valid_domain(domain: str) -> bool:
+    # Check for invalid values (nan, web sitesi, etc.)
+    # Validate domain format (dots, TLD, character rules)
+    # return True if valid, False otherwise
 ```
 
 ### DNS Analysis
@@ -188,9 +205,11 @@ def get_whois_info(domain: str) -> Optional[Dict[str, Any]]:
 
 ### Scoring
 ```python
-def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
+def score_domain(domain: str, signals: Dict, provider: str, mx_records: List[str]) -> Dict[str, Any]:
+    # validate domain first
+    # check hard-fail rules (e.g., missing MX)
     # load rules.json
-    # calculate base_score + provider_points + signal_points
+    # calculate base_score + provider_points + signal_points - risk_points
     # determine segment (order matters)
     # return: {"score": int, "segment": str, "reason": str}
 ```

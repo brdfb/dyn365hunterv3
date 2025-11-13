@@ -45,6 +45,29 @@ class Company(Base):
     )
 
 
+class ProviderChangeHistory(Base):
+    """History of provider changes for domains."""
+    
+    __tablename__ = "provider_change_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    previous_provider = Column(String(50), nullable=True)  # Previous provider
+    new_provider = Column(String(50), nullable=False)  # New provider
+    changed_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+    scan_id = Column(Integer, nullable=True)  # Reference to domain_signals.id if needed
+
+
 class DomainSignal(Base):
     """DNS and WHOIS analysis results for domains."""
     

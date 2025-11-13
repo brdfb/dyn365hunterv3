@@ -225,6 +225,15 @@ def score_domain(
         - reason: str (human-readable explanation)
     """
     # Check hard-fail conditions FIRST
+    # But skip hard-fail check if domain is invalid (already filtered, but double-check)
+    from app.core.normalizer import is_valid_domain
+    if not is_valid_domain(domain):
+        return {
+            "score": 0,
+            "segment": "Skip",
+            "reason": f"Invalid domain format: {domain}"
+        }
+    
     hard_fail_reason = check_hard_fail(mx_records)
     if hard_fail_reason:
         return {

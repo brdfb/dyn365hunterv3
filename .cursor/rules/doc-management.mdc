@@ -36,6 +36,8 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - Current phase roadmap section
 - Active prompts (if actively referenced)
 - Current acceptance criteria
+- **Feature documentation** - New features (provider change tracking, duplicate prevention, domain validation)
+- **Reference guides** - Development environment, testing, troubleshooting guides
 
 ## Prompt Management
 

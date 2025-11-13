@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from app.db.session import get_db
-from app.db.models import Company, DomainSignal, LeadScore
+from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 from app.core.normalizer import normalize_domain
 from app.core.analyzer_dns import analyze_dns
 from app.core.analyzer_whois import get_whois_info
@@ -95,8 +95,14 @@ async def scan_domain(
         mx_root = dns_result.get("mx_root")
         provider = classify_provider(mx_root)
         
+        # Track provider changes
+        previous_provider = company.provider
+        provider_changed = False
+        
         # Update company provider if we have new information
         if provider and provider != "Unknown":
+            if previous_provider != provider:
+                provider_changed = True
             company.provider = provider
             db.commit()
         
@@ -115,54 +121,43 @@ async def scan_domain(
             mx_records=dns_result.get("mx_records", [])
         )
         
-        # Upsert domain_signals
-        domain_signal = db.query(DomainSignal).filter(DomainSignal.domain == domain).first()
+        # Delete any existing domain_signals for this domain (prevent duplicates)
+        db.query(DomainSignal).filter(DomainSignal.domain == domain).delete()
         
-        if domain_signal:
-            # Update existing signal
-            domain_signal.spf = dns_result.get("spf", False)
-            domain_signal.dkim = dns_result.get("dkim", False)
-            domain_signal.dmarc_policy = dns_result.get("dmarc_policy")
-            domain_signal.mx_root = mx_root
-            domain_signal.scan_status = scan_status
-            
-            # Update WHOIS data if available
-            if whois_result:
-                domain_signal.registrar = whois_result.get("registrar")
-                domain_signal.expires_at = whois_result.get("expires_at")
-                domain_signal.nameservers = whois_result.get("nameservers")
-        else:
-            # Create new signal
-            domain_signal = DomainSignal(
+        # Create new domain_signal
+        domain_signal = DomainSignal(
+            domain=domain,
+            spf=dns_result.get("spf", False),
+            dkim=dns_result.get("dkim", False),
+            dmarc_policy=dns_result.get("dmarc_policy"),
+            mx_root=mx_root,
+            registrar=whois_result.get("registrar") if whois_result else None,
+            expires_at=whois_result.get("expires_at") if whois_result else None,
+            nameservers=whois_result.get("nameservers") if whois_result else None,
+            scan_status=scan_status
+        )
+        db.add(domain_signal)
+        
+        # Delete any existing lead_scores for this domain (prevent duplicates)
+        db.query(LeadScore).filter(LeadScore.domain == domain).delete()
+        
+        # Create new lead_score
+        lead_score = LeadScore(
+            domain=domain,
+            readiness_score=scoring_result["score"],
+            segment=scoring_result["segment"],
+            reason=scoring_result["reason"]
+        )
+        db.add(lead_score)
+        
+        # Log provider change if detected
+        if provider_changed and previous_provider:
+            change_history = ProviderChangeHistory(
                 domain=domain,
-                spf=dns_result.get("spf", False),
-                dkim=dns_result.get("dkim", False),
-                dmarc_policy=dns_result.get("dmarc_policy"),
-                mx_root=mx_root,
-                registrar=whois_result.get("registrar") if whois_result else None,
-                expires_at=whois_result.get("expires_at") if whois_result else None,
-                nameservers=whois_result.get("nameservers") if whois_result else None,
-                scan_status=scan_status
+                previous_provider=previous_provider,
+                new_provider=provider
             )
-            db.add(domain_signal)
-        
-        # Upsert lead_scores
-        lead_score = db.query(LeadScore).filter(LeadScore.domain == domain).first()
-        
-        if lead_score:
-            # Update existing score
-            lead_score.readiness_score = scoring_result["score"]
-            lead_score.segment = scoring_result["segment"]
-            lead_score.reason = scoring_result["reason"]
-        else:
-            # Create new score
-            lead_score = LeadScore(
-                domain=domain,
-                readiness_score=scoring_result["score"],
-                segment=scoring_result["segment"],
-                reason=scoring_result["reason"]
-            )
-            db.add(lead_score)
+            db.add(change_history)
         
         # Commit all changes
         db.commit()

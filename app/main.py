@@ -1,10 +1,11 @@
 """FastAPI application entry point."""
 from fastapi import FastAPI, Depends
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.db.session import get_db, engine
-from app.api import ingest, scan, leads, dashboard, email_tools
+from app.api import ingest, scan, leads, dashboard, email_tools, progress
 
 # Create FastAPI app
 app = FastAPI(
@@ -19,6 +20,24 @@ app.include_router(scan.router)
 app.include_router(leads.router)
 app.include_router(dashboard.router)
 app.include_router(email_tools.router)
+app.include_router(progress.router)
+
+# Mount static files for Mini UI
+import os
+# Try multiple paths for Docker and local development
+possible_paths = [
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "mini-ui"),  # Local dev
+    "/app/mini-ui",  # Docker
+    os.path.join(os.getcwd(), "mini-ui"),  # Fallback
+]
+mini_ui_path = None
+for path in possible_paths:
+    if os.path.exists(path):
+        mini_ui_path = path
+        break
+
+if mini_ui_path:
+    app.mount("/mini-ui", StaticFiles(directory=mini_ui_path, html=True), name="mini-ui")
 
 
 @app.get("/healthz")

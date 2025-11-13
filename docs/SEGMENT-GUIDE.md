@@ -422,6 +422,27 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
 - Skor: 5 → 25
 - SPF eklenmesi veya provider değişikliği
 
+### Provider Değişikliği Takibi ⚡ YENİ
+
+**Otomatik Tespit:**
+- Domain scan edildiğinde, önceki provider ile karşılaştırılır
+- Provider değişikliği tespit edilirse, `provider_change_history` tablosuna kaydedilir
+- Örnek: Google → M365 geçişi otomatik olarak kaydedilir
+
+**Kullanım Senaryoları:**
+- **Migration fırsatı**: Provider değişikliği migration fırsatı gösterebilir
+- **Müşteri takibi**: Müşterilerin provider değişikliklerini takip edebilirsiniz
+- **Trend analizi**: Hangi provider'lara geçiş yapıldığını analiz edebilirsiniz
+
+**SQL Sorgusu (Gelecekte API endpoint eklenecek):**
+```sql
+-- Son 30 günde provider değişikliği olan domain'ler
+SELECT domain, previous_provider, new_provider, changed_at
+FROM provider_change_history
+WHERE changed_at >= NOW() - INTERVAL '30 days'
+ORDER BY changed_at DESC;
+```
+
 ---
 
 ## 📊 Özet Tablo
@@ -451,7 +472,10 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
 ### Q: Segment değişir mi?
 **A:** Evet, skor değiştiğinde segment de değişir. Düzenli kontrol önerilir.
 
+### Q: Provider değişikliği nasıl takip edilir?
+**A:** Provider değişiklikleri otomatik olarak tespit edilir ve `provider_change_history` tablosuna kaydedilir. SQL sorgusu ile veya gelecekte eklenecek API endpoint ile sorgulanabilir.
+
 ---
 
-**Son Güncelleme:** 2025-01-27
+**Son Güncelleme:** 2025-01-28
 

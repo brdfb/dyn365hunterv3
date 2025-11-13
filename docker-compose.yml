@@ -37,6 +37,7 @@ services:
     volumes:
       - ./app:/app/app
       - ./tests:/app/tests
+      - ./mini-ui:/app/mini-ui
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
       interval: 10s

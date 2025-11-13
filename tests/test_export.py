@@ -72,6 +72,18 @@ def client(db_session):
 @pytest.fixture
 def sample_leads(db_session):
     """Create sample leads for testing."""
+    # Clean up any existing test data first
+    db_session.query(LeadScore).filter(
+        LeadScore.domain.in_(["example.com", "test.com"])
+    ).delete(synchronize_session=False)
+    db_session.query(DomainSignal).filter(
+        DomainSignal.domain.in_(["example.com", "test.com"])
+    ).delete(synchronize_session=False)
+    db_session.query(Company).filter(
+        Company.domain.in_(["example.com", "test.com"])
+    ).delete(synchronize_session=False)
+    db_session.commit()
+    
     # Create companies
     company1 = Company(
         domain="example.com",
@@ -129,11 +141,20 @@ def sample_leads(db_session):
     
     yield
     
-    # Cleanup
-    db_session.query(LeadScore).delete()
-    db_session.query(DomainSignal).delete()
-    db_session.query(Company).delete()
-    db_session.commit()
+    # Cleanup (transaction rollback will handle this, but explicit cleanup for safety)
+    try:
+        db_session.query(LeadScore).filter(
+            LeadScore.domain.in_(["example.com", "test.com"])
+        ).delete(synchronize_session=False)
+        db_session.query(DomainSignal).filter(
+            DomainSignal.domain.in_(["example.com", "test.com"])
+        ).delete(synchronize_session=False)
+        db_session.query(Company).filter(
+            Company.domain.in_(["example.com", "test.com"])
+        ).delete(synchronize_session=False)
+        db_session.commit()
+    except Exception:
+        db_session.rollback()
 
 
 def test_export_leads_csv(client, db_session, sample_leads):

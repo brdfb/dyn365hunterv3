@@ -148,9 +148,10 @@ async def export_leads(
             
             return Response(
                 content=csv_content,
-                media_type="text/csv; charset=utf-8",
+                media_type="text/csv",
                 headers={
-                    "Content-Disposition": f"attachment; filename=leads_{timestamp}.csv"
+                    "Content-Disposition": f"attachment; filename=leads_{timestamp}.csv",
+                    "Content-Type": "text/csv; charset=utf-8"
                 }
             )
         else:  # xlsx
