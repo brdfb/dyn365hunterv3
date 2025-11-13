@@ -6,6 +6,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from app.db.session import get_db
 from app.core.normalizer import normalize_domain
+from app.core.priority import calculate_priority_score
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -30,6 +31,7 @@ class LeadResponse(BaseModel):
     readiness_score: Optional[int] = None
     segment: Optional[str] = None
     reason: Optional[str] = None
+    priority_score: Optional[int] = None
 
 
 @router.get("", response_model=List[LeadResponse])
@@ -101,6 +103,9 @@ async def get_leads(
         
         leads = []
         for row in rows:
+            # Calculate priority score
+            priority_score = calculate_priority_score(row.segment, row.readiness_score)
+            
             lead = LeadResponse(
                 company_id=row.company_id,
                 canonical_name=row.canonical_name,
@@ -118,7 +123,8 @@ async def get_leads(
                 scanned_at=str(row.scanned_at) if row.scanned_at else None,
                 readiness_score=row.readiness_score,
                 segment=row.segment,
-                reason=row.reason
+                reason=row.reason,
+                priority_score=priority_score
             )
             leads.append(lead)
         
@@ -195,6 +201,9 @@ async def get_lead(
                 detail=f"Domain {normalized_domain} has not been scanned yet. Please use /scan/domain first."
             )
         
+        # Calculate priority score
+        priority_score = calculate_priority_score(row.segment, row.readiness_score)
+        
         return LeadResponse(
             company_id=row.company_id,
             canonical_name=row.canonical_name,
@@ -212,7 +221,8 @@ async def get_lead(
             scanned_at=str(row.scanned_at) if row.scanned_at else None,
             readiness_score=row.readiness_score,
             segment=row.segment,
-            reason=row.reason
+            reason=row.reason,
+            priority_score=priority_score
         )
     
     except HTTPException:

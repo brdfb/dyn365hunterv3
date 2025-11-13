@@ -1,0 +1,388 @@
+# Dyn365Hunter - Satış Senaryoları
+
+**Gerçek Hayat Senaryoları ve En İyi Pratikler**
+
+---
+
+## 📋 Senaryo 1: Yeni Lead Listesi Analizi
+
+### Durum
+Satış ekibi yeni bir lead listesi aldı (100 domain). Hangi domain'ler öncelikli?
+
+### Dashboard ile Hızlı Kontrol
+```bash
+# Önce dashboard'a bak, genel durumu gör
+curl "http://localhost:8000/dashboard"
+```
+
+**Örnek Sonuç:**
+```json
+{
+  "total_leads": 100,
+  "migration": 15,
+  "existing": 25,
+  "cold": 40,
+  "skip": 20,
+  "avg_score": 45.5,
+  "high_priority": 8
+}
+```
+
+**Yorum:**
+- 15 Migration lead var → Hemen bakılmalı
+- 8 yüksek öncelikli lead (Priority 1-2) → En öncelikli
+- Ortalama skor 45.5 → Genel olarak orta seviye
+
+### Adımlar
+
+#### 1. CSV'den Domain'leri Ekle
+```bash
+curl -X POST http://localhost:8000/ingest/csv \
+  -F "file=@yeni-leadler.csv"
+```
+
+**CSV Formatı:**
+```csv
+domain,company_name,email,website
+firma1.com,Firma 1 A.Ş.,info@firma1.com,https://www.firma1.com
+firma2.com,Firma 2 Ltd.,,https://www.firma2.com
+firma3.com,,info@firma3.com,
+```
+
+#### 2. Toplu Analiz (Script ile)
+```bash
+# Her domain için analiz yap
+while IFS=, read -r domain rest; do
+  if [ "$domain" != "domain" ]; then
+    echo "Analiz ediliyor: $domain"
+    curl -X POST http://localhost:8000/scan/domain \
+      -H "Content-Type: application/json" \
+      -d "{\"domain\": \"$domain\"}"
+    sleep 2  # Rate limiting için bekle
+  fi
+done < yeni-leadler.csv
+```
+
+#### 3. Öncelikli Lead'leri Görüntüle
+```bash
+# Migration segment'i (yüksek öncelik)
+curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+
+# Existing segment'i (orta öncelik)
+curl "http://localhost:8000/leads?segment=Existing&min_score=50"
+```
+
+#### 4. Dashboard Özeti
+```bash
+# Tüm lead'lerin özet istatistikleri
+curl "http://localhost:8000/dashboard"
+```
+
+**Ne Gösterir?**
+- Toplam lead sayısı
+- Segment dağılımı (Migration, Existing, Cold, Skip)
+- Ortalama skor
+- Yüksek öncelikli lead sayısı (Migration + skor >= 70)
+
+### Sonuç
+- **Migration**: Hemen aksiyon alınacak lead'ler
+- **Existing**: Takip edilecek lead'ler
+- **Cold/Skip**: Düşük öncelikli, sonra bakılacak
+
+---
+
+## 📋 Senaryo 2: Tek Domain Hızlı Kontrol
+
+### Durum
+Bir müşteri adayından domain aldınız. Hızlıca kontrol etmek istiyorsunuz.
+
+**Hızlı Kontrol Akışı:**
+1. Domain ekle → Analiz et → Priority Score'a bak → Aksiyon al
+
+### Adımlar
+
+#### 1. Domain Ekle
+```bash
+curl -X POST http://localhost:8000/ingest/domain \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domain": "yeni-firma.com",
+    "company_name": "Yeni Firma A.Ş.",
+    "email": "info@yeni-firma.com"
+  }'
+```
+
+#### 2. Analiz Et
+```bash
+curl -X POST http://localhost:8000/scan/domain \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "yeni-firma.com"}'
+```
+
+#### 3. Sonucu Yorumla
+```json
+{
+  "domain": "yeni-firma.com",
+  "score": 85,
+  "segment": "Migration",
+  "provider": "M365",
+  "priority_score": 1
+}
+```
+
+**Yorum:**
+- ✅ Skor 85 → Yüksek hazırlık
+- ✅ Segment Migration → Hemen aksiyon
+- ✅ Provider M365 → Cloud kullanıyor
+- ✅ Priority Score 1 → En yüksek öncelik
+
+**Aksiyon:** Hemen iletişime geç, migration teklifi hazırla
+
+---
+
+## 📋 Senaryo 3: Mevcut Müşteri Takibi
+
+### Durum
+Mevcut müşterilerin durumunu kontrol etmek istiyorsunuz. Upsell/cross-sell fırsatı var mı?
+
+### Dashboard ile Genel Bakış
+```bash
+# Önce genel durumu gör
+curl "http://localhost:8000/dashboard"
+```
+
+**Yorum:**
+- `existing` sayısı → Mevcut müşteri potansiyeli
+- `avg_score` → Genel hazırlık seviyesi
+- `high_priority` → Yüksek öncelikli fırsatlar
+
+### Adımlar
+
+#### 1. Existing Segment'indeki Lead'leri Görüntüle
+```bash
+curl "http://localhost:8000/leads?segment=Existing&min_score=50"
+```
+
+#### 2. Yüksek Skorlu Lead'leri Filtrele
+```bash
+curl "http://localhost:8000/leads?segment=Existing&min_score=70"
+```
+
+#### 3. Belirli Provider'a Göre Filtrele
+```bash
+# M365 kullanan mevcut müşteriler
+curl "http://localhost:8000/leads?segment=Existing&provider=M365&min_score=50"
+```
+
+### Sonuç
+- **Skor 70+**: Upsell fırsatı olabilir
+- **Skor 50-69**: Düzenli takip
+- **Provider değişikliği**: Migration fırsatı
+
+---
+
+## 📋 Senaryo 4: Migration Fırsatı Tespiti
+
+### Durum
+Hangi müşteri adayları migration için hazır?
+
+### Dashboard ile Hızlı Tespit
+```bash
+# Dashboard'da migration sayısını gör
+curl "http://localhost:8000/dashboard"
+```
+
+**Yorum:**
+- `migration` sayısı → Migration fırsatı olan lead sayısı
+- `high_priority` → Priority 1-2 olan en öncelikli lead'ler
+
+### Adımlar
+
+#### 1. Migration Segment'indeki Tüm Lead'leri Görüntüle
+```bash
+curl "http://localhost:8000/leads?segment=Migration"
+```
+
+#### 2. Yüksek Skorlu Lead'leri Sırala
+```bash
+curl "http://localhost:8000/leads?segment=Migration&min_score=80"
+```
+
+#### 3. Belirli Provider'a Göre Filtrele
+```bash
+# M365'ten başka provider'a geçiş fırsatı
+curl "http://localhost:8000/leads?segment=Migration&provider=Google&min_score=70"
+```
+
+### Sonuç
+- **Migration + Skor 80+**: En yüksek öncelik
+- **Migration + Skor 70-79**: Yüksek öncelik
+- **Provider çeşitliliği**: Farklı provider'lara göre strateji
+
+---
+
+## 📋 Senaryo 5: Düzenli Takip (Aylık)
+
+### Durum
+Aylık olarak tüm lead'leri kontrol etmek, skor değişikliklerini takip etmek.
+
+### Adımlar
+
+#### 1. Tüm Segment'leri Kontrol Et
+```bash
+# Migration
+curl "http://localhost:8000/leads?segment=Migration"
+
+# Existing
+curl "http://localhost:8000/leads?segment=Existing"
+
+# Cold
+curl "http://localhost:8000/leads?segment=Cold"
+```
+
+#### 2. Skor Değişikliklerini Takip Et
+```bash
+# Yüksek skorlu lead'ler (öncelikli)
+curl "http://localhost:8000/leads?min_score=70"
+
+# Orta skorlu lead'ler (takip)
+curl "http://localhost:8000/leads?min_score=50&max_score=69"
+```
+
+#### 3. Provider Değişikliklerini Kontrol Et
+```bash
+# M365 kullananlar
+curl "http://localhost:8000/leads?provider=M365"
+
+# Google kullananlar
+curl "http://localhost:8000/leads?provider=Google"
+```
+
+### Sonuç
+- **Skor artışı**: Segment değişikliği olabilir (Cold → Existing)
+- **Provider değişikliği**: Migration fırsatı
+- **Yeni lead'ler**: Yeni eklenen domain'ler
+
+---
+
+## 💡 En İyi Pratikler
+
+### 1. Öncelik Sıralaması (Priority Score)
+1. **Priority 1**: Migration + Skor 80+ → En yüksek öncelik, hemen aksiyon
+2. **Priority 2**: Migration + Skor 70-79 → Yüksek öncelik, hemen aksiyon
+3. **Priority 3**: Existing + Skor 70+ → Orta-yüksek öncelik, 1 hafta içinde
+4. **Priority 4**: Existing + Skor 50-69 → Orta öncelik, takip et
+5. **Priority 5**: Cold + Skor 40+ → Düşük öncelik, 1-2 ay sonra kontrol
+6. **Priority 6**: Diğerleri → En düşük öncelik, 3-6 ay sonra kontrol
+
+**Eski Segment Bazlı Sıralama:**
+1. **Migration (70+)**: Hemen aksiyon
+2. **Existing (50+)**: Takip et
+3. **Cold (20-49)**: 1-2 ay sonra kontrol
+4. **Skip (0-19)**: 3-6 ay sonra kontrol
+
+### 2. Toplu Analiz
+- CSV'den ekleme yaparken batch processing kullanın
+- Her analiz arasında 2 saniye bekleyin (rate limiting)
+- Hata durumlarını log'layın
+
+### 3. Düzenli Kontrol
+- **Migration/Existing**: Haftalık kontrol
+- **Cold**: Aylık kontrol
+- **Skip**: 3-6 ayda bir kontrol
+
+### 4. Skor Takibi
+- Skor değişikliklerini takip edin
+- Segment değişikliklerini not edin
+- Provider değişikliklerini değerlendirin
+
+### 5. Veri Kalitesi
+- Domain'leri normalize edin (www, büyük/küçük harf)
+- Email ve website'den domain çıkarın
+- Duplicate domain'leri kontrol edin
+
+---
+
+## 🔧 Yardımcı Script'ler
+
+### Toplu Analiz Script'i
+```bash
+#!/bin/bash
+# Toplu domain analizi
+
+API_URL="http://localhost:8000"
+CSV_FILE="domain-listesi.csv"
+
+while IFS=, read -r domain rest; do
+  if [ "$domain" != "domain" ]; then
+    echo "Analiz: $domain"
+    curl -X POST "${API_URL}/scan/domain" \
+      -H "Content-Type: application/json" \
+      -d "{\"domain\": \"$domain\"}"
+    sleep 2
+  fi
+done < "$CSV_FILE"
+```
+
+### Migration Lead'leri Export
+```bash
+#!/bin/bash
+# Migration lead'lerini JSON olarak export et
+
+API_URL="http://localhost:8000"
+OUTPUT_FILE="migration-leads.json"
+
+curl -s "${API_URL}/leads?segment=Migration&min_score=70" > "$OUTPUT_FILE"
+echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
+```
+
+---
+
+## 📊 Örnek Sonuçlar
+
+### Senaryo 1 Sonucu
+```
+100 domain analiz edildi:
+- Migration (70+): 15 domain → Hemen aksiyon
+- Existing (50-69): 25 domain → Takip et
+- Cold (20-49): 30 domain → 1-2 ay sonra kontrol
+- Skip (0-19): 30 domain → 3-6 ay sonra kontrol
+```
+
+### Senaryo 2 Sonucu
+```
+Domain: yeni-firma.com
+Skor: 85
+Segment: Migration
+Priority Score: 1 (En yüksek öncelik)
+Aksiyon: Hemen iletişime geç, migration teklifi hazırla
+```
+
+### Senaryo 3 Sonucu
+```
+50 mevcut müşteri kontrol edildi:
+- Skor 70+: 10 müşteri → Upsell fırsatı
+- Skor 50-69: 20 müşteri → Düzenli takip
+- Skor 20-49: 20 müşteri → 1-2 ay sonra kontrol
+```
+
+---
+
+## ❓ Sık Sorulan Sorular
+
+### Q: Toplu analiz ne kadar sürer?
+**A:** Domain başına 10-15 saniye. 100 domain için yaklaşık 20-25 dakika (rate limiting ile).
+
+### Q: Hangi segment'e öncelik vermeliyim?
+**A:** Migration (70+) → Existing (50+) → Cold (20-49) → Skip (0-19)
+
+### Q: Skor değişir mi?
+**A:** Evet, domain'in DNS/WHOIS bilgileri değiştiğinde skor da değişir. Düzenli kontrol önerilir.
+
+### Q: CSV'den ekledim, otomatik analiz olmuyor mu?
+**A:** Hayır. CSV sadece domain'leri ekler. Analiz için `/scan/domain` endpoint'ini kullanmalısınız.
+
+---
+
+**Son Güncelleme:** 2025-01-27
+

@@ -55,6 +55,6 @@ echo "🎉 Demo complete!"
 echo ""
 echo "📋 Try these commands:"
 echo "   curl \"${API_URL}/leads?segment=Migration&min_score=70\""
-echo "   curl \"${API_URL}/lead/example.com\""
+echo "   curl \"${API_URL}/leads/example.com\""
 echo "   curl \"${API_URL}/docs\"  # API documentation"
 

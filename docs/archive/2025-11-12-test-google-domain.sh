@@ -50,7 +50,7 @@ echo ""
 
 # Step 4: Get lead details
 echo "4️⃣ Getting lead details for google.com..."
-LEAD_RESPONSE=$(curl -s "${API_URL}/lead/google.com")
+LEAD_RESPONSE=$(curl -s "${API_URL}/leads/google.com")
 if echo "$LEAD_RESPONSE" | grep -q "404\|Not Found"; then
     echo "   ⚠️  Response: $LEAD_RESPONSE"
     echo "   (This should work now with the fix)"

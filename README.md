@@ -22,6 +22,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ DNS analysis (MX/SPF/DKIM/DMARC with 10s timeout)
 - ✅ WHOIS lookup (graceful fail with 5s timeout)
 - ✅ Lead segmentation API with filtering
+- ✅ Dashboard endpoint with aggregated statistics
+- ✅ Priority score calculation for lead prioritization
 
 ## Tech Stack
 
@@ -151,9 +153,14 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
     - `segment` (optional): Filter by segment (Migration, Existing, Cold, Skip)
     - `min_score` (optional): Minimum readiness score (0-100)
     - `provider` (optional): Filter by provider (M365, Google, etc.)
-  - Returns: Array of lead objects
-- `GET /lead/{domain}` - Get single lead details
-  - Returns: Complete lead information including signals, scores, and metadata
+  - Returns: Array of lead objects with `priority_score` field (1-6, where 1 is highest priority)
+- `GET /leads/{domain}` - Get single lead details
+  - Returns: Complete lead information including signals, scores, priority_score, and metadata
+
+### Dashboard
+- `GET /dashboard` - Get aggregated dashboard statistics
+  - Returns: `{"total_leads": 150, "migration": 25, "existing": 50, "cold": 60, "skip": 15, "avg_score": 55.5, "high_priority": 10}`
+  - Provides segment distribution, average score, and high priority lead count
 
 ## Development
 
@@ -260,15 +267,27 @@ curl -X POST http://localhost:8000/scan/domain \
 curl "http://localhost:8000/leads?segment=Migration&min_score=70"
 
 # 4. Get single lead
-curl "http://localhost:8000/lead/example.com"
+curl "http://localhost:8000/leads/example.com"
+
+# 5. Get dashboard statistics
+curl "http://localhost:8000/dashboard"
 ```
 
 ## Documentation
 
-- [MVP Roadmap](docs/active/MVP-TRIMMED-ROADMAP.md) - 10-day implementation plan
-- [Plan Critique](docs/active/CRITIQUE.md) - Plan analysis and recommendations
-- [Go/No-Go Checklist](docs/active/GO-NO-GO-CHECKLIST.md) - Acceptance criteria
-- [Actions](docs/active/ACTIONS.json) - Implementation action items
+### For Sales Team
+- [Sales Guide](docs/SALES-GUIDE.md) - Quick start guide for sales team (5 minutes)
+- [Segment Guide](docs/SEGMENT-GUIDE.md) - Segment and score explanations
+- [Sales Scenarios](docs/SALES-SCENARIOS.md) - Real-world usage scenarios
+- [Sales Demo Script](scripts/sales-demo.sh) - Quick demo script
+
+### For Developers
+- [Sales Feature Requests](docs/active/SALES-FEATURE-REQUESTS.md) - MVP scope features (Dashboard, Priority Score) and Post-MVP roadmap
+- [Sales Feature Requests Critique](docs/active/SALES-FEATURE-REQUESTS-CRITIQUE.md) - Technical analysis and recommendations
+- [Development Environment](docs/active/DEVELOPMENT-ENVIRONMENT.md) - Setup guide
+- [WSL Guide](docs/active/WSL-GUIDE.md) - WSL2 setup and troubleshooting
+- [Testing Guide](docs/active/TESTING.md) - How to run tests
+- [Docker Troubleshooting](docs/active/DOCKER-TROUBLESHOOTING.md) - Common Docker issues and solutions
 
 ## License
 

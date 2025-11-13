@@ -1,0 +1,43 @@
+{
+  "tld_servers": {
+    ".tr": "whois.nic.tr",
+    ".com": "whois.verisign-grs.com",
+    ".net": "whois.verisign-grs.com",
+    ".org": "whois.pir.org",
+    ".io": "whois.nic.io",
+    ".co": "whois.nic.co",
+    ".uk": "whois.nic.uk",
+    ".de": "whois.denic.de",
+    ".fr": "whois.afnic.fr",
+    ".nl": "whois.domain-registry.nl",
+    ".au": "whois.aunic.net",
+    ".ca": "whois.cira.ca",
+    ".jp": "whois.jprs.jp",
+    ".cn": "whois.cnnic.net.cn",
+    ".ru": "whois.tcinet.ru",
+    ".br": "whois.registro.br",
+    ".in": "whois.inregistry.net",
+    ".mx": "whois.mx",
+    ".it": "whois.nic.it",
+    ".es": "whois.nic.es"
+  },
+  "rdap_servers": {
+    ".com": "https://rdap.verisign.com/com/v1/domain/",
+    ".net": "https://rdap.verisign.com/net/v1/domain/",
+    ".org": "https://rdap.org.org/domain/",
+    ".io": "https://rdap.nic.io/domain/",
+    ".co": "https://rdap.co/domain/",
+    ".uk": "https://rdap.nominet.uk/domain/",
+    ".de": "https://rdap.denic.de/domain/",
+    ".fr": "https://rdap.afnic.fr/domain/",
+    ".nl": "https://rdap.domain-registry.nl/domain/",
+    ".au": "https://rdap.auda.org.au/domain/",
+    ".ca": "https://rdap.cira.ca/domain/",
+    ".jp": "https://rdap.jprs.jp/domain/",
+    ".br": "https://rdap.registro.br/domain/",
+    ".in": "https://rdap.inregistry.net/domain/",
+    ".it": "https://rdap.nic.it/domain/",
+    ".es": "https://rdap.nic.es/domain/"
+  }
+}
+

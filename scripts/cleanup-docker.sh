@@ -9,16 +9,13 @@ echo "🧹 Cleaning up Dyn365Hunter Docker resources..."
 echo "📦 Stopping and removing containers..."
 docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
 
-# Remove containers by name if they exist
-if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "dyn365hunter-postgres"; then
-    echo "   Removing dyn365hunter-postgres container..."
-    docker rm -f dyn365hunter-postgres 2>/dev/null || true
-fi
+# Force remove containers by name (handles name conflicts)
+echo "🗑️  Force removing containers..."
+docker rm -f dyn365hunter-postgres 2>/dev/null || true
+docker rm -f dyn365hunter-api 2>/dev/null || true
 
-if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "dyn365hunter-api"; then
-    echo "   Removing dyn365hunter-api container..."
-    docker rm -f dyn365hunter-api 2>/dev/null || true
-fi
+# Also try removing by pattern (in case names are different)
+docker ps -a --format '{{.Names}}' 2>/dev/null | grep -E "dyn365hunter|domainhunter" | xargs -r docker rm -f 2>/dev/null || true
 
 # Optional: Remove volumes (uncomment if you want to delete data)
 # echo "🗑️  Removing volumes..."

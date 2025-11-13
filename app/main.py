@@ -4,19 +4,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.db.session import get_db, engine
-from app.api import ingest, scan, leads
+from app.api import ingest, scan, leads, dashboard
 
 # Create FastAPI app
 app = FastAPI(
     title="Dyn365Hunter MVP",
     description="Lead intelligence engine for domain-based analysis",
-    version="0.1.0"
+    version="0.5.0"
 )
 
 # Register routers
 app.include_router(ingest.router)
 app.include_router(scan.router)
 app.include_router(leads.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/healthz")
@@ -46,7 +47,7 @@ async def root():
     """Root endpoint."""
     return {
         "message": "Dyn365Hunter MVP API",
-        "version": "0.1.0",
+        "version": "0.5.0",
         "docs": "/docs"
     }
 

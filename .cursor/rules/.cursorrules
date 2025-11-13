@@ -45,13 +45,16 @@
 ## MVP Scope Discipline
 
 ### ✅ IN SCOPE
+- Health check (`GET /healthz`) - Database connection status
 - Single domain ingestion (`POST /ingest/domain`)
 - CSV ingestion (`POST /ingest/csv`) - parse + normalize + insert only
 - Single domain scan (`POST /scan/domain`) - DNS + WHOIS + scoring
 - Leads query (`GET /leads` with filters)
-- Single lead query (`GET /lead/{domain}`)
+- Single lead query (`GET /leads/{domain}`)
+- Dashboard endpoint (`GET /dashboard`) - Aggregated statistics
+- Priority Score feature - Lead prioritization (1-6 scale)
 - Docker Compose setup
-- Basic tests (3 test files)
+- Basic tests (5 test files)
 
 ### ❌ OUT OF SCOPE (Post-MVP)
 - UI (Phase 6)
@@ -76,10 +79,10 @@
 - `app/db/schema.sql` (PostgreSQL DDL)
 - `app/db/models.py` (SQLAlchemy models)
 - `app/db/session.py` (DB session factory)
-- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`
-- `app/api/ingest.py`, `scan.py`, `leads.py`
+- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`
+- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`
 - `app/data/providers.json`, `rules.json`
-- `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`
+- `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`, `test_api_endpoints.py`, `test_priority.py`
 - `README.md`
 
 ### File Naming
@@ -91,9 +94,11 @@
 
 ### P0 (Must Have)
 - Docker setup, DB schema, FastAPI skeleton
+- Health check endpoint (`/healthz`)
 - Domain normalization, ingestion endpoints
 - DNS/WHOIS analyzers, provider mapping, scoring
-- Scan endpoint, leads API
+- Scan endpoint, leads API, dashboard endpoint
+- Priority score calculation
 - Basic tests, README
 
 ### P1 (Should Have)

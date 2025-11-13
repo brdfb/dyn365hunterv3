@@ -144,8 +144,10 @@ If issues arise:
 - [x] Documentation updated (SEGMENT-GUIDE.md, CHANGELOG.md)
 - [x] CHANGELOG.md updated (v0.5.0)
 - [x] Code review completed (no linter errors)
-- [ ] Deployed to dev environment (pending deployment)
-- [ ] Smoke tests passed (pending deployment)
+- [x] API version updated to v0.5.0 (app/main.py)
+- [x] Documentation updated (COMMIT_CHECKLIST.md, GUNCELLENMESI_GEREKENLER.md)
+- [ ] Deployed to dev environment (pending deployment - requires infrastructure setup)
+- [ ] Smoke tests passed (pending deployment - will test after deployment)
 
 ## 🚀 Next Steps (Phase 1 - Optional)
 

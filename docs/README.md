@@ -26,12 +26,16 @@ docs/
 
 ## 📝 Current Status
 
-### Active Documentation
-- `CRITIQUE.md` - Plan critique and recommendations
-- `GO-NO-GO-CHECKLIST.md` - Acceptance criteria
-- `MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap
+### Active Documentation (Reference Guides)
+- `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
+- `WSL-GUIDE.md` - WSL2 setup and configuration guide
+- `TESTING.md` - Testing guide and troubleshooting
+- `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
+
+**Note:** Active documentation now contains only reference guides (setup, troubleshooting, testing). Phase-specific and planning documentation has been moved to `plans/` and `archive/`.
 
 ### Archived Documentation
+- `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
 - `2025-11-12-G1-foundation.md` - G1: Foundation & Docker Setup (Completed)
 - `2025-11-12-G2-database-schema.md` - G2: Database Schema & Models (Completed)
 - `2025-11-12-G3-domain-normalization.md` - G3: Domain Normalization & Data Files (Completed)
@@ -40,13 +44,21 @@ docs/
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
 - `2025-11-12-demo-script.sh` - Demo script (archived)
 
-**Note:** Phases G4-G10 are completed (see CHANGELOG.md for details). Phase documentation for G4-G10 was not created as separate TODO files, but all work is documented in CHANGELOG.md.
+**Note:** 
+- All MVP phases (G1-G10) are completed (see CHANGELOG.md for details)
+- MVP scope features (Dashboard, Priority Score) completed in v0.4.0
+- Phase documentation for G4-G10 was not created as separate TODO files, but all work is documented in CHANGELOG.md
 
 ### Important Prompts & Decisions
 - `2025-11-12-initial-setup.md` - Initial project setup
 - `2025-11-12-alembic-decision.md` - [DECISION] Alembic migration approach
 - `2025-11-12-phase-completion-workflow.md` - Phase completion workflow enhancement
 
+### Project Plans
+- `2025-01-27-phase0-hotfix-scoring.md` - Phase 0: Enhanced Scoring & Hard-Fail Rules (Completed)
+- `2025-01-27-SALES-FEATURE-REQUESTS.md` - Sales team feature requests (MVP scope completed, Post-MVP planning)
+- `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests
+
 ### TODOs
-- (No active TODOs - All phases G1-G10 completed)
+- (No active TODOs - All MVP phases completed, MVP scope features completed)
 
