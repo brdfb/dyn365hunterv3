@@ -65,7 +65,8 @@ docs/
 - `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests
 - `2025-01-27-IMPORTER-EMAIL-IMPLEMENTATION-PLAN.md` - Importer + Email Module Implementation Plan (v2, Prioritized)
 - `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches
+- `2025-01-28-POST-MVP-SPRINT1-PLAN.md` - Post-MVP Sprint 1: CSV Export + UI Mini (In Progress)
 
 ### TODOs
-- No active TODOs - All phases completed
+- `G14-post-mvp-sprint1.md` - Post-MVP Sprint 1: CSV Export + UI Mini (In Progress)
 

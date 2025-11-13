@@ -185,7 +185,13 @@ async def scan_domain(
     
     except HTTPException:
         raise
+    except ValueError as e:
+        # Validation errors (e.g., invalid domain format)
+        raise HTTPException(status_code=400, detail=f"Invalid request: {str(e)}")
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="An error occurred while scanning the domain. Please try again later."
+        )
 

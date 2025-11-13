@@ -255,6 +255,54 @@ curl "http://localhost:8000/dashboard"
 - Ortalama skor takibi
 - Yüksek öncelikli lead sayısı (Migration + skor >= 70)
 
+### Lead Export (CSV/Excel) 📥 YENİ
+
+Lead'leri CSV veya Excel formatında export etme:
+
+```bash
+# CSV formatında export (default)
+curl "http://localhost:8000/leads/export?format=csv" -o leads.csv
+
+# Excel formatında export
+curl "http://localhost:8000/leads/export?format=xlsx" -o leads.xlsx
+```
+
+**Filtreleme ile Export:**
+```bash
+# Migration segment'indeki lead'leri export et
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+
+# Belirli provider'ı export et
+curl "http://localhost:8000/leads/export?format=csv&provider=M365" -o m365-leads.csv
+
+# Kombine filtre
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70&provider=Google" -o google-migration.xlsx
+```
+
+**Export Parametreleri:**
+- `format`: `csv` (default) veya `xlsx`
+- `segment`: Migration, Existing, Cold, Skip
+- `min_score`: Minimum skor (0-100)
+- `provider`: M365, Google, Yandex, vb.
+
+**Export İçeriği:**
+- Domain, company_name, provider, country
+- Segment, readiness_score, priority_score
+- SPF, DKIM, DMARC policy
+- MX root, registrar, expires_at
+- Nameservers, scan_status, scanned_at
+- Reason (skor açıklaması)
+
+**Dosya Adı Formatı:**
+- `leads_YYYY-MM-DD_HH-MM-SS.csv`
+- `leads_YYYY-MM-DD_HH-MM-SS.xlsx`
+
+**Ne İşe Yarar?**
+- Excel'de analiz yapma
+- CRM'e import etme
+- Raporlama ve paylaşım
+- Filtrelenmiş lead listelerini kaydetme
+
 ---
 
 ## 📧 Email Araçları
@@ -455,6 +503,18 @@ curl "http://localhost:8000/leads/DOMAIN-BURAYA"
 curl "http://localhost:8000/dashboard"
 ```
 
+### Lead Export (CSV/Excel)
+```bash
+# CSV export
+curl "http://localhost:8000/leads/export?format=csv" -o leads.csv
+
+# Excel export
+curl "http://localhost:8000/leads/export?format=xlsx" -o leads.xlsx
+
+# Filtreli export (Migration, skor 70+)
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+```
+
 ### Email Üret ve Doğrula
 ```bash
 curl -X POST http://localhost:8000/email/generate-and-validate \
@@ -560,9 +620,14 @@ Bu script:
    
    # Detaylı lead listesi (Priority Score ile)
    curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+   
+   # Lead'leri CSV/Excel olarak export et
+   curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
    ```
 
 **Hepsi bu kadar! 🎉**
 
-**İpucu:** Priority Score 1-2 olan lead'lere öncelik verin!
+**İpuçları:**
+- Priority Score 1-2 olan lead'lere öncelik verin!
+- Lead'leri Excel'e export edip detaylı analiz yapabilirsiniz!
 

@@ -62,11 +62,11 @@
 - Basic tests (8 test files)
 
 ### ❌ OUT OF SCOPE (Post-MVP)
-- UI (Phase 6)
+- UI (Phase 6) - **Note:** UI Mini in progress (Sprint 1)
 - Webhook endpoint (`/ingest/webhook`)
 - Bulk scan endpoint (`/scan/bulk`)
-- CSV export endpoint (`POST /export`)
-- `app/core/exporter.py` module
+- ~~CSV export endpoint (`POST /export`)~~ - **✅ COMPLETED** (G14: `GET /leads/export`)
+- `app/core/exporter.py` module - **Note:** Export logic in `app/api/leads.py`
 - `scripts/demo_run.sh`
 - D365 adapter
 - Redis/Queue

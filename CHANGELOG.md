@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G14: CSV Export** - Lead data export to CSV and Excel formats
+  - `GET /leads/export` endpoint for exporting leads to CSV or Excel format
+  - Filter parameters: `segment`, `min_score`, `provider` (same as GET /leads)
+  - Format parameter: `csv` (default) or `xlsx`
+  - Timestamped filename: `leads_YYYY-MM-DD_HH-MM-SS.csv` or `.xlsx`
+  - Export includes all lead fields: domain, company_name, provider, segment, scores, signals, etc.
+  - Implementation: Export endpoint added to `app/api/leads.py` router
+  - Tests: `tests/test_export.py` - Comprehensive export tests (9 test cases)
+  - Post-MVP feature (low-risk, core-independent)
+
 - **G11: Importer Module** - Excel/CSV column auto-detection and ingestion enhancement
   - Excel file support (.xlsx, .xls) for `/ingest/csv` endpoint
   - `auto_detect_columns` query parameter for automatic column detection
@@ -36,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests: `tests/test_email_validator.py` - Comprehensive validation tests with mocks (19 test cases)
 
 ### Post-MVP (High Priority)
-- CSV Export - Endpoint design needs detail
+- ✅ CSV Export - **Completed** (G14) - CSV and Excel export with filters
 - Bulk Scan - Requires async queue (risks identified)
 
 ### Post-MVP (Low Priority)

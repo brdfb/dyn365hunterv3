@@ -27,6 +27,7 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Lead segmentation API with filtering
 - ✅ Dashboard endpoint with aggregated statistics
 - ✅ Priority score calculation for lead prioritization
+- ✅ CSV/Excel export endpoint (`GET /leads/export`) - Export leads with filters
 
 ## Tech Stack
 
@@ -161,6 +162,14 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Returns: Array of lead objects with `priority_score` field (1-6, where 1 is highest priority)
 - `GET /leads/{domain}` - Get single lead details
   - Returns: Complete lead information including signals, scores, priority_score, and metadata
+- `GET /leads/export` - Export leads to CSV or Excel format
+  - Query parameters:
+    - `segment` (optional): Filter by segment (Migration, Existing, Cold, Skip)
+    - `min_score` (optional): Minimum readiness score (0-100)
+    - `provider` (optional): Filter by provider (M365, Google, etc.)
+    - `format` (optional): Export format (`csv` or `xlsx`, default: `csv`)
+  - Returns: CSV or Excel file download with lead data
+  - File name format: `leads_YYYY-MM-DD_HH-MM-SS.csv` or `leads_YYYY-MM-DD_HH-MM-SS.xlsx`
 
 ### Dashboard
 - `GET /dashboard` - Get aggregated dashboard statistics

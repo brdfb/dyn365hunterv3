@@ -94,10 +94,26 @@ curl "http://localhost:8000/dashboard"
 - Ortalama skor
 - Yüksek öncelikli lead sayısı (Migration + skor >= 70)
 
+#### 5. Lead'leri Export Et (CSV/Excel) 📥 YENİ
+```bash
+# Migration lead'lerini CSV olarak export et
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+
+# Excel formatında export
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70" -o migration-leads.xlsx
+```
+
+**Ne İşe Yarar?**
+- Excel'de detaylı analiz yapma
+- CRM'e import etme
+- Raporlama ve paylaşım
+- Filtrelenmiş lead listelerini kaydetme
+
 ### Sonuç
 - **Migration**: Hemen aksiyon alınacak lead'ler
 - **Existing**: Takip edilecek lead'ler
 - **Cold/Skip**: Düşük öncelikli, sonra bakılacak
+- **Export**: Lead'leri CSV/Excel olarak export edip analiz edebilirsiniz
 
 ---
 
@@ -229,6 +245,14 @@ curl "http://localhost:8000/leads?segment=Migration&provider=Google&min_score=70
 - **Migration + Skor 70-79**: Yüksek öncelik
 - **Provider çeşitliliği**: Farklı provider'lara göre strateji
 
+**Export ile Analiz:**
+```bash
+# Migration lead'lerini Excel'e export et
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70" -o migration-opportunities.xlsx
+
+# Excel'de detaylı analiz yapabilirsiniz
+```
+
 ---
 
 ## 📋 Senaryo 5: Düzenli Takip (Aylık)
@@ -272,6 +296,14 @@ curl "http://localhost:8000/leads?provider=Google"
 - **Skor artışı**: Segment değişikliği olabilir (Cold → Existing)
 - **Provider değişikliği**: Migration fırsatı
 - **Yeni lead'ler**: Yeni eklenen domain'ler
+
+**Export ile Takip:**
+```bash
+# Tüm segment'leri CSV olarak export et (aylık rapor)
+curl "http://localhost:8000/leads/export?format=csv" -o monthly-report-$(date +%Y-%m).csv
+
+# Excel'de skor değişikliklerini takip edebilirsiniz
+```
 
 ---
 
@@ -440,15 +472,27 @@ while IFS=, read -r domain rest; do
 done < "$CSV_FILE"
 ```
 
-### Migration Lead'leri Export
+### Migration Lead'leri Export (CSV/Excel) 📥 YENİ
 ```bash
 #!/bin/bash
-# Migration lead'lerini JSON olarak export et
+# Migration lead'lerini CSV olarak export et
 
 API_URL="http://localhost:8000"
-OUTPUT_FILE="migration-leads.json"
+OUTPUT_FILE="migration-leads-$(date +%Y-%m-%d_%H-%M-%S).csv"
 
-curl -s "${API_URL}/leads?segment=Migration&min_score=70" > "$OUTPUT_FILE"
+curl -s "${API_URL}/leads/export?format=csv&segment=Migration&min_score=70" -o "$OUTPUT_FILE"
+echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
+```
+
+**Excel Formatında:**
+```bash
+#!/bin/bash
+# Migration lead'lerini Excel olarak export et
+
+API_URL="http://localhost:8000"
+OUTPUT_FILE="migration-leads-$(date +%Y-%m-%d_%H-%M-%S).xlsx"
+
+curl -s "${API_URL}/leads/export?format=xlsx&segment=Migration&min_score=70" -o "$OUTPUT_FILE"
 echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
 ```
 
