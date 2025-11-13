@@ -35,19 +35,29 @@ curl "http://localhost:8000/dashboard"
 
 ### Adımlar
 
-#### 1. CSV'den Domain'leri Ekle
+#### 1. CSV/Excel'den Domain'leri Ekle
 ```bash
+# CSV dosyası
 curl -X POST http://localhost:8000/ingest/csv \
   -F "file=@yeni-leadler.csv"
+
+# Excel dosyası (OSB formatı için otomatik kolon tespiti)
+curl -X POST "http://localhost:8000/ingest/csv?auto_detect_columns=true" \
+  -F "file=@yeni-leadler.xlsx"
 ```
 
-**CSV Formatı:**
+**CSV/Excel Formatı:**
 ```csv
 domain,company_name,email,website
 firma1.com,Firma 1 A.Ş.,info@firma1.com,https://www.firma1.com
 firma2.com,Firma 2 Ltd.,,https://www.firma2.com
 firma3.com,,info@firma3.com,
 ```
+
+**Excel Otomatik Kolon Tespiti:**
+- OSB Excel dosyaları için `auto_detect_columns=true` kullanın
+- Firma/şirket ve domain kolonlarını otomatik tespit eder
+- Standart CSV formatı için `auto_detect_columns=false` (default) yeterli
 
 #### 2. Toplu Analiz (Script ile)
 ```bash
@@ -265,6 +275,106 @@ curl "http://localhost:8000/leads?provider=Google"
 
 ---
 
+## 📋 Senaryo 6: Email Üretme ve Doğrulama
+
+### Durum
+Bir domain için iletişim email'lerini bulmak ve doğrulamak istiyorsunuz.
+
+### Adımlar
+
+#### 1. Generic Email'leri Üret ve Doğrula
+
+```bash
+# Light validation (hızlı, önerilen)
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com", "use_smtp": false}'
+```
+
+**Örnek Sonuç:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "emails": [
+    {
+      "email": "info@ornek-firma.com",
+      "status": "valid",
+      "confidence": "medium",
+      "checks": {
+        "syntax": true,
+        "mx": true,
+        "smtp": "skipped"
+      },
+      "reason": "Valid syntax and MX records (SMTP not checked)"
+    },
+    {
+      "email": "sales@ornek-firma.com",
+      "status": "valid",
+      "confidence": "medium",
+      "checks": {
+        "syntax": true,
+        "mx": true,
+        "smtp": "skipped"
+      },
+      "reason": "Valid syntax and MX records (SMTP not checked)"
+    }
+  ]
+}
+```
+
+**Yorum:**
+- ✅ `status: "valid"` → Email geçerli
+- ✅ `confidence: "medium"` → Syntax + MX OK (SMTP kontrol edilmedi)
+- ✅ `checks.mx: true` → Domain'de MX kaydı var
+
+#### 2. Sadece Email Listesi (Doğrulama Olmadan)
+
+```bash
+# Sadece email listesi istiyorsanız
+curl -X POST http://localhost:8000/email/generate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com"}'
+```
+
+**Ne Döner?**
+- 9 generic email adresi (Türkçe + International)
+- Doğrulama yok, sadece liste
+
+#### 3. Full Validation (SMTP ile)
+
+```bash
+# Full validation (yavaş, 10-30 saniye sürebilir)
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com", "use_smtp": true}'
+```
+
+**Ne Döner?**
+- Syntax + MX + SMTP kontrolü
+- Daha yüksek confidence (high)
+- Daha yavaş (her email için 3 saniye timeout)
+
+### Sonuç
+
+**Light Validation (Önerilen):**
+- Hızlı (<1 saniye)
+- Syntax + MX kontrolü
+- Medium confidence
+- Outreach için yeterli
+
+**Full Validation:**
+- Yavaş (10-30 saniye)
+- Syntax + MX + SMTP kontrolü
+- High confidence
+- Kritik durumlar için
+
+**Kullanım Senaryoları:**
+- **Outreach**: Light validation yeterli
+- **Kritik İletişim**: Full validation önerilir
+- **Toplu İşlem**: Light validation kullanın (hız önemli)
+
+---
+
 ## 💡 En İyi Pratikler
 
 ### 1. Öncelik Sıralaması (Priority Score)
@@ -300,6 +410,12 @@ curl "http://localhost:8000/leads?provider=Google"
 - Domain'leri normalize edin (www, büyük/küçük harf)
 - Email ve website'den domain çıkarın
 - Duplicate domain'leri kontrol edin
+
+### 6. Email Üretme ve Doğrulama
+- **Light validation** kullanın (use_smtp=false) - Hızlı ve yeterli
+- **Full validation** sadece kritik durumlarda (use_smtp=true) - Yavaş ama kesin
+- Generic email'leri outreach için kullanın
+- Valid status'lu email'lere öncelik verin
 
 ---
 
@@ -364,6 +480,16 @@ Aksiyon: Hemen iletişime geç, migration teklifi hazırla
 - Skor 70+: 10 müşteri → Upsell fırsatı
 - Skor 50-69: 20 müşteri → Düzenli takip
 - Skor 20-49: 20 müşteri → 1-2 ay sonra kontrol
+```
+
+### Senaryo 6 Sonucu
+```
+Domain: ornek-firma.com
+9 generic email üretildi:
+- Valid: 7 email (info, sales, admin, iletisim, satis, support, hr)
+- Invalid: 2 email (muhasebe, ik - MX kaydı yok)
+- Confidence: Medium (syntax + MX kontrolü)
+- Aksiyon: Valid email'leri outreach için kullan
 ```
 
 ---

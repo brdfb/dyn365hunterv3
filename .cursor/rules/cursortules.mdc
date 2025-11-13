@@ -49,14 +49,19 @@ alwaysApply: true
 ### ✅ IN SCOPE
 - Health check (`GET /healthz`) - Database connection status
 - Single domain ingestion (`POST /ingest/domain`)
-- CSV ingestion (`POST /ingest/csv`) - parse + normalize + insert only
+- CSV/Excel ingestion (`POST /ingest/csv`) - parse + normalize + insert only
+  - CSV support (.csv)
+  - Excel support (.xlsx, .xls)
+  - Auto-detect columns (`auto_detect_columns` query parameter) for OSB Excel files
 - Single domain scan (`POST /scan/domain`) - DNS + WHOIS + scoring
 - Leads query (`GET /leads` with filters)
 - Single lead query (`GET /leads/{domain}`)
 - Dashboard endpoint (`GET /dashboard`) - Aggregated statistics
 - Priority Score feature - Lead prioritization (1-6 scale)
+- Email generation (`POST /email/generate`) - Generic email addresses for domains
+- Email validation (`POST /email/generate-and-validate`) - Syntax, MX, optional SMTP validation
 - Docker Compose setup
-- Basic tests (5 test files)
+- Basic tests (8 test files)
 
 ### ❌ OUT OF SCOPE (Post-MVP)
 - UI (Phase 6)
@@ -81,10 +86,10 @@ alwaysApply: true
 - `app/db/schema.sql` (PostgreSQL DDL)
 - `app/db/models.py` (SQLAlchemy models)
 - `app/db/session.py` (DB session factory)
-- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`
-- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`
+- `app/core/normalizer.py`, `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`, `importer.py`, `email_generator.py`, `email_validator.py`
+- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`, `email_tools.py`
 - `app/data/providers.json`, `rules.json`
-- `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`, `test_api_endpoints.py`, `test_priority.py`
+- `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`, `test_api_endpoints.py`, `test_priority.py`, `test_importer_autodetect.py`, `test_email_generator.py`, `test_email_validator.py`
 - `README.md`
 
 ### File Naming
@@ -113,7 +118,10 @@ alwaysApply: true
 ## Performance Targets
 - Single domain scan: ≤10s (cold: ≤15s acceptable)
 - API response: <1s for `/leads` query
-- CSV ingestion: Parse + normalize + insert only (scan separate)
+- CSV/Excel ingestion: Parse + normalize + insert only (scan separate)
+- Email generation: <1s response time
+- Email validation (light): <1s response time (syntax + MX only)
+- Email validation (full): 10-30s response time (with SMTP check)
 
 ## Data Files
 
@@ -187,6 +195,23 @@ def score_domain(domain: str, signals: Dict, provider: str) -> Dict[str, Any]:
     # calculate base_score + provider_points + signal_points
     # determine segment (order matters)
     # return: {"score": int, "segment": str, "reason": str}
+```
+
+### Email Generation
+```python
+def generate_generic_emails(domain: str) -> List[str]:
+    # normalize domain
+    # generate emails from GENERIC_LOCAL_PARTS list
+    # return sorted unique list of emails
+```
+
+### Email Validation
+```python
+def validate_email(email: str, use_smtp: bool = False) -> EmailValidationResult:
+    # syntax check (regex)
+    # MX check (DNS)
+    # optional SMTP check (if use_smtp=True)
+    # return EmailValidationResult with status, confidence, checks
 ```
 
 ## Documentation Management

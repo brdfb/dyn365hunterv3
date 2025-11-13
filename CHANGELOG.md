@@ -17,6 +17,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests: `tests/test_importer_autodetect.py` - Column detection tests
   - Tests: Updated `tests/test_ingest_csv.py` with Excel support tests
 
+- **G12: Email Generator** - Generic email address generation
+  - `POST /email/generate` endpoint for generating generic email addresses
+  - `app/core/email_generator.py` - Email generation utilities (`generate_generic_emails`)
+  - Generic email list includes Türkçe (iletisim, satis, muhasebe, ik) and International (info, sales, admin, support, hr) local parts
+  - Domain normalization integrated (www prefix removal, lowercase, etc.)
+  - Tests: `tests/test_email_generator.py` - Email generation tests
+
+- **G13: Email Validator** - Email validation with syntax, MX, and optional SMTP checks
+  - `POST /email/generate-and-validate` endpoint for generating and validating emails
+  - `app/core/email_validator.py` - Email validation utilities
+    - Syntax validation (RFC 5322 simplified regex)
+    - MX record validation (DNS lookup using existing `get_mx_records`)
+    - Optional SMTP validation (RCPT TO check, flag-based, default: disabled)
+  - Validation result includes status ("valid", "invalid", "unknown"), confidence level ("high", "medium", "low"), and detailed checks
+  - Light validation by default (syntax + MX, no SMTP) for fast response times
+  - SMTP validation optional and controlled via `use_smtp` parameter
+  - Tests: `tests/test_email_validator.py` - Comprehensive validation tests with mocks (19 test cases)
+
 ### Post-MVP (High Priority)
 - CSV Export - Endpoint design needs detail
 - Bulk Scan - Requires async queue (risks identified)

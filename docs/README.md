@@ -39,6 +39,10 @@ docs/
 - `2025-11-12-G1-foundation.md` - G1: Foundation & Docker Setup (Completed)
 - `2025-11-12-G2-database-schema.md` - G2: Database Schema & Models (Completed)
 - `2025-11-12-G3-domain-normalization.md` - G3: Domain Normalization & Data Files (Completed)
+- `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (Completed)
+  - G11: Importer Module - Excel/CSV column auto-detection
+  - G12: Email Generator - Generic email generation
+  - G13: Email Validator - Light email validation (syntax, MX, optional SMTP)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
@@ -48,6 +52,7 @@ docs/
 - All MVP phases (G1-G10) are completed (see CHANGELOG.md for details)
 - MVP scope features (Dashboard, Priority Score) completed in v0.4.0
 - Phase documentation for G4-G10 was not created as separate TODO files, but all work is documented in CHANGELOG.md
+- G11-G13 (Importer + Email modules) completed in 2025-01-27
 
 ### Important Prompts & Decisions
 - `2025-11-12-initial-setup.md` - Initial project setup
@@ -62,8 +67,5 @@ docs/
 - `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches
 
 ### TODOs
-- `G11-importer-email.md` - Importer + Email Module Implementation (G11-G13)
-  - **Status:** Pending
-  - **Priority:** P0 (Importer), P1 (Email Generator), P2 (Email Validator)
-  - **Created:** 2025-01-27
+- No active TODOs - All phases completed
 

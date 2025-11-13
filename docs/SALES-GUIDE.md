@@ -72,14 +72,19 @@ curl -X POST http://localhost:8000/ingest/domain \
 }
 ```
 
-### CSV ile Toplu Ekleme
+### CSV/Excel ile Toplu Ekleme
 
 ```bash
+# CSV dosyası
 curl -X POST http://localhost:8000/ingest/csv \
   -F "file=@domain-listesi.csv"
+
+# Excel dosyası (.xlsx, .xls)
+curl -X POST http://localhost:8000/ingest/csv \
+  -F "file=@domain-listesi.xlsx"
 ```
 
-**CSV Formatı:**
+**CSV/Excel Formatı:**
 ```csv
 domain,company_name,email,website
 ornek1.com,Örnek 1 A.Ş.,info@ornek1.com,https://www.ornek1.com
@@ -87,7 +92,29 @@ ornek2.com,Örnek 2 Ltd.,,https://www.ornek2.com
 ornek3.com,,info@ornek3.com,
 ```
 
-**Not:** CSV'de sadece `domain` kolonu zorunlu, diğerleri opsiyonel.
+**Not:** CSV/Excel'de sadece `domain` kolonu zorunlu (auto_detect_columns=false ise), diğerleri opsiyonel.
+
+**Excel Kolon Otomatik Tespiti (OSB Dosyaları için):**
+
+OSB Excel dosyalarında kolon isimleri farklı olabilir (örn: "Firma Adı", "Ünvan", "Web", vb.). Bu durumda otomatik tespit kullanabilirsiniz:
+
+```bash
+# Kolon otomatik tespiti ile (OSB Excel dosyaları için)
+curl -X POST "http://localhost:8000/ingest/csv?auto_detect_columns=true" \
+  -F "file=@osb-listesi.xlsx"
+```
+
+**Ne Yapıyor?**
+- Firma/şirket kolonunu otomatik tespit eder (Firma Adı, Ünvan, Company, vb.)
+- Domain kolonunu otomatik tespit eder (Domain, Web, Website, vb.)
+- Heuristic-based detection kullanır (%80+ doğruluk)
+
+**Ne Zaman Kullanılır?**
+- OSB Excel dosyaları için (kolon isimleri standart değilse)
+- Farklı formatlardaki Excel dosyaları için
+- Manuel kolon mapping yapmak istemiyorsanız
+
+**Not:** `auto_detect_columns=false` (default) → Mevcut CSV formatı çalışmaya devam eder (backward compatible).
 
 ---
 
@@ -230,6 +257,107 @@ curl "http://localhost:8000/dashboard"
 
 ---
 
+## 📧 Email Araçları
+
+### Generic Email Üretme
+
+Bir domain için yaygın generic email adreslerini üretme:
+
+```bash
+curl -X POST http://localhost:8000/email/generate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com"}'
+```
+
+**Ne Üretir?**
+- Türkçe: iletisim, satis, muhasebe, ik
+- International: info, sales, admin, support, hr
+- Toplam 9 generic email adresi
+
+**Başarılı Yanıt:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "emails": [
+    "admin@ornek-firma.com",
+    "hr@ornek-firma.com",
+    "ik@ornek-firma.com",
+    "iletisim@ornek-firma.com",
+    "info@ornek-firma.com",
+    "muhasebe@ornek-firma.com",
+    "sales@ornek-firma.com",
+    "satis@ornek-firma.com",
+    "support@ornek-firma.com"
+  ]
+}
+```
+
+**Ne İşe Yarar?**
+- Satış ekibi için iletişim email'lerini bulma
+- Domain'e özel generic email'leri hızlıca üretme
+- Outreach için email listesi hazırlama
+
+### Email Üretme ve Doğrulama
+
+Generic email'leri üretip doğrulama (syntax, MX, opsiyonel SMTP):
+
+```bash
+# Light validation (hızlı, önerilen)
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com", "use_smtp": false}'
+```
+
+**Ne Yapıyor?**
+- Generic email'leri üretir
+- Her email'i doğrular:
+  - Syntax kontrolü (regex)
+  - MX kaydı kontrolü (DNS)
+  - SMTP kontrolü (opsiyonel, `use_smtp=true` ile)
+
+**Başarılı Yanıt:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "emails": [
+    {
+      "email": "info@ornek-firma.com",
+      "status": "valid",
+      "confidence": "medium",
+      "checks": {
+        "syntax": true,
+        "mx": true,
+        "smtp": "skipped"
+      },
+      "reason": "Valid syntax and MX records (SMTP not checked)"
+    },
+    ...
+  ]
+}
+```
+
+**Status Değerleri:**
+- `valid`: Email geçerli (syntax + MX OK)
+- `invalid`: Email geçersiz (syntax veya MX hatası)
+- `unknown`: Belirsiz (catch-all veya SMTP hatası)
+
+**Confidence Değerleri:**
+- `high`: Yüksek güven (SMTP ile doğrulandı)
+- `medium`: Orta güven (sadece syntax + MX)
+- `low`: Düşük güven (belirsiz durum)
+
+**SMTP Doğrulama (Opsiyonel):**
+```bash
+# Full validation (yavaş, 10-30 saniye sürebilir)
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com", "use_smtp": true}'
+```
+
+**Not:** SMTP doğrulama yavaş olabilir (her email için 3 saniye timeout). Light validation (use_smtp=false) önerilir.
+
+---
+
 ## 🎯 Pratik Senaryolar
 
 ### Senaryo 1: Yeni Lead Listesi Analizi
@@ -273,6 +401,20 @@ curl "http://localhost:8000/leads/yeni-firma.com"
 curl "http://localhost:8000/leads?segment=Existing&min_score=50"
 ```
 
+### Senaryo 4: Email Üretme ve Doğrulama
+
+```bash
+# 1. Domain için generic email'leri üret ve doğrula
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com", "use_smtp": false}'
+
+# 2. Sadece email listesi istiyorsanız (doğrulama olmadan)
+curl -X POST http://localhost:8000/email/generate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "ornek-firma.com"}'
+```
+
 Detaylı senaryolar için: [SALES-SCENARIOS.md](SALES-SCENARIOS.md)
 
 ---
@@ -311,6 +453,13 @@ curl "http://localhost:8000/leads/DOMAIN-BURAYA"
 ### Dashboard Özeti
 ```bash
 curl "http://localhost:8000/dashboard"
+```
+
+### Email Üret ve Doğrula
+```bash
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "DOMAIN-BURAYA", "use_smtp": false}'
 ```
 
 ---

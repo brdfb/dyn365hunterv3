@@ -2,6 +2,13 @@
 
 This folder contains TODO lists and task tracking documents.
 
+## Current Status
+
+**All TODOs Completed** - No active TODO files in this directory.
+
+All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (Completed)
+
 ## Format
 
 Each TODO file should follow this format:
@@ -26,7 +33,7 @@ Each TODO file should follow this format:
 
 ## Archive Policy
 
-- Move to `archive/` when phase is complete
+- Move to `docs/archive/` when phase is complete
 - Keep only active TODOs in root
 - Use date prefix for archived TODOs: `YYYY-MM-DD-todo-name.md`
 

@@ -1,8 +1,9 @@
 # G11-G13: Importer + Email Module Implementation
 
-**Status:** Pending  
+**Status:** Completed  
 **Priority:** P0 (Importer), P1 (Email Generator), P2 (Email Validator)  
-**Created:** 2025-01-27
+**Created:** 2025-01-27  
+**Completed:** 2025-01-27
 
 ## Overview
 
@@ -40,27 +41,27 @@ Add two new modules to Dyn365Hunter MVP:
 ## Acceptance Criteria
 
 ### G11: Importer Module
-- [ ] Excel support (.xlsx, .xls) added to `/ingest/csv`
-- [ ] `auto_detect_columns` query parameter (default: False)
-- [ ] Column guessing functions in `app/core/importer.py`
-- [ ] Backward compatibility maintained (existing CSV ingestion works)
-- [ ] Tests for column detection
-- [ ] Documentation updated
+- [x] Excel support (.xlsx, .xls) added to `/ingest/csv`
+- [x] `auto_detect_columns` query parameter (default: False)
+- [x] Column guessing functions in `app/core/importer.py`
+- [x] Backward compatibility maintained (existing CSV ingestion works)
+- [x] Tests for column detection
+- [x] Documentation updated
 
 ### G12: Email Generator
-- [ ] `generate_generic_emails()` function
-- [ ] Generic email list (Türkçe + International)
-- [ ] API endpoint `/email/generate-and-validate` (generation only, validation later)
-- [ ] Tests for email generation
-- [ ] Documentation updated
+- [x] `generate_generic_emails()` function
+- [x] Generic email list (Türkçe + International)
+- [x] API endpoint `/email/generate` (generation only, validation later in G13)
+- [x] Tests for email generation
+- [x] Documentation updated
 
 ### G13: Email Validator
-- [ ] Syntax validation (regex)
-- [ ] MX record validation (DNS)
-- [ ] Optional SMTP validation (flag-based)
-- [ ] Confidence score (high/medium/low)
-- [ ] Tests with mocks
-- [ ] Documentation updated
+- [x] Syntax validation (regex)
+- [x] MX record validation (DNS)
+- [x] Optional SMTP validation (flag-based)
+- [x] Confidence score (high/medium/low)
+- [x] Tests with mocks
+- [x] Documentation updated
 
 ## Notes
 

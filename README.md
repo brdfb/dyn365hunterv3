@@ -20,6 +20,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Rule-based scoring engine with segment classification
 - ✅ Domain ingestion (CSV + Excel + single domain endpoints)
 - ✅ Excel/CSV column auto-detection for OSB files
+- ✅ Generic email generation for domains
+- ✅ Email validation (syntax, MX, optional SMTP)
 - ✅ DNS analysis (MX/SPF/DKIM/DMARC with 10s timeout)
 - ✅ WHOIS lookup (graceful fail with 5s timeout)
 - ✅ Lead segmentation API with filtering
@@ -164,6 +166,21 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - `GET /dashboard` - Get aggregated dashboard statistics
   - Returns: `{"total_leads": 150, "migration": 25, "existing": 50, "cold": 60, "skip": 15, "avg_score": 55.5, "high_priority": 10}`
   - Provides segment distribution, average score, and high priority lead count
+
+### Email Tools
+- `POST /email/generate` - Generate generic email addresses for a domain
+  - Request body: `{"domain": "example.com"}`
+  - Returns: `{"domain": "example.com", "emails": ["admin@example.com", "hr@example.com", "info@example.com", ...]}`
+  - Generates common generic email addresses (info, sales, admin, iletisim, satis, etc.) for the given domain
+  - Domain is normalized before generation (www prefix removed, lowercase, etc.)
+- `POST /email/generate-and-validate` - Generate and validate generic email addresses for a domain
+  - Request body: `{"domain": "example.com", "use_smtp": false}`
+  - Returns: `{"domain": "example.com", "emails": [{"email": "info@example.com", "status": "valid", "confidence": "medium", "checks": {"syntax": true, "mx": true, "smtp": "skipped"}, "reason": "Valid syntax and MX records (SMTP not checked)"}, ...]}`
+  - Generates generic emails and validates each one using:
+    - Syntax validation (regex)
+    - MX record validation (DNS)
+    - Optional SMTP validation (if `use_smtp=true`, default: false)
+  - Returns validation status ("valid", "invalid", "unknown"), confidence level ("high", "medium", "low"), and detailed checks
 
 ## Development
 
