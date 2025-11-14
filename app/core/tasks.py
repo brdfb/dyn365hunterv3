@@ -179,15 +179,19 @@ def scan_single_domain(domain: str, db: Session) -> Dict:
 
 
 @celery_app.task(bind=True)
-def bulk_scan_task(self, job_id: str):
+def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
     """
     Celery task to process bulk scan job.
     
     This task processes all domains in a job sequentially (with rate limiting).
+    Supports both regular scan and rescan (with change detection).
     
     Args:
         job_id: Bulk scan job ID
+        is_rescan: If True, use rescan_domain (with change detection), else use scan_single_domain
     """
+    from app.core.rescan import rescan_domain
+    
     tracker = get_progress_tracker()
     db = SessionLocal()
     
@@ -214,15 +218,29 @@ def bulk_scan_task(self, job_id: str):
         
         for domain in domain_list:
             try:
-                # Scan domain (with rate limiting)
-                result = scan_single_domain(domain, db)
+                # Scan or rescan domain (with rate limiting)
+                if is_rescan:
+                    result = rescan_domain(domain, db)
+                    # For rescan, result structure is different - extract result dict
+                    if result.get("success"):
+                        result_dict = result.get("result", {})
+                        # Include change information in stored result
+                        result_dict["changes_detected"] = result.get("changes_detected", False)
+                        result_dict["signal_changes"] = result.get("signal_changes", 0)
+                        result_dict["score_changes"] = result.get("score_changes", 0)
+                        result_dict["alerts_created"] = result.get("alerts_created", 0)
+                else:
+                    result = scan_single_domain(domain, db)
                 
                 processed += 1
                 error = None
                 if result["success"]:
                     succeeded += 1
                     # Store result
-                    tracker.store_result(job_id, domain, result["result"])
+                    if is_rescan:
+                        tracker.store_result(job_id, domain, result.get("result", {}))
+                    else:
+                        tracker.store_result(job_id, domain, result["result"])
                 else:
                     failed += 1
                     # Store error
@@ -248,11 +266,42 @@ def bulk_scan_task(self, job_id: str):
         
         # Set status to completed
         tracker.set_status(job_id, "completed")
-        logger.info(f"Bulk scan job {job_id} completed: {succeeded} succeeded, {failed} failed")
+        logger.info(f"Bulk {'rescan' if is_rescan else 'scan'} job {job_id} completed: {succeeded} succeeded, {failed} failed")
     
     except Exception as e:
-        logger.error(f"Error in bulk scan task {job_id}: {str(e)}", exc_info=True)
+        logger.error(f"Error in bulk {'rescan' if is_rescan else 'scan'} task {job_id}: {str(e)}", exc_info=True)
         tracker.set_status(job_id, "failed")
+        raise
+    
+    finally:
+        db.close()
+
+
+@celery_app.task(bind=True)
+def process_pending_alerts_task(self):
+    """
+    Process pending alerts and send notifications (G18: Alert processing).
+    
+    This task:
+    - Gets all pending alerts
+    - Sends notifications based on alert configuration
+    - Updates alert status
+    """
+    import asyncio
+    from app.core.notifications import process_pending_alerts
+    
+    logger.info("Starting pending alerts processing task...")
+    
+    db = SessionLocal()
+    
+    try:
+        # Process pending alerts (async function, need to run in event loop)
+        processed = asyncio.run(process_pending_alerts(db))
+        logger.info(f"Processed {processed} pending alerts")
+        return {"status": "completed", "processed": processed}
+    
+    except Exception as e:
+        logger.error(f"Error in process pending alerts task: {str(e)}", exc_info=True)
         raise
     
     finally:
@@ -293,13 +342,12 @@ def daily_rescan_task(self):
         for i in range(0, len(domain_list), batch_size):
             batch = domain_list[i:i + batch_size]
             
-            # Create bulk rescan job for this batch
-            job_id = str(uuid.uuid4())
+            # Create bulk rescan job for this batch (creates job_id automatically)
             tracker = get_progress_tracker()
-            tracker.create_job(job_id, len(batch))
+            job_id = tracker.create_job(batch)
             
-            # Start async task
-            bulk_scan_task.delay(job_id, batch)
+            # Start async rescan task (with is_rescan=True for change detection)
+            bulk_scan_task.delay(job_id, is_rescan=True)
             
             total_processed += len(batch)
             logger.info(f"Created rescan job {job_id} for {len(batch)} domains (batch {i//batch_size + 1})")

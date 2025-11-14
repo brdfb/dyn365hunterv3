@@ -42,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tests: Comprehensive test suite
     - `tests/test_rescan_alerts.py` - ReScan, change detection, and alerts tests
   - Post-MVP Sprint 5 feature (automation + change alerts)
+  - **Bug Fixes (2025-11-14)**:
+    - Fixed bulk rescan change detection (now uses `rescan_domain` with change detection)
+    - Fixed alert notification processing (added Celery Beat task for pending alerts)
+    - Fixed daily rescan change detection (now properly detects changes)
+    - Added immediate alert processing trigger after rescan
 - **G17: Notes, Tags, Favorites + PDF Summary** - CRM-lite features and PDF account summaries
   - Notes system:
     - `POST /leads/{domain}/notes` - Create a note for a domain

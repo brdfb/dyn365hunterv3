@@ -144,15 +144,12 @@ async def bulk_rescan(
     if not normalized_domains:
         raise HTTPException(status_code=400, detail="No valid domains after normalization")
     
-    # Create job ID
-    job_id = str(uuid.uuid4())
-    
-    # Initialize progress tracker
+    # Initialize progress tracker and create job (creates job_id automatically)
     tracker = get_progress_tracker()
-    tracker.create_job(job_id, len(normalized_domains))
+    job_id = tracker.create_job(normalized_domains)
     
-    # Start async task
-    bulk_scan_task.delay(job_id, normalized_domains)
+    # Start async rescan task (with is_rescan=True for change detection)
+    bulk_scan_task.delay(job_id, is_rescan=True)
     
     return {
         "job_id": job_id,

@@ -1,11 +1,14 @@
 """ReScan engine for domain re-scanning with change detection (G18)."""
 from typing import Dict, Optional
 from sqlalchemy.orm import Session
+import logging
 from app.db.models import DomainSignal, LeadScore, Company
 from app.core.tasks import scan_single_domain
 from app.core.change_detection import detect_signal_changes, detect_score_changes, create_alerts
 from app.core.auto_tagging import apply_auto_tags
 import copy
+
+logger = logging.getLogger(__name__)
 
 
 def rescan_domain(domain: str, db: Session) -> Dict:
@@ -71,12 +74,21 @@ def rescan_domain(domain: str, db: Session) -> Dict:
         apply_auto_tags(domain, db)
     except Exception as e:
         # Log but don't fail
-        import logging
-        logger = logging.getLogger(__name__)
         logger.warning(f"Auto-tagging failed during rescan for {domain}: {str(e)}")
     
     # Commit all changes
     db.commit()
+    
+    # Trigger alert notification processing (async, non-blocking)
+    # Alerts will be processed by the scheduled task, but we can also trigger it immediately
+    # for faster notification delivery
+    try:
+        from app.core.tasks import process_pending_alerts_task
+        # Trigger async task to process alerts (non-blocking)
+        process_pending_alerts_task.delay()
+    except Exception as e:
+        # Log but don't fail - alerts will be processed by scheduled task
+        logger.warning(f"Failed to trigger alert processing task: {str(e)}")
     
     return {
         "success": True,
