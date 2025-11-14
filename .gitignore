@@ -124,3 +124,7 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
+
+# Test export files
+test_export*.csv
+test_export*.xlsx

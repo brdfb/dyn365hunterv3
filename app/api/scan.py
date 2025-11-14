@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Optional, List
 from app.db.session import get_db
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 from app.core.normalizer import normalize_domain
@@ -10,6 +10,8 @@ from app.core.analyzer_dns import analyze_dns
 from app.core.analyzer_whois import get_whois_info
 from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
+from app.core.progress_tracker import get_progress_tracker
+from app.core.tasks import bulk_scan_task
 
 
 router = APIRouter(prefix="/scan", tags=["scan"])
@@ -189,4 +191,161 @@ async def scan_domain(
             status_code=500,
             detail="An error occurred while scanning the domain. Please try again later."
         )
+
+
+class BulkScanRequest(BaseModel):
+    """Request model for bulk domain scanning."""
+    domain_list: List[str] = Field(..., description="List of domain names to scan", min_length=1, max_length=1000)
+    
+    @field_validator("domain_list")
+    @classmethod
+    def validate_domain_list(cls, v: List[str]) -> List[str]:
+        """Validate and normalize domain list."""
+        normalized = []
+        for domain in v:
+            normalized_domain = normalize_domain(domain)
+            if normalized_domain:
+                normalized.append(normalized_domain)
+        if not normalized:
+            raise ValueError("No valid domains in domain_list")
+        return normalized
+
+
+class BulkScanResponse(BaseModel):
+    """Response model for bulk scan job creation."""
+    job_id: str
+    message: str
+    total: int
+
+
+class BulkScanStatusResponse(BaseModel):
+    """Response model for bulk scan job status."""
+    job_id: str
+    status: str  # pending, running, completed, failed
+    progress: int  # 0-100
+    total: int
+    processed: int
+    succeeded: int
+    failed: int
+    errors: List[dict]
+
+
+@router.post("/bulk", response_model=BulkScanResponse)
+async def scan_bulk(
+    request: BulkScanRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Create a bulk scan job for multiple domains.
+    
+    This endpoint creates an async job that will scan all domains in the background.
+    Use GET /scan/bulk/{job_id} to check progress.
+    
+    Args:
+        request: Bulk scan request with domain list
+        db: Database session
+        
+    Returns:
+        BulkScanResponse with job_id
+    """
+    # Validate that all domains exist in database
+    missing_domains = []
+    for domain in request.domain_list:
+        company = db.query(Company).filter(Company.domain == domain).first()
+        if not company:
+            missing_domains.append(domain)
+    
+    if missing_domains:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Domains not found. Please ingest first: {', '.join(missing_domains[:5])}"
+            + (f" and {len(missing_domains) - 5} more" if len(missing_domains) > 5 else "")
+        )
+    
+    # Create job in progress tracker
+    tracker = get_progress_tracker()
+    job_id = tracker.create_job(request.domain_list)
+    
+    # Start bulk scan task
+    bulk_scan_task.delay(job_id)
+    
+    return BulkScanResponse(
+        job_id=job_id,
+        message="Bulk scan job created successfully",
+        total=len(request.domain_list)
+    )
+
+
+@router.get("/bulk/{job_id}", response_model=BulkScanStatusResponse)
+async def get_bulk_scan_status(job_id: str):
+    """
+    Get bulk scan job status and progress.
+    
+    Args:
+        job_id: Job ID from POST /scan/bulk
+        
+    Returns:
+        BulkScanStatusResponse with job status and progress
+    """
+    tracker = get_progress_tracker()
+    job = tracker.get_job(job_id)
+    
+    if not job:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Job {job_id} not found"
+        )
+    
+    # Check if job is completed (all domains processed)
+    if job["status"] == "running" and job["processed"] >= job["total"]:
+        job["status"] = "completed"
+        tracker.set_status(job_id, "completed")
+    
+    return BulkScanStatusResponse(
+        job_id=job_id,
+        status=job["status"],
+        progress=job.get("progress", 0),
+        total=job["total"],
+        processed=job["processed"],
+        succeeded=job["succeeded"],
+        failed=job["failed"],
+        errors=job["errors"]
+    )
+
+
+@router.get("/bulk/{job_id}/results")
+async def get_bulk_scan_results(job_id: str):
+    """
+    Get bulk scan job results (only for completed jobs).
+    
+    Args:
+        job_id: Job ID from POST /scan/bulk
+        
+    Returns:
+        List of scan results
+    """
+    tracker = get_progress_tracker()
+    job = tracker.get_job(job_id)
+    
+    if not job:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Job {job_id} not found"
+        )
+    
+    if job["status"] != "completed":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Job {job_id} is not completed yet. Status: {job['status']}"
+        )
+    
+    results = tracker.get_results(job_id)
+    
+    return {
+        "job_id": job_id,
+        "total": job["total"],
+        "succeeded": job["succeeded"],
+        "failed": job["failed"],
+        "results": results
+    }
 

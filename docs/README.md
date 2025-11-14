@@ -50,6 +50,8 @@ docs/
   - G11: Importer Module - Excel/CSV column auto-detection
   - G12: Email Generator - Generic email generation
   - G13: Email Validator - Light email validation (syntax, MX, optional SMTP)
+- `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
+- `2025-11-14-G15-bulk-scan-async.md` - G15: Sprint 2: Bulk Scan & Async Queue (Completed)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
@@ -75,7 +77,16 @@ docs/
 - `2025-01-28-POST-MVP-SPRINT1-PLAN.md` - Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
 - `2025-01-28-MINI-UI-IMPLEMENTATION-PLAN.md` - Mini UI Implementation Plan (Completed)
 - `2025-01-28-MINI-UI-CRITIQUE.md` - Mini UI Approach Critique and Alternatives
+- `2025-11-14-ROADMAP-CRITIQUE.md` - Critical evaluation of Sprint 2-6 roadmap
+- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)**
 
 ### TODOs
-- `G14-post-mvp-sprint1.md` - Post-MVP Sprint 1: CSV Export + UI Mini (Implementation Completed, Manual Testing Pending)
+- `G15-bulk-scan-async.md` - Sprint 2: Bulk Scan & Async Queue (✅ Completed)
+- `G16-webhook-enrichment.md` - Sprint 3: Webhook + Basit Lead Enrichment (📋 Planned)
+- `G17-notes-tags-pdf.md` - Sprint 4: Notes/Tags/Favorites + Basit PDF (📋 Planned)
+- `G18-rescan-alerts-scoring.md` - Sprint 5: ReScan + Alerts + Enhanced Scoring (📋 Planned)
+- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (📋 Planned)
+
+**Archived TODOs:**
+- `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (✅ Completed)
 

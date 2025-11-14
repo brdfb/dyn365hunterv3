@@ -126,13 +126,45 @@ firma3.com,,info@firma3.com,
 - Firma/şirket ve domain kolonlarını otomatik tespit eder
 - Standart CSV formatı için `auto_detect_columns=false` (default) yeterli
 
-#### 2. Toplu Analiz (Artık Gerekli Değil - Otomatik Scan Kullanın) ⚡ YENİ
+#### 2. Toplu Analiz (Bulk Scan) ⚡ YENİ
 
 **Not:** `auto_scan=true` kullanıyorsanız, bu adım gerekli değildir. Domain'ler otomatik olarak scan edilir.
 
-**Manuel Scan (Sadece Gerekirse):**
+**Bulk Scan (Önerilen - 10+ Domain için):**
 ```bash
-# Eğer auto_scan=false kullandıysanız, manuel scan yapabilirsiniz
+# Domain listesini hazırla (CSV'den veya manuel)
+DOMAINS='["domain1.com", "domain2.com", "domain3.com", ...]'
+
+# Bulk scan job oluştur
+RESPONSE=$(curl -X POST http://localhost:8000/scan/bulk \
+  -H "Content-Type: application/json" \
+  -d "{\"domain_list\": $DOMAINS}")
+
+# Job ID'yi al
+JOB_ID=$(echo $RESPONSE | jq -r '.job_id')
+echo "Job ID: $JOB_ID"
+
+# İlerleme takibi (polling)
+while true; do
+  STATUS=$(curl -s "http://localhost:8000/scan/bulk/$JOB_ID" | jq -r '.status')
+  PROGRESS=$(curl -s "http://localhost:8000/scan/bulk/$JOB_ID" | jq -r '.progress')
+  echo "Status: $STATUS, Progress: $PROGRESS%"
+  
+  if [ "$STATUS" = "completed" ]; then
+    echo "İşlem tamamlandı!"
+    break
+  fi
+  
+  sleep 5  # 5 saniye bekle
+done
+
+# Sonuçları al
+curl "http://localhost:8000/scan/bulk/$JOB_ID/results" | jq '.'
+```
+
+**Manuel Tek Tek Scan (Sadece Gerekirse - 10'dan az domain):**
+```bash
+# Eğer auto_scan=false kullandıysanız ve az sayıda domain varsa
 while IFS=, read -r domain rest; do
   if [ "$domain" != "domain" ]; then
     echo "Analiz ediliyor: $domain"

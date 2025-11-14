@@ -3,7 +3,9 @@
 ## Project Context
 - **MVP Scope**: FastAPI + PostgreSQL, rule-based scoring, DNS/WHOIS analysis
 - **Target**: ≤2 minute "kahvelik" analysis flow for sales team
-- **Out of Scope (Post-MVP)**: D365 adapter, Redis/Queue, webhook, bulk scan
+- **MVP Status**: ✅ Completed (G1-G14)
+- **Post-MVP Sprint 1 (G14)**: ✅ Completed - CSV Export + UI Mini
+- **Post-MVP Sprint 2-6 (G15-G19)**: 📋 Planned - See `docs/plans/2025-11-14-FINAL-ROADMAP.md`
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation
 
 ## Code Style & Standards
@@ -73,14 +75,14 @@
 - Docker Compose setup
 - Basic tests (8 test files)
 
-### ❌ OUT OF SCOPE (Post-MVP)
-- Webhook endpoint (`/ingest/webhook`)
-- Bulk scan endpoint (`/scan/bulk`)
-- `app/core/exporter.py` module - **Note:** Export logic in `app/api/leads.py`
-- `scripts/demo_run.sh`
-- D365 adapter
-- Redis/Queue (currently using in-memory job tracking)
-- Scheduler
+### ❌ OUT OF SCOPE (Post-MVP - Sprint 2-6'da planlandı)
+- **Sprint 2 (G15)**: Bulk scan endpoint (`/scan/bulk`) - ✅ Planlandı
+- **Sprint 3 (G16)**: Webhook endpoint (`/ingest/webhook`) - ✅ Planlandı
+- **Sprint 4 (G17)**: Notes/Tags/Favorites + PDF - ✅ Planlandı
+- **Sprint 5 (G18)**: ReScan + Alerts + Enhanced Scoring - ✅ Planlandı
+- **Sprint 6 (G19)**: Auth + UI + Advanced Features - ✅ Planlandı
+- **Still Out of Scope**: D365 adapter, `scripts/demo_run.sh`
+- **Note**: Redis/Queue ve Scheduler Sprint 2-5'te eklenecek
 
 ## File Structure Rules
 
@@ -263,12 +265,46 @@ When a phase is completed (TODO status = "Completed"):
 - Prompt no longer referenced → Archive prompt
 - Keep only active/current documentation visible
 
+## Post-MVP Sprint Planning (G15-G19)
+
+### Sprint 2 (G15) - Bulk Scan & Async Queue
+- ✅ Use async queue (Celery/RQ/FastAPI BackgroundTasks)
+- ✅ Implement rate limiting (DNS: 10 req/s, WHOIS: 5 req/s)
+- ✅ Progress tracking via Redis or DB
+- ❌ Do NOT implement Priority Score Engine (already exists in `app/core/priority.py`)
+- ❌ Do NOT implement ReScan Infrastructure (moved to Sprint 5)
+
+### Sprint 3 (G16) - Webhook + Basit Lead Enrichment
+- ✅ Simple API Key auth (no OAuth yet)
+- ✅ Basic lead enrichment (contact_emails, contact_quality_score, linkedin_pattern)
+- ❌ Do NOT implement Contact Finder (moved to Sprint 6+)
+- ❌ Do NOT implement Auto-tagging (moved to Sprint 4)
+
+### Sprint 4 (G17) - Notes/Tags/Favorites + Basit PDF
+- ✅ Session-based favorites (no auth required yet)
+- ✅ Simple PDF generation (no AI)
+- ❌ Do NOT implement AI Recommendation (moved to Sprint 6+)
+- ❌ Do NOT implement Microsoft Auth (moved to Sprint 6)
+
+### Sprint 5 (G18) - ReScan + Alerts + Enhanced Scoring
+- ✅ History tables for change tracking
+- ✅ Enhanced scoring (signal-based improvements, NO AI)
+- ❌ Do NOT implement AI-enhanced scoring (moved to Sprint 6+)
+
+### Sprint 6 (G19) - Auth + UI + Advanced Features
+- ✅ Microsoft SSO authentication
+- ✅ UI/Dashboard upgrade
+- ✅ AI Features (optional)
+- ✅ Contact Finder (optional)
+
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
-2. Does this require external API calls? (Handle timeouts/errors)
-3. Will this log PII? (Only log domain)
-4. Is this testable? (Write tests)
-5. Does this break Docker setup? (Verify setup_dev.sh still works)
-6. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
+2. **Is this in the correct Post-MVP sprint?** (Check `docs/plans/2025-11-14-FINAL-ROADMAP.md`)
+3. Does this require external API calls? (Handle timeouts/errors)
+4. Will this log PII? (Only log domain)
+5. Is this testable? (Write tests)
+6. Does this break Docker setup? (Verify setup_dev.sh still works)
+7. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
+8. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
 

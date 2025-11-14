@@ -27,6 +27,14 @@ Aşağıdaki dosyalar silindi:
 ### 3. Boş/Geçici Klasörler
 - ❌ `htmlcov/` - Coverage raporları (boş, .gitignore'da olmalı)
 
+### 4. Test Export Dosyaları (2025-11-14)
+- ❌ `test_export.csv` - Test export dosyası (silindi)
+- ❌ `test_export.xlsx` - Test export dosyası (silindi)
+- ❌ `test_export_min_score.csv` - Test export dosyası (silindi)
+- ❌ `test_export_filtered.csv` - Test export dosyası (silindi)
+
+**Not:** Bu dosyalar `.gitignore`'a eklendi (`test_export*.csv`, `test_export*.xlsx`)
+
 ## ✅ Silinen Dosyalar
 
 1. ✅ `COMMIT_MESSAGE.md` - Silindi
@@ -37,6 +45,10 @@ Aşağıdaki dosyalar silindi:
 6. ✅ `scripts/auto-doc-manager.sh` - Silindi
 7. ✅ `scripts/auto-update-docs.sh` - Silindi
 8. ✅ `htmlcov/` - Klasör kontrol edildi (zaten ignore ediliyor)
+9. ✅ `test_export.csv` - Silindi (2025-11-14)
+10. ✅ `test_export.xlsx` - Silindi (2025-11-14)
+11. ✅ `test_export_min_score.csv` - Silindi (2025-11-14)
+12. ✅ `test_export_filtered.csv` - Silindi (2025-11-14)
 
 ## ✅ Tutulacak Dosyalar
 
@@ -54,5 +66,15 @@ htmlcov/
 .coverage
 *.pyc
 __pycache__/
+test_export*.csv
+test_export*.xlsx
 ```
+
+**Not:** `htmlcov/` zaten `.gitignore`'da mevcut. Test export dosyaları 2025-11-14'te eklendi.
+
+---
+
+**Oluşturulma Tarihi:** 2025-01-12
+**Son Güncelleme:** 2025-11-14
+**Arşivlenme Tarihi:** 2025-11-14
 

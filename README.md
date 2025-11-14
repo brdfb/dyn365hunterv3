@@ -40,11 +40,13 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ CSV/Excel export endpoint (`GET /leads/export`) - Export leads with filters
 - ✅ Mini UI (HTML + Vanilla JS) - Simple web interface for demo and internal use
 - ✅ **Progress tracking** - Real-time progress updates for CSV ingestion and scanning operations
+- ✅ **Bulk Scan** - Async bulk domain scanning with progress tracking (G15)
 
 ## Tech Stack
 
 - **Backend**: FastAPI (Python 3.10)
 - **Database**: PostgreSQL 15
+- **Queue**: Celery + Redis
 - **DNS Analysis**: dnspython
 - **WHOIS**: python-whois
 - **Deployment**: Docker Compose
@@ -122,8 +124,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
    This will:
    - Check Docker availability
    - Create `.env` from `.env.example`
-   - Start Docker Compose services
-   - Wait for PostgreSQL to be ready
+   - Start Docker Compose services (PostgreSQL, Redis, API, Worker)
+   - Wait for PostgreSQL and Redis to be ready
    - Run database schema migration
    - Verify `/healthz` endpoint
 
@@ -181,6 +183,22 @@ A simple web interface for demo and internal use:
   - Returns: `{"domain": "example.com", "score": 75, "segment": "Migration", "reason": "...", "provider": "M365", "mx_root": "outlook.com", "spf": true, "dkim": true, "dmarc_policy": "reject", "scan_status": "success"}`
   - Performs DNS analysis (MX, SPF, DKIM, DMARC) and WHOIS lookup
   - Calculates readiness score and determines segment
+- `POST /scan/bulk` - Create bulk scan job for multiple domains (async)
+  - Request body: `{"domain_list": ["example.com", "google.com", "microsoft.com"]}`
+  - Returns: `{"job_id": "uuid", "message": "Bulk scan job created successfully", "total": 3}`
+  - Creates async job that scans all domains in background
+  - Max 1000 domains per job
+  - Rate limiting: DNS (10 req/s), WHOIS (5 req/s)
+  - Use `GET /scan/bulk/{job_id}` to check progress
+- `GET /scan/bulk/{job_id}` - Get bulk scan job status and progress
+  - Returns: `{"job_id": "uuid", "status": "running", "progress": 50, "total": 3, "processed": 1, "succeeded": 1, "failed": 0, "errors": []}`
+  - Status: `pending`, `running`, `completed`, `failed`
+  - Progress: 0-100 percentage
+  - Polling-based (no HTTP timeout)
+- `GET /scan/bulk/{job_id}/results` - Get bulk scan results (completed jobs only)
+  - Returns: `{"job_id": "uuid", "total": 3, "succeeded": 2, "failed": 1, "results": [...]}`
+  - Returns scan results for all successfully processed domains
+  - Only available for completed jobs
 
 ### Leads
 - `GET /leads` - Query leads with filters
@@ -228,13 +246,15 @@ A simple web interface for demo and internal use:
 dyn365hunterv3/
 ├── app/                    # FastAPI application
 │   ├── api/               # API endpoints
-│   ├── core/              # Core logic (normalizer, analyzer, scorer)
+│   ├── core/              # Core logic (normalizer, analyzer, scorer, celery, tasks)
 │   ├── db/                # Database models and session
 │   └── data/              # Configuration files (providers.json, rules.json)
 ├── tests/                 # Test files
 ├── docs/                  # Documentation
+├── scripts/               # Utility scripts
+│   └── start_celery_worker.sh  # Celery worker startup script
 ├── Dockerfile             # FastAPI container
-├── docker-compose.yml     # Services configuration
+├── docker-compose.yml     # Services configuration (PostgreSQL, Redis, API, Worker)
 └── setup_dev.sh          # Development setup script
 ```
 
@@ -297,6 +317,9 @@ POSTGRES_USER=dyn365hunter
 POSTGRES_PASSWORD=password123
 POSTGRES_DB=dyn365hunter
 
+# Redis (for Celery queue and progress tracking)
+REDIS_URL=redis://redis:6379/0
+
 # FastAPI
 API_HOST=0.0.0.0
 API_PORT=8000
@@ -320,6 +343,17 @@ curl -X POST http://localhost:8000/ingest/domain \
 curl -X POST http://localhost:8000/scan/domain \
   -H "Content-Type: application/json" \
   -d '{"domain": "example.com"}'
+
+# 2b. Bulk scan multiple domains (async)
+curl -X POST http://localhost:8000/scan/bulk \
+  -H "Content-Type: application/json" \
+  -d '{"domain_list": ["example.com", "google.com", "microsoft.com"]}'
+
+# 2c. Check bulk scan progress
+curl "http://localhost:8000/scan/bulk/{job_id}"
+
+# 2d. Get bulk scan results (when completed)
+curl "http://localhost:8000/scan/bulk/{job_id}/results"
 
 # 3. Query leads
 curl "http://localhost:8000/leads?segment=Migration&min_score=70"

@@ -191,6 +191,8 @@ curl -X POST "http://localhost:8000/ingest/csv?auto_detect_columns=true" \
 
 ## 🔍 Adım 2: Domain Analizi (Scan)
 
+### Tek Domain Analizi
+
 Domain'i analiz edip skor hesaplama:
 
 ```bash
@@ -209,6 +211,65 @@ curl -X POST http://localhost:8000/scan/domain \
 - **Duplicate önleme** - Aynı domain için eski kayıtları temizler, yeni sonuçları kaydeder
 
 **Süre:** 10-15 saniye (soğuk başlangıç: 15-20 saniye)
+
+### Toplu Domain Analizi (Bulk Scan) ⚡ YENİ
+
+Birden fazla domain'i asenkron olarak analiz etme:
+
+```bash
+# Bulk scan job oluştur
+curl -X POST http://localhost:8000/scan/bulk \
+  -H "Content-Type: application/json" \
+  -d '{"domain_list": ["ornek1.com", "ornek2.com", "ornek3.com"]}'
+```
+
+**Yanıt:**
+```json
+{
+  "job_id": "uuid-string",
+  "message": "Bulk scan job created successfully",
+  "total": 3
+}
+```
+
+**İlerleme Takibi:**
+```bash
+# Job durumunu kontrol et
+curl "http://localhost:8000/scan/bulk/{job_id}"
+```
+
+**Yanıt:**
+```json
+{
+  "job_id": "uuid-string",
+  "status": "running",
+  "progress": 50,
+  "total": 3,
+  "processed": 1,
+  "succeeded": 1,
+  "failed": 0,
+  "errors": []
+}
+```
+
+**Sonuçları Alma:**
+```bash
+# İşlem tamamlandığında sonuçları al
+curl "http://localhost:8000/scan/bulk/{job_id}/results"
+```
+
+**Özellikler:**
+- ✅ **Async processing** - Arka planda çalışır, HTTP timeout yok
+- ✅ **Progress tracking** - Gerçek zamanlı ilerleme takibi
+- ✅ **Rate limiting** - DNS (10 req/s), WHOIS (5 req/s) otomatik sınırlama
+- ✅ **Error handling** - Hata olan domain'ler işlenmeye devam eder
+- ✅ **Max 1000 domain** - Tek job'da en fazla 1000 domain
+- ✅ **Polling-based** - İlerleme kontrolü için polling kullanın
+
+**Ne Zaman Kullanılır?**
+- 10+ domain analiz edilecekse bulk scan kullanın
+- Tek domain için `/scan/domain` endpoint'i yeterli
+- Toplu analiz için bulk scan daha hızlı ve verimli
 
 **Başarılı Yanıt:**
 ```json
@@ -554,11 +615,25 @@ curl -X POST http://localhost:8000/ingest/domain \
   -d '{"domain": "DOMAIN-BURAYA", "company_name": "Firma Adı"}'
 ```
 
-### Analiz Et
+### Analiz Et (Tek Domain)
 ```bash
 curl -X POST http://localhost:8000/scan/domain \
   -H "Content-Type: application/json" \
   -d '{"domain": "DOMAIN-BURAYA"}'
+```
+
+### Toplu Analiz (Bulk Scan) ⚡ YENİ
+```bash
+# Bulk scan job oluştur
+curl -X POST http://localhost:8000/scan/bulk \
+  -H "Content-Type: application/json" \
+  -d '{"domain_list": ["domain1.com", "domain2.com", "domain3.com"]}'
+
+# İlerleme kontrolü (job_id'yi yukarıdaki yanıttan alın)
+curl "http://localhost:8000/scan/bulk/{job_id}"
+
+# Sonuçları alma (tamamlandığında)
+curl "http://localhost:8000/scan/bulk/{job_id}/results"
 ```
 
 ### Migration Lead'leri Gör

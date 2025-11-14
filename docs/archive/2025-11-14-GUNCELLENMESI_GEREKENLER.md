@@ -90,6 +90,7 @@ curl "http://localhost:8000/lead/example.com"
 
 **Oluşturulma Tarihi:** 2025-01-12
 **Tamamlanma Tarihi:** 2025-01-12
+**Arşivlenme Tarihi:** 2025-11-14
 **Test Edilen Ortam:** Browser (Swagger UI), Kod İncelemesi
 **Durum:** ✅ TAMAMLANDI
 

@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G15: Bulk Scan & Async Queue** - Async bulk domain scanning with progress tracking
+  - `POST /scan/bulk` endpoint for creating bulk scan jobs (up to 1000 domains)
+  - `GET /scan/bulk/{job_id}` endpoint for checking job status and progress
+  - `GET /scan/bulk/{job_id}/results` endpoint for retrieving scan results
+  - Celery + Redis integration for async task processing
+  - Rate limiting: DNS (10 req/s), WHOIS (5 req/s) per worker
+  - Progress tracking with Redis (job status, progress percentage, error tracking)
+  - Error handling: Partial failure support, retry logic, exponential backoff
+  - Worker configuration: 5 concurrent tasks, 15s per-domain timeout, 2 max retries
+  - Docker Compose: Redis service and Celery worker service added
+  - Implementation:
+    - `app/core/celery_app.py` - Celery application configuration
+    - `app/core/rate_limiter.py` - Rate limiting utilities (token bucket algorithm)
+    - `app/core/progress_tracker.py` - Redis-based progress tracking
+    - `app/core/tasks.py` - Celery tasks for bulk scanning
+    - `app/api/scan.py` - Bulk scan API endpoints
+  - Tests: Comprehensive test suite (19+ test cases)
+    - `tests/test_rate_limiter.py` - Rate limiting tests (9 tests)
+    - `tests/test_progress_tracker.py` - Progress tracking tests (10 tests)
+    - `tests/test_error_handling.py` - Error handling tests
+    - `tests/test_bulk_scan.py` - Integration tests for bulk scan API
+  - Worker startup script: `scripts/start_celery_worker.sh`
+  - Post-MVP Sprint 2 feature (core infrastructure)
 - **Provider Change Tracking** - Automatic detection and logging of provider changes
   - `ProviderChangeHistory` model in `app/db/models.py` to track provider changes over time
   - Automatic detection when domain is scanned (via `/scan/domain` or CSV ingestion with `auto_scan=true`)

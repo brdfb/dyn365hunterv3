@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dyn365Hunter Mini UI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1 class="header__title">Dyn365Hunter Mini UI</h1>
+    </header>
+
+    <!-- KPI Area -->
+    <section class="kpi">
+        <div class="kpi__item">
+            <span class="kpi__label">Toplam Lead</span>
+            <span class="kpi__value" id="kpi-total">-</span>
+        </div>
+        <div class="kpi__item">
+            <span class="kpi__label">Migration</span>
+            <span class="kpi__value" id="kpi-migration">-</span>
+        </div>
+        <div class="kpi__item">
+            <span class="kpi__label">En Yüksek Skor</span>
+            <span class="kpi__value" id="kpi-max-score">-</span>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Left Block: Forms -->
+        <aside class="forms">
+            <!-- Form 1: CSV Upload -->
+            <section class="form-section">
+                <h2 class="form-section__title">CSV/Excel Yükle</h2>
+                <form id="form-csv-upload" class="form">
+                    <div class="form__group">
+                        <label for="csv-file" class="form__label">Dosya Seç</label>
+                        <input type="file" id="csv-file" name="file" accept=".csv,.xlsx,.xls" class="form__input" required>
+                    </div>
+                    <div class="form__group">
+                        <label class="form__checkbox-label">
+                            <input type="checkbox" id="auto-detect" name="auto_detect_columns">
+                            <span>Otomatik kolon tespiti (OSB dosyaları için)</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="form__button">Yükle ve İşle</button>
+                    <div id="csv-upload-message" class="form__message"></div>
+                </form>
+            </section>
+
+            <!-- Form 2: Domain Scan -->
+            <section class="form-section">
+                <h2 class="form-section__title">Tek Domain Tara</h2>
+                <form id="form-domain-scan" class="form">
+                    <div class="form__group">
+                        <label for="domain-input" class="form__label">Domain</label>
+                        <input type="text" id="domain-input" name="domain" placeholder="ornek.com" class="form__input" required>
+                    </div>
+                    <div class="form__group">
+                        <label for="company-name" class="form__label">Şirket Adı (Opsiyonel)</label>
+                        <input type="text" id="company-name" name="company_name" placeholder="Örnek Firma A.Ş." class="form__input">
+                    </div>
+                    <button type="submit" class="form__button">Tara</button>
+                    <div id="scan-result" class="scan-result"></div>
+                    <div id="scan-message" class="form__message"></div>
+                </form>
+            </section>
+        </aside>
+
+        <!-- Right Block: Leads Table -->
+        <section class="leads-section">
+            <h2 class="leads-section__title">Lead Listesi</h2>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filters__group">
+                    <label for="filter-segment" class="filters__label">Segment</label>
+                    <select id="filter-segment" class="filters__select">
+                        <option value="">Tümü</option>
+                        <option value="Migration">Migration</option>
+                        <option value="Existing">Existing</option>
+                        <option value="Cold">Cold</option>
+                        <option value="Skip">Skip</option>
+                    </select>
+                </div>
+                <div class="filters__group">
+                    <label for="filter-min-score" class="filters__label">Min Skor</label>
+                    <input type="number" id="filter-min-score" min="0" max="100" placeholder="0" class="filters__input">
+                </div>
+                <div class="filters__group">
+                    <label for="filter-provider" class="filters__label">Provider</label>
+                    <select id="filter-provider" class="filters__select">
+                        <option value="">Tümü</option>
+                        <option value="M365">M365</option>
+                        <option value="Google">Google</option>
+                        <option value="Yandex">Yandex</option>
+                        <option value="Zoho">Zoho</option>
+                        <option value="Hosting">Hosting</option>
+                        <option value="Local">Local</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+                <button type="button" id="btn-filter" class="filters__button">Filtrele</button>
+                <button type="button" id="btn-export" class="filters__button filters__button--export">Export CSV</button>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading" style="display: none;">
+                <span>Yükleniyor...</span>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error" class="error" style="display: none;"></div>
+
+            <!-- Leads Table -->
+            <div class="table-container">
+                <table id="leads-table" class="leads-table">
+                    <thead class="leads-table__head">
+                        <tr class="leads-table__row">
+                            <th class="leads-table__cell leads-table__cell--header">Öncelik</th>
+                            <th class="leads-table__cell leads-table__cell--header">Domain</th>
+                            <th class="leads-table__cell leads-table__cell--header">Şirket</th>
+                            <th class="leads-table__cell leads-table__cell--header">Provider</th>
+                            <th class="leads-table__cell leads-table__cell--header">Segment</th>
+                            <th class="leads-table__cell leads-table__cell--header">Skor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leads-table-body" class="leads-table__body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <p>Henüz lead bulunmuyor. CSV yükleyin veya domain tarayın.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/ui-leads.js"></script>
+    <script type="module" src="js/ui-forms.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
+

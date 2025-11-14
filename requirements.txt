@@ -16,4 +16,7 @@ pytest-cov==4.1.0
 flake8==6.1.0
 black==23.12.1
 mypy==1.8.0
+# Celery and Redis for async queue
+celery==5.3.4
+redis==5.0.1
 

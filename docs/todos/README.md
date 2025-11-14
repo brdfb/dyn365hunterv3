@@ -4,10 +4,17 @@ This folder contains TODO lists and task tracking documents.
 
 ## Current Status
 
-**All TODOs Completed** - No active TODO files in this directory.
+**Active TODOs:**
+- `G16-webhook-enrichment.md` - Sprint 3: Webhook + Basit Lead Enrichment (📋 Planned)
+- `G17-notes-tags-pdf.md` - Sprint 4: Notes/Tags/Favorites + Basit PDF (📋 Planned)
+- `G18-rescan-alerts-scoring.md` - Sprint 5: ReScan + Alerts + Enhanced Scoring (📋 Planned)
+- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (📋 Planned)
 
+**Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
 - `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (Completed)
+- `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
+- `2025-11-14-G15-bulk-scan-async.md` - G15: Sprint 2: Bulk Scan & Async Queue (Completed)
 
 ## Format
 
