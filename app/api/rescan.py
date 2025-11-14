@@ -9,6 +9,7 @@ from app.core.normalizer import normalize_domain
 from app.core.rescan import rescan_domain
 from app.core.progress_tracker import get_progress_tracker
 from app.core.tasks import bulk_scan_task
+from app.core.constants import MAX_BULK_SCAN_DOMAINS
 import uuid
 
 
@@ -131,8 +132,8 @@ async def bulk_rescan(
     if not domains:
         raise HTTPException(status_code=400, detail="No valid domains provided")
     
-    if len(domains) > 1000:
-        raise HTTPException(status_code=400, detail="Maximum 1000 domains per bulk rescan")
+    if len(domains) > MAX_BULK_SCAN_DOMAINS:
+        raise HTTPException(status_code=400, detail=f"Maximum {MAX_BULK_SCAN_DOMAINS} domains per bulk rescan")
     
     # Normalize domains
     normalized_domains = []

@@ -5,6 +5,7 @@ from sqlalchemy import text
 from pydantic import BaseModel
 from typing import Optional
 from app.db.session import get_db
+from app.core.constants import HIGH_PRIORITY_SCORE
 
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
@@ -19,7 +20,7 @@ class DashboardResponse(BaseModel):
     skip: int
     avg_score: float
     max_score: Optional[int] = None  # Maximum readiness score
-    high_priority: int  # Migration + score >= 70
+    high_priority: int  # Migration + score >= HIGH_PRIORITY_SCORE
 
 
 @router.get("", response_model=DashboardResponse)
@@ -38,7 +39,7 @@ async def get_dashboard(
         - skip: Count of Skip segment leads
         - avg_score: Average readiness score
         - max_score: Maximum readiness score
-        - high_priority: Count of high priority leads (Migration + score >= 70)
+        - high_priority: Count of high priority leads (Migration + score >= HIGH_PRIORITY_SCORE)
     """
     try:
         # Query for segment counts and average score
@@ -52,12 +53,12 @@ async def get_dashboard(
                 COUNT(CASE WHEN segment = 'Skip' THEN 1 END) AS skip,
                 COALESCE(AVG(readiness_score), 0.0) AS avg_score,
                 MAX(readiness_score) AS max_score,
-                COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= 70 THEN 1 END) AS high_priority
+                COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= :high_priority_score THEN 1 END) AS high_priority
             FROM leads_ready
             WHERE readiness_score IS NOT NULL
         """
         
-        result = db.execute(text(query))
+        result = db.execute(text(query), {"high_priority_score": HIGH_PRIORITY_SCORE})
         row = result.fetchone()
         
         if not row:

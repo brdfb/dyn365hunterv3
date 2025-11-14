@@ -142,6 +142,10 @@
     </main>
 
     <!-- Scripts -->
+    <script>
+        // API base URL - can be overridden by deployment
+        window.HUNTER_API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
+    </script>
     <script type="module" src="js/api.js"></script>
     <script type="module" src="js/ui-leads.js"></script>
     <script type="module" src="js/ui-forms.js"></script>

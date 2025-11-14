@@ -13,6 +13,7 @@ from app.core.scorer import score_domain
 from app.core.progress_tracker import get_progress_tracker
 from app.core.tasks import bulk_scan_task
 from app.core.auto_tagging import apply_auto_tags
+from app.core.constants import MAX_BULK_SCAN_DOMAINS
 
 
 router = APIRouter(prefix="/scan", tags=["scan"])
@@ -206,7 +207,7 @@ async def scan_domain(
 
 class BulkScanRequest(BaseModel):
     """Request model for bulk domain scanning."""
-    domain_list: List[str] = Field(..., description="List of domain names to scan", min_length=1, max_length=1000)
+    domain_list: List[str] = Field(..., description="List of domain names to scan", min_length=1, max_length=MAX_BULK_SCAN_DOMAINS)
     
     @field_validator("domain_list")
     @classmethod

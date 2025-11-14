@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- (No new features yet)
+
+## [1.0.0] - 2025-11-14
+
+### Added
 - **G18: ReScan + Alerts + Enhanced Scoring** - Automation and change detection
   - ReScan infrastructure:
     - `POST /scan/{domain}/rescan` - Manual rescan with change detection
@@ -242,10 +247,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Post-MVP (High Priority)
 - ✅ CSV Export - **Completed** (G14) - CSV and Excel export with filters
 - ✅ Mini UI - **Completed** (G14) - Simple web interface for demo and internal use
-- Bulk Scan - Requires async queue (risks identified)
+- ✅ Bulk Scan - **Completed** (G15) - Async bulk domain scanning with progress tracking
+- ✅ Webhook + Enrichment - **Completed** (G16) - Webhook ingestion with API key authentication
+- ✅ Notes/Tags/Favorites + PDF - **Completed** (G17) - CRM-lite features and PDF summaries
+- ✅ ReScan + Alerts - **Completed** (G18) - Automation and change detection
 
 ### Post-MVP (Low Priority)
-- Email Templates, Notes/Tags, Favorites, Reminders - Requirements specified
+- Email Templates, Reminders - Requirements specified
 
 ## [0.5.0] - 2025-01-27
 

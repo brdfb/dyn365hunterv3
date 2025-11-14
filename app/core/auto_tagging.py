@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.db.models import Tag, DomainSignal, LeadScore, Company
+from app.core.constants import MIGRATION_READY_SCORE, EXPIRE_SOON_DAYS
 
 
 def apply_auto_tags(domain: str, db: Session) -> List[str]:
@@ -48,7 +49,7 @@ def apply_auto_tags(domain: str, db: Session) -> List[str]:
             applied_tags.append(tag_name)
     
     # Check for migration-ready: Migration segment + score >= 70
-    if lead_score.segment == "Migration" and lead_score.readiness_score >= 70:
+    if lead_score.segment == "Migration" and lead_score.readiness_score >= MIGRATION_READY_SCORE:
         tag_name = "migration-ready"
         if not _tag_exists(domain, tag_name, db):
             tag = Tag(domain=domain, tag=tag_name)
@@ -58,7 +59,7 @@ def apply_auto_tags(domain: str, db: Session) -> List[str]:
     # Check for expire-soon: expires_at < 30 days
     if domain_signal.expires_at:
         days_until_expiry = (domain_signal.expires_at - datetime.now().date()).days
-        if 0 < days_until_expiry < 30:
+        if 0 < days_until_expiry < EXPIRE_SOON_DAYS:
             tag_name = "expire-soon"
             if not _tag_exists(domain, tag_name, db):
                 tag = Tag(domain=domain, tag=tag_name)

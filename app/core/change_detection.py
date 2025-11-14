@@ -6,6 +6,7 @@ from app.db.models import (
     DomainSignal, LeadScore, Company,
     SignalChangeHistory, ScoreChangeHistory, Alert
 )
+from app.core.constants import EXPIRE_SOON_DAYS
 
 
 def detect_signal_changes(
@@ -104,9 +105,9 @@ def detect_signal_changes(
     # Detect expiry changes (expire soon)
     if new_signal.expires_at:
         days_until_expiry = (new_signal.expires_at - datetime.now().date()).days
-        if 0 < days_until_expiry < 30:
+        if 0 < days_until_expiry < EXPIRE_SOON_DAYS:
             # Check if this is a new expiry warning
-            if not old_signal.expires_at or (old_signal.expires_at - datetime.now().date()).days >= 30:
+            if not old_signal.expires_at or (old_signal.expires_at - datetime.now().date()).days >= EXPIRE_SOON_DAYS:
                 changes.append({
                     "type": "expire_soon",
                     "days_until_expiry": days_until_expiry,

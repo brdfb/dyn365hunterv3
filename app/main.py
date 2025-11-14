@@ -11,7 +11,7 @@ from app.api import ingest, scan, leads, dashboard, email_tools, progress, admin
 app = FastAPI(
     title="Dyn365Hunter MVP",
     description="Lead intelligence engine for domain-based analysis",
-    version="0.5.0"
+    version="1.0.0"
 )
 
 # Register routers
@@ -74,7 +74,7 @@ async def root():
     """Root endpoint."""
     return {
         "message": "Dyn365Hunter MVP API",
-        "version": "0.5.0",
+        "version": "1.0.0",
         "docs": "/docs"
     }
 

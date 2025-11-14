@@ -1,5 +1,12 @@
 """Priority score calculation for lead prioritization."""
 from typing import Optional
+from app.core.constants import (
+    MIGRATION_READY_SCORE,
+    PRIORITY_1_SCORE,
+    PRIORITY_3_SCORE,
+    PRIORITY_4_SCORE,
+    PRIORITY_5_SCORE,
+)
 
 
 def calculate_priority_score(segment: Optional[str], score: Optional[int]) -> int:
@@ -33,25 +40,25 @@ def calculate_priority_score(segment: Optional[str], score: Optional[int]) -> in
     
     # Migration segment
     if segment == "Migration":
-        if score >= 80:
+        if score >= PRIORITY_1_SCORE:
             return 1
-        elif score >= 70:
+        elif score >= MIGRATION_READY_SCORE:
             return 2
         else:
             return 6
     
     # Existing segment
     elif segment == "Existing":
-        if score >= 70:
+        if score >= PRIORITY_3_SCORE:
             return 3
-        elif score >= 50:
+        elif score >= PRIORITY_4_SCORE:
             return 4
         else:
             return 6
     
     # Cold segment
     elif segment == "Cold":
-        if score >= 40:
+        if score >= PRIORITY_5_SCORE:
             return 5
         else:
             return 6

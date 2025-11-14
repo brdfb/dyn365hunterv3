@@ -1,5 +1,6 @@
 // API Client - All fetch calls
-const API_BASE_URL = 'http://localhost:8000';
+// Can be overridden by deployment (e.g., nginx template sets window.HUNTER_API_BASE_URL)
+const API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
 
 /**
  * Fetch leads with filters
