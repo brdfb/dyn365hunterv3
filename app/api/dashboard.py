@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel
+from typing import Optional
 from app.db.session import get_db
 
 
@@ -17,6 +18,7 @@ class DashboardResponse(BaseModel):
     cold: int
     skip: int
     avg_score: float
+    max_score: Optional[int] = None  # Maximum readiness score
     high_priority: int  # Migration + score >= 70
 
 
@@ -27,7 +29,7 @@ async def get_dashboard(
     """
     Get dashboard statistics with aggregated lead data.
     
-    Returns:
+        Returns:
         DashboardResponse with:
         - total_leads: Total number of scanned leads
         - migration: Count of Migration segment leads
@@ -35,6 +37,7 @@ async def get_dashboard(
         - cold: Count of Cold segment leads
         - skip: Count of Skip segment leads
         - avg_score: Average readiness score
+        - max_score: Maximum readiness score
         - high_priority: Count of high priority leads (Migration + score >= 70)
     """
     try:
@@ -48,6 +51,7 @@ async def get_dashboard(
                 COUNT(CASE WHEN segment = 'Cold' THEN 1 END) AS cold,
                 COUNT(CASE WHEN segment = 'Skip' THEN 1 END) AS skip,
                 COALESCE(AVG(readiness_score), 0.0) AS avg_score,
+                MAX(readiness_score) AS max_score,
                 COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= 70 THEN 1 END) AS high_priority
             FROM leads_ready
             WHERE readiness_score IS NOT NULL
@@ -65,6 +69,7 @@ async def get_dashboard(
                 cold=0,
                 skip=0,
                 avg_score=0.0,
+                max_score=None,
                 high_priority=0
             )
         
@@ -75,6 +80,7 @@ async def get_dashboard(
             cold=row.cold or 0,
             skip=row.skip or 0,
             avg_score=float(row.avg_score) if row.avg_score else 0.0,
+            max_score=int(row.max_score) if row.max_score is not None else None,
             high_priority=row.high_priority or 0
         )
     

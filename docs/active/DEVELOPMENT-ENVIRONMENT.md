@@ -124,6 +124,24 @@ pytest tests/ -v --cov=app
 docker-compose up -d        # Servisleri başlat
 docker-compose logs -f api  # Logları izle
 docker-compose down         # Servisleri durdur
+docker-compose restart      # Servisleri yeniden başlat
+docker-compose ps           # Container durumlarını görüntüle
+```
+
+### Phase 0 Deployment Sonrası Komutlar
+
+```bash
+# Smoke test'leri çalıştır
+bash scripts/smoke_test_phase0.sh
+
+# Phase 0'ı tekrar deploy et
+bash scripts/deploy_phase0.sh
+
+# Health check
+curl http://localhost:8000/healthz
+
+# API version kontrolü
+curl http://localhost:8000/openapi.json | grep version
 ```
 
 ## 🚫 Neden Git Bash Önerilmiyor?

@@ -102,7 +102,7 @@ async def export_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
     
-    # Order by score descending
+    # Note: We'll sort by priority_score in Python after calculating it
     query += " ORDER BY readiness_score DESC, domain ASC"
     
     try:
@@ -135,6 +135,12 @@ async def export_leads(
                 "reason": row.reason or ""
             }
             leads_data.append(lead_dict)
+        
+        # Sort by priority_score ASC (1 = highest priority), then readiness_score DESC
+        leads_data.sort(key=lambda x: (
+            x.get("priority_score", 999),
+            -x.get("readiness_score", 0)
+        ))
         
         # Convert to DataFrame
         df = pd.DataFrame(leads_data)
@@ -243,7 +249,8 @@ async def get_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
     
-    # Order by score descending
+    # Note: We'll sort by priority_score in Python after calculating it
+    # because priority_score is computed from segment + readiness_score
     query += " ORDER BY readiness_score DESC, domain ASC"
     
     try:
@@ -276,6 +283,13 @@ async def get_leads(
                 priority_score=priority_score
             )
             leads.append(lead)
+        
+        # Sort by priority_score ASC (1 = highest priority), then readiness_score DESC
+        # This ensures Migration leads with high scores appear first
+        leads.sort(key=lambda x: (
+            x.priority_score if x.priority_score is not None else 999,
+            -(x.readiness_score if x.readiness_score is not None else 0)
+        ))
         
         return leads
     

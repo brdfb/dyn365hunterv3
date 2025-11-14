@@ -134,12 +134,15 @@ async def export_leads(
 
 **Dosya Yapısı**:
 ```
-app/static/
+mini-ui/
 ├── index.html          # Ana sayfa
-├── css/
-│   └── style.css      # Basit CSS
-└── js/
-    └── app.js         # Vanilla JS
+├── styles.css          # CSS (BEM pattern)
+├── js/
+│   ├── app.js         # Orchestration, global state
+│   ├── api.js         # API client (fetch calls)
+│   ├── ui-leads.js    # Table & filter rendering
+│   └── ui-forms.js    # Form binding
+└── README-mini-ui.md  # Kullanım kılavuzu
 ```
 
 **Özellikler**:
@@ -177,10 +180,13 @@ app/static/
 - Color coding: Migration (green), Existing (blue), Cold (yellow), Skip (red)
 
 **Dosyalar**:
-- `app/static/index.html` - Ana sayfa
-- `app/static/css/style.css` - Stil dosyası
-- `app/static/js/app.js` - JavaScript logic
-- `app/main.py` - Static file serving (`app.mount("/static", StaticFiles(directory="app/static"), name="static")`)
+- `mini-ui/index.html` - Ana sayfa
+- `mini-ui/styles.css` - Stil dosyası (BEM pattern)
+- `mini-ui/js/app.js` - Orchestration, global state
+- `mini-ui/js/api.js` - API client (tüm fetch çağrıları)
+- `mini-ui/js/ui-leads.js` - Table & filter rendering
+- `mini-ui/js/ui-forms.js` - Form binding
+- `app/main.py` - Static file serving (`app.mount("/mini-ui", StaticFiles(directory="mini-ui", html=True), name="mini-ui")`)
 
 **Test Cases**:
 - File upload (CSV, Excel)
@@ -189,9 +195,11 @@ app/static/
 - CSV export from UI
 - Error handling (invalid domain, network errors)
 
-**Süre**: **2-3 gün**
+**Süre**: **2-3 gün** ✅ **Tamamlandı (1 gün)**
 
 **Risk**: 🟢 Düşük (read-only UI, core'a dokunmuyor)
+
+**Not**: Implementation tamamlandı. Dosya yapısı `mini-ui/` olarak oluşturuldu (planlanan `app/static/` yerine). Modüler JS yapısı kullanıldı (4 dosya: app.js, api.js, ui-leads.js, ui-forms.js). Scan form'u otomatik ingest yapıyor (company name varsa).
 
 ---
 

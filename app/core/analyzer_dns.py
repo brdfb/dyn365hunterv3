@@ -74,6 +74,8 @@ def extract_mx_root(mx_hostname: str) -> Optional[str]:
     """
     Extract root domain from MX hostname.
     
+    Handles two-part TLDs like .com.tr, .co.uk, .com.au, etc.
+    
     Examples:
         >>> extract_mx_root("outlook-com.olc.protection.outlook.com")
         'outlook.com'
@@ -81,6 +83,10 @@ def extract_mx_root(mx_hostname: str) -> Optional[str]:
         'google.com'
         >>> extract_mx_root("mail.example.com")
         'example.com'
+        >>> extract_mx_root("aspmx.vit.com.tr")
+        'vit.com.tr'
+        >>> extract_mx_root("mail.example.co.uk")
+        'example.co.uk'
     """
     if not mx_hostname:
         return None
@@ -91,12 +97,39 @@ def extract_mx_root(mx_hostname: str) -> Optional[str]:
     # Split by dots
     parts = mx_hostname.split('.')
     
-    # If we have at least 2 parts, take the last 2 as root domain
-    # This is a simple heuristic - for most cases it works
-    if len(parts) >= 2:
-        return '.'.join(parts[-2:])
+    if len(parts) < 2:
+        return mx_hostname
     
-    return mx_hostname
+    # Common two-part TLDs (country code + generic)
+    # These require taking the last 3 parts instead of 2
+    two_part_tlds = [
+        'com.tr', 'net.tr', 'org.tr', 'gov.tr', 'edu.tr',  # Turkey
+        'co.uk', 'org.uk', 'ac.uk', 'gov.uk',  # UK
+        'com.au', 'net.au', 'org.au', 'gov.au', 'edu.au',  # Australia
+        'co.za', 'org.za', 'gov.za',  # South Africa
+        'com.br', 'net.br', 'org.br', 'gov.br',  # Brazil
+        'co.jp', 'ne.jp', 'or.jp', 'go.jp', 'ac.jp',  # Japan
+        'com.cn', 'net.cn', 'org.cn', 'gov.cn', 'edu.cn',  # China
+        'co.in', 'net.in', 'org.in', 'gov.in', 'edu.in',  # India
+        'com.mx', 'net.mx', 'org.mx', 'gov.mx',  # Mexico
+        'com.ar', 'net.ar', 'org.ar', 'gov.ar',  # Argentina
+        'co.nz', 'net.nz', 'org.nz', 'govt.nz',  # New Zealand
+        'com.sg', 'net.sg', 'org.sg', 'gov.sg',  # Singapore
+        'com.my', 'net.my', 'org.my', 'gov.my',  # Malaysia
+        'com.ph', 'net.ph', 'org.ph', 'gov.ph',  # Philippines
+    ]
+    
+    # Check if the last 2 parts form a two-part TLD
+    last_two = '.'.join(parts[-2:]).lower()
+    if last_two in two_part_tlds:
+        # For two-part TLDs, take the last 3 parts
+        if len(parts) >= 3:
+            return '.'.join(parts[-3:])
+        else:
+            return mx_hostname
+    
+    # For standard TLDs, take the last 2 parts
+    return '.'.join(parts[-2:])
 
 
 def check_spf(domain: str) -> bool:

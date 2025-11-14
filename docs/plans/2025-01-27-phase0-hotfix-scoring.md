@@ -146,8 +146,8 @@ If issues arise:
 - [x] Code review completed (no linter errors)
 - [x] API version updated to v0.5.0 (app/main.py)
 - [x] Documentation updated (COMMIT_CHECKLIST.md, GUNCELLENMESI_GEREKENLER.md)
-- [ ] Deployed to dev environment (pending deployment - requires infrastructure setup)
-- [ ] Smoke tests passed (pending deployment - will test after deployment)
+- [x] Deployed to dev environment (deployed via scripts/deploy_phase0.sh)
+- [x] Smoke tests passed (all 6 smoke tests passing)
 
 ## 🚀 Next Steps (Phase 1 - Optional)
 
@@ -159,5 +159,57 @@ Phase 1 (On-Prem Detection) will be evaluated after Phase 0 metrics are collecte
 ---
 
 **Created:** 2025-01-27  
-**Last Updated:** 2025-01-27
+**Last Updated:** 2025-01-28  
+**Deployed:** 2025-01-28 (via scripts/deploy_phase0.sh)
+
+## 📋 Kullanışlı Komutlar (Post-Deployment)
+
+### Smoke Test'leri Çalıştırma
+```bash
+# Phase 0 smoke test'lerini çalıştır
+bash scripts/smoke_test_phase0.sh
+```
+
+### Docker İşlemleri
+```bash
+# Log'ları görüntüle
+docker-compose logs -f api
+
+# Servisleri durdur
+docker-compose down
+
+# Servisleri yeniden başlat
+docker-compose restart
+
+# Container'ları yeniden build et
+docker-compose build --no-cache api
+docker-compose up -d
+```
+
+### API Kontrolü
+```bash
+# Health check
+curl http://localhost:8000/healthz
+
+# API version kontrolü
+curl http://localhost:8000/openapi.json | grep version
+
+# Dashboard istatistikleri
+curl http://localhost:8000/dashboard
+```
+
+### Test Çalıştırma
+```bash
+# Unit test'leri çalıştır
+docker-compose exec api pytest tests/test_scorer_rules.py::TestHardFailRules -v
+
+# Tüm test'leri çalıştır
+docker-compose exec api pytest tests/ -v
+```
+
+### Deployment Tekrarı
+```bash
+# Phase 0'ı tekrar deploy et
+bash scripts/deploy_phase0.sh
+```
 
