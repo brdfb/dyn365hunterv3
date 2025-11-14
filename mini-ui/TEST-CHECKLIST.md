@@ -63,7 +63,7 @@
 ## 🧪 Manuel Test Senaryoları
 
 ### Test 1: Mini UI Erişimi
-- [ ] Backend çalışıyor mu? (`curl http://localhost:8000/healthz`)
+- [ ] Backend çalışıyor mu? (`curl http://localhost:8000/healthz` veya `curl http://localhost:8000/healthz/ready`)
 - [ ] Mini UI açılıyor mu? (`http://localhost:8000/mini-ui/`)
 - [ ] CSS yükleniyor mu?
 - [ ] JavaScript yükleniyor mu? (Browser console'da hata var mı?)

@@ -151,7 +151,12 @@ const API_BASE_URL = 'http://localhost:8000';
 
 1. Backend çalışıyor mu kontrol et:
    ```bash
+   # Legacy endpoint (backward compatible)
    curl http://localhost:8000/healthz
+   
+   # Veya yeni health check endpoint'leri (recommended)
+   curl http://localhost:8000/healthz/ready  # DB + Redis check
+   curl http://localhost:8000/healthz/live   # Liveness check
    ```
 
 2. `mini-ui/` klasörü proje root'unda var mı kontrol et
