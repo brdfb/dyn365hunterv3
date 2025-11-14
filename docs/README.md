@@ -31,9 +31,7 @@ docs/
 #### Reference Guides
 - `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
 - `WSL-GUIDE.md` - WSL2 setup and configuration guide
-- `TESTING.md` - Testing guide and troubleshooting
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
-- `TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report
 
 #### Production Readiness Documentation
 - `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
@@ -60,6 +58,8 @@ docs/
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
 - `2025-01-28-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-01-28)
+- `2025-01-28-TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report (Archived)
+- `2025-01-28-TESTING.md` - Testing guide and troubleshooting (Archived)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
