@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import pandas as pd
 import uuid
 from app.db.session import get_db
@@ -196,10 +196,8 @@ async def export_leads(
             )
 
     except Exception as e:
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Export error: {str(e)}", exc_info=True)
+        from app.core.logging import logger
+        logger.error("export_error", error=str(e), exc_info=True)
         raise HTTPException(
             status_code=500, detail=f"An error occurred while exporting leads: {str(e)}"
         )

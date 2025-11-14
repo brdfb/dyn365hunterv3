@@ -1,6 +1,6 @@
 """API Key authentication and rate limiting for webhook endpoints."""
 
-import hashlib
+import bcrypt
 import secrets
 from datetime import datetime
 from typing import Optional
@@ -23,8 +23,18 @@ _rate_limiter_lock = Lock()
 
 
 def hash_api_key(api_key: str) -> str:
-    """Hash an API key using SHA-256."""
-    return hashlib.sha256(api_key.encode()).hexdigest()
+    """Hash an API key using bcrypt (with salt)."""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(api_key.encode(), salt)
+    return hashed.decode()
+
+
+def check_api_key_hash(api_key: str, stored_hash: str) -> bool:
+    """Verify API key against stored hash (helper function)."""
+    try:
+        return bcrypt.checkpw(api_key.encode(), stored_hash.encode())
+    except Exception:
+        return False
 
 
 def generate_api_key() -> str:
@@ -68,15 +78,15 @@ async def verify_api_key(
             status_code=401, detail="API key required. Please provide X-API-Key header."
         )
 
-    # Hash the provided key
-    key_hash = hash_api_key(x_api_key)
-
-    # Look up API key in database
-    api_key = (
-        db.query(ApiKey)
-        .filter(ApiKey.key_hash == key_hash, ApiKey.is_active == True)
-        .first()
-    )
+    # Look up API key in database (check all active keys)
+    # Note: With bcrypt, we can't hash and compare directly, so we need to check each key
+    api_keys = db.query(ApiKey).filter(ApiKey.is_active == True).all()
+    
+    api_key = None
+    for key in api_keys:
+        if check_api_key_hash(x_api_key, key.key_hash):
+            api_key = key
+            break
 
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid or inactive API key")

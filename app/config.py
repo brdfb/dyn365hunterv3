@@ -1,5 +1,6 @@
 """Application configuration using Pydantic Settings."""
 
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +11,8 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql://dyn365hunter:password123@postgres:5432/dyn365hunter"
     )
+    db_pool_size: int = 20
+    db_max_overflow: int = 10
 
     # Redis
     redis_url: str = "redis://redis:6379/0"
@@ -21,6 +24,9 @@ class Settings(BaseSettings):
 
     # Environment
     environment: str = "development"
+    
+    # Error Tracking
+    sentry_dsn: Optional[str] = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

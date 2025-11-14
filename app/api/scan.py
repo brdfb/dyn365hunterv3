@@ -1,6 +1,6 @@
 """Scan endpoints for domain analysis and scoring."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
@@ -15,6 +15,7 @@ from app.core.progress_tracker import get_progress_tracker
 from app.core.tasks import bulk_scan_task
 from app.core.auto_tagging import apply_auto_tags
 from app.core.constants import MAX_BULK_SCAN_DOMAINS
+from app.core.logging import logger
 
 
 router = APIRouter(prefix="/scan", tags=["scan"])
@@ -174,10 +175,7 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
             db.commit()
         except Exception as e:
             # Log error but don't fail the scan
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Auto-tagging failed for {domain}: {str(e)}")
+            logger.warning("auto_tagging_failed", domain=domain, error=str(e))
 
         # Return response
         return ScanDomainResponse(

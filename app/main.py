@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.db.session import get_db, engine
+from app.core.middleware import RequestIDMiddleware
+from app.core.error_tracking import *  # Initialize Sentry
 from app.api import (
     ingest,
     scan,
@@ -20,6 +22,7 @@ from app.api import (
     pdf,
     rescan,
     alerts,
+    health,
 )
 
 # Create FastAPI app
@@ -29,7 +32,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Add request ID middleware
+app.add_middleware(RequestIDMiddleware)
+
 # Register routers
+app.include_router(health.router)
 app.include_router(ingest.router)
 app.include_router(scan.router)
 app.include_router(leads.router)
@@ -65,22 +72,8 @@ if mini_ui_path:
     )
 
 
-@app.get("/healthz")
-async def health_check(db: Session = Depends(get_db)):
-    """
-    Health check endpoint.
-
-    Returns:
-        dict: Status and database connection status
-    """
-    try:
-        # Test database connection
-        db.execute(text("SELECT 1"))
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"disconnected: {str(e)}"
-
-    return {"status": "ok", "database": db_status, "environment": settings.environment}
+# Legacy health check endpoint moved to app/api/health.py
+# Keeping for backward compatibility but redirecting to health router
 
 
 @app.get("/")

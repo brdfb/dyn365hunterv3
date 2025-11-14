@@ -2,7 +2,6 @@
 
 import pandas as pd
 import asyncio
-import logging
 from fastapi import (
     APIRouter,
     Depends,
@@ -11,6 +10,7 @@ from fastapi import (
     File,
     Query,
     BackgroundTasks,
+    Request,
 )
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -39,8 +39,7 @@ from app.api.jobs import (
     complete_job,
     JobStatus,
 )
-
-logger = logging.getLogger(__name__)
+from app.core.logging import logger, mask_pii
 
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -524,6 +523,7 @@ async def ingest_webhook(
     request: WebhookRequest,
     api_key: ApiKey = Depends(verify_api_key),
     db: Session = Depends(get_db),
+    http_request: Request = None,
 ):
     """
     Ingest data from webhook with API key authentication.
@@ -552,7 +552,14 @@ async def ingest_webhook(
         normalized_domain = normalize_domain(request.domain)
         if not normalized_domain:
             error_msg = f"Invalid domain format: {request.domain}"
-            logger.error(f"Webhook error: {error_msg}")
+            request_id = getattr(http_request.state, "request_id", None) if http_request else None
+            logger.error(
+                "webhook_error",
+                request_id=request_id,
+                domain=request.domain,
+                error=error_msg,
+                api_key_id=api_key.id,
+            )
             # Create retry record for invalid domain (won't retry, but for tracking)
             create_webhook_retry(
                 db=db,
@@ -571,7 +578,15 @@ async def ingest_webhook(
             )
         except Exception as e:
             error_msg = f"Failed to upsert company: {str(e)}"
-            logger.error(f"Webhook error: {error_msg}", exc_info=True)
+            request_id = getattr(http_request.state, "request_id", None) if http_request else None
+            logger.error(
+                "webhook_error",
+                request_id=request_id,
+                domain=normalized_domain,
+                error=error_msg,
+                api_key_id=api_key.id,
+                exc_info=True,
+            )
             # Create retry record
             create_webhook_retry(
                 db=db,
@@ -599,7 +614,15 @@ async def ingest_webhook(
                 enriched = True
             except Exception as e:
                 error_msg = f"Failed to enrich company data: {str(e)}"
-                logger.error(f"Webhook enrichment error: {error_msg}", exc_info=True)
+                request_id = getattr(http_request.state, "request_id", None) if http_request else None
+                logger.error(
+                    "webhook_enrichment_error",
+                    request_id=request_id,
+                    domain=normalized_domain,
+                    error=error_msg,
+                    api_key_id=api_key.id,
+                    exc_info=True,
+                )
                 # Don't fail the whole request if enrichment fails, just log it
                 db.rollback()
 
@@ -621,7 +644,15 @@ async def ingest_webhook(
             db.refresh(raw_lead)
         except Exception as e:
             error_msg = f"Failed to create raw_lead: {str(e)}"
-            logger.error(f"Webhook error: {error_msg}", exc_info=True)
+            request_id = getattr(http_request.state, "request_id", None) if http_request else None
+            logger.error(
+                "webhook_error",
+                request_id=request_id,
+                domain=normalized_domain,
+                error=error_msg,
+                api_key_id=api_key.id,
+                exc_info=True,
+            )
             # Create retry record
             create_webhook_retry(
                 db=db,
@@ -632,8 +663,13 @@ async def ingest_webhook(
             )
             raise HTTPException(status_code=500, detail=error_msg)
 
+        request_id = getattr(http_request.state, "request_id", None) if http_request else None
         logger.info(
-            f"Webhook ingested successfully: domain={normalized_domain}, api_key_id={api_key.id}"
+            "webhook_ingested",
+            request_id=request_id,
+            domain=normalized_domain,
+            api_key_id=api_key.id,
+            enriched=enriched,
         )
 
         return WebhookResponse(
@@ -648,7 +684,14 @@ async def ingest_webhook(
         raise
     except Exception as e:
         error_msg = f"Unexpected error: {str(e)}"
-        logger.error(f"Webhook unexpected error: {error_msg}", exc_info=True)
+        request_id = getattr(http_request.state, "request_id", None) if http_request else None
+        logger.error(
+            "webhook_unexpected_error",
+            request_id=request_id,
+            error=error_msg,
+            api_key_id=api_key.id if api_key else None,
+            exc_info=True,
+        )
         # Create retry record
         try:
             create_webhook_retry(

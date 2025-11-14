@@ -3,13 +3,10 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 import httpx
-import logging
 from datetime import datetime
 from app.db.models import Alert, AlertConfig
 from app.config import settings
-
-
-logger = logging.getLogger(__name__)
+from app.core.logging import logger
 
 
 async def send_webhook_notification(webhook_url: str, alert: Alert) -> bool:
@@ -38,7 +35,7 @@ async def send_webhook_notification(webhook_url: str, alert: Alert) -> bool:
             return True
 
     except Exception as e:
-        logger.error(f"Webhook notification failed for alert {alert.id}: {str(e)}")
+        logger.error("webhook_notification_failed", alert_id=alert.id, domain=alert.domain, error=str(e))
         return False
 
 
@@ -59,14 +56,15 @@ async def send_email_notification(email_address: str, alert: Alert) -> bool:
     try:
         # TODO: Integrate with SMTP service (SendGrid, AWS SES, etc.)
         logger.info(
-            f"Email notification would be sent to {email_address} for alert {alert.id}"
+            "email_notification_sent",
+            alert_id=alert.id,
+            domain=alert.domain,
+            alert_type=alert.alert_type,
         )
-        logger.info(f"Subject: Domain Alert - {alert.domain}")
-        logger.info(f"Body: {alert.alert_message}")
         return True
 
     except Exception as e:
-        logger.error(f"Email notification failed for alert {alert.id}: {str(e)}")
+        logger.error("email_notification_failed", alert_id=alert.id, domain=alert.domain, error=str(e))
         return False
 
 

@@ -1,6 +1,6 @@
 """Celery tasks for async domain scanning."""
 
-import logging
+from app.core.logging import logger
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -15,7 +15,6 @@ from app.core.auto_tagging import apply_auto_tags
 from app.db.session import SessionLocal
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 
-logger = logging.getLogger(__name__)
 
 
 def scan_single_domain(domain: str, db: Session) -> Dict:
@@ -147,7 +146,7 @@ def scan_single_domain(domain: str, db: Session) -> Dict:
             db.commit()
         except Exception as e:
             # Log error but don't fail the scan
-            logger.warning(f"Auto-tagging failed for {normalized_domain}: {str(e)}")
+            logger.warning("auto_tagging_failed", domain=normalized_domain, error=str(e))
 
         # Return success result
         return {
@@ -168,7 +167,7 @@ def scan_single_domain(domain: str, db: Session) -> Dict:
         }
 
     except Exception as e:
-        logger.error(f"Error scanning domain {domain}: {str(e)}", exc_info=True)
+        logger.error("scan_error", domain=domain, error=str(e), exc_info=True)
         db.rollback()
         return {"domain": domain, "error": str(e), "success": False}
 
@@ -194,12 +193,12 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
         # Get job and domain list
         job = tracker.get_job(job_id)
         if not job:
-            logger.error(f"Job {job_id} not found")
+            logger.error("job_not_found", job_id=job_id)
             return
 
         domain_list = tracker.get_domain_list(job_id)
         if not domain_list:
-            logger.error(f"Domain list not found for job {job_id}")
+            logger.error("domain_list_not_found", job_id=job_id)
             tracker.set_status(job_id, "failed")
             return
 
@@ -252,7 +251,10 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
 
             except Exception as e:
                 logger.error(
-                    f"Error scanning domain {domain} in job {job_id}: {str(e)}",
+                    "scan_domain_error",
+                    domain=domain,
+                    job_id=job_id,
+                    error=str(e),
                     exc_info=True,
                 )
                 processed += 1
@@ -263,12 +265,19 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
         # Set status to completed
         tracker.set_status(job_id, "completed")
         logger.info(
-            f"Bulk {'rescan' if is_rescan else 'scan'} job {job_id} completed: {succeeded} succeeded, {failed} failed"
+            "bulk_scan_completed",
+            job_id=job_id,
+            scan_type="rescan" if is_rescan else "scan",
+            succeeded=succeeded,
+            failed=failed,
         )
 
     except Exception as e:
         logger.error(
-            f"Error in bulk {'rescan' if is_rescan else 'scan'} task {job_id}: {str(e)}",
+            "bulk_scan_error",
+            job_id=job_id,
+            scan_type="rescan" if is_rescan else "scan",
+            error=str(e),
             exc_info=True,
         )
         tracker.set_status(job_id, "failed")
@@ -291,18 +300,18 @@ def process_pending_alerts_task(self):
     import asyncio
     from app.core.notifications import process_pending_alerts
 
-    logger.info("Starting pending alerts processing task...")
+    logger.info("pending_alerts_task_started")
 
     db = SessionLocal()
 
     try:
         # Process pending alerts (async function, need to run in event loop)
         processed = asyncio.run(process_pending_alerts(db))
-        logger.info(f"Processed {processed} pending alerts")
+        logger.info("pending_alerts_processed", processed=processed)
         return {"status": "completed", "processed": processed}
 
     except Exception as e:
-        logger.error(f"Error in process pending alerts task: {str(e)}", exc_info=True)
+        logger.error("pending_alerts_task_error", error=str(e), exc_info=True)
         raise
 
     finally:
@@ -321,7 +330,7 @@ def daily_rescan_task(self):
     """
     from app.db.models import Company, DomainSignal
 
-    logger.info("Starting daily rescan task...")
+    logger.info("daily_rescan_task_started")
 
     db = SessionLocal()
 
@@ -331,14 +340,14 @@ def daily_rescan_task(self):
         domain_list = [row[0] for row in domains_with_signals]
 
         if not domain_list:
-            logger.info("No domains to rescan")
+            logger.info("daily_rescan_no_domains")
             return {
                 "status": "completed",
                 "total": 0,
                 "message": "No domains to rescan",
             }
 
-        logger.info(f"Found {len(domain_list)} domains to rescan")
+        logger.info("daily_rescan_domains_found", count=len(domain_list))
 
         # Process in batches of 100 to avoid overwhelming the system
         batch_size = 100
@@ -356,11 +365,15 @@ def daily_rescan_task(self):
 
             total_processed += len(batch)
             logger.info(
-                f"Created rescan job {job_id} for {len(batch)} domains (batch {i//batch_size + 1})"
+                "rescan_job_created",
+                job_id=job_id,
+                batch_size=len(batch),
+                batch_number=i//batch_size + 1,
             )
 
         logger.info(
-            f"Daily rescan task completed: {total_processed} domains queued for rescan"
+            "daily_rescan_completed",
+            total_processed=total_processed,
         )
 
         return {
@@ -371,7 +384,7 @@ def daily_rescan_task(self):
         }
 
     except Exception as e:
-        logger.error(f"Error in daily rescan task: {str(e)}", exc_info=True)
+        logger.error("daily_rescan_error", error=str(e), exc_info=True)
         raise
 
     finally:

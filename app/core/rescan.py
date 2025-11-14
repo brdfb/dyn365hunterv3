@@ -2,7 +2,6 @@
 
 from typing import Dict, Optional
 from sqlalchemy.orm import Session
-import logging
 from app.db.models import DomainSignal, LeadScore, Company
 from app.core.tasks import scan_single_domain
 from app.core.change_detection import (
@@ -11,9 +10,8 @@ from app.core.change_detection import (
     create_alerts,
 )
 from app.core.auto_tagging import apply_auto_tags
+from app.core.logging import logger
 import copy
-
-logger = logging.getLogger(__name__)
 
 
 def rescan_domain(domain: str, db: Session) -> Dict:
@@ -76,7 +74,7 @@ def rescan_domain(domain: str, db: Session) -> Dict:
         apply_auto_tags(domain, db)
     except Exception as e:
         # Log but don't fail
-        logger.warning(f"Auto-tagging failed during rescan for {domain}: {str(e)}")
+        logger.warning("auto_tagging_failed", domain=domain, error=str(e))
 
     # Commit all changes
     db.commit()
@@ -91,7 +89,7 @@ def rescan_domain(domain: str, db: Session) -> Dict:
         process_pending_alerts_task.delay()
     except Exception as e:
         # Log but don't fail - alerts will be processed by scheduled task
-        logger.warning(f"Failed to trigger alert processing task: {str(e)}")
+        logger.warning("alert_processing_trigger_failed", error=str(e))
 
     return {
         "success": True,

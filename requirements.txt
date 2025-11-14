@@ -21,4 +21,8 @@ celery==5.3.4
 redis==5.0.1
 # PDF generation (G17)
 reportlab==4.0.7
+# Security (G19 pre-flight)
+bcrypt>=4.0.0
+structlog>=23.0.0
+sentry-sdk[fastapi]>=1.38.0
 

@@ -2,23 +2,30 @@
 
 import pytest
 import time
-from app.core.api_key_auth import hash_api_key, generate_api_key, get_api_key_limiter
+from app.core.api_key_auth import hash_api_key, check_api_key_hash, generate_api_key, get_api_key_limiter
 
 
 def test_hash_api_key():
-    """Test API key hashing."""
+    """Test API key hashing with bcrypt."""
     key = "test-key-123"
     hash1 = hash_api_key(key)
     hash2 = hash_api_key(key)
 
-    # Same key should produce same hash
-    assert hash1 == hash2
+    # With bcrypt, same key produces different hashes (due to salt)
+    # But both should verify correctly
+    assert check_api_key_hash(key, hash1) is True
+    assert check_api_key_hash(key, hash2) is True
 
     # Hash should be different from original
     assert hash1 != key
+    assert hash2 != key
 
-    # Hash should be hex string (SHA-256 = 64 chars)
-    assert len(hash1) == 64
+    # Hashes should be different (bcrypt uses random salt)
+    assert hash1 != hash2
+
+    # Hash should be a bcrypt hash (starts with $2b$ and is ~60 chars)
+    assert hash1.startswith("$2b$") or hash1.startswith("$2a$") or hash1.startswith("$2y$")
+    assert len(hash1) >= 50  # bcrypt hashes are typically 60 chars
 
 
 def test_generate_api_key():
