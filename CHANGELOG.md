@@ -8,6 +8,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G18: ReScan + Alerts + Enhanced Scoring** - Automation and change detection
+  - ReScan infrastructure:
+    - `POST /scan/{domain}/rescan` - Manual rescan with change detection
+    - `POST /scan/bulk/rescan` - Bulk rescan for multiple domains
+    - Change detection for signals (SPF, DKIM, DMARC, MX) and scores
+    - History tables: `signal_change_history`, `score_change_history`
+  - Alerts system:
+    - `GET /alerts` - List alerts with filters
+    - `POST /alerts/config` - Configure alert preferences
+    - `GET /alerts/config` - List alert configurations
+    - Alert types: MX changed, DMARC added, Domain expire soon, Score changed
+    - Notification methods: Email (placeholder), Webhook (HTTP POST), Slack (optional)
+    - Alert configuration: Immediate or daily digest frequency
+  - Enhanced scoring (AI-free):
+    - DKIM none penalty (additional risk point)
+    - SPF multiple includes risk detection
+    - Enhanced risk scoring for security signals
+  - Scheduler:
+    - Daily rescan task via Celery Beat
+    - Automatic change detection and alert generation
+    - Configurable schedule (daily, weekly, monthly)
+  - Database migration: `app/db/migrations/g18_rescan_alerts_scoring.sql`
+  - Implementation:
+    - `app/core/change_detection.py` - Change detection logic
+    - `app/core/rescan.py` - ReScan engine
+    - `app/core/notifications.py` - Notification engine
+    - `app/api/rescan.py` - ReScan endpoints
+    - `app/api/alerts.py` - Alerts endpoints
+    - `app/db/models.py` - History and alert models
+    - `app/core/celery_app.py` - Celery Beat schedule
+    - `app/core/tasks.py` - Daily rescan task
+  - Tests: Comprehensive test suite
+    - `tests/test_rescan_alerts.py` - ReScan, change detection, and alerts tests
+  - Post-MVP Sprint 5 feature (automation + change alerts)
+- **G17: Notes, Tags, Favorites + PDF Summary** - CRM-lite features and PDF account summaries
+  - Notes system:
+    - `POST /leads/{domain}/notes` - Create a note for a domain
+    - `GET /leads/{domain}/notes` - List all notes for a domain
+    - `PUT /leads/{domain}/notes/{note_id}` - Update a note
+    - `DELETE /leads/{domain}/notes/{note_id}` - Delete a note
+    - Database table: `notes` with domain foreign key
+  - Tags system:
+    - `POST /leads/{domain}/tags` - Add a tag to a domain
+    - `GET /leads/{domain}/tags` - List all tags for a domain
+    - `DELETE /leads/{domain}/tags/{tag_id}` - Remove a tag from a domain
+    - Database table: `tags` with domain foreign key and unique constraint
+    - Auto-tagging: Automatically applies tags after domain scan:
+      - `security-risk`: No SPF + no DKIM
+      - `migration-ready`: Migration segment + score >= 70
+      - `expire-soon`: Domain expires in < 30 days
+      - `weak-spf`: SPF exists but DMARC policy is 'none'
+      - `google-workspace`: Provider is Google
+      - `local-mx`: Provider is Local
+  - Favorites system:
+    - `POST /leads/{domain}/favorite` - Add a domain to favorites
+    - `GET /leads?favorite=true` - List favorite domains (session-based)
+    - `DELETE /leads/{domain}/favorite` - Remove a domain from favorites
+    - Database table: `favorites` with domain and user_id (session-based)
+  - PDF Summary:
+    - `GET /leads/{domain}/summary.pdf` - Generate PDF account summary
+    - Includes: Provider info, SPF/DKIM/DMARC status, expiry date, signals, scores, risks
+    - Uses ReportLab for PDF generation
+  - Database migration: `app/db/migrations/g17_notes_tags_favorites.sql`
+  - Implementation:
+    - `app/core/auto_tagging.py` - Auto-tagging logic
+    - `app/api/notes.py` - Notes endpoints
+    - `app/api/tags.py` - Tags endpoints
+    - `app/api/favorites.py` - Favorites endpoints
+    - `app/api/pdf.py` - PDF summary endpoint
+    - `app/db/models.py` - Note, Tag, Favorite models
+  - Tests: Comprehensive test suite
+    - `tests/test_notes_tags_favorites.py` - Notes, tags, favorites, and auto-tagging tests
+    - `tests/test_pdf.py` - PDF generation tests
+  - Post-MVP Sprint 4 feature (CRM-lite + PDF summary)
 - **G16: Webhook + Lead Enrichment** - Webhook ingestion with API key authentication and lead enrichment
   - `POST /ingest/webhook` endpoint for webhook data ingestion
     - API key authentication via `X-API-Key` header

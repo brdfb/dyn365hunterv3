@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.db.session import get_db, engine
-from app.api import ingest, scan, leads, dashboard, email_tools, progress, admin
+from app.api import ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts
 
 # Create FastAPI app
 app = FastAPI(
@@ -22,6 +22,12 @@ app.include_router(dashboard.router)
 app.include_router(email_tools.router)
 app.include_router(progress.router)
 app.include_router(admin.router)
+app.include_router(notes.router)
+app.include_router(tags.router)
+app.include_router(favorites.router)
+app.include_router(pdf.router)
+app.include_router(rescan.router)
+app.include_router(alerts.router)
 
 # Mount static files for Mini UI
 import os

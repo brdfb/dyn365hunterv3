@@ -23,7 +23,9 @@
     "no_spf": -10,
     "no_dkim": -10,
     "dmarc_none": -10,
-    "hosting_mx_weak": -10
+    "hosting_mx_weak": -10,
+    "spf_multiple_includes": -5,
+    "dkim_none": -5
   },
   "hard_fail_rules": [
     {

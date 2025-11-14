@@ -12,6 +12,7 @@ from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
 from app.core.progress_tracker import get_progress_tracker
 from app.core.tasks import bulk_scan_task
+from app.core.auto_tagging import apply_auto_tags
 
 
 router = APIRouter(prefix="/scan", tags=["scan"])
@@ -165,6 +166,16 @@ async def scan_domain(
         db.commit()
         db.refresh(domain_signal)
         db.refresh(lead_score)
+        
+        # Apply auto-tagging (G17)
+        try:
+            apply_auto_tags(domain, db)
+            db.commit()
+        except Exception as e:
+            # Log error but don't fail the scan
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Auto-tagging failed for {domain}: {str(e)}")
         
         # Return response
         return ScanDomainResponse(

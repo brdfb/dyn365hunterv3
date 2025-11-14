@@ -10,6 +10,7 @@ from app.core.analyzer_dns import analyze_dns
 from app.core.analyzer_whois import get_whois_info
 from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
+from app.core.auto_tagging import apply_auto_tags
 from app.db.session import SessionLocal
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 
@@ -139,6 +140,14 @@ def scan_single_domain(domain: str, db: Session) -> Dict:
         db.refresh(domain_signal)
         db.refresh(lead_score)
         
+        # Apply auto-tagging (G17)
+        try:
+            apply_auto_tags(normalized_domain, db)
+            db.commit()
+        except Exception as e:
+            # Log error but don't fail the scan
+            logger.warning(f"Auto-tagging failed for {normalized_domain}: {str(e)}")
+        
         # Return success result
         return {
             "domain": normalized_domain,
@@ -244,6 +253,68 @@ def bulk_scan_task(self, job_id: str):
     except Exception as e:
         logger.error(f"Error in bulk scan task {job_id}: {str(e)}", exc_info=True)
         tracker.set_status(job_id, "failed")
+        raise
+    
+    finally:
+        db.close()
+
+
+@celery_app.task(bind=True)
+def daily_rescan_task(self):
+    """
+    Daily rescan task for all domains (G18: Scheduler).
+    
+    This task:
+    - Gets all domains that have been scanned
+    - Creates bulk rescan jobs for them
+    - Processes changes and creates alerts
+    """
+    from app.db.models import Company, DomainSignal
+    
+    logger.info("Starting daily rescan task...")
+    
+    db = SessionLocal()
+    
+    try:
+        # Get all domains that have been scanned (have domain_signals)
+        domains_with_signals = db.query(DomainSignal.domain).distinct().all()
+        domain_list = [row[0] for row in domains_with_signals]
+        
+        if not domain_list:
+            logger.info("No domains to rescan")
+            return {"status": "completed", "total": 0, "message": "No domains to rescan"}
+        
+        logger.info(f"Found {len(domain_list)} domains to rescan")
+        
+        # Process in batches of 100 to avoid overwhelming the system
+        batch_size = 100
+        total_processed = 0
+        
+        for i in range(0, len(domain_list), batch_size):
+            batch = domain_list[i:i + batch_size]
+            
+            # Create bulk rescan job for this batch
+            job_id = str(uuid.uuid4())
+            tracker = get_progress_tracker()
+            tracker.create_job(job_id, len(batch))
+            
+            # Start async task
+            bulk_scan_task.delay(job_id, batch)
+            
+            total_processed += len(batch)
+            logger.info(f"Created rescan job {job_id} for {len(batch)} domains (batch {i//batch_size + 1})")
+        
+        logger.info(f"Daily rescan task completed: {total_processed} domains queued for rescan")
+        
+        return {
+            "status": "completed",
+            "total": total_processed,
+            "batches": (len(domain_list) + batch_size - 1) // batch_size,
+            "message": f"Queued {total_processed} domains for rescan"
+        }
+    
+    except Exception as e:
+        logger.error(f"Error in daily rescan task: {str(e)}", exc_info=True)
         raise
     
     finally:

@@ -206,6 +206,7 @@ A simple web interface for demo and internal use:
     - `segment` (optional): Filter by segment (Migration, Existing, Cold, Skip)
     - `min_score` (optional): Minimum readiness score (0-100)
     - `provider` (optional): Filter by provider (M365, Google, etc.)
+    - `favorite` (optional): Filter by favorites (true = only favorites, false = all leads)
   - Returns: Array of lead objects with `priority_score` field (1-6, where 1 is highest priority)
 - `GET /leads/{domain}` - Get single lead details
   - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), and metadata
@@ -221,6 +222,76 @@ A simple web interface for demo and internal use:
     - `format` (optional): Export format (`csv` or `xlsx`, default: `csv`)
   - Returns: CSV or Excel file download with lead data
   - File name format: `leads_YYYY-MM-DD_HH-MM-SS.csv` or `leads_YYYY-MM-DD_HH-MM-SS.xlsx`
+
+### Notes (G17: CRM-lite)
+- `POST /leads/{domain}/notes` - Create a note for a domain
+  - Request body: `{"note": "This is a note"}`
+  - Returns: Created note with id, domain, note, created_at, updated_at
+- `GET /leads/{domain}/notes` - List all notes for a domain
+  - Returns: Array of notes (ordered by created_at desc)
+- `PUT /leads/{domain}/notes/{note_id}` - Update a note
+  - Request body: `{"note": "Updated note"}`
+  - Returns: Updated note
+- `DELETE /leads/{domain}/notes/{note_id}` - Delete a note
+  - Returns: 204 No Content
+
+### Tags (G17: CRM-lite)
+- `POST /leads/{domain}/tags` - Add a tag to a domain
+  - Request body: `{"tag": "important"}`
+  - Returns: Created tag with id, domain, tag, created_at
+- `GET /leads/{domain}/tags` - List all tags for a domain
+  - Returns: Array of tags
+- `DELETE /leads/{domain}/tags/{tag_id}` - Remove a tag from a domain
+  - Returns: 204 No Content
+- **Auto-tagging**: Automatically applies tags after domain scan:
+  - `security-risk`: No SPF + no DKIM
+  - `migration-ready`: Migration segment + score >= 70
+  - `expire-soon`: Domain expires in < 30 days
+  - `weak-spf`: SPF exists but DMARC policy is 'none'
+  - `google-workspace`: Provider is Google
+  - `local-mx`: Provider is Local
+
+### Favorites (G17: CRM-lite)
+- `POST /leads/{domain}/favorite` - Add a domain to favorites
+  - Returns: Created favorite with id, domain, user_id, created_at
+  - Session-based (no authentication required yet)
+- `GET /leads?favorite=true` - List favorite domains
+  - Returns: Array of leads that are favorited by the current user
+- `DELETE /leads/{domain}/favorite` - Remove a domain from favorites
+  - Returns: 204 No Content
+
+### PDF Summary (G17)
+- `GET /leads/{domain}/summary.pdf` - Generate PDF account summary
+  - Returns: PDF file download
+  - Includes: Provider info, SPF/DKIM/DMARC status, expiry date, signals, scores, risks
+  - File name: `{domain}_summary.pdf`
+
+### ReScan (G18: Automation)
+- `POST /scan/{domain}/rescan` - Re-scan a single domain and detect changes
+  - Returns: Scan result with detected changes (signals, scores, alerts)
+  - Detects: MX changes, DMARC changes, expiry warnings, score changes
+  - Creates alerts for detected changes
+- `POST /scan/bulk/rescan?domain_list=domain1.com,domain2.com` - Bulk rescan multiple domains
+  - Returns: Job ID for async processing
+  - Maximum 1000 domains per request
+  - Uses same progress tracking as bulk scan
+
+### Alerts (G18: Change Notifications)
+- `GET /alerts` - List alerts with optional filters
+  - Query parameters:
+    - `domain` (optional): Filter by domain
+    - `alert_type` (optional): Filter by alert type (mx_changed, dmarc_added, expire_soon, score_changed)
+    - `status` (optional): Filter by status (pending, sent, failed)
+    - `limit` (optional): Maximum number of alerts (default: 100)
+  - Returns: List of alerts
+- `POST /alerts/config` - Create or update alert configuration
+  - Request body: `{"alert_type": "mx_changed", "notification_method": "webhook", "enabled": true, "frequency": "immediate", "webhook_url": "https://example.com/webhook"}`
+  - Returns: Alert configuration
+- `GET /alerts/config` - List alert configurations for current user
+  - Returns: List of alert configurations
+- **Notification methods**: Email (placeholder), Webhook (HTTP POST), Slack (optional)
+- **Alert types**: MX changed, DMARC added, Domain expire soon, Score changed
+- **Daily rescan**: Automatically runs daily via Celery Beat scheduler
 
 ### Dashboard
 - `GET /dashboard` - Get aggregated dashboard statistics

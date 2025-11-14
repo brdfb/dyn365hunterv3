@@ -1,7 +1,7 @@
 # TODO: Sprint 4 (G17) - Notes/Tags/Favorites + Basit PDF
 
 **Date Created**: 2025-11-14  
-**Status**: 📋 Planned  
+**Status**: ✅ Completed  
 **Phase**: G17 (Post-MVP Sprint 4)  
 **Süre**: 2 hafta
 
@@ -19,123 +19,123 @@ CRM-lite - Notes, tags, favorites + satış sunumu (basit PDF).
 
 ### Notes System
 
-- [ ] Schema: `notes` tablosu
-  - [ ] `id` (primary key)
-  - [ ] `domain` (foreign key to companies.domain)
-  - [ ] `note` (text)
-  - [ ] `created_at` (timestamp)
-  - [ ] `updated_at` (timestamp)
-  - [ ] Migration script
+- [x] Schema: `notes` tablosu
+  - [x] `id` (primary key)
+  - [x] `domain` (foreign key to companies.domain)
+  - [x] `note` (text)
+  - [x] `created_at` (timestamp)
+  - [x] `updated_at` (timestamp)
+  - [x] Migration script
 
-- [ ] CRUD endpoints
-  - [ ] `POST /leads/{domain}/notes` - Create note
-  - [ ] `GET /leads/{domain}/notes` - List notes
-  - [ ] `PUT /leads/{domain}/notes/{note_id}` - Update note
-  - [ ] `DELETE /leads/{domain}/notes/{note_id}` - Delete note
+- [x] CRUD endpoints
+  - [x] `POST /leads/{domain}/notes` - Create note
+  - [x] `GET /leads/{domain}/notes` - List notes
+  - [x] `PUT /leads/{domain}/notes/{note_id}` - Update note
+  - [x] `DELETE /leads/{domain}/notes/{note_id}` - Delete note
 
 ### Tags System
 
-- [ ] Schema: `tags` tablosu (many-to-many)
-  - [ ] `id` (primary key)
-  - [ ] `domain` (foreign key to companies.domain)
-  - [ ] `tag` (string, unique per domain)
-  - [ ] `created_at` (timestamp)
-  - [ ] Migration script
+- [x] Schema: `tags` tablosu (many-to-many)
+  - [x] `id` (primary key)
+  - [x] `domain` (foreign key to companies.domain)
+  - [x] `tag` (string, unique per domain)
+  - [x] `created_at` (timestamp)
+  - [x] Migration script
 
-- [ ] CRUD endpoints
-  - [ ] `POST /leads/{domain}/tags` - Add tag
-  - [ ] `GET /leads/{domain}/tags` - List tags
-  - [ ] `DELETE /leads/{domain}/tags/{tag_id}` - Remove tag
+- [x] CRUD endpoints
+  - [x] `POST /leads/{domain}/tags` - Add tag
+  - [x] `GET /leads/{domain}/tags` - List tags
+  - [x] `DELETE /leads/{domain}/tags/{tag_id}` - Remove tag
 
-- [ ] Auto-tagging logic
-  - [ ] "security-risk" (no SPF + no DKIM)
-  - [ ] "migration-ready" (Migration segment + score >= 70)
-  - [ ] "expire-soon" (expires_at < 30 days)
-  - [ ] "weak-spf" (SPF exists but weak)
-  - [ ] "google-workspace" (provider = Google)
-  - [ ] "local-mx" (provider = Local)
-  - [ ] Auto-tagging trigger (scan sonrası)
+- [x] Auto-tagging logic
+  - [x] "security-risk" (no SPF + no DKIM)
+  - [x] "migration-ready" (Migration segment + score >= 70)
+  - [x] "expire-soon" (expires_at < 30 days)
+  - [x] "weak-spf" (SPF exists but weak)
+  - [x] "google-workspace" (provider = Google)
+  - [x] "local-mx" (provider = Local)
+  - [x] Auto-tagging trigger (scan sonrası)
 
 ### Favorites System
 
-- [ ] Schema: `favorites` tablosu
-  - [ ] `id` (primary key)
-  - [ ] `domain` (foreign key to companies.domain)
-  - [ ] `user_id` (string, session-based, auth yok)
-  - [ ] `created_at` (timestamp)
-  - [ ] Migration script
+- [x] Schema: `favorites` tablosu
+  - [x] `id` (primary key)
+  - [x] `domain` (foreign key to companies.domain)
+  - [x] `user_id` (string, session-based, auth yok)
+  - [x] `created_at` (timestamp)
+  - [x] Migration script
 
-- [ ] CRUD endpoints
-  - [ ] `POST /leads/{domain}/favorite` - Add favorite
-  - [ ] `GET /leads?favorite=true` - List favorites
-  - [ ] `DELETE /leads/{domain}/favorite` - Remove favorite
+- [x] CRUD endpoints
+  - [x] `POST /leads/{domain}/favorite` - Add favorite
+  - [x] `GET /leads?favorite=true` - List favorites
+  - [x] `DELETE /leads/{domain}/favorite` - Remove favorite
 
 ### PDF Account Summary (Basit, AI Yok)
 
-- [ ] PDF generation library
-  - [ ] ReportLab veya WeasyPrint seçimi
-  - [ ] Dependency ekleme
+- [x] PDF generation library
+  - [x] ReportLab veya WeasyPrint seçimi
+  - [x] Dependency ekleme
 
-- [ ] PDF template
-  - [ ] Provider bilgisi
-  - [ ] SPF/DKIM/DMARC status
-  - [ ] Expiry date
-  - [ ] Signals (MX, nameservers)
-  - [ ] Migration Score, Priority Score
-  - [ ] Risks (no SPF, no DKIM, DMARC none)
-  - [ ] **AI Recommendation YOK** (Sprint 6+)
+- [x] PDF template
+  - [x] Provider bilgisi
+  - [x] SPF/DKIM/DMARC status
+  - [x] Expiry date
+  - [x] Signals (MX, nameservers)
+  - [x] Migration Score, Priority Score
+  - [x] Risks (no SPF, no DKIM, DMARC none)
+  - [x] **AI Recommendation YOK** (Sprint 6+)
 
-- [ ] Endpoint: `GET /leads/{domain}/summary.pdf`
-  - [ ] PDF generation
-  - [ ] File download response
+- [x] Endpoint: `GET /leads/{domain}/summary.pdf`
+  - [x] PDF generation
+  - [x] File download response
 
 ### API Endpoints
 
-- [ ] Notes endpoints (4 endpoint)
-- [ ] Tags endpoints (3 endpoint)
-- [ ] Favorites endpoints (3 endpoint)
-- [ ] PDF endpoint (1 endpoint)
+- [x] Notes endpoints (4 endpoint)
+- [x] Tags endpoints (3 endpoint)
+- [x] Favorites endpoints (3 endpoint)
+- [x] PDF endpoint (1 endpoint)
 
 ### Testing
 
-- [ ] Unit tests
-  - [ ] Notes CRUD tests
-  - [ ] Tags CRUD tests
-  - [ ] Favorites CRUD tests
-  - [ ] Auto-tagging logic tests
-  - [ ] PDF generation tests
+- [x] Unit tests
+  - [x] Notes CRUD tests
+  - [x] Tags CRUD tests
+  - [x] Favorites CRUD tests
+  - [x] Auto-tagging logic tests
+  - [x] PDF generation tests
 
-- [ ] Integration tests
-  - [ ] Notes end-to-end test
-  - [ ] Tags end-to-end test
-  - [ ] Favorites end-to-end test
-  - [ ] PDF generation end-to-end test
+- [x] Integration tests
+  - [x] Notes end-to-end test
+  - [x] Tags end-to-end test
+  - [x] Favorites end-to-end test
+  - [x] PDF generation end-to-end test
 
 ### Documentation
 
-- [ ] API documentation
-  - [ ] Notes endpoints docs
-  - [ ] Tags endpoints docs
-  - [ ] Favorites endpoints docs
-  - [ ] PDF endpoint docs
+- [x] API documentation
+  - [x] Notes endpoints docs
+  - [x] Tags endpoints docs
+  - [x] Favorites endpoints docs
+  - [x] PDF endpoint docs
 
-- [ ] README.md güncellemesi
-  - [ ] Notes/Tags/Favorites kullanımı
-  - [ ] PDF summary kullanımı
+- [x] README.md güncellemesi
+  - [x] Notes/Tags/Favorites kullanımı
+  - [x] PDF summary kullanımı
 
-- [ ] CHANGELOG.md güncellemesi
-  - [ ] G17: Notes/Tags/Favorites + PDF Summary added
+- [x] CHANGELOG.md güncellemesi
+  - [x] G17: Notes/Tags/Favorites + PDF Summary added
 
 ---
 
 ## ✅ Acceptance Criteria
 
-- [ ] Notes CRUD çalışıyor (4 endpoint)
-- [ ] Tags CRUD çalışıyor (3 endpoint)
-- [ ] Auto-tagging çalışıyor (6 tag type)
-- [ ] Favorites çalışıyor (session-based, 3 endpoint)
-- [ ] PDF summary oluşturuluyor (AI olmadan)
-- [ ] Tests passing (≥12 test cases)
+- [x] Notes CRUD çalışıyor (4 endpoint)
+- [x] Tags CRUD çalışıyor (3 endpoint)
+- [x] Auto-tagging çalışıyor (6 tag type)
+- [x] Favorites çalışıyor (session-based, 3 endpoint)
+- [x] PDF summary oluşturuluyor (AI olmadan)
+- [x] Tests passing (≥12 test cases)
 
 ---
 
@@ -159,6 +159,7 @@ CRM-lite - Notes, tags, favorites + satış sunumu (basit PDF).
 ---
 
 **Son Güncelleme**: 2025-11-14  
-**Sprint Başlangıç**: TBD  
-**Sprint Bitiş**: TBD
+**Sprint Başlangıç**: 2025-11-14  
+**Sprint Bitiş**: 2025-11-14  
+**Tamamlanma Tarihi**: 2025-11-14
 

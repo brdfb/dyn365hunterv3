@@ -29,5 +29,13 @@ celery_app.conf.update(
     task_default_retry_delay=60,  # 1 minute delay before retry
     task_max_retries=2,  # Max 2 retries for transient failures
     result_expires=3600,  # Results expire after 1 hour
+    # Celery Beat schedule (G18: Daily rescan)
+    beat_schedule={
+        'daily-rescan': {
+            'task': 'app.core.tasks.daily_rescan_task',
+            'schedule': 86400.0,  # Run daily (24 hours in seconds)
+            'options': {'expires': 3600}  # Task expires after 1 hour if not picked up
+        },
+    },
 )
 

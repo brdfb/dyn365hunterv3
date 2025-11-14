@@ -135,6 +135,8 @@ def calculate_score(
     # No DKIM risk
     if not signals.get("dkim"):
         score += risk_points.get("no_dkim", 0)
+        # Additional penalty for DKIM none (G18: Enhanced scoring)
+        score += risk_points.get("dkim_none", 0)
     
     # DMARC none risk (additional to signal_points)
     if dmarc_policy and dmarc_policy.lower() == "none":
@@ -143,6 +145,14 @@ def calculate_score(
     # Hosting MX weak risk (Hosting provider + no SPF + no DKIM)
     if provider == "Hosting" and not signals.get("spf") and not signals.get("dkim"):
         score += risk_points.get("hosting_mx_weak", 0)
+    
+    # SPF multiple includes risk (G18: Enhanced scoring)
+    # Check if SPF has multiple includes (indicates complexity/risk)
+    spf_record = signals.get("spf_record")  # Optional: full SPF record string
+    if spf_record and isinstance(spf_record, str):
+        include_count = spf_record.count("include:")
+        if include_count > 3:  # More than 3 includes = risk
+            score += risk_points.get("spf_multiple_includes", 0)
     
     # Floor at 0, cap at 100
     return max(0, min(score, 100))

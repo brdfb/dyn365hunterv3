@@ -424,10 +424,35 @@ curl "http://localhost:8000/leads?provider=M365"
 curl "http://localhost:8000/leads?provider=Google"
 ```
 
+#### 4. ReScan ile Değişiklikleri Tespit Et (G18) ✨ YENİ
+```bash
+# Tek domain'i yeniden tara
+curl -X POST http://localhost:8000/scan/ornek-firma.com/rescan
+
+# Toplu rescan (tüm domain'ler için)
+curl -X POST "http://localhost:8000/scan/bulk/rescan?domain_list=domain1.com,domain2.com,domain3.com"
+
+# Alert'leri kontrol et
+curl "http://localhost:8000/alerts?alert_type=mx_changed"
+```
+
+**ReScan Ne Yapıyor?**
+- Domain'i yeniden tarar (DNS + WHOIS)
+- Değişiklikleri tespit eder (MX, DMARC, skor, expiry)
+- Alert oluşturur (değişiklik varsa)
+- History kayıtları oluşturur
+
+**Alert Türleri:**
+- `mx_changed`: MX root değişti
+- `dmarc_added`: DMARC policy eklendi (none → quarantine/reject)
+- `expire_soon`: Domain 30 gün içinde expire olacak
+- `score_changed`: Priority score veya segment değişti
+
 ### Sonuç
 - **Skor artışı**: Segment değişikliği olabilir (Cold → Existing)
 - **Provider değişikliği**: Migration fırsatı
 - **Yeni lead'ler**: Yeni eklenen domain'ler
+- **Değişiklikler**: ReScan ile otomatik tespit edilir ve alert oluşturulur
 
 **Export ile Takip:**
 ```bash
@@ -436,6 +461,8 @@ curl "http://localhost:8000/leads/export?format=csv" -o monthly-report-$(date +%
 
 # Excel'de skor değişikliklerini takip edebilirsiniz
 ```
+
+**Not:** G18 ile birlikte daily rescan scheduler eklendi. Tüm domain'ler otomatik olarak günlük olarak yeniden taranır ve değişiklikler tespit edilir.
 
 ---
 
@@ -619,6 +646,217 @@ curl -X POST http://localhost:8000/email/generate-and-validate \
 
 ---
 
+## 📋 Senaryo 8: ReScan ve Change Detection (G18) ✨ YENİ
+
+### Durum
+Domain'lerdeki değişiklikleri (MX, DMARC, skor) takip etmek ve alert almak istiyorsunuz.
+
+### Adımlar
+
+#### 1. Tek Domain'i ReScan Et
+```bash
+# Domain'i yeniden tara ve değişiklikleri tespit et
+curl -X POST http://localhost:8000/scan/ornek-firma.com/rescan
+```
+
+**Yanıt:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "success": true,
+  "changes_detected": true,
+  "signal_changes": 1,
+  "score_changes": 0,
+  "alerts_created": 1,
+  "changes": [
+    {
+      "type": "mx_changed",
+      "old_value": "outlook.com",
+      "new_value": "google.com"
+    }
+  ]
+}
+```
+
+**Yorum:**
+- ✅ MX root değişti (outlook.com → google.com)
+- ✅ Alert oluşturuldu
+- ✅ History kaydı oluşturuldu
+
+#### 2. Toplu ReScan
+```bash
+# Birden fazla domain'i yeniden tara
+curl -X POST "http://localhost:8000/scan/bulk/rescan?domain_list=domain1.com,domain2.com,domain3.com"
+```
+
+**Yanıt:**
+```json
+{
+  "job_id": "uuid-string",
+  "status": "pending",
+  "total": 3,
+  "message": "Bulk rescan job created"
+}
+```
+
+**İlerleme Takibi:**
+```bash
+# Job durumunu kontrol et
+curl "http://localhost:8000/scan/bulk/{job_id}"
+```
+
+#### 3. Alert'leri Görüntüle
+```bash
+# Tüm alert'leri listele
+curl "http://localhost:8000/alerts"
+
+# MX değişikliği alert'lerini filtrele
+curl "http://localhost:8000/alerts?alert_type=mx_changed"
+
+# Belirli domain için alert'leri görüntüle
+curl "http://localhost:8000/alerts?domain=ornek-firma.com"
+```
+
+#### 4. Alert Konfigürasyonu
+```bash
+# Webhook notification için alert config
+curl -X POST http://localhost:8000/alerts/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alert_type": "mx_changed",
+    "notification_method": "webhook",
+    "enabled": true,
+    "frequency": "immediate",
+    "webhook_url": "https://example.com/webhook"
+  }'
+
+# Email notification için alert config
+curl -X POST http://localhost:8000/alerts/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alert_type": "expire_soon",
+    "notification_method": "email",
+    "enabled": true,
+    "frequency": "immediate",
+    "email_address": "sales@example.com"
+  }'
+```
+
+### Sonuç
+
+**ReScan Avantajları:**
+- ✅ Domain değişikliklerini otomatik tespit
+- ✅ MX, DMARC, skor değişikliklerini takip
+- ✅ Alert sistemi ile bildirim alma
+- ✅ History kayıtları ile geçmiş takibi
+
+**Alert Türleri:**
+- **MX Changed**: Provider değişikliği tespit edildi
+- **DMARC Added**: DMARC policy eklendi (güvenlik iyileştirmesi)
+- **Expire Soon**: Domain yakında expire olacak
+- **Score Changed**: Priority score veya segment değişti
+
+**Kullanım Senaryoları:**
+- **Migration Fırsatı**: MX değişikliği migration fırsatı gösterebilir
+- **Güvenlik İyileştirmesi**: DMARC eklenmesi güvenlik iyileştirmesi gösterebilir
+- **Domain Expiry**: Domain expire uyarısı ile yenileme fırsatı
+- **Skor Takibi**: Skor değişiklikleri ile lead durumu takibi
+
+**Not:** Daily rescan scheduler ile tüm domain'ler otomatik olarak günlük olarak yeniden taranır.
+
+---
+
+## 📋 Senaryo 9: Notes, Tags ve Favorites (G17: CRM-lite) ✨ YENİ
+
+### Durum
+Lead'leri organize etmek, notlar eklemek ve favorilere eklemek istiyorsunuz.
+
+### Adımlar
+
+#### 1. Not Ekleyin
+```bash
+# Domain için not ekle
+curl -X POST http://localhost:8000/leads/ornek-firma.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Müşteri ile görüşüldü, migration planı hazırlanıyor"}'
+
+# Notları listele
+curl "http://localhost:8000/leads/ornek-firma.com/notes"
+
+# Notu güncelle
+curl -X PUT http://localhost:8000/leads/ornek-firma.com/notes/{note_id} \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Güncellenmiş not"}'
+
+# Notu sil
+curl -X DELETE http://localhost:8000/leads/ornek-firma.com/notes/{note_id}
+```
+
+#### 2. Tag Ekleyin
+```bash
+# Tag ekle
+curl -X POST http://localhost:8000/leads/ornek-firma.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "important"}'
+
+# Tag'leri listele
+curl "http://localhost:8000/leads/ornek-firma.com/tags"
+
+# Tag'i sil
+curl -X DELETE http://localhost:8000/leads/ornek-firma.com/tags/{tag_id}
+```
+
+**Auto-Tagging:**
+- Sistem otomatik olarak tag'ler ekler:
+  - `security-risk`: SPF ve DKIM yok
+  - `migration-ready`: Migration segment + skor >= 70
+  - `expire-soon`: Domain 30 gün içinde expire olacak
+  - `weak-spf`: SPF var ama DMARC none
+  - `google-workspace`: Provider Google
+  - `local-mx`: Provider Local
+
+#### 3. Favorilere Ekleyin
+```bash
+# Favorilere ekle
+curl -X POST http://localhost:8000/leads/ornek-firma.com/favorite
+
+# Favorileri listele
+curl "http://localhost:8000/leads?favorite=true"
+
+# Favorilerden çıkar
+curl -X DELETE http://localhost:8000/leads/ornek-firma.com/favorite
+```
+
+#### 4. PDF Özet Oluşturun
+```bash
+# Domain için PDF özet oluştur
+curl "http://localhost:8000/leads/ornek-firma.com/summary.pdf" -o ornek-firma-summary.pdf
+```
+
+**PDF İçeriği:**
+- Provider bilgisi
+- SPF/DKIM/DMARC durumu
+- Expiry date
+- Signals (MX, nameservers)
+- Scores (Readiness, Priority)
+- Risks (no SPF, no DKIM, DMARC none)
+
+### Sonuç
+
+**CRM-lite Avantajları:**
+- ✅ Notlar ile lead takibi
+- ✅ Tag'ler ile lead organizasyonu
+- ✅ Favoriler ile öncelikli lead'ler
+- ✅ PDF özet ile satış sunumu
+
+**Kullanım Senaryoları:**
+- **Notlar**: Müşteri görüşmeleri, migration planları, takip notları
+- **Tag'ler**: Öncelik belirleme, kategori organizasyonu
+- **Favoriler**: Öncelikli lead'leri hızlıca erişim
+- **PDF**: Satış sunumu, müşteri raporu
+
+---
+
 ## 💡 En İyi Pratikler
 
 ### 0. Mini UI Kullanın (Önerilen) 🖥️
@@ -675,11 +913,24 @@ http://localhost:8000/mini-ui/
 - **Domain validation**: Geçersiz domain'ler (nan, web sitesi, vb.) otomatik olarak filtrelenir
 - **Duplicate prevention**: Aynı domain için eski kayıtlar otomatik olarak temizlenir (tekrar scan edildiğinde)
 
+### 6. ReScan ve Change Detection (G18) ✨ YENİ
+- **Düzenli ReScan**: Aylık olarak domain'leri yeniden tarayın
+- **Alert Konfigürasyonu**: Önemli değişiklikler için alert ayarlayın
+- **Change Tracking**: MX, DMARC, skor değişikliklerini takip edin
+- **Daily Rescan**: Sistem otomatik olarak günlük rescan yapar (scheduler ile)
+
 ### 6. Email Üretme ve Doğrulama
 - **Light validation** kullanın (use_smtp=false) - Hızlı ve yeterli
 - **Full validation** sadece kritik durumlarda (use_smtp=true) - Yavaş ama kesin
 - Generic email'leri outreach için kullanın
 - Valid status'lu email'lere öncelik verin
+
+### 7. Notes, Tags ve Favorites (G17) ✨ YENİ
+- **Notlar**: Müşteri görüşmeleri, migration planları için notlar ekleyin
+- **Tag'ler**: Öncelik belirleme, kategori organizasyonu için tag'ler kullanın
+- **Favoriler**: Öncelikli lead'leri favorilere ekleyin, hızlıca erişin
+- **PDF Özet**: Satış sunumu için PDF özet oluşturun
+- **Auto-Tagging**: Sistem otomatik tag'ler ekler, manuel tag'ler de ekleyebilirsiniz
 
 ---
 

@@ -440,6 +440,49 @@ curl -X POST http://localhost:8000/leads/ornek-firma.com/enrich \
 
 **Not:** Enrichment bilgileri `GET /leads/{domain}` endpoint'inde de görüntülenir.
 
+### Notes, Tags, Favorites (G17: CRM-lite) ✨ YENİ
+
+**Notes (Notlar):**
+- `POST /leads/{domain}/notes` - Not ekle
+- `GET /leads/{domain}/notes` - Notları listele
+- `PUT /leads/{domain}/notes/{note_id}` - Notu güncelle
+- `DELETE /leads/{domain}/notes/{note_id}` - Notu sil
+
+**Tags (Etiketler):**
+- `POST /leads/{domain}/tags` - Tag ekle
+- `GET /leads/{domain}/tags` - Tag'leri listele
+- `DELETE /leads/{domain}/tags/{tag_id}` - Tag'i sil
+- **Auto-tagging**: Sistem otomatik tag'ler ekler (security-risk, migration-ready, expire-soon, vb.)
+
+**Favorites (Favoriler):**
+- `POST /leads/{domain}/favorite` - Favorilere ekle
+- `GET /leads?favorite=true` - Favorileri listele
+- `DELETE /leads/{domain}/favorite` - Favorilerden çıkar
+
+**PDF Summary:**
+- `GET /leads/{domain}/summary.pdf` - PDF özet oluştur
+- Satış sunumu için hazır PDF raporu
+
+### ReScan ve Alerts (G18: Automation) ✨ YENİ
+
+**ReScan:**
+- `POST /scan/{domain}/rescan` - Tek domain'i yeniden tara
+- `POST /scan/bulk/rescan?domain_list=...` - Toplu rescan
+- Değişiklikleri tespit eder (MX, DMARC, skor, expiry)
+- Alert oluşturur (değişiklik varsa)
+
+**Alerts:**
+- `GET /alerts` - Alert'leri listele (filtrelerle)
+- `POST /alerts/config` - Alert konfigürasyonu
+- `GET /alerts/config` - Konfigürasyonları listele
+- Alert türleri: mx_changed, dmarc_added, expire_soon, score_changed
+- Notification: Webhook (HTTP POST), Email (placeholder), Slack (optional)
+
+**Daily Rescan:**
+- Sistem otomatik olarak günlük rescan yapar (Celery Beat scheduler)
+- Tüm domain'ler için değişiklikleri tespit eder
+- Alert'ler oluşturulur ve bildirim gönderilir
+
 ### Lead Export (CSV/Excel) 📥 YENİ
 
 Lead'leri CSV veya Excel formatında export etme:
@@ -730,6 +773,42 @@ curl -X POST http://localhost:8000/leads/DOMAIN-BURAYA/enrich \
   -d '{"contact_emails": ["email1@domain.com", "email2@domain.com"]}'
 ```
 
+### Notes, Tags, Favorites (G17: CRM-lite) ✨ YENİ
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/DOMAIN-BURAYA/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Müşteri ile görüşüldü, migration planı hazırlanıyor"}'
+
+# Tag ekle
+curl -X POST http://localhost:8000/leads/DOMAIN-BURAYA/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "important"}'
+
+# Favorilere ekle
+curl -X POST http://localhost:8000/leads/DOMAIN-BURAYA/favorite
+
+# PDF özet oluştur
+curl "http://localhost:8000/leads/DOMAIN-BURAYA/summary.pdf" -o domain-summary.pdf
+```
+
+### ReScan ve Alerts (G18: Automation) ✨ YENİ
+```bash
+# Domain'i yeniden tara (değişiklikleri tespit et)
+curl -X POST http://localhost:8000/scan/DOMAIN-BURAYA/rescan
+
+# Toplu rescan
+curl -X POST "http://localhost:8000/scan/bulk/rescan?domain_list=domain1.com,domain2.com"
+
+# Alert'leri listele
+curl "http://localhost:8000/alerts?alert_type=mx_changed"
+
+# Alert konfigürasyonu
+curl -X POST http://localhost:8000/alerts/config \
+  -H "Content-Type: application/json" \
+  -d '{"alert_type": "mx_changed", "notification_method": "webhook", "webhook_url": "https://example.com/webhook"}'
+```
+
 ---
 
 ## 📖 Dokümantasyon
@@ -760,7 +839,13 @@ http://localhost:8000/docs
 **A:** Normalde 10-15 saniye. İlk analiz (soğuk başlangıç) 15-20 saniye sürebilir.
 
 ### Q: CSV'den ekledim, otomatik analiz olmuyor mu?
-**A:** Hayır. CSV sadece domain'leri ekler. Analiz için `/scan/domain` endpoint'ini kullanmalısınız.
+**A:** `auto_scan=true` parametresi ile CSV upload sonrası otomatik analiz yapılır. Varsayılan olarak `auto_scan=true` kullanılır (Mini UI'de otomatik). Eğer `auto_scan=false` kullandıysanız, manuel olarak `/scan/domain` endpoint'ini kullanmalısınız.
+
+### Q: Domain değişikliklerini nasıl takip ederim?
+**A:** G18 ile birlikte ReScan özelliği eklendi. `POST /scan/{domain}/rescan` ile domain'i yeniden tarayabilir ve değişiklikleri (MX, DMARC, skor) tespit edebilirsiniz. Alert sistemi ile değişiklikler için bildirim alabilirsiniz.
+
+### Q: Alert'ler nasıl çalışır?
+**A:** Alert sistemi domain değişikliklerini (MX değişti, DMARC eklendi, domain expire soon, skor değişti) otomatik olarak tespit eder ve webhook/email ile bildirim gönderir. Alert konfigürasyonu `/alerts/config` endpoint'i ile yapılır.
 
 ### Q: Skor 0-100 arası, hangisi iyi?
 **A:** 

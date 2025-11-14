@@ -1,5 +1,5 @@
 """Leads endpoints for querying analyzed domains."""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -7,11 +7,12 @@ from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 import pandas as pd
+import uuid
 from app.db.session import get_db
 from app.core.normalizer import normalize_domain
 from app.core.priority import calculate_priority_score
 from app.core.enrichment import enrich_company_data
-from app.db.models import Company
+from app.db.models import Company, Favorite
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -194,11 +195,31 @@ async def export_leads(
         )
 
 
+def get_user_id(request: Request) -> str:
+    """
+    Get user ID from session (session-based, no auth yet).
+    
+    For now, we use a session cookie or generate a default user_id.
+    In the future, this will be replaced with proper authentication.
+    """
+    # Try to get session ID from cookie
+    session_id = request.cookies.get("session_id")
+    
+    if not session_id:
+        # Generate a new session ID (for demo purposes)
+        # In production, this should be handled by proper session management
+        session_id = str(uuid.uuid4())
+    
+    return session_id
+
+
 @router.get("", response_model=List[LeadResponse])
 async def get_leads(
     segment: Optional[str] = Query(None, description="Filter by segment (Migration, Existing, Cold, Skip)"),
     min_score: Optional[int] = Query(None, ge=0, le=100, description="Minimum readiness score (0-100)"),
     provider: Optional[str] = Query(None, description="Filter by provider (M365, Google, etc.)"),
+    favorite: Optional[bool] = Query(None, description="Filter by favorites (true = only favorites, false = all leads)"),
+    request: Request = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -208,6 +229,7 @@ async def get_leads(
     - segment: Filter by segment (Migration, Existing, Cold, Skip)
     - min_score: Minimum readiness score (0-100)
     - provider: Filter by provider name
+    - favorite: Filter by favorites (true = only favorites, false = all leads)
     
     Returns:
         List of LeadResponse objects matching the filters
@@ -261,6 +283,21 @@ async def get_leads(
     try:
         result = db.execute(text(query), params)
         rows = result.fetchall()
+        
+        # Filter by favorites if requested
+        if favorite is True:
+            # Get user ID from session
+            user_id = get_user_id(request) if request else "default"
+            
+            # Get favorite domains for this user
+            favorite_domains = {
+                fav.domain for fav in db.query(Favorite).filter(
+                    Favorite.user_id == user_id
+                ).all()
+            }
+            
+            # Filter rows to only include favorite domains
+            rows = [row for row in rows if row.domain in favorite_domains]
         
         leads = []
         for row in rows:

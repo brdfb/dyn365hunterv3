@@ -173,3 +173,167 @@ class WebhookRetry(Base):
     )
     last_retry_at = Column(TIMESTAMP(timezone=True), nullable=True)
 
+
+class Note(Base):
+    """User notes for domains (G17: CRM-lite)."""
+    
+    __tablename__ = "notes"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    note = Column(Text, nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )
+
+
+class Tag(Base):
+    """Tags for domains with auto-tagging support (G17: CRM-lite)."""
+    
+    __tablename__ = "tags"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    tag = Column(String(100), nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+
+
+class Favorite(Base):
+    """User favorites for domains, session-based (G17: CRM-lite)."""
+    
+    __tablename__ = "favorites"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    user_id = Column(String(255), nullable=False, index=True)  # Session-based user identifier
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+
+
+class SignalChangeHistory(Base):
+    """History of signal changes (SPF, DKIM, DMARC, MX) (G18)."""
+    
+    __tablename__ = "signal_change_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    signal_type = Column(String(50), nullable=False, index=True)  # 'spf', 'dkim', 'dmarc', 'mx'
+    old_value = Column(Text, nullable=True)
+    new_value = Column(Text, nullable=True)
+    changed_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+
+
+class ScoreChangeHistory(Base):
+    """History of score and segment changes (G18)."""
+    
+    __tablename__ = "score_change_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    old_score = Column(Integer, nullable=True)
+    new_score = Column(Integer, nullable=True)
+    old_segment = Column(String(50), nullable=True)
+    new_segment = Column(String(50), nullable=True)
+    changed_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+
+
+class Alert(Base):
+    """Generated alerts for domain changes (G18)."""
+    
+    __tablename__ = "alerts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    alert_type = Column(String(50), nullable=False, index=True)  # 'mx_changed', 'dmarc_added', 'expire_soon', 'score_changed'
+    alert_message = Column(Text, nullable=False)
+    status = Column(String(50), nullable=False, default="pending", index=True)  # 'pending', 'sent', 'failed'
+    notification_method = Column(String(50), nullable=True)  # 'email', 'webhook', 'slack'
+    sent_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True
+    )
+
+
+class AlertConfig(Base):
+    """Alert configuration preferences (G18)."""
+    
+    __tablename__ = "alert_config"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(255), nullable=False, default="default", index=True)  # Session-based user identifier
+    alert_type = Column(String(50), nullable=False, index=True)  # 'mx_changed', 'dmarc_added', 'expire_soon', 'score_changed'
+    notification_method = Column(String(50), nullable=False)  # 'email', 'webhook', 'slack'
+    enabled = Column(Boolean, nullable=False, default=True, index=True)
+    frequency = Column(String(50), nullable=False, default="immediate")  # 'immediate', 'daily_digest'
+    webhook_url = Column(Text, nullable=True)  # For webhook notifications
+    email_address = Column(String(255), nullable=True)  # For email notifications
+    created_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False
+    )

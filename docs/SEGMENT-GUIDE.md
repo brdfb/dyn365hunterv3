@@ -490,6 +490,44 @@ WHERE changed_at >= NOW() - INTERVAL '30 days'
 ORDER BY changed_at DESC;
 ```
 
+### Change Detection ve Alerts (G18) ✨ YENİ
+
+**Otomatik Değişiklik Tespiti:**
+- Domain rescan edildiğinde, önceki değerlerle karşılaştırılır
+- Değişiklikler tespit edilirse, history kayıtları oluşturulur
+- Alert'ler oluşturulur (webhook/email ile bildirim)
+
+**Tespit Edilen Değişiklikler:**
+- **MX Changed**: MX root değişti (provider değişikliği)
+- **DMARC Added**: DMARC policy eklendi (none → quarantine/reject)
+- **Expire Soon**: Domain 30 gün içinde expire olacak
+- **Score Changed**: Priority score veya segment değişti
+
+**Alert Konfigürasyonu:**
+- Alert türüne göre konfigürasyon (mx_changed, dmarc_added, expire_soon, score_changed)
+- Notification method (webhook, email, slack)
+- Frequency (immediate, daily_digest)
+
+**Kullanım Senaryoları:**
+- **Migration Fırsatı**: MX değişikliği migration fırsatı gösterebilir
+- **Güvenlik İyileştirmesi**: DMARC eklenmesi güvenlik iyileştirmesi
+- **Domain Expiry**: Domain expire uyarısı ile yenileme fırsatı
+- **Skor Takibi**: Skor değişiklikleri ile lead durumu takibi
+
+**API Endpoints:**
+```bash
+# ReScan
+POST /scan/{domain}/rescan
+POST /scan/bulk/rescan?domain_list=...
+
+# Alerts
+GET /alerts
+POST /alerts/config
+GET /alerts/config
+```
+
+**Not:** Daily rescan scheduler ile tüm domain'ler otomatik olarak günlük olarak yeniden taranır.
+
 ---
 
 ## 📊 Özet Tablo
