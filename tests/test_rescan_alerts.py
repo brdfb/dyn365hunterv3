@@ -225,3 +225,236 @@ def test_create_alert_config(db: Session):
     assert data["notification_method"] == "webhook"
     assert data["enabled"] is True
 
+
+# Edge case tests for change detection
+
+def test_detect_signal_changes_first_scan(db: Session, test_domain: str):
+    """Test change detection on first scan (no old signal)."""
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=True,
+        dkim=True,
+        dmarc_policy="quarantine",
+        mx_root="outlook.com",
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, None, new_signal, db)
+    
+    # First scan should not detect changes
+    assert len(changes) == 0
+
+
+def test_detect_signal_changes_expiry_soon(db: Session, test_domain: str):
+    """Test expiry detection (expire soon)."""
+    old_signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
+    
+    # Create new signal with expiry in 15 days
+    expires_at = (datetime.now().date() + timedelta(days=15))
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=old_signal.spf,
+        dkim=old_signal.dkim,
+        dmarc_policy=old_signal.dmarc_policy,
+        mx_root=old_signal.mx_root,
+        expires_at=expires_at,
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, old_signal, new_signal, db)
+    db.commit()
+    
+    # Should detect expiry warning
+    assert any(c["type"] == "expire_soon" for c in changes)
+    expire_change = next(c for c in changes if c["type"] == "expire_soon")
+    assert expire_change["days_until_expiry"] == 15
+
+
+def test_detect_signal_changes_expiry_not_soon(db: Session, test_domain: str):
+    """Test expiry detection (not soon enough)."""
+    old_signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
+    
+    # Create new signal with expiry in 60 days (not soon)
+    expires_at = (datetime.now().date() + timedelta(days=60))
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=old_signal.spf,
+        dkim=old_signal.dkim,
+        dmarc_policy=old_signal.dmarc_policy,
+        mx_root=old_signal.mx_root,
+        expires_at=expires_at,
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, old_signal, new_signal, db)
+    
+    # Should not detect expiry warning (too far in future)
+    assert not any(c["type"] == "expire_soon" for c in changes)
+
+
+def test_detect_signal_changes_dmarc_added(db: Session, test_domain: str):
+    """Test DMARC added detection (none -> quarantine/reject)."""
+    old_signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
+    # Update old signal to have no DMARC
+    old_signal.dmarc_policy = None
+    db.commit()
+    
+    # Create new signal with DMARC added
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=old_signal.spf,
+        dkim=old_signal.dkim,
+        dmarc_policy="reject",  # Added
+        mx_root=old_signal.mx_root,
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, old_signal, new_signal, db)
+    db.commit()
+    
+    # Should detect dmarc_added (not just dmarc_changed)
+    assert any(c["type"] == "dmarc_added" for c in changes)
+
+
+def test_detect_signal_changes_spf_change(db: Session, test_domain: str):
+    """Test SPF change detection."""
+    old_signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
+    old_signal.spf = False
+    db.commit()
+    
+    # Create new signal with SPF added
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=True,  # Changed
+        dkim=old_signal.dkim,
+        dmarc_policy=old_signal.dmarc_policy,
+        mx_root=old_signal.mx_root,
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, old_signal, new_signal, db)
+    db.commit()
+    
+    assert any(c["type"] == "spf_changed" for c in changes)
+    
+    # Verify history record
+    history = db.query(SignalChangeHistory).filter(
+        SignalChangeHistory.domain == test_domain,
+        SignalChangeHistory.signal_type == "spf"
+    ).first()
+    assert history is not None
+
+
+def test_detect_signal_changes_dkim_change(db: Session, test_domain: str):
+    """Test DKIM change detection."""
+    old_signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
+    old_signal.dkim = False
+    db.commit()
+    
+    # Create new signal with DKIM added
+    new_signal = DomainSignal(
+        domain=test_domain,
+        spf=old_signal.spf,
+        dkim=True,  # Changed
+        dmarc_policy=old_signal.dmarc_policy,
+        mx_root=old_signal.mx_root,
+        scan_status="success"
+    )
+    
+    changes = detect_signal_changes(test_domain, old_signal, new_signal, db)
+    db.commit()
+    
+    assert any(c["type"] == "dkim_changed" for c in changes)
+
+
+def test_detect_score_changes_first_scan(db: Session, test_domain: str):
+    """Test score change detection on first scan (no old score)."""
+    new_score = LeadScore(
+        domain=test_domain,
+        readiness_score=75,
+        segment="Migration",
+        reason="First scan"
+    )
+    
+    changes = detect_score_changes(test_domain, None, new_score, db)
+    
+    # First scan should not detect changes
+    assert len(changes) == 0
+
+
+def test_detect_score_changes_segment_change(db: Session, test_domain: str):
+    """Test segment change detection."""
+    old_score = db.query(LeadScore).filter(LeadScore.domain == test_domain).first()
+    old_score.segment = "Cold"
+    old_score.readiness_score = 30
+    db.commit()
+    
+    # Create new score with segment change
+    new_score = LeadScore(
+        domain=test_domain,
+        readiness_score=75,  # Changed
+        segment="Migration",  # Changed
+        reason="Updated"
+    )
+    
+    changes = detect_score_changes(test_domain, old_score, new_score, db)
+    db.commit()
+    
+    # Should detect segment change or priority score change
+    assert len(changes) > 0
+    assert any(c["type"] in ["segment_changed", "priority_score_changed"] for c in changes)
+
+
+def test_detect_score_changes_priority_score_change(db: Session, test_domain: str):
+    """Test priority score change detection."""
+    old_score = db.query(LeadScore).filter(LeadScore.domain == test_domain).first()
+    old_score.readiness_score = 65  # Priority 2
+    old_score.segment = "Migration"
+    db.commit()
+    
+    # Create new score that changes priority
+    new_score = LeadScore(
+        domain=test_domain,
+        readiness_score=85,  # Priority 1
+        segment="Migration",
+        reason="Updated"
+    )
+    
+    changes = detect_score_changes(test_domain, old_score, new_score, db)
+    db.commit()
+    
+    # Should detect priority score change
+    assert any(c["type"] == "priority_score_changed" for c in changes)
+
+
+def test_create_alerts_unknown_change_type(db: Session, test_domain: str):
+    """Test alert creation with unknown change type."""
+    changes = [
+        {"type": "unknown_change", "old_value": "old", "new_value": "new"}
+    ]
+    
+    alerts = create_alerts(test_domain, changes, db)
+    
+    # Unknown change types should not create alerts
+    assert len(alerts) == 0
+
+
+def test_create_alerts_no_changes(db: Session, test_domain: str):
+    """Test alert creation with no changes."""
+    alerts = create_alerts(test_domain, [], db)
+    
+    assert len(alerts) == 0
+
+
+def test_rescan_domain_no_old_signal(db: Session, test_domain: str):
+    """Test rescan when no old signal exists (first scan scenario)."""
+    # Delete old signal
+    db.query(DomainSignal).filter(DomainSignal.domain == test_domain).delete()
+    db.commit()
+    
+    # Rescan should still work (treats as first scan)
+    result = rescan_domain(test_domain, db)
+    
+    # Should succeed but no changes detected
+    assert result.get("success") is True
+    assert result.get("changes_detected") is False
