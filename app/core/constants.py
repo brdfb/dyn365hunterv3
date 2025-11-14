@@ -15,4 +15,3 @@ EXPIRE_SOON_DAYS = 30  # Domain expires in < 30 days
 
 # Bulk Operations Limits
 MAX_BULK_SCAN_DOMAINS = 1000  # Maximum domains per bulk scan/rescan
-

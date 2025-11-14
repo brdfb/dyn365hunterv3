@@ -12,14 +12,14 @@ from app.config import settings
 
 def run_migration():
     """Run schema.sql migration against the database."""
-    
+
     # Get schema.sql path
     schema_file = Path(__file__).parent / "schema.sql"
-    
+
     if not schema_file.exists():
         print(f"❌ Schema file not found: {schema_file}")
         sys.exit(1)
-    
+
     # Read schema.sql
     try:
         with open(schema_file, "r", encoding="utf-8") as f:
@@ -27,17 +27,14 @@ def run_migration():
     except Exception as e:
         print(f"❌ Failed to read schema file: {e}")
         sys.exit(1)
-    
+
     # Create database engine
     try:
-        engine = create_engine(
-            settings.database_url,
-            pool_pre_ping=True
-        )
+        engine = create_engine(settings.database_url, pool_pre_ping=True)
     except Exception as e:
         print(f"❌ Failed to create database engine: {e}")
         sys.exit(1)
-    
+
     # Execute migration
     try:
         with engine.begin() as conn:  # begin() automatically commits on success
@@ -52,4 +49,3 @@ def run_migration():
 
 if __name__ == "__main__":
     sys.exit(run_migration())
-

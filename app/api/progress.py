@@ -1,4 +1,5 @@
 """Progress tracking endpoints for async operations."""
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
@@ -11,6 +12,7 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 class JobProgressResponse(BaseModel):
     """Job progress response model."""
+
     job_id: str
     status: str
     total: int
@@ -29,21 +31,21 @@ class JobProgressResponse(BaseModel):
 async def get_job_progress(job_id: str):
     """
     Get progress of a job by job_id.
-    
+
     Args:
         job_id: Job identifier
-        
+
     Returns:
         JobProgressResponse with current progress
     """
     job = get_job(job_id)
-    
+
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
-    
+
     progress_percent = (job.processed / job.total * 100) if job.total > 0 else 0.0
     remaining = job.total - job.processed
-    
+
     return JobProgressResponse(
         job_id=job.job_id,
         status=job.status.value,
@@ -56,6 +58,5 @@ async def get_job_progress(job_id: str):
         errors=job.errors,
         message=job.message,
         started_at=job.started_at.isoformat() if job.started_at else None,
-        completed_at=job.completed_at.isoformat() if job.completed_at else None
+        completed_at=job.completed_at.isoformat() if job.completed_at else None,
     )
-

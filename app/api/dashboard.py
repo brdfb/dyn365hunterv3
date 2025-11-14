@@ -1,4 +1,5 @@
 """Dashboard endpoints for aggregated statistics."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 class DashboardResponse(BaseModel):
     """Response model for dashboard statistics."""
+
     total_leads: int
     migration: int
     existing: int
@@ -24,12 +26,10 @@ class DashboardResponse(BaseModel):
 
 
 @router.get("", response_model=DashboardResponse)
-async def get_dashboard(
-    db: Session = Depends(get_db)
-):
+async def get_dashboard(db: Session = Depends(get_db)):
     """
     Get dashboard statistics with aggregated lead data.
-    
+
         Returns:
         DashboardResponse with:
         - total_leads: Total number of scanned leads
@@ -57,10 +57,10 @@ async def get_dashboard(
             FROM leads_ready
             WHERE readiness_score IS NOT NULL
         """
-        
+
         result = db.execute(text(query), {"high_priority_score": HIGH_PRIORITY_SCORE})
         row = result.fetchone()
-        
+
         if not row:
             # Empty database case
             return DashboardResponse(
@@ -71,9 +71,9 @@ async def get_dashboard(
                 skip=0,
                 avg_score=0.0,
                 max_score=None,
-                high_priority=0
+                high_priority=0,
             )
-        
+
         return DashboardResponse(
             total_leads=row.total_leads or 0,
             migration=row.migration or 0,
@@ -82,9 +82,8 @@ async def get_dashboard(
             skip=row.skip or 0,
             avg_score=float(row.avg_score) if row.avg_score else 0.0,
             max_score=int(row.max_score) if row.max_score is not None else None,
-            high_priority=row.high_priority or 0
+            high_priority=row.high_priority or 0,
         )
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-

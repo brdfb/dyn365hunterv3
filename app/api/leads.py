@@ -1,4 +1,5 @@
 """Leads endpoints for querying analyzed domains."""
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/leads", tags=["leads"])
 
 class LeadResponse(BaseModel):
     """Response model for a single lead."""
+
     company_id: Optional[int] = None
     canonical_name: Optional[str] = None
     domain: str
@@ -45,24 +47,32 @@ class LeadResponse(BaseModel):
 
 @router.get("/export")
 async def export_leads(
-    segment: Optional[str] = Query(None, description="Filter by segment (Migration, Existing, Cold, Skip)"),
-    min_score: Optional[int] = Query(None, ge=0, le=100, description="Minimum readiness score (0-100)"),
-    provider: Optional[str] = Query(None, description="Filter by provider (M365, Google, etc.)"),
-    format: str = Query("csv", pattern="^(csv|xlsx)$", description="Export format (csv or xlsx)"),
-    db: Session = Depends(get_db)
+    segment: Optional[str] = Query(
+        None, description="Filter by segment (Migration, Existing, Cold, Skip)"
+    ),
+    min_score: Optional[int] = Query(
+        None, ge=0, le=100, description="Minimum readiness score (0-100)"
+    ),
+    provider: Optional[str] = Query(
+        None, description="Filter by provider (M365, Google, etc.)"
+    ),
+    format: str = Query(
+        "csv", pattern="^(csv|xlsx)$", description="Export format (csv or xlsx)"
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Export leads to CSV or Excel format.
-    
+
     Uses the same filtering logic as GET /leads endpoint.
     Returns a downloadable file with lead data.
-    
+
     Query parameters:
     - segment: Filter by segment (Migration, Existing, Cold, Skip)
     - min_score: Minimum readiness score (0-100)
     - provider: Filter by provider name
     - format: Export format (csv or xlsx, default: csv)
-    
+
     Returns:
         CSV or Excel file download with lead data
     """
@@ -89,38 +99,38 @@ async def export_leads(
         FROM leads_ready
         WHERE 1=1
     """
-    
+
     params = {}
-    
+
     # Add filters (same logic as GET /leads)
     if segment:
         query += " AND segment = :segment"
         params["segment"] = segment
-    
+
     if min_score is not None:
         query += " AND readiness_score >= :min_score"
         params["min_score"] = min_score
-    
+
     if provider:
         query += " AND provider = :provider"
         params["provider"] = provider
-    
+
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
-    
+
     # Note: We'll sort by priority_score in Python after calculating it
     query += " ORDER BY readiness_score DESC, domain ASC"
-    
+
     try:
         result = db.execute(text(query), params)
         rows = result.fetchall()
-        
+
         # Convert to list of dictionaries
         leads_data = []
         for row in rows:
             # Calculate priority score
             priority_score = calculate_priority_score(row.segment, row.readiness_score)
-            
+
             lead_dict = {
                 "domain": row.domain,
                 "company_name": row.canonical_name or "",
@@ -138,99 +148,108 @@ async def export_leads(
                 "nameservers": ", ".join(row.nameservers) if row.nameservers else "",
                 "scan_status": row.scan_status or "",
                 "scanned_at": str(row.scanned_at) if row.scanned_at else "",
-                "reason": row.reason or ""
+                "reason": row.reason or "",
             }
             leads_data.append(lead_dict)
-        
+
         # Sort by priority_score ASC (1 = highest priority), then readiness_score DESC
-        leads_data.sort(key=lambda x: (
-            x.get("priority_score", 999),
-            -x.get("readiness_score", 0)
-        ))
-        
+        leads_data.sort(
+            key=lambda x: (x.get("priority_score", 999), -x.get("readiness_score", 0))
+        )
+
         # Convert to DataFrame
         df = pd.DataFrame(leads_data)
-        
+
         # Generate filename with timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        
+
         if format == "csv":
             # Generate CSV content
             csv_content = df.to_csv(index=False)
-            
+
             return Response(
                 content=csv_content,
                 media_type="text/csv",
                 headers={
                     "Content-Disposition": f"attachment; filename=leads_{timestamp}.csv",
-                    "Content-Type": "text/csv; charset=utf-8"
-                }
+                    "Content-Type": "text/csv; charset=utf-8",
+                },
             )
         else:  # xlsx
             # Generate Excel content
             from io import BytesIO
+
             output = BytesIO()
-            
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='Leads')
-            
+
+            with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                df.to_excel(writer, index=False, sheet_name="Leads")
+
             output.seek(0)
             excel_content = output.read()
-            
+
             return Response(
                 content=excel_content,
                 media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 headers={
                     "Content-Disposition": f"attachment; filename=leads_{timestamp}.xlsx"
-                }
+                },
             )
-    
+
     except Exception as e:
         import logging
+
         logger = logging.getLogger(__name__)
         logger.error(f"Export error: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=500,
-            detail=f"An error occurred while exporting leads: {str(e)}"
+            status_code=500, detail=f"An error occurred while exporting leads: {str(e)}"
         )
 
 
 def get_user_id(request: Request) -> str:
     """
     Get user ID from session (session-based, no auth yet).
-    
+
     For now, we use a session cookie or generate a default user_id.
     In the future, this will be replaced with proper authentication.
     """
     # Try to get session ID from cookie
     session_id = request.cookies.get("session_id")
-    
+
     if not session_id:
         # Generate a new session ID (for demo purposes)
         # In production, this should be handled by proper session management
         session_id = str(uuid.uuid4())
-    
+
     return session_id
 
 
 @router.get("", response_model=List[LeadResponse])
 async def get_leads(
-    segment: Optional[str] = Query(None, description="Filter by segment (Migration, Existing, Cold, Skip)"),
-    min_score: Optional[int] = Query(None, ge=0, le=100, description="Minimum readiness score (0-100)"),
-    provider: Optional[str] = Query(None, description="Filter by provider (M365, Google, etc.)"),
-    favorite: Optional[bool] = Query(None, description="Filter by favorites (true = only favorites, false = all leads)"),
+    segment: Optional[str] = Query(
+        None, description="Filter by segment (Migration, Existing, Cold, Skip)"
+    ),
+    min_score: Optional[int] = Query(
+        None, ge=0, le=100, description="Minimum readiness score (0-100)"
+    ),
+    provider: Optional[str] = Query(
+        None, description="Filter by provider (M365, Google, etc.)"
+    ),
+    favorite: Optional[bool] = Query(
+        None,
+        description="Filter by favorites (true = only favorites, false = all leads)",
+    ),
     request: Request = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get filtered list of leads.
-    
+
     Query parameters:
     - segment: Filter by segment (Migration, Existing, Cold, Skip)
     - min_score: Minimum readiness score (0-100)
     - provider: Filter by provider name
     - favorite: Filter by favorites (true = only favorites, false = all leads)
-    
+
     Returns:
         List of LeadResponse objects matching the filters
     """
@@ -257,53 +276,52 @@ async def get_leads(
         FROM leads_ready
         WHERE 1=1
     """
-    
+
     params = {}
-    
+
     # Add filters
     if segment:
         query += " AND segment = :segment"
         params["segment"] = segment
-    
+
     if min_score is not None:
         query += " AND readiness_score >= :min_score"
         params["min_score"] = min_score
-    
+
     if provider:
         query += " AND provider = :provider"
         params["provider"] = provider
-    
+
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
-    
+
     # Note: We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
     query += " ORDER BY readiness_score DESC, domain ASC"
-    
+
     try:
         result = db.execute(text(query), params)
         rows = result.fetchall()
-        
+
         # Filter by favorites if requested
         if favorite is True:
             # Get user ID from session
             user_id = get_user_id(request) if request else "default"
-            
+
             # Get favorite domains for this user
             favorite_domains = {
-                fav.domain for fav in db.query(Favorite).filter(
-                    Favorite.user_id == user_id
-                ).all()
+                fav.domain
+                for fav in db.query(Favorite).filter(Favorite.user_id == user_id).all()
             }
-            
+
             # Filter rows to only include favorite domains
             rows = [row for row in rows if row.domain in favorite_domains]
-        
+
         leads = []
         for row in rows:
             # Calculate priority score
             priority_score = calculate_priority_score(row.segment, row.readiness_score)
-            
+
             lead = LeadResponse(
                 company_id=row.company_id,
                 canonical_name=row.canonical_name,
@@ -322,47 +340,46 @@ async def get_leads(
                 readiness_score=row.readiness_score,
                 segment=row.segment,
                 reason=row.reason,
-                priority_score=priority_score
+                priority_score=priority_score,
             )
             leads.append(lead)
-        
+
         # Sort by priority_score ASC (1 = highest priority), then readiness_score DESC
         # This ensures Migration leads with high scores appear first
-        leads.sort(key=lambda x: (
-            x.priority_score if x.priority_score is not None else 999,
-            -(x.readiness_score if x.readiness_score is not None else 0)
-        ))
-        
+        leads.sort(
+            key=lambda x: (
+                x.priority_score if x.priority_score is not None else 999,
+                -(x.readiness_score if x.readiness_score is not None else 0),
+            )
+        )
+
         return leads
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.get("/{domain}", response_model=LeadResponse)
-async def get_lead(
-    domain: str,
-    db: Session = Depends(get_db)
-):
+async def get_lead(domain: str, db: Session = Depends(get_db)):
     """
     Get a single lead by domain.
-    
+
     Args:
         domain: Domain name (will be normalized)
         db: Database session
-        
+
     Returns:
         LeadResponse with full lead details
-        
+
     Raises:
         404: If domain not found or not scanned
     """
     # Normalize domain
     normalized_domain = normalize_domain(domain)
-    
+
     if not normalized_domain:
         raise HTTPException(status_code=400, detail="Invalid domain format")
-    
+
     # Query using direct JOIN (more reliable than VIEW)
     query = """
         SELECT 
@@ -391,27 +408,27 @@ async def get_lead(
         LEFT JOIN lead_scores ls ON c.domain = ls.domain
         WHERE c.domain = :domain
     """
-    
+
     try:
         result = db.execute(text(query), {"domain": normalized_domain})
         row = result.fetchone()
-        
+
         if not row:
             raise HTTPException(
                 status_code=404,
-                detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain"
+                detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
             )
-        
+
         # Check if domain has been scanned
         if row.readiness_score is None:
             raise HTTPException(
                 status_code=404,
-                detail=f"Domain {normalized_domain} has not been scanned yet. Please use /scan/domain first."
+                detail=f"Domain {normalized_domain} has not been scanned yet. Please use /scan/domain first.",
             )
-        
+
         # Calculate priority score
         priority_score = calculate_priority_score(row.segment, row.readiness_score)
-        
+
         # Convert contact_emails from JSONB to list if present
         contact_emails = None
         if row.contact_emails:
@@ -419,8 +436,10 @@ async def get_lead(
                 contact_emails = row.contact_emails
             else:
                 # Handle case where it might be stored differently
-                contact_emails = list(row.contact_emails) if row.contact_emails else None
-        
+                contact_emails = (
+                    list(row.contact_emails) if row.contact_emails else None
+                )
+
         return LeadResponse(
             company_id=row.company_id,
             canonical_name=row.canonical_name,
@@ -442,9 +461,9 @@ async def get_lead(
             readiness_score=row.readiness_score,
             segment=row.segment,
             reason=row.reason,
-            priority_score=priority_score
+            priority_score=priority_score,
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -453,11 +472,15 @@ async def get_lead(
 
 class EnrichLeadRequest(BaseModel):
     """Request model for manual lead enrichment."""
-    contact_emails: List[str] = Field(..., description="List of contact email addresses")
+
+    contact_emails: List[str] = Field(
+        ..., description="List of contact email addresses"
+    )
 
 
 class EnrichLeadResponse(BaseModel):
     """Response model for lead enrichment."""
+
     domain: str
     contact_emails: List[str]
     contact_quality_score: int
@@ -467,25 +490,23 @@ class EnrichLeadResponse(BaseModel):
 
 @router.post("/{domain}/enrich", response_model=EnrichLeadResponse, status_code=200)
 async def enrich_lead(
-    domain: str,
-    request: EnrichLeadRequest,
-    db: Session = Depends(get_db)
+    domain: str, request: EnrichLeadRequest, db: Session = Depends(get_db)
 ):
     """
     Manually enrich a lead with contact emails.
-    
+
     - Updates company record with enrichment data
     - Calculates contact quality score
     - Detects LinkedIn email pattern
-    
+
     Args:
         domain: Domain name (will be normalized)
         request: Enrichment request with contact emails
         db: Database session
-        
+
     Returns:
         EnrichLeadResponse with enrichment results
-        
+
     Raises:
         404: If domain not found
         400: If domain is invalid or no emails provided
@@ -493,46 +514,46 @@ async def enrich_lead(
     """
     # Normalize domain
     normalized_domain = normalize_domain(domain)
-    
+
     if not normalized_domain:
         raise HTTPException(status_code=400, detail="Invalid domain format")
-    
+
     # Validate contact emails
     if not request.contact_emails:
-        raise HTTPException(status_code=400, detail="At least one contact email is required")
-    
+        raise HTTPException(
+            status_code=400, detail="At least one contact email is required"
+        )
+
     # Find company
     company = db.query(Company).filter(Company.domain == normalized_domain).first()
-    
+
     if not company:
         raise HTTPException(
             status_code=404,
-            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain"
+            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
         )
-    
+
     try:
         # Enrich company data
         enrichment_data = enrich_company_data(
-            emails=request.contact_emails,
-            domain=normalized_domain
+            emails=request.contact_emails, domain=normalized_domain
         )
-        
+
         # Update company with enrichment data
         company.contact_emails = enrichment_data["contact_emails"]
         company.contact_quality_score = enrichment_data["contact_quality_score"]
         company.linkedin_pattern = enrichment_data["linkedin_pattern"]
         db.commit()
         db.refresh(company)
-        
+
         return EnrichLeadResponse(
             domain=normalized_domain,
             contact_emails=enrichment_data["contact_emails"],
             contact_quality_score=enrichment_data["contact_quality_score"],
             linkedin_pattern=enrichment_data["linkedin_pattern"],
-            message=f"Domain {normalized_domain} enriched successfully"
+            message=f"Domain {normalized_domain} enriched successfully",
         )
-    
+
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-

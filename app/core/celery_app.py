@@ -1,12 +1,11 @@
 """Celery application configuration for async task processing."""
+
 from celery import Celery
 from app.config import settings
 
 # Create Celery app
 celery_app = Celery(
-    "domainhunter",
-    broker=settings.redis_url,
-    backend=settings.redis_url
+    "domainhunter", broker=settings.redis_url, backend=settings.redis_url
 )
 
 # Import tasks to register them
@@ -31,16 +30,15 @@ celery_app.conf.update(
     result_expires=3600,  # Results expire after 1 hour
     # Celery Beat schedule (G18: Daily rescan + Alert processing)
     beat_schedule={
-        'daily-rescan': {
-            'task': 'app.core.tasks.daily_rescan_task',
-            'schedule': 86400.0,  # Run daily (24 hours in seconds)
-            'options': {'expires': 3600}  # Task expires after 1 hour if not picked up
+        "daily-rescan": {
+            "task": "app.core.tasks.daily_rescan_task",
+            "schedule": 86400.0,  # Run daily (24 hours in seconds)
+            "options": {"expires": 3600},  # Task expires after 1 hour if not picked up
         },
-        'process-pending-alerts': {
-            'task': 'app.core.tasks.process_pending_alerts_task',
-            'schedule': 300.0,  # Run every 5 minutes
-            'options': {'expires': 60}  # Task expires after 1 minute if not picked up
+        "process-pending-alerts": {
+            "task": "app.core.tasks.process_pending_alerts_task",
+            "schedule": 300.0,  # Run every 5 minutes
+            "options": {"expires": 60},  # Task expires after 1 minute if not picked up
         },
     },
 )
-

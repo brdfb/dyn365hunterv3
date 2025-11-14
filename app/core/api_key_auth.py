@@ -1,4 +1,5 @@
 """API Key authentication and rate limiting for webhook endpoints."""
+
 import hashlib
 import secrets
 from datetime import datetime
@@ -34,67 +35,62 @@ def generate_api_key() -> str:
 def get_api_key_limiter(api_key_id: int, rate_limit_per_minute: int) -> RateLimiter:
     """Get or create a rate limiter for a specific API key."""
     limiter_key = f"api_key_{api_key_id}"
-    
+
     with _rate_limiter_lock:
         if limiter_key not in _api_key_limiters:
             # Convert per-minute to per-second rate
             rate_per_second = rate_limit_per_minute / 60.0
             _api_key_limiters[limiter_key] = RateLimiter(
                 rate=rate_per_second,
-                burst=rate_limit_per_minute  # Allow burst up to per-minute limit
+                burst=rate_limit_per_minute,  # Allow burst up to per-minute limit
             )
         return _api_key_limiters[limiter_key]
 
 
 async def verify_api_key(
-    x_api_key: Optional[str] = Security(api_key_header),
-    db: Session = Depends(get_db)
+    x_api_key: Optional[str] = Security(api_key_header), db: Session = Depends(get_db)
 ) -> ApiKey:
     """
     Verify API key from header and return ApiKey model.
-    
+
     Args:
         x_api_key: API key from X-API-Key header
         db: Database session
-        
+
     Returns:
         ApiKey model instance
-        
+
     Raises:
         HTTPException: If API key is missing, invalid, or inactive
     """
     if not x_api_key:
         raise HTTPException(
-            status_code=401,
-            detail="API key required. Please provide X-API-Key header."
+            status_code=401, detail="API key required. Please provide X-API-Key header."
         )
-    
+
     # Hash the provided key
     key_hash = hash_api_key(x_api_key)
-    
+
     # Look up API key in database
-    api_key = db.query(ApiKey).filter(
-        ApiKey.key_hash == key_hash,
-        ApiKey.is_active == True
-    ).first()
-    
+    api_key = (
+        db.query(ApiKey)
+        .filter(ApiKey.key_hash == key_hash, ApiKey.is_active == True)
+        .first()
+    )
+
     if not api_key:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid or inactive API key"
-        )
-    
+        raise HTTPException(status_code=401, detail="Invalid or inactive API key")
+
     # Update last_used_at
     api_key.last_used_at = datetime.utcnow()
     db.commit()
-    
+
     # Check rate limit
     limiter = get_api_key_limiter(api_key.id, api_key.rate_limit_per_minute)
     if not limiter.acquire():
         raise HTTPException(
             status_code=429,
-            detail=f"Rate limit exceeded. Limit: {api_key.rate_limit_per_minute} requests per minute"
+            detail=f"Rate limit exceeded. Limit: {api_key.rate_limit_per_minute} requests per minute",
         )
-    
-    return api_key
 
+    return api_key

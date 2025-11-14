@@ -1,4 +1,5 @@
 """Tests for Notes, Tags, and Favorites endpoints (G17)."""
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -24,15 +25,11 @@ def db():
 def test_domain(db: Session):
     """Create a test domain with scan data."""
     domain = "test-notes.com"
-    
+
     # Create company
-    company = Company(
-        canonical_name="Test Company",
-        domain=domain,
-        provider="M365"
-    )
+    company = Company(canonical_name="Test Company", domain=domain, provider="M365")
     db.add(company)
-    
+
     # Create domain signal
     signal = DomainSignal(
         domain=domain,
@@ -40,19 +37,19 @@ def test_domain(db: Session):
         dkim=True,
         dmarc_policy="quarantine",
         mx_root="outlook.com",
-        scan_status="success"
+        scan_status="success",
     )
     db.add(signal)
-    
+
     # Create lead score
     score = LeadScore(
         domain=domain,
         readiness_score=75,
         segment="Migration",
-        reason="High readiness score"
+        reason="High readiness score",
     )
     db.add(score)
-    
+
     db.commit()
     return domain
 
@@ -60,8 +57,7 @@ def test_domain(db: Session):
 def test_create_note(db: Session, test_domain: str):
     """Test creating a note."""
     response = client.post(
-        f"/leads/{test_domain}/notes",
-        json={"note": "This is a test note"}
+        f"/leads/{test_domain}/notes", json={"note": "This is a test note"}
     )
     assert response.status_code == 201
     data = response.json()
@@ -79,7 +75,7 @@ def test_list_notes(db: Session, test_domain: str):
     note2 = Note(domain=test_domain, note="Test note 2")
     db.add(note2)
     db.commit()
-    
+
     response = client.get(f"/leads/{test_domain}/notes")
     assert response.status_code == 200
     data = response.json()
@@ -94,10 +90,9 @@ def test_update_note(db: Session, test_domain: str):
     db.add(note)
     db.commit()
     note_id = note.id
-    
+
     response = client.put(
-        f"/leads/{test_domain}/notes/{note_id}",
-        json={"note": "Updated note"}
+        f"/leads/{test_domain}/notes/{note_id}", json={"note": "Updated note"}
     )
     assert response.status_code == 200
     data = response.json()
@@ -112,10 +107,10 @@ def test_delete_note(db: Session, test_domain: str):
     db.add(note)
     db.commit()
     note_id = note.id
-    
+
     response = client.delete(f"/leads/{test_domain}/notes/{note_id}")
     assert response.status_code == 204
-    
+
     # Verify note is deleted
     db.refresh(note)
     assert db.query(Note).filter(Note.id == note_id).first() is None
@@ -123,10 +118,7 @@ def test_delete_note(db: Session, test_domain: str):
 
 def test_create_tag(db: Session, test_domain: str):
     """Test creating a tag."""
-    response = client.post(
-        f"/leads/{test_domain}/tags",
-        json={"tag": "important"}
-    )
+    response = client.post(f"/leads/{test_domain}/tags", json={"tag": "important"})
     assert response.status_code == 201
     data = response.json()
     assert data["domain"] == test_domain
@@ -142,7 +134,7 @@ def test_list_tags(db: Session, test_domain: str):
     tag2 = Tag(domain=test_domain, tag="tag2")
     db.add(tag2)
     db.commit()
-    
+
     response = client.get(f"/leads/{test_domain}/tags")
     assert response.status_code == 200
     data = response.json()
@@ -157,10 +149,10 @@ def test_delete_tag(db: Session, test_domain: str):
     db.add(tag)
     db.commit()
     tag_id = tag.id
-    
+
     response = client.delete(f"/leads/{test_domain}/tags/{tag_id}")
     assert response.status_code == 204
-    
+
     # Verify tag is deleted
     assert db.query(Tag).filter(Tag.id == tag_id).first() is None
 
@@ -181,7 +173,7 @@ def test_list_favorites(db: Session, test_domain: str):
     favorite = Favorite(domain=test_domain, user_id="test-user")
     db.add(favorite)
     db.commit()
-    
+
     # Note: favorites endpoint uses session-based user_id
     # For testing, we'll need to mock the session
     response = client.get("/leads?favorite=true")
@@ -196,7 +188,7 @@ def test_remove_favorite(db: Session, test_domain: str):
     db.add(favorite)
     db.commit()
     favorite_id = favorite.id
-    
+
     response = client.delete(f"/leads/{test_domain}/favorite")
     # This will work if the session cookie matches
     # For now, we'll just check the endpoint exists
@@ -206,42 +198,43 @@ def test_remove_favorite(db: Session, test_domain: str):
 def test_auto_tagging_security_risk(db: Session, test_domain: str):
     """Test auto-tagging for security-risk tag."""
     from app.core.auto_tagging import apply_auto_tags
-    
+
     # Update domain signal to have no SPF and no DKIM
     signal = db.query(DomainSignal).filter(DomainSignal.domain == test_domain).first()
     signal.spf = False
     signal.dkim = False
     db.commit()
-    
+
     # Apply auto-tags
     applied_tags = apply_auto_tags(test_domain, db)
     db.commit()
-    
+
     assert "security-risk" in applied_tags
-    
+
     # Verify tag was created
-    tag = db.query(Tag).filter(
-        Tag.domain == test_domain,
-        Tag.tag == "security-risk"
-    ).first()
+    tag = (
+        db.query(Tag)
+        .filter(Tag.domain == test_domain, Tag.tag == "security-risk")
+        .first()
+    )
     assert tag is not None
 
 
 def test_auto_tagging_migration_ready(db: Session, test_domain: str):
     """Test auto-tagging for migration-ready tag."""
     from app.core.auto_tagging import apply_auto_tags
-    
+
     # Domain already has Migration segment and score >= 70
     # Apply auto-tags
     applied_tags = apply_auto_tags(test_domain, db)
     db.commit()
-    
-    assert "migration-ready" in applied_tags
-    
-    # Verify tag was created
-    tag = db.query(Tag).filter(
-        Tag.domain == test_domain,
-        Tag.tag == "migration-ready"
-    ).first()
-    assert tag is not None
 
+    assert "migration-ready" in applied_tags
+
+    # Verify tag was created
+    tag = (
+        db.query(Tag)
+        .filter(Tag.domain == test_domain, Tag.tag == "migration-ready")
+        .first()
+    )
+    assert tag is not None
