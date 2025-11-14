@@ -392,6 +392,53 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
 
 ---
 
+## 📧 Lead Enrichment (G16) ✨ YENİ
+
+### Enrichment Nedir?
+
+Lead enrichment, lead'leri contact email'leri ile zenginleştirme özelliğidir.
+
+**Enrichment Fields:**
+- **contact_emails**: Contact email adresleri listesi
+- **contact_quality_score**: Email kalitesi skoru (0-100)
+  - Email sayısı (daha fazla email = daha yüksek skor)
+  - Domain eşleşmesi (email domain = company domain)
+- **linkedin_pattern**: LinkedIn email pattern'i
+  - `firstname.lastname@domain.com`
+  - `f.lastname@domain.com`
+  - `firstname@domain.com`
+
+### Enrichment Nasıl Kullanılır?
+
+**Manuel Enrichment:**
+```bash
+curl -X POST http://localhost:8000/leads/example.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{"contact_emails": ["john@example.com", "jane@example.com"]}'
+```
+
+**Otomatik Enrichment:**
+- Webhook endpoint'i ile otomatik enrichment yapılabilir
+- Contact emails webhook payload'ında gönderilirse, otomatik olarak enrichment yapılır
+
+### Enrichment ve Segment İlişkisi
+
+**Önemli Not:** Enrichment fields segment hesaplamasına dahil değildir. Segment sadece DNS/WHOIS sinyalleri ve provider bilgisine göre hesaplanır.
+
+**Ancak:**
+- Enrichment bilgileri lead değerlendirmesinde kullanılabilir
+- Yüksek quality score'lu lead'ler daha değerli olabilir
+- LinkedIn pattern tespit edildiyse, LinkedIn outreach yapılabilir
+
+### Enrichment Kullanım Senaryoları
+
+1. **Contact Email Toplama**: Satış ekibi contact email'lerini toplar ve sisteme ekler
+2. **Quality Score**: Yüksek quality score'lu lead'lere öncelik verilir
+3. **LinkedIn Outreach**: LinkedIn pattern tespit edildiyse, LinkedIn'de benzer pattern'lerle arama yapılır
+4. **Lead Değerlendirme**: Daha fazla contact email'i olan lead'ler daha değerli olabilir
+
+---
+
 ## 💡 İpuçları
 
 ### Skor Artırma Stratejileri

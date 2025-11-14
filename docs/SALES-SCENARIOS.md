@@ -439,7 +439,87 @@ curl "http://localhost:8000/leads/export?format=csv" -o monthly-report-$(date +%
 
 ---
 
-## 📋 Senaryo 6: Email Üretme ve Doğrulama
+## 📋 Senaryo 6: Lead Enrichment (Contact Emails) ✨ YENİ
+
+### Durum
+Bir lead için contact email'lerini topladınız ve sisteme eklemek istiyorsunuz.
+
+### Adımlar
+
+#### 1. Lead'i Contact Email'leri ile Zenginleştir
+
+```bash
+curl -X POST http://localhost:8000/leads/ornek-firma.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contact_emails": [
+      "john.doe@ornek-firma.com",
+      "jane.smith@ornek-firma.com",
+      "bob@ornek-firma.com"
+    ]
+  }'
+```
+
+**Örnek Sonuç:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "contact_emails": [
+    "john.doe@ornek-firma.com",
+    "jane.smith@ornek-firma.com",
+    "bob@ornek-firma.com"
+  ],
+  "contact_quality_score": 75,
+  "linkedin_pattern": "firstname.lastname",
+  "message": "Domain ornek-firma.com enriched successfully"
+}
+```
+
+**Yorum:**
+- ✅ 3 contact email eklendi
+- ✅ Quality score: 75 (yüksek - domain eşleşmesi var)
+- ✅ LinkedIn pattern: firstname.lastname (LinkedIn outreach için kullanılabilir)
+
+#### 2. Enrichment Bilgilerini Görüntüle
+
+```bash
+# Lead detaylarında enrichment bilgileri görüntülenir
+curl "http://localhost:8000/leads/ornek-firma.com"
+```
+
+**Ne Döner?**
+- Contact emails listesi
+- Contact quality score (0-100)
+- LinkedIn pattern (firstname.lastname, f.lastname, firstname, veya null)
+
+#### 3. Export ile Enrichment Bilgilerini Kaydet
+
+```bash
+# Enrichment bilgileri export'ta da yer alır
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration" -o migration-leads.csv
+```
+
+**Export İçeriği:**
+- Contact emails (virgülle ayrılmış)
+- Contact quality score
+- LinkedIn pattern
+
+### Sonuç
+
+**Enrichment Avantajları:**
+- ✅ Satış ekibi için iletişim bilgileri toplama
+- ✅ Email kalitesi skorlaması (hangi lead'lerde daha fazla contact var)
+- ✅ LinkedIn outreach için pattern tespiti
+- ✅ Lead'leri daha iyi değerlendirme
+
+**Kullanım Senaryoları:**
+- **Toplu Enrichment**: Birçok lead için contact email'leri topladıysanız, tek tek enrichment yapabilirsiniz
+- **Quality Score**: Yüksek quality score'lu lead'lere öncelik verin (daha fazla contact = daha iyi fırsat)
+- **LinkedIn Outreach**: LinkedIn pattern tespit edildiyse, LinkedIn'de benzer pattern'lerle arama yapabilirsiniz
+
+---
+
+## 📋 Senaryo 7: Email Üretme ve Doğrulama
 
 ### Durum
 Bir domain için iletişim email'lerini bulmak ve doğrulamak istiyorsunuz.
@@ -679,6 +759,18 @@ Aksiyon: Hemen iletişime geç, migration teklifi hazırla
 ```
 
 ### Senaryo 6 Sonucu
+```
+Domain: ornek-firma.com
+3 contact email eklendi:
+- john.doe@ornek-firma.com
+- jane.smith@ornek-firma.com
+- bob@ornek-firma.com
+Quality Score: 75 (yüksek - domain eşleşmesi var)
+LinkedIn Pattern: firstname.lastname
+Aksiyon: LinkedIn'de benzer pattern'lerle arama yap, outreach başlat
+```
+
+### Senaryo 7 Sonucu
 ```
 Domain: ornek-firma.com
 9 generic email üretildi:

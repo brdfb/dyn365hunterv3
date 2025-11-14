@@ -354,6 +354,7 @@ curl "http://localhost:8000/leads/ornek-firma.com"
 - WHOIS bilgileri
 - Skor ve segment detayları
 - **Priority Score** (1-6, 1 en yüksek öncelik)
+- **Lead Enrichment** (G16): Contact emails, quality score, LinkedIn pattern
 - Güncelleme tarihleri
 
 **Priority Score Nedir?**
@@ -389,6 +390,56 @@ curl "http://localhost:8000/dashboard"
 - Ortalama skor takibi
 - Yüksek öncelikli lead sayısı (Migration + skor >= 70)
 
+### Lead Enrichment (G16) ✨ YENİ
+
+Lead'leri contact email'leri ile zenginleştirme:
+
+```bash
+# Bir lead'i contact email'leri ile zenginleştir
+curl -X POST http://localhost:8000/leads/ornek-firma.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contact_emails": [
+      "john.doe@ornek-firma.com",
+      "jane.smith@ornek-firma.com",
+      "bob@ornek-firma.com"
+    ]
+  }'
+```
+
+**Ne Yapıyor?**
+- Contact email'lerini kaydeder
+- **Contact Quality Score** hesaplar (0-100):
+  - Email sayısı (daha fazla email = daha yüksek skor)
+  - Domain eşleşmesi (email domain = company domain)
+- **LinkedIn Pattern** tespit eder:
+  - `firstname.lastname@domain.com`
+  - `f.lastname@domain.com`
+  - `firstname@domain.com`
+
+**Başarılı Yanıt:**
+```json
+{
+  "domain": "ornek-firma.com",
+  "contact_emails": [
+    "john.doe@ornek-firma.com",
+    "jane.smith@ornek-firma.com",
+    "bob@ornek-firma.com"
+  ],
+  "contact_quality_score": 75,
+  "linkedin_pattern": "firstname.lastname",
+  "message": "Domain ornek-firma.com enriched successfully"
+}
+```
+
+**Ne İşe Yarar?**
+- Satış ekibi için iletişim bilgilerini toplama
+- Email kalitesi skorlaması (hangi lead'lerde daha fazla contact var)
+- LinkedIn outreach için pattern tespiti
+- Lead'leri daha iyi değerlendirme
+
+**Not:** Enrichment bilgileri `GET /leads/{domain}` endpoint'inde de görüntülenir.
+
 ### Lead Export (CSV/Excel) 📥 YENİ
 
 Lead'leri CSV veya Excel formatında export etme:
@@ -422,6 +473,7 @@ curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score
 **Export İçeriği:**
 - Domain, company_name, provider, country
 - Segment, readiness_score, priority_score
+- **Lead Enrichment** (G16): contact_emails, contact_quality_score, linkedin_pattern
 - SPF, DKIM, DMARC policy
 - MX root, registrar, expires_at
 - Nameservers, scan_status, scanned_at
@@ -668,6 +720,14 @@ curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=
 curl -X POST http://localhost:8000/email/generate-and-validate \
   -H "Content-Type: application/json" \
   -d '{"domain": "DOMAIN-BURAYA", "use_smtp": false}'
+```
+
+### Lead Enrichment (G16) ✨ YENİ
+```bash
+# Bir lead'i contact email'leri ile zenginleştir
+curl -X POST http://localhost:8000/leads/DOMAIN-BURAYA/enrich \
+  -H "Content-Type: application/json" \
+  -d '{"contact_emails": ["email1@domain.com", "email2@domain.com"]}'
 ```
 
 ---
