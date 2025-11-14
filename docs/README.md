@@ -35,7 +35,12 @@ docs/
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
 - `TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report
 
-**Note:** Active documentation contains only reference guides. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
+#### Production Readiness Documentation
+- `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
+- `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
+- `G19-PRE-FLIGHT-CHECKLIST.md` - G19 pre-flight checklist (✅ Completed - Production hardening)
+
+**Note:** Active documentation contains reference guides and production readiness documentation. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
 
 ### Archived Documentation
 - `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
@@ -54,6 +59,7 @@ docs/
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
+- `2025-01-28-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-01-28)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
