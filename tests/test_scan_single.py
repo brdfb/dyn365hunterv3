@@ -146,10 +146,19 @@ class TestDNSAnalyzer:
 class TestWHOISAnalyzer:
     """Test WHOIS analysis functions."""
     
+    @patch('app.core.analyzer_whois._try_rdap')
     @patch('app.core.analyzer_whois.whois.whois')
-    def test_get_whois_info_success(self, mock_whois):
+    def test_get_whois_info_success(self, mock_whois, mock_rdap):
         """Test successful WHOIS lookup."""
         from datetime import datetime, date
+        
+        # Mock RDAP to return None (will fallback to WHOIS)
+        mock_rdap.return_value = None
+        
+        # Clear cache before test
+        from app.core.analyzer_whois import _whois_cache
+        if "example.com" in _whois_cache:
+            del _whois_cache["example.com"]
         
         mock_w = MagicMock()
         mock_w.registrar = "Example Registrar"
@@ -157,7 +166,7 @@ class TestWHOISAnalyzer:
         mock_w.name_servers = ["ns1.example.com", "ns2.example.com"]
         mock_whois.return_value = mock_w
         
-        result = get_whois_info("example.com")
+        result = get_whois_info("example.com", use_cache=False)
         
         assert result is not None
         assert result["registrar"] == "Example Registrar"
@@ -173,23 +182,42 @@ class TestWHOISAnalyzer:
         
         assert result is None
     
+    @patch('app.core.analyzer_whois._try_rdap')
     @patch('app.core.analyzer_whois.whois.whois')
-    def test_get_whois_info_timeout(self, mock_whois):
+    def test_get_whois_info_timeout(self, mock_whois, mock_rdap):
         """Test WHOIS lookup timeout handling (graceful fail)."""
         import socket
+        
+        # Mock RDAP to return None (will fallback to WHOIS)
+        mock_rdap.return_value = None
+        
+        # Clear cache before test
+        from app.core.analyzer_whois import _whois_cache
+        if "example.com" in _whois_cache:
+            del _whois_cache["example.com"]
+        
         mock_whois.side_effect = socket.timeout()
         
-        result = get_whois_info("example.com")
+        result = get_whois_info("example.com", use_cache=False)
         
         # Should return None gracefully, not raise exception
         assert result is None
     
+    @patch('app.core.analyzer_whois._try_rdap')
     @patch('app.core.analyzer_whois.whois.whois')
-    def test_get_whois_info_exception(self, mock_whois):
+    def test_get_whois_info_exception(self, mock_whois, mock_rdap):
         """Test WHOIS lookup exception handling (graceful fail)."""
+        # Mock RDAP to return None (will fallback to WHOIS)
+        mock_rdap.return_value = None
+        
+        # Clear cache before test
+        from app.core.analyzer_whois import _whois_cache
+        if "example.com" in _whois_cache:
+            del _whois_cache["example.com"]
+        
         mock_whois.side_effect = Exception("WHOIS error")
         
-        result = get_whois_info("example.com")
+        result = get_whois_info("example.com", use_cache=False)
         
         # Should return None gracefully, not raise exception
         assert result is None

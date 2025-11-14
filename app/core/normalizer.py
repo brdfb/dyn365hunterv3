@@ -114,10 +114,24 @@ def normalize_domain(domain: str) -> str:
     if domain.startswith('www.'):
         domain = domain[4:]
     
-    # Decode punycode if present
+    # Encode to punycode if contains non-ASCII characters (for IDNA compatibility)
+    try:
+        # Check if domain contains non-ASCII characters
+        domain_bytes = domain.encode('ascii')
+    except UnicodeEncodeError:
+        # Contains non-ASCII characters, encode to punycode
+        try:
+            domain = idna_encode(domain).decode('ascii')
+        except (UnicodeEncodeError, UnicodeError):
+            # If encoding fails, return empty (invalid domain)
+            return ""
+    
+    # Decode punycode if present (for display)
     try:
         if domain.startswith('xn--'):
-            domain = idna_decode(domain.encode('ascii')).decode('utf-8')
+            decoded = idna_decode(domain.encode('ascii')).decode('utf-8')
+            # Keep punycode for validation, but we can use decoded for some operations
+            # For now, keep punycode format for consistency
     except (UnicodeDecodeError, UnicodeError):
         # If punycode decode fails, keep original
         pass
