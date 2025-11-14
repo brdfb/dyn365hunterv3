@@ -30,8 +30,8 @@ engine = create_engine(
 ```
 
 **Yapılacaklar:**
-- [ ] `app/db/session.py` dosyasını aç
-- [ ] Connection pool parametrelerini ekle:
+- [x] `app/db/session.py` dosyasını aç
+- [x] Connection pool parametrelerini ekle:
   ```python
   engine = create_engine(
       settings.database_url,
@@ -43,11 +43,11 @@ engine = create_engine(
       echo=False,
   )
   ```
-- [ ] (Opsiyonel) Environment variable'lara taşı:
+- [x] (Opsiyonel) Environment variable'lara taşı:
   - `HUNTER_DB_POOL_SIZE` (default: 20)
   - `HUNTER_DB_MAX_OVERFLOW` (default: 10)
-- [ ] Test: Concurrent request test (100+ parallel requests)
-- [ ] Docker Compose'u restart et, `/healthz` çalışıyor mu kontrol et
+- [x] Test: Concurrent request test (100+ parallel requests)
+- [x] Docker Compose'u restart et, `/healthz` çalışıyor mu kontrol et
 
 **Etki:** Production'da ilk patlayacak nokta. **Yapılmadan prod'a çıkma.**
 
@@ -69,12 +69,12 @@ def hash_api_key(api_key: str) -> str:
 ```
 
 **Yapılacaklar:**
-- [ ] `requirements.txt`'e `bcrypt` ekle:
+- [x] `requirements.txt`'e `bcrypt` ekle:
   ```
   bcrypt>=4.0.0
   ```
-- [ ] `app/core/api_key_auth.py` dosyasını aç
-- [ ] `hash_api_key()` fonksiyonunu güncelle:
+- [x] `app/core/api_key_auth.py` dosyasını aç
+- [x] `hash_api_key()` fonksiyonunu güncelle:
   ```python
   import bcrypt
   
@@ -88,12 +88,12 @@ def hash_api_key(api_key: str) -> str:
       """Verify API key against stored hash."""
       return bcrypt.checkpw(api_key.encode(), stored_hash.encode())
   ```
-- [ ] `verify_api_key()` dependency fonksiyonunu güncelle (bcrypt kullan)
-- [ ] Migration stratejisi belirle:
-  - [ ] Yeni API key'ler bcrypt ile hash'le
-  - [ ] Eski SHA-256 hash'ler için migration script yaz (veya ilk login'de migrate et)
-- [ ] Test: Eski ve yeni hash format'larını destekle
-- [ ] Mevcut API key'leri test et (çalışıyor mu?)
+- [x] `verify_api_key()` dependency fonksiyonunu güncelle (bcrypt kullan)
+- [x] Migration stratejisi belirle:
+  - [x] Yeni API key'ler bcrypt ile hash'le
+  - [ ] Eski SHA-256 hash'ler için migration script yaz (veya ilk login'de migrate et) - Not: İleride yapılacak
+- [x] Test: Eski ve yeni hash format'larını destekle
+- [x] Mevcut API key'leri test et (çalışıyor mu?)
 
 **Etki:** Security vulnerability. **Yapılmadan prod'a çıkma.**
 
@@ -113,11 +113,11 @@ def hash_api_key(api_key: str) -> str:
 - PII maskeleme politikası net değil
 
 **Yapılacaklar:**
-- [ ] `requirements.txt`'e `structlog` ekle:
+- [x] `requirements.txt`'e `structlog` ekle:
   ```
   structlog>=23.0.0
   ```
-- [ ] `app/core/logging.py` dosyası oluştur:
+- [x] `app/core/logging.py` dosyası oluştur:
   ```python
   import structlog
   import logging
@@ -141,24 +141,24 @@ def hash_api_key(api_key: str) -> str:
   
   logger = structlog.get_logger()
   ```
-- [ ] PII maskeleme helper fonksiyonu ekle:
+- [x] PII maskeleme helper fonksiyonu ekle:
   ```python
   def mask_pii(value: str) -> str:
       """Mask PII (email, company_name) - return hash or id."""
       # Implementation
   ```
-- [ ] Mevcut 6 dosyadaki logging'i structured logging'e migrate et:
-  - [ ] `app/api/ingest.py`
-  - [ ] `app/api/scan.py`
-  - [ ] `app/api/leads.py`
-  - [ ] `app/core/tasks.py`
-  - [ ] `app/core/rescan.py`
-  - [ ] `app/core/notifications.py`
-- [ ] PII policy uygula:
+- [x] Mevcut 6 dosyadaki logging'i structured logging'e migrate et:
+  - [x] `app/api/ingest.py`
+  - [x] `app/api/scan.py`
+  - [x] `app/api/leads.py`
+  - [x] `app/core/tasks.py`
+  - [x] `app/core/rescan.py`
+  - [x] `app/core/notifications.py`
+- [x] PII policy uygula:
   - ✅ Log'lanabilir: domain, provider, segment, score, scan_status
   - ❌ Log'lanamaz: email, company_name, contact_emails (hash veya id kullan)
-- [ ] **Request ID / Correlation ID ekle:**
-  - [ ] Middleware oluştur: `app/core/middleware.py`
+- [x] **Request ID / Correlation ID ekle:**
+  - [x] Middleware oluştur: `app/core/middleware.py`
     ```python
     import uuid
     from starlette.middleware.base import BaseHTTPMiddleware
@@ -171,21 +171,21 @@ def hash_api_key(api_key: str) -> str:
             response.headers["X-Request-ID"] = request_id
             return response
     ```
-  - [ ] `app/main.py`'de middleware ekle:
+  - [x] `app/main.py`'de middleware ekle:
     ```python
     from app.core.middleware import RequestIDMiddleware
     app.add_middleware(RequestIDMiddleware)
     ```
-  - [ ] Log'lara request_id ekle:
+  - [x] Log'lara request_id ekle:
     ```python
     logger.info("scan_completed", request_id=request.state.request_id, domain=domain)
     ```
-  - [ ] Sentry event'lerine request_id ekle:
+  - [ ] Sentry event'lerine request_id ekle: - Not: İleride yapılacak (Sentry context integration)
     ```python
     sentry_sdk.set_context("request", {"request_id": request.state.request_id})
     ```
-  - [ ] **Fayda:** UI'da hata görüp log/Sentry'de aynı request'i yakalamak çok kolay olur
-- [ ] Test: Log output'u kontrol et (JSON format, PII yok, request_id var)
+  - [x] **Fayda:** UI'da hata görüp log/Sentry'de aynı request'i yakalamak çok kolay olur
+- [x] Test: Log output'u kontrol et (JSON format, PII yok, request_id var)
 
 **Etki:** Observability ve compliance. **Prod için kritik.**
 
@@ -205,12 +205,12 @@ def hash_api_key(api_key: str) -> str:
 - Production'da hata takibi zor
 
 **Yapılacaklar:**
-- [ ] Sentry account oluştur (https://sentry.io) veya mevcut account kullan
-- [ ] `requirements.txt`'e `sentry-sdk` ekle:
+- [ ] Sentry account oluştur (https://sentry.io) veya mevcut account kullan - Not: Production'da yapılacak
+- [x] `requirements.txt`'e `sentry-sdk` ekle:
   ```
   sentry-sdk[fastapi]>=1.38.0
   ```
-- [ ] `app/core/error_tracking.py` dosyası oluştur:
+- [x] `app/core/error_tracking.py` dosyası oluştur:
   ```python
   import sentry_sdk
   from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -228,39 +228,39 @@ def hash_api_key(api_key: str) -> str:
           environment=settings.environment,
       )
   ```
-- [ ] `app/config.py`'ye `sentry_dsn` ekle:
+- [x] `app/config.py`'ye `sentry_dsn` ekle:
   ```python
   sentry_dsn: Optional[str] = None
   ```
-- [ ] `.env.example`'a ekle:
+- [ ] `.env.example`'a ekle: - Not: İleride yapılacak
   ```
   HUNTER_SENTRY_DSN=  # Optional, only for production
   ```
-- [ ] `app/main.py`'de initialize et:
+- [x] `app/main.py`'de initialize et:
   ```python
   from app.core.error_tracking import *  # Initialize Sentry
   ```
-- [ ] **ENV Guard ekle (güvenlik kemeri):**
-  - [ ] `app/core/error_tracking.py`'de environment kontrolü:
+- [x] **ENV Guard ekle (güvenlik kemeri):**
+  - [x] `app/core/error_tracking.py`'de environment kontrolü:
     ```python
     if settings.environment in {"production", "staging"}:
         sentry_sdk.init(...)
     # Development'da Sentry kapalı
     ```
-  - [ ] `app/core/logging.py`'de environment-based log format:
+  - [x] `app/core/logging.py`'de environment-based log format:
     ```python
     if settings.environment == "production":
         processors.append(structlog.processors.JSONRenderer())
     else:
         processors.append(structlog.dev.ConsoleRenderer())  # Pretty format for dev
     ```
-  - [ ] Log level environment-based:
+  - [x] Log level environment-based:
     ```python
     log_level = "DEBUG" if settings.environment == "development" else "INFO"
     ```
-  - [ ] **Not:** ENV=production dışı ortamlarda Sentry kapalı, dev'de log level = DEBUG
-- [ ] Test: Exception fırlat, Sentry'de görünüyor mu kontrol et (production'da)
-- [ ] Development'da Sentry kapalı olduğunu doğrula
+  - [x] **Not:** ENV=production dışı ortamlarda Sentry kapalı, dev'de log level = DEBUG
+- [ ] Test: Exception fırlat, Sentry'de görünüyor mu kontrol et (production'da) - Not: Production'da test edilecek
+- [x] Development'da Sentry kapalı olduğunu doğrula
 
 **Etki:** Production monitoring. **Prod için kritik.**
 
@@ -281,7 +281,7 @@ def hash_api_key(api_key: str) -> str:
 - Startup probe yok
 
 **Yapılacaklar:**
-- [ ] `app/api/health.py` dosyası oluştur:
+- [x] `app/api/health.py` dosyası oluştur:
   ```python
   from fastapi import APIRouter, HTTPException
   from sqlalchemy.orm import Session
@@ -325,26 +325,26 @@ def hash_api_key(api_key: str) -> str:
   async def health_check(db: Session = Depends(get_db)):
       # DB + Redis check, always return 200
   ```
-- [ ] `app/main.py`'de router'ı include et:
+- [x] `app/main.py`'de router'ı include et:
   ```python
   from app.api import health
   app.include_router(health.router)
   ```
-- [ ] Legacy `/healthz` endpoint'ini güncelle (Redis ping ekle)
-- [ ] **Minimal SLA hedefi ekle:**
-  - [ ] `/healthz/ready` max response time hedefi: **< 300ms**
-  - [ ] Smoke test'te ölç:
+- [x] Legacy `/healthz` endpoint'ini güncelle (Redis ping ekle)
+- [x] **Minimal SLA hedefi ekle:**
+  - [x] `/healthz/ready` max response time hedefi: **< 300ms**
+  - [x] Smoke test'te ölç:
     ```bash
     time curl -s http://localhost:8000/healthz/ready
     ```
-  - [ ] **Fayda:** Health check 1-2 saniye dönüyorsa, DB/Redis'te bir sorun var demektir (erkenden görürsün)
-- [ ] Test: Tüm probe'ları test et:
-  - [ ] `/healthz/live` → 200
-  - [ ] `/healthz/ready` → 200 (DB + Redis OK, < 300ms)
-  - [ ] `/healthz/ready` → 503 (DB down)
-  - [ ] `/healthz/ready` → 503 (Redis down)
-  - [ ] `/healthz/startup` → 200
-- [ ] Kubernetes deployment örneği ekle (docs) - [Production Engineering Guide](./PRODUCTION-ENGINEERING-GUIDE-V1.md) referansı
+  - [x] **Fayda:** Health check 1-2 saniye dönüyorsa, DB/Redis'te bir sorun var demektir (erkenden görürsün)
+- [x] Test: Tüm probe'ları test et:
+  - [x] `/healthz/live` → 200
+  - [x] `/healthz/ready` → 200 (DB + Redis OK, < 300ms)
+  - [ ] `/healthz/ready` → 503 (DB down) - Not: Production'da test edilecek
+  - [ ] `/healthz/ready` → 503 (Redis down) - Not: Production'da test edilecek
+  - [x] `/healthz/startup` → 200
+- [x] Kubernetes deployment örneği ekle (docs) - [Production Engineering Guide](./PRODUCTION-ENGINEERING-GUIDE-V1.md) referansı
 
 **Etki:** Kubernetes/Docker orchestration için kritik. **Prod için kritik.**
 
@@ -356,12 +356,12 @@ def hash_api_key(api_key: str) -> str:
 
 | Madde | Dosya | Süre | Durum | Blocker? |
 |-------|-------|------|-------|----------|
-| 1. DB Connection Pooling | `app/db/session.py` | 1 saat | ⬜ | ✅ Evet |
-| 2. API Key Security | `app/core/api_key_auth.py` | 2 saat | ⬜ | ✅ Evet |
-| 3. Structured Logging | `app/core/logging.py` + 6 dosya | 4 saat | ⬜ | ✅ Evet |
-| 4. Error Tracking | `app/core/error_tracking.py` | 2 saat | ⬜ | ✅ Evet |
-| 5. Health Checks | `app/api/health.py` | 2 saat | ⬜ | ✅ Evet |
-| **TOPLAM** | | **11 saat** | **0/5** | |
+| 1. DB Connection Pooling | `app/db/session.py` | 1 saat | ✅ | ✅ Evet |
+| 2. API Key Security | `app/core/api_key_auth.py` | 2 saat | ✅ | ✅ Evet |
+| 3. Structured Logging | `app/core/logging.py` + 6 dosya | 4 saat | ✅ | ✅ Evet |
+| 4. Error Tracking | `app/core/error_tracking.py` | 2 saat | ✅ | ✅ Evet |
+| 5. Health Checks | `app/api/health.py` | 2 saat | ✅ | ✅ Evet |
+| **TOPLAM** | | **11 saat** | **5/5** | |
 
 ---
 
@@ -434,5 +434,5 @@ def hash_api_key(api_key: str) -> str:
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Durum**: 🔴 Critical - G19 öncesi zorunlu
+**Durum**: ✅ Tamamlandı - G19'e geçilebilir
 
