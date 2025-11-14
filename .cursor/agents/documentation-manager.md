@@ -23,7 +23,9 @@ Comprehensive documentation management agent that automatically updates document
 
 ### 4. Regular Maintenance
 - **Weekly Cleanup**: Check for outdated prompts (not referenced in 7+ days)
-- **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files)
+- **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files, currently only reference guides)
+- **Feature Documentation**: Archive feature docs when complete (e.g., PROVIDER-CHANGE-TRACKING.md, DUPLICATE-PREVENTION.md)
+- **Planning Docs**: Archive completed planning docs to `docs/archive/`
 - **Token Efficiency**: Archive immediately when work is complete
 
 ## Triggers
@@ -62,11 +64,12 @@ Comprehensive documentation management agent that automatically updates document
 ### Phase Completion Workflow
 When TODO status = "Completed":
 1. Archive TODO file: `scripts/manage_docs.sh archive-todo <filename>`
-2. Update CHANGELOG.md: Add phase changes under `[Unreleased]` → `### Added`
+2. Update CHANGELOG.md: Add phase changes under `[Unreleased]` → `### Added` (for future releases) or under current version if releasing immediately
 3. Update README.md: Mark completed features in Features section
 4. Update docs/README.md: Add phase to "Archived Documentation" section
-5. Check `docs/active/` for phase-related docs and archive if needed
-6. Confirm completion with summary
+5. Check `docs/active/` for phase-related feature docs and archive if needed (feature docs should be archived when complete)
+6. Check `docs/plans/` for completed planning docs and archive if needed
+7. Confirm completion with summary
 
 ### New Phase Initiation
 1. Extract phase name from context (G1, G2, G3, etc.)
@@ -128,25 +131,25 @@ scripts/manage_docs.sh list
 4. Confirm: "✅ Documentation updated: README.md and CHANGELOG.md"
 
 ### Example 2: Phase Complete
-**User**: "G1 tamamlandı" or "G1 bitti"
+**User**: "G18 tamamlandı" or "G18 bitti"
 **Agent Action**:
-1. Check `docs/todos/G1-foundation.md` status
+1. Check `docs/todos/G18-rescan-alerts-scoring.md` status
 2. If "Completed" → Run phase completion workflow:
-   - `scripts/manage_docs.sh archive-todo G1-foundation.md`
-   - Update CHANGELOG.md with G1 changes
-   - Update README.md Features section (mark G1 features as ✅)
-   - Update docs/README.md (add G1 to archived docs)
-3. Check `docs/active/` for G1-related docs
-4. Archive if needed
-5. Confirm: "✅ G1 phase completed - TODO archived, documentation updated"
+   - `scripts/manage_docs.sh archive-todo G18-rescan-alerts-scoring.md`
+   - Update CHANGELOG.md with G18 changes (under `[Unreleased]` or current version)
+   - Update README.md Features section (mark G18 features as ✅)
+   - Update docs/README.md (add G18 to archived docs)
+3. Check `docs/active/` for G18-related feature docs and archive if needed
+4. Check `docs/plans/` for G18-related planning docs and archive if needed
+5. Confirm: "✅ G18 phase completed - TODO archived, documentation updated"
 
 ### Example 3: New Phase
-**User**: "G2 başlıyor"
+**User**: "G19 başlıyor"
 **Agent Action**:
-1. Extract phase: "G2"
-2. Extract name from context or use default: "database-schema"
-3. `scripts/manage_docs.sh create-todo G2 database-schema`
-4. Confirm: "✅ G2 TODO created: docs/todos/G2-database-schema.md"
+1. Extract phase: "G19"
+2. Extract name from context or use default: "auth-ui-advanced"
+3. `scripts/manage_docs.sh create-todo G19 auth-ui-advanced`
+4. Confirm: "✅ G19 TODO created: docs/todos/G19-auth-ui-advanced.md"
 
 ### Example 4: Important Decision
 **User**: "Bu önemli bir karar, kaydet"
@@ -169,7 +172,9 @@ scripts/manage_docs.sh list
 
 Agent should regularly check:
 - TODO files status changes
-- Active documentation count (should be < 7 files)
+- Active documentation count (should be < 7 files, currently 5 reference guides)
+- Feature documentation in `docs/active/` (should be archived when complete)
+- Planning documentation in `docs/plans/` (should be archived when complete)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -189,7 +194,7 @@ This agent should be **always active** in the AI assistant's context. When you s
 - New core modules created → Auto-update CHANGELOG.md
 - TODO completed → Run full phase completion workflow
 - User mentions "save this" → Save prompt
-- User mentions "G2 başlıyor" → Create TODO
+- User mentions "G19 başlıyor" or "Starting G19" → Create TODO
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
 

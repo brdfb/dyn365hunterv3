@@ -5,8 +5,9 @@
 - **Target**: ≤2 minute "kahvelik" analysis flow for sales team
 - **MVP Status**: ✅ Completed (G1-G14)
 - **Post-MVP Sprint 1 (G14)**: ✅ Completed - CSV Export + UI Mini
-- **Post-MVP Sprint 2-6 (G15-G19)**: 📋 Planned - See `docs/plans/2025-11-14-FINAL-ROADMAP.md`
-- **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation
+- **Post-MVP Sprint 2-5 (G15-G18)**: ✅ Completed - Bulk Scan, Webhook, Notes/Tags/Favorites/PDF, ReScan/Alerts/Enhanced Scoring
+- **Post-MVP Sprint 6 (G19)**: 📋 Planned - Auth + UI + Advanced Features
+- **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring
 
 ## Code Style & Standards
 
@@ -15,6 +16,7 @@
 - Follow PEP 8 (black formatter preferred)
 - Use f-strings for string formatting
 - Prefer explicit over implicit (no magic numbers/strings)
+- Use `app/core/constants.py` for business logic thresholds (scores, expiry days, bulk limits)
 
 ### FastAPI
 - Use Pydantic models for request/response validation
@@ -29,12 +31,16 @@
 - Always use transactions for multi-step operations
 - **Duplicate Prevention**: Delete existing LeadScore/DomainSignal before creating new ones (prevents duplicates)
 - **Provider Change Tracking**: Log provider changes to `provider_change_history` table when detected
+- **Change Detection**: History tables (`signal_change_history`, `score_change_history`) for tracking changes over time
 
 ### Error Handling
 - DNS timeout: 10s max, return None/error status, set `scan_status='dns_timeout'`
 - WHOIS timeout: 5s max, graceful fail (return None), set `scan_status='whois_failed'`
+- RDAP timeout: 3s max (fallback to WHOIS)
+- SMTP timeout: 3s max (for email validation)
 - Invalid domain: Return 400 Bad Request with clear error message
 - Never crash on external API failures (DNS/WHOIS) - continue with partial data
+- Celery task timeout: 900s (15 minutes) per task
 
 ### Logging & PII
 - **CRITICAL**: Log only domain, NEVER log email or company_name
@@ -46,6 +52,8 @@
 - Test edge cases: invalid domains, timeouts, malformed CSV, missing MX records
 - Use pytest with pytest-mock for mocking DNS/WHOIS
 - Target: ≥70% code coverage for core modules
+- All tests must pass before commit (214+ tests)
+- CI/CD enforces: black formatting, flake8 linting, mypy type checking
 
 ## MVP Scope Discipline
 
@@ -67,22 +75,26 @@
 - Priority Score feature - Lead prioritization (1-6 scale)
 - Email generation (`POST /email/generate`) - Generic email addresses for domains
 - Email validation (`POST /email/generate-and-validate`) - Syntax, MX, optional SMTP validation
-- **Mini UI** (`/mini-ui/`) - Simple web interface for demo and internal use
+- **Mini UI** (`/mini-ui/`) - Simple web interface for demo and internal use (API_BASE_URL configurable via `window.HUNTER_API_BASE_URL`)
 - **CSV/Excel export** (`GET /leads/export`) - Export leads with filters
 - **Provider change tracking** - Automatic detection and history logging
 - **Duplicate prevention** - Automatic cleanup of duplicate records
 - **Domain validation** - Enhanced validation to filter invalid domains
+- **Bulk scan** (`POST /scan/bulk`) - Async bulk domain scanning with Celery + Redis
+- **Webhook ingestion** (`POST /ingest/webhook`) - API key authenticated webhook endpoint
+- **Lead enrichment** - Contact emails, quality score, LinkedIn pattern detection
+- **Notes/Tags/Favorites** - CRM-lite features with session-based favorites
+- **PDF summaries** (`GET /leads/{domain}/summary.pdf`) - Account summary PDF generation
+- **ReScan infrastructure** (`POST /scan/{domain}/rescan`, `POST /scan/bulk/rescan`) - Manual and bulk rescan with change detection
+- **Alerts system** (`GET /alerts`, `POST /alerts/config`) - Change alerts (MX, DMARC, expiry, score)
+- **Enhanced scoring** - Signal-based improvements (DKIM none penalty, SPF multiple includes risk)
 - Docker Compose setup
 - Basic tests (8 test files)
 
-### ❌ OUT OF SCOPE (Post-MVP - Sprint 2-6'da planlandı)
-- **Sprint 2 (G15)**: Bulk scan endpoint (`/scan/bulk`) - ✅ Planlandı
-- **Sprint 3 (G16)**: Webhook endpoint (`/ingest/webhook`) - ✅ Planlandı
-- **Sprint 4 (G17)**: Notes/Tags/Favorites + PDF - ✅ Planlandı
-- **Sprint 5 (G18)**: ReScan + Alerts + Enhanced Scoring - ✅ Planlandı
-- **Sprint 6 (G19)**: Auth + UI + Advanced Features - ✅ Planlandı
+### ❌ OUT OF SCOPE (Post-MVP - Sprint 6'da planlandı)
+- **Sprint 6 (G19)**: Auth + UI + Advanced Features - 📋 Planlandı
 - **Still Out of Scope**: D365 adapter, `scripts/demo_run.sh`
-- **Note**: Redis/Queue ve Scheduler Sprint 2-5'te eklenecek
+- **Note**: Redis/Queue ve Scheduler Sprint 2-5'te eklendi (Celery + Redis)
 
 ## File Structure Rules
 
@@ -92,12 +104,12 @@
 - `.env.example` (all required env vars)
 - `requirements.txt` (pinned versions)
 - `app/main.py` (FastAPI app + `/healthz`)
-- `app/config.py` (Pydantic Settings)
+- `app/config.py` (Pydantic Settings with `HUNTER_` prefix - use `HUNTER_DATABASE_URL`, `HUNTER_REDIS_URL`, etc.)
 - `app/db/schema.sql` (PostgreSQL DDL)
 - `app/db/models.py` (SQLAlchemy models) - Includes `ProviderChangeHistory` model
 - `app/db/session.py` (DB session factory)
-- `app/core/normalizer.py` (includes `is_valid_domain()`), `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`, `importer.py`, `email_generator.py`, `email_validator.py`
-- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`, `email_tools.py`, `progress.py`, `jobs.py`
+- `app/core/normalizer.py` (includes `is_valid_domain()`), `analyzer_dns.py`, `analyzer_whois.py`, `provider_map.py`, `scorer.py`, `merger.py`, `priority.py`, `importer.py`, `email_generator.py`, `email_validator.py`, `constants.py`, `change_detection.py`, `rescan.py`, `auto_tagging.py`, `notifications.py`
+- `app/api/ingest.py`, `scan.py`, `leads.py`, `dashboard.py`, `email_tools.py`, `progress.py`, `jobs.py`, `bulk_scan.py`, `rescan.py`, `webhook.py`, `export.py`, `notes.py`, `tags.py`, `favorites.py`, `pdf.py`, `alerts.py`
 - `app/data/providers.json`, `rules.json`
 - `tests/test_scan_single.py`, `test_scorer_rules.py`, `test_ingest_csv.py`, `test_api_endpoints.py`, `test_priority.py`, `test_importer_autodetect.py`, `test_email_generator.py`, `test_email_validator.py`
 - `README.md`
@@ -162,6 +174,50 @@
 - Verify `/healthz` endpoint
 - Print access URLs
 
+## Guardrails & Validation Rules
+
+### Rate Limiting
+- **DNS queries**: 10 req/s per worker (token bucket algorithm)
+- **WHOIS queries**: 5 req/s per worker (token bucket algorithm)
+- **API Key rate limiting**: Configurable per key (default: 60 req/min)
+- Always use `wait_for_dns_rate_limit()` and `wait_for_whois_rate_limit()` in bulk operations
+
+### Bulk Operation Limits
+- **Maximum domains per bulk scan/rescan**: 1000 (use `MAX_BULK_SCAN_DOMAINS` from `app/core/constants.py`)
+- Validate domain count before processing
+- Return 400 Bad Request if limit exceeded
+
+### Environment Variables
+- **Always use `HUNTER_` prefix**: `HUNTER_DATABASE_URL`, `HUNTER_REDIS_URL`, etc.
+- Load via Pydantic Settings (`app/config.py`)
+- Never hardcode database/Redis URLs in code
+- Provide defaults for development (Docker Compose service names)
+
+### Constants & Magic Numbers
+- **Never use magic numbers**: Use `app/core/constants.py` for all thresholds
+- Score thresholds: `MIGRATION_READY_SCORE`, `PRIORITY_1_SCORE`, etc.
+- Expiry thresholds: `EXPIRE_SOON_DAYS`
+- Bulk limits: `MAX_BULK_SCAN_DOMAINS`
+
+### API Key Authentication
+- **Webhook endpoints**: Require `X-API-Key` header
+- Use `verify_api_key()` dependency for protected endpoints
+- Rate limit per API key (configurable, default: 60 req/min)
+- Store hashed keys (SHA-256), never plaintext
+
+### Celery Task Configuration
+- **Task timeout**: 900s (15 minutes) per task
+- **Max retries**: 2 for transient failures
+- **Concurrent tasks**: 5 per worker
+- Always use rate limiting in Celery tasks
+
+### CI/CD Guardrails
+- **Black formatting**: Enforced in CI (`.github/workflows/lint.yml`)
+- **Flake8 linting**: Max line length 127, complexity ≤10
+- **Type checking**: mypy (non-blocking, ignore missing imports)
+- **Test coverage**: Codecov integration
+- **All tests must pass**: 214+ tests
+
 ## Code Review Checklist
 
 Before marking code as done, verify:
@@ -169,9 +225,15 @@ Before marking code as done, verify:
 - [ ] Error handling implemented (timeouts, invalid input)
 - [ ] No PII in logs (domain only)
 - [ ] Tests written for new functions
-- [ ] MVP scope respected (no UI, webhook, bulk, export)
+- [ ] MVP scope respected (Post-MVP features: bulk, webhook, export, rescan, alerts are now in scope)
 - [ ] Docker Compose still works
 - [ ] `/healthz` still responds
+- [ ] Rate limiting applied (if bulk/external API calls)
+- [ ] Bulk limits enforced (max 1000 domains)
+- [ ] Constants used (no magic numbers)
+- [ ] Environment variables use `HUNTER_` prefix
+- [ ] Black formatting applied
+- [ ] All tests passing
 
 ## Common Patterns
 
@@ -267,29 +329,27 @@ When a phase is completed (TODO status = "Completed"):
 
 ## Post-MVP Sprint Planning (G15-G19)
 
-### Sprint 2 (G15) - Bulk Scan & Async Queue
-- ✅ Use async queue (Celery/RQ/FastAPI BackgroundTasks)
+### Sprint 2 (G15) - Bulk Scan & Async Queue ✅ Completed
+- ✅ Use async queue (Celery + Redis)
 - ✅ Implement rate limiting (DNS: 10 req/s, WHOIS: 5 req/s)
 - ✅ Progress tracking via Redis or DB
-- ❌ Do NOT implement Priority Score Engine (already exists in `app/core/priority.py`)
-- ❌ Do NOT implement ReScan Infrastructure (moved to Sprint 5)
+- ✅ Bulk scan endpoint (`POST /scan/bulk`)
 
-### Sprint 3 (G16) - Webhook + Basit Lead Enrichment
+### Sprint 3 (G16) - Webhook + Basit Lead Enrichment ✅ Completed
 - ✅ Simple API Key auth (no OAuth yet)
 - ✅ Basic lead enrichment (contact_emails, contact_quality_score, linkedin_pattern)
-- ❌ Do NOT implement Contact Finder (moved to Sprint 6+)
-- ❌ Do NOT implement Auto-tagging (moved to Sprint 4)
+- ✅ Webhook endpoint (`POST /ingest/webhook`)
 
-### Sprint 4 (G17) - Notes/Tags/Favorites + Basit PDF
+### Sprint 4 (G17) - Notes/Tags/Favorites + Basit PDF ✅ Completed
 - ✅ Session-based favorites (no auth required yet)
 - ✅ Simple PDF generation (no AI)
-- ❌ Do NOT implement AI Recommendation (moved to Sprint 6+)
-- ❌ Do NOT implement Microsoft Auth (moved to Sprint 6)
+- ✅ Auto-tagging (security-risk, migration-ready, expire-soon, etc.)
 
-### Sprint 5 (G18) - ReScan + Alerts + Enhanced Scoring
+### Sprint 5 (G18) - ReScan + Alerts + Enhanced Scoring ✅ Completed
 - ✅ History tables for change tracking
 - ✅ Enhanced scoring (signal-based improvements, NO AI)
-- ❌ Do NOT implement AI-enhanced scoring (moved to Sprint 6+)
+- ✅ ReScan infrastructure (manual and bulk)
+- ✅ Alerts system (MX changed, DMARC added, expiry, score changed)
 
 ### Sprint 6 (G19) - Auth + UI + Advanced Features
 - ✅ Microsoft SSO authentication

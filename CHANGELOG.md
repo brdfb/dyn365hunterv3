@@ -8,7 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- (No new features yet)
+- Production readiness documentation:
+  - `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
+  - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
+
+### Documentation
+- Added comprehensive production readiness critique (v2) with health checks & probes
+- Added production engineering guide (v1) with SRE practices and incident response runbook
+- Archived completed phase documentation to `docs/archive/`
 
 ## [1.0.0] - 2025-11-14
 

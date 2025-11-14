@@ -28,18 +28,14 @@ docs/
 
 ### Active Documentation
 
-#### Feature Documentation
-- `PROVIDER-CHANGE-TRACKING.md` - Automatic detection and logging of provider changes
-- `DUPLICATE-PREVENTION.md` - Automatic cleanup of duplicate records
-- `DOMAIN-VALIDATION.md` - Enhanced domain validation and filtering
-
 #### Reference Guides
 - `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
 - `WSL-GUIDE.md` - WSL2 setup and configuration guide
 - `TESTING.md` - Testing guide and troubleshooting
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
+- `TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report
 
-**Note:** Active documentation contains feature documentation and reference guides. Phase-specific and planning documentation has been moved to `plans/` and `archive/`.
+**Note:** Active documentation contains only reference guides. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
 
 ### Archived Documentation
 - `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
@@ -52,6 +48,12 @@ docs/
   - G13: Email Validator - Light email validation (syntax, MX, optional SMTP)
 - `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
 - `2025-11-14-G15-bulk-scan-async.md` - G15: Sprint 2: Bulk Scan & Async Queue (Completed)
+- `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (Completed)
+- `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (Completed)
+- `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (Completed)
+- `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
+- `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
+- `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
@@ -69,24 +71,33 @@ docs/
 - `2025-11-12-phase-completion-workflow.md` - Phase completion workflow enhancement
 
 ### Project Plans
+
+**Active Plans:**
+- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - Active roadmap (G19 planned)
+
+**Archived Plans:**
+All completed planning documentation has been moved to `docs/archive/`:
 - `2025-01-27-phase0-hotfix-scoring.md` - Phase 0: Enhanced Scoring & Hard-Fail Rules (Completed)
-- `2025-01-27-SALES-FEATURE-REQUESTS.md` - Sales team feature requests (MVP scope completed, Post-MVP planning)
-- `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests
-- `2025-01-27-IMPORTER-EMAIL-IMPLEMENTATION-PLAN.md` - Importer + Email Module Implementation Plan (v2, Prioritized)
-- `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches
+- `2025-01-27-SALES-FEATURE-REQUESTS.md` - Sales team feature requests (Completed)
+- `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests (Completed)
+- `2025-01-27-IMPORTER-EMAIL-IMPLEMENTATION-PLAN.md` - Importer + Email Module Implementation Plan (Completed)
+- `2025-01-27-IMPORTER-EMAIL-MODULE-CRITIQUE.md` - Design critique and alternative approaches (Completed)
 - `2025-01-28-POST-MVP-SPRINT1-PLAN.md` - Post-MVP Sprint 1: CSV Export + UI Mini (Completed)
 - `2025-01-28-MINI-UI-IMPLEMENTATION-PLAN.md` - Mini UI Implementation Plan (Completed)
-- `2025-01-28-MINI-UI-CRITIQUE.md` - Mini UI Approach Critique and Alternatives
-- `2025-11-14-ROADMAP-CRITIQUE.md` - Critical evaluation of Sprint 2-6 roadmap
-- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)**
+- `2025-01-28-MINI-UI-CRITIQUE.md` - Mini UI Approach Critique and Alternatives (Completed)
+- `2025-11-14-ROADMAP-CRITIQUE.md` - Critical evaluation of Sprint 2-6 roadmap (Completed)
 
 ### TODOs
-- `G15-bulk-scan-async.md` - Sprint 2: Bulk Scan & Async Queue (✅ Completed)
-- `G16-webhook-enrichment.md` - Sprint 3: Webhook + Basit Lead Enrichment (📋 Planned)
-- `G17-notes-tags-pdf.md` - Sprint 4: Notes/Tags/Favorites + Basit PDF (📋 Planned)
-- `G18-rescan-alerts-scoring.md` - Sprint 5: ReScan + Alerts + Enhanced Scoring (📋 Planned)
+
+**Active TODOs:**
 - `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (📋 Planned)
 
 **Archived TODOs:**
+All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (✅ Completed)
 - `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (✅ Completed)
+- `2025-11-14-G15-bulk-scan-async.md` - G15: Sprint 2: Bulk Scan & Async Queue (✅ Completed)
+- `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (✅ Completed)
+- `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (✅ Completed)
+- `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (✅ Completed)
 
