@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G16: Webhook + Lead Enrichment** - Webhook ingestion with API key authentication and lead enrichment
+  - `POST /ingest/webhook` endpoint for webhook data ingestion
+    - API key authentication via `X-API-Key` header
+    - Rate limiting per API key (configurable, default: 60 requests/minute)
+    - Automatic domain normalization and company upsert
+    - Lead enrichment with contact emails, quality score, and LinkedIn pattern detection
+    - Retry logic with exponential backoff for failed requests (max 3 retries)
+    - Error logging and webhook failure tracking
+  - `POST /admin/api-keys` endpoint for API key generation
+    - Generate secure API keys (SHA-256 hashed)
+    - Configurable rate limits per key
+    - Key activation/deactivation support
+  - `GET /admin/api-keys` endpoint for listing API keys
+  - `PATCH /admin/api-keys/{key_id}/activate` and `/deactivate` endpoints
+  - `POST /leads/{domain}/enrich` endpoint for manual lead enrichment
+  - Database schema updates:
+    - `api_keys` table for API key management
+    - `webhook_retries` table for retry tracking
+    - `companies.contact_emails` (JSONB array) for contact email storage
+    - `companies.contact_quality_score` (integer, 0-100) for quality scoring
+    - `companies.linkedin_pattern` (string) for LinkedIn email pattern detection
+  - Lead enrichment features:
+    - Contact quality score calculation (based on email count and domain matching)
+    - LinkedIn email pattern detection (firstname.lastname, f.lastname, firstname)
+    - Email deduplication and normalization
+  - Implementation:
+    - `app/core/api_key_auth.py` - API key authentication and rate limiting
+    - `app/core/enrichment.py` - Lead enrichment logic
+    - `app/core/webhook_retry.py` - Retry logic with exponential backoff
+    - `app/api/admin.py` - Admin endpoints for API key management
+    - `app/api/ingest.py` - Webhook endpoint
+    - `app/api/leads.py` - Enrichment endpoint and updated GET /leads/{domain}
+    - `app/db/migrations/g16_webhook_enrichment.sql` - Database migration script
+  - Tests: Comprehensive test suite (20+ test cases)
+    - `tests/test_webhook.py` - Webhook endpoint tests (10 tests)
+    - `tests/test_enrichment.py` - Enrichment logic tests (10 tests)
+    - `tests/test_api_key_auth.py` - API key authentication tests
+  - Post-MVP Sprint 3 feature (webhook infrastructure + basic enrichment)
 - **G15: Bulk Scan & Async Queue** - Async bulk domain scanning with progress tracking
   - `POST /scan/bulk` endpoint for creating bulk scan jobs (up to 1000 domains)
   - `GET /scan/bulk/{job_id}` endpoint for checking job status and progress

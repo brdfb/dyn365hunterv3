@@ -1,12 +1,13 @@
 """Ingest endpoints for domain and CSV data ingestion."""
 import pandas as pd
 import asyncio
+import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from app.db.session import get_db
-from app.db.models import RawLead
+from app.db.models import RawLead, ApiKey
 from app.core.normalizer import (
     normalize_domain,
     extract_domain_from_email,
@@ -18,8 +19,13 @@ from app.core.analyzer_dns import analyze_dns
 from app.core.analyzer_whois import get_whois_info
 from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
+from app.core.api_key_auth import verify_api_key
+from app.core.enrichment import enrich_company_data
+from app.core.webhook_retry import create_webhook_retry
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 from app.api.jobs import create_job, update_job_progress, start_job, complete_job, JobStatus
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -445,4 +451,183 @@ async def ingest_csv(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+class WebhookRequest(BaseModel):
+    """Request model for webhook ingestion."""
+    domain: str = Field(..., description="Domain name (will be normalized)")
+    company_name: Optional[str] = Field(None, description="Company name (optional)")
+    contact_emails: Optional[List[str]] = Field(default_factory=list, description="List of contact email addresses (optional)")
+    
+    @field_validator("domain")
+    @classmethod
+    def validate_domain(cls, v: str) -> str:
+        """Validate and normalize domain."""
+        normalized = normalize_domain(v)
+        if not normalized:
+            raise ValueError("Invalid domain format")
+        return normalized
+    
+    @field_validator("contact_emails")
+    @classmethod
+    def validate_contact_emails(cls, v: Optional[List[str]]) -> List[str]:
+        """Validate contact emails list."""
+        if v is None:
+            return []
+        # Filter out empty strings and None values
+        return [email for email in v if email and isinstance(email, str) and email.strip()]
+
+
+class WebhookResponse(BaseModel):
+    """Response model for webhook ingestion."""
+    status: str
+    domain: str
+    ingested: bool
+    enriched: bool
+    message: str
+
+
+@router.post("/webhook", response_model=WebhookResponse, status_code=201)
+async def ingest_webhook(
+    request: WebhookRequest,
+    api_key: ApiKey = Depends(verify_api_key),
+    db: Session = Depends(get_db)
+):
+    """
+    Ingest data from webhook with API key authentication.
+    
+    - Requires X-API-Key header for authentication
+    - Normalizes domain and creates/updates company record
+    - Enriches company data with contact emails, quality score, and LinkedIn pattern
+    - Creates raw_lead record with source='webhook'
+    
+    Args:
+        request: Webhook ingestion request
+        api_key: Verified API key (from dependency)
+        db: Database session
+        
+    Returns:
+        WebhookResponse with ingestion status
+        
+    Raises:
+        401: If API key is missing or invalid
+        429: If rate limit exceeded
+        400: If domain is invalid
+        500: If internal server error
+    """
+    try:
+        # Normalize domain
+        normalized_domain = normalize_domain(request.domain)
+        if not normalized_domain:
+            error_msg = f"Invalid domain format: {request.domain}"
+            logger.error(f"Webhook error: {error_msg}")
+            # Create retry record for invalid domain (won't retry, but for tracking)
+            create_webhook_retry(
+                db=db,
+                api_key_id=api_key.id,
+                payload=request.model_dump(),
+                domain=request.domain,
+                error_message=error_msg,
+                max_retries=0  # Don't retry invalid domains
+            )
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Upsert company
+        try:
+            company = upsert_companies(
+                db=db,
+                domain=normalized_domain,
+                company_name=request.company_name
+            )
+        except Exception as e:
+            error_msg = f"Failed to upsert company: {str(e)}"
+            logger.error(f"Webhook error: {error_msg}", exc_info=True)
+            # Create retry record
+            create_webhook_retry(
+                db=db,
+                api_key_id=api_key.id,
+                payload=request.model_dump(),
+                domain=normalized_domain,
+                error_message=error_msg
+            )
+            raise HTTPException(status_code=500, detail=error_msg)
+        
+        # Enrich company data if contact emails provided
+        enriched = False
+        if request.contact_emails:
+            try:
+                enrichment_data = enrich_company_data(
+                    emails=request.contact_emails,
+                    domain=normalized_domain
+                )
+                
+                # Update company with enrichment data
+                company.contact_emails = enrichment_data["contact_emails"]
+                company.contact_quality_score = enrichment_data["contact_quality_score"]
+                company.linkedin_pattern = enrichment_data["linkedin_pattern"]
+                db.commit()
+                db.refresh(company)
+                enriched = True
+            except Exception as e:
+                error_msg = f"Failed to enrich company data: {str(e)}"
+                logger.error(f"Webhook enrichment error: {error_msg}", exc_info=True)
+                # Don't fail the whole request if enrichment fails, just log it
+                db.rollback()
+        
+        # Create raw_lead record
+        try:
+            raw_lead = RawLead(
+                source="webhook",
+                company_name=request.company_name,
+                domain=normalized_domain,
+                payload={
+                    "original_domain": request.domain,
+                    "contact_emails": request.contact_emails,
+                    "api_key_id": api_key.id,
+                    "api_key_name": api_key.name
+                }
+            )
+            db.add(raw_lead)
+            db.commit()
+            db.refresh(raw_lead)
+        except Exception as e:
+            error_msg = f"Failed to create raw_lead: {str(e)}"
+            logger.error(f"Webhook error: {error_msg}", exc_info=True)
+            # Create retry record
+            create_webhook_retry(
+                db=db,
+                api_key_id=api_key.id,
+                payload=request.model_dump(),
+                domain=normalized_domain,
+                error_message=error_msg
+            )
+            raise HTTPException(status_code=500, detail=error_msg)
+        
+        logger.info(f"Webhook ingested successfully: domain={normalized_domain}, api_key_id={api_key.id}")
+        
+        return WebhookResponse(
+            status="success",
+            domain=normalized_domain,
+            ingested=True,
+            enriched=enriched,
+            message=f"Domain {normalized_domain} ingested successfully"
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Unexpected error: {str(e)}"
+        logger.error(f"Webhook unexpected error: {error_msg}", exc_info=True)
+        # Create retry record
+        try:
+            create_webhook_retry(
+                db=db,
+                api_key_id=api_key.id if api_key else None,
+                payload=request.model_dump() if request else {},
+                domain=request.domain if request else None,
+                error_message=error_msg
+            )
+        except Exception:
+            pass  # Don't fail if retry creation fails
+        raise HTTPException(status_code=500, detail=error_msg)
 

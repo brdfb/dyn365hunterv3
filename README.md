@@ -208,7 +208,11 @@ A simple web interface for demo and internal use:
     - `provider` (optional): Filter by provider (M365, Google, etc.)
   - Returns: Array of lead objects with `priority_score` field (1-6, where 1 is highest priority)
 - `GET /leads/{domain}` - Get single lead details
-  - Returns: Complete lead information including signals, scores, priority_score, and metadata
+  - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), and metadata
+- `POST /leads/{domain}/enrich` - Manually enrich a lead with contact emails
+  - Request body: `{"contact_emails": ["john@example.com", "jane@example.com"]}`
+  - Returns: Enrichment results (contact_emails, contact_quality_score, linkedin_pattern)
+  - Calculates quality score and detects LinkedIn email patterns
 - `GET /leads/export` - Export leads to CSV or Excel format
   - Query parameters:
     - `segment` (optional): Filter by segment (Migration, Existing, Cold, Skip)
@@ -222,6 +226,26 @@ A simple web interface for demo and internal use:
 - `GET /dashboard` - Get aggregated dashboard statistics
   - Returns: `{"total_leads": 150, "migration": 25, "existing": 50, "cold": 60, "skip": 15, "avg_score": 55.5, "high_priority": 10}`
   - Provides segment distribution, average score, and high priority lead count
+
+### Webhook Ingestion (G16)
+- `POST /ingest/webhook` - Ingest data from webhook with API key authentication
+  - **Authentication**: Requires `X-API-Key` header
+  - Request body: `{"domain": "example.com", "company_name": "Example Inc", "contact_emails": ["john@example.com"]}`
+  - Returns: `{"status": "success", "domain": "example.com", "ingested": true, "enriched": true, "message": "..."}`
+  - Features:
+    - API key authentication and rate limiting (per key)
+    - Automatic domain normalization
+    - Lead enrichment (contact emails, quality score, LinkedIn pattern detection)
+    - Retry logic with exponential backoff for failed requests
+    - Error logging and tracking
+
+### Admin (API Key Management)
+- `POST /admin/api-keys` - Create a new API key
+  - Request body: `{"name": "My API Key", "rate_limit_per_minute": 60, "created_by": "admin"}`
+  - Returns: API key (shown only once - store securely!)
+- `GET /admin/api-keys` - List all API keys (without showing actual keys)
+- `PATCH /admin/api-keys/{key_id}/activate` - Activate an API key
+- `PATCH /admin/api-keys/{key_id}/deactivate` - Deactivate an API key
 
 ### Email Tools
 - `POST /email/generate` - Generate generic email addresses for a domain
@@ -363,6 +387,22 @@ curl "http://localhost:8000/leads/example.com"
 
 # 5. Get dashboard statistics
 curl "http://localhost:8000/dashboard"
+
+# 6. Create API key for webhook
+curl -X POST http://localhost:8000/admin/api-keys \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My Webhook Key", "rate_limit_per_minute": 60}'
+
+# 7. Ingest data via webhook
+curl -X POST http://localhost:8000/ingest/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -d '{"domain": "example.com", "company_name": "Example Inc", "contact_emails": ["john@example.com"]}'
+
+# 8. Manually enrich a lead
+curl -X POST http://localhost:8000/leads/example.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{"contact_emails": ["john@example.com", "jane@example.com"]}'
 ```
 
 ## Documentation

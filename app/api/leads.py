@@ -10,6 +10,8 @@ import pandas as pd
 from app.db.session import get_db
 from app.core.normalizer import normalize_domain
 from app.core.priority import calculate_priority_score
+from app.core.enrichment import enrich_company_data
+from app.db.models import Company
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -22,6 +24,9 @@ class LeadResponse(BaseModel):
     domain: str
     provider: Optional[str] = None
     country: Optional[str] = None
+    contact_emails: Optional[List[str]] = None  # G16: Lead enrichment
+    contact_quality_score: Optional[int] = None  # G16: Lead enrichment
+    linkedin_pattern: Optional[str] = None  # G16: Lead enrichment
     spf: Optional[bool] = None
     dkim: Optional[bool] = None
     dmarc_policy: Optional[str] = None
@@ -329,6 +334,9 @@ async def get_lead(
             c.domain,
             c.provider,
             c.country,
+            c.contact_emails,
+            c.contact_quality_score,
+            c.linkedin_pattern,
             ds.spf,
             ds.dkim,
             ds.dmarc_policy,
@@ -367,12 +375,24 @@ async def get_lead(
         # Calculate priority score
         priority_score = calculate_priority_score(row.segment, row.readiness_score)
         
+        # Convert contact_emails from JSONB to list if present
+        contact_emails = None
+        if row.contact_emails:
+            if isinstance(row.contact_emails, list):
+                contact_emails = row.contact_emails
+            else:
+                # Handle case where it might be stored differently
+                contact_emails = list(row.contact_emails) if row.contact_emails else None
+        
         return LeadResponse(
             company_id=row.company_id,
             canonical_name=row.canonical_name,
             domain=row.domain,
             provider=row.provider,
             country=row.country,
+            contact_emails=contact_emails,
+            contact_quality_score=row.contact_quality_score,
+            linkedin_pattern=row.linkedin_pattern,
             spf=row.spf,
             dkim=row.dkim,
             dmarc_policy=row.dmarc_policy,
@@ -391,5 +411,91 @@ async def get_lead(
     except HTTPException:
         raise
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+class EnrichLeadRequest(BaseModel):
+    """Request model for manual lead enrichment."""
+    contact_emails: List[str] = Field(..., description="List of contact email addresses")
+
+
+class EnrichLeadResponse(BaseModel):
+    """Response model for lead enrichment."""
+    domain: str
+    contact_emails: List[str]
+    contact_quality_score: int
+    linkedin_pattern: Optional[str]
+    message: str
+
+
+@router.post("/{domain}/enrich", response_model=EnrichLeadResponse, status_code=200)
+async def enrich_lead(
+    domain: str,
+    request: EnrichLeadRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Manually enrich a lead with contact emails.
+    
+    - Updates company record with enrichment data
+    - Calculates contact quality score
+    - Detects LinkedIn email pattern
+    
+    Args:
+        domain: Domain name (will be normalized)
+        request: Enrichment request with contact emails
+        db: Database session
+        
+    Returns:
+        EnrichLeadResponse with enrichment results
+        
+    Raises:
+        404: If domain not found
+        400: If domain is invalid or no emails provided
+        500: If internal server error
+    """
+    # Normalize domain
+    normalized_domain = normalize_domain(domain)
+    
+    if not normalized_domain:
+        raise HTTPException(status_code=400, detail="Invalid domain format")
+    
+    # Validate contact emails
+    if not request.contact_emails:
+        raise HTTPException(status_code=400, detail="At least one contact email is required")
+    
+    # Find company
+    company = db.query(Company).filter(Company.domain == normalized_domain).first()
+    
+    if not company:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain"
+        )
+    
+    try:
+        # Enrich company data
+        enrichment_data = enrich_company_data(
+            emails=request.contact_emails,
+            domain=normalized_domain
+        )
+        
+        # Update company with enrichment data
+        company.contact_emails = enrichment_data["contact_emails"]
+        company.contact_quality_score = enrichment_data["contact_quality_score"]
+        company.linkedin_pattern = enrichment_data["linkedin_pattern"]
+        db.commit()
+        db.refresh(company)
+        
+        return EnrichLeadResponse(
+            domain=normalized_domain,
+            contact_emails=enrichment_data["contact_emails"],
+            contact_quality_score=enrichment_data["contact_quality_score"],
+            linkedin_pattern=enrichment_data["linkedin_pattern"],
+            message=f"Domain {normalized_domain} enriched successfully"
+        )
+    
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

@@ -1,9 +1,10 @@
 # TODO: Sprint 3 (G16) - Webhook + Basit Lead Enrichment
 
 **Date Created**: 2025-11-14  
-**Status**: 📋 Planned  
+**Status**: ✅ Completed  
 **Phase**: G16 (Post-MVP Sprint 3)  
-**Süre**: 1 hafta
+**Süre**: 1 hafta  
+**Completed**: 2025-11-14
 
 ---
 
@@ -19,102 +20,102 @@ Veri akışı - Webhook ingestion + basit lead enrichment.
 
 ### Webhook Infrastructure
 
-- [ ] `POST /ingest/webhook` endpoint
-  - [ ] Request model (Pydantic)
-  - [ ] Payload validation
-  - [ ] Domain extraction from payload
-  - [ ] Company name extraction from payload
+- [x] `POST /ingest/webhook` endpoint
+  - [x] Request model (Pydantic)
+  - [x] Payload validation
+  - [x] Domain extraction from payload
+  - [x] Company name extraction from payload
 
-- [ ] API Key authentication
-  - [ ] API Key model (database table)
-  - [ ] API Key validation middleware
-  - [ ] API Key generation endpoint (admin)
-  - [ ] Rate limiting per API key
+- [x] API Key authentication
+  - [x] API Key model (database table)
+  - [x] API Key validation middleware
+  - [x] API Key generation endpoint (admin)
+  - [x] Rate limiting per API key
 
-- [ ] Retry logic
-  - [ ] Exponential backoff
-  - [ ] Max retries (3)
-  - [ ] Retry queue (failed webhooks)
+- [x] Retry logic
+  - [x] Exponential backoff
+  - [x] Max retries (3)
+  - [x] Retry queue (failed webhooks)
 
-- [ ] Error handling & logging
-  - [ ] Error logging
-  - [ ] Error response format
-  - [ ] Webhook failure tracking
+- [x] Error handling & logging
+  - [x] Error logging
+  - [x] Error response format
+  - [x] Webhook failure tracking
 
 ### Lead Enrichment (Basit)
 
-- [ ] Schema değişikliği
-  - [ ] `companies.contact_emails` (JSONB array)
-  - [ ] `companies.contact_quality_score` (integer, 0-100)
-  - [ ] `companies.linkedin_pattern` (string, basit pattern)
-  - [ ] Migration script
+- [x] Schema değişikliği
+  - [x] `companies.contact_emails` (JSONB array)
+  - [x] `companies.contact_quality_score` (integer, 0-100)
+  - [x] `companies.linkedin_pattern` (string, basit pattern)
+  - [x] Migration script
 
-- [ ] Enrichment logic
-  - [ ] `contact_emails[]` - Webhook'tan gelen (manuel)
-  - [ ] `contact_quality_score` - Basit hesaplama:
+- [x] Enrichment logic
+  - [x] `contact_emails[]` - Webhook'tan gelen (manuel)
+  - [x] `contact_quality_score` - Basit hesaplama:
     - Email count (daha fazla email = daha yüksek score)
     - Domain match (email domain = company domain)
-  - [ ] `linkedin_pattern` - Basit string ops:
+  - [x] `linkedin_pattern` - Basit string ops:
     - `firstname.lastname@domain.com`
     - `f.lastname@domain.com`
     - `firstname@domain.com`
 
-- [ ] Enrichment endpoint
-  - [ ] `POST /leads/{domain}/enrich` (manuel enrichment)
-  - [ ] Webhook'tan otomatik enrichment
+- [x] Enrichment endpoint
+  - [x] `POST /leads/{domain}/enrich` (manuel enrichment)
+  - [x] Webhook'tan otomatik enrichment
 
 ### API Endpoints
 
-- [ ] `POST /ingest/webhook` endpoint
-  - [ ] Request: `{ "domain": "...", "company_name": "...", "contact_emails": [...] }`
-  - [ ] Response: `{ "status": "success", "domain": "...", "ingested": true }`
+- [x] `POST /ingest/webhook` endpoint
+  - [x] Request: `{ "domain": "...", "company_name": "...", "contact_emails": [...] }`
+  - [x] Response: `{ "status": "success", "domain": "...", "ingested": true }`
 
-- [ ] `GET /leads/{domain}` endpoint güncelleme
-  - [ ] Enrichment fields response'a eklenecek:
+- [x] `GET /leads/{domain}` endpoint güncelleme
+  - [x] Enrichment fields response'a eklenecek:
     - `contact_emails: List[str]`
     - `contact_quality_score: int`
     - `linkedin_pattern: str`
 
-- [ ] `POST /leads/{domain}/enrich` endpoint (opsiyonel)
-  - [ ] Manuel enrichment trigger
+- [x] `POST /leads/{domain}/enrich` endpoint (opsiyonel)
+  - [x] Manuel enrichment trigger
 
 ### Testing
 
-- [ ] Unit tests
-  - [ ] Webhook endpoint tests
-  - [ ] API Key auth tests
-  - [ ] Enrichment logic tests
-  - [ ] Retry logic tests
+- [x] Unit tests
+  - [x] Webhook endpoint tests
+  - [x] API Key auth tests
+  - [x] Enrichment logic tests
+  - [x] Retry logic tests
 
-- [ ] Integration tests
-  - [ ] Webhook ingestion end-to-end test
-  - [ ] Enrichment end-to-end test
-  - [ ] Rate limiting test
+- [x] Integration tests
+  - [x] Webhook ingestion end-to-end test
+  - [x] Enrichment end-to-end test
+  - [x] Rate limiting test
 
 ### Documentation
 
-- [ ] API documentation
-  - [ ] `POST /ingest/webhook` endpoint docs
-  - [ ] API Key generation docs
-  - [ ] Enrichment fields docs
+- [x] API documentation
+  - [x] `POST /ingest/webhook` endpoint docs
+  - [x] API Key generation docs
+  - [x] Enrichment fields docs
 
-- [ ] README.md güncellemesi
-  - [ ] Webhook kullanımı
-  - [ ] API Key setup
+- [x] README.md güncellemesi
+  - [x] Webhook kullanımı
+  - [x] API Key setup
 
-- [ ] CHANGELOG.md güncellemesi
-  - [ ] G16: Webhook + Lead Enrichment added
+- [x] CHANGELOG.md güncellemesi
+  - [x] G16: Webhook + Lead Enrichment added
 
 ---
 
 ## ✅ Acceptance Criteria
 
-- [ ] `POST /ingest/webhook` endpoint çalışıyor
-- [ ] API Key auth çalışıyor
-- [ ] Retry logic çalışıyor (exponential backoff)
-- [ ] Rate limiting çalışıyor (per API key)
-- [ ] Lead enrichment fields response'da (`contact_emails`, `contact_quality_score`, `linkedin_pattern`)
-- [ ] Tests passing (≥8 test cases)
+- [x] `POST /ingest/webhook` endpoint çalışıyor
+- [x] API Key auth çalışıyor
+- [x] Retry logic çalışıyor (exponential backoff)
+- [x] Rate limiting çalışıyor (per API key)
+- [x] Lead enrichment fields response'da (`contact_emails`, `contact_quality_score`, `linkedin_pattern`)
+- [x] Tests passing (≥20 test cases)
 
 ---
 
