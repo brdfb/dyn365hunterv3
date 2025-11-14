@@ -12,20 +12,28 @@ from app.db.models import Base, Company
 from app.main import app
 
 # Test database URL
+# Priority: TEST_DATABASE_URL > HUNTER_DATABASE_URL > DATABASE_URL > default
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
     os.getenv(
-        "DATABASE_URL",
-        "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        "HUNTER_DATABASE_URL",
+        os.getenv(
+            "DATABASE_URL",
+            "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        )
     )
 )
 
 # Test Redis URL
+# Priority: TEST_REDIS_URL > HUNTER_REDIS_URL > REDIS_URL > default
 TEST_REDIS_URL = os.getenv(
     "TEST_REDIS_URL",
     os.getenv(
-        "REDIS_URL",
-        "redis://localhost:6379/1"  # Use DB 1 for testing
+        "HUNTER_REDIS_URL",
+        os.getenv(
+            "REDIS_URL",
+            "redis://localhost:6379/1"  # Use DB 1 for testing
+        )
     )
 )
 

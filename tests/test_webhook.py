@@ -10,11 +10,15 @@ from app.db.models import Base, ApiKey, Company, RawLead
 from app.core.api_key_auth import hash_api_key, generate_api_key
 from app.main import app
 
+# Priority: TEST_DATABASE_URL > HUNTER_DATABASE_URL > DATABASE_URL > default
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
     os.getenv(
-        "DATABASE_URL",
-        "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        "HUNTER_DATABASE_URL",
+        os.getenv(
+            "DATABASE_URL",
+            "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        )
     )
 )
 

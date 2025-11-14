@@ -40,7 +40,8 @@ jobs:
     
     - name: Run tests
       env:
-        DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_REDIS_URL: redis://localhost:6379/0
       run: |
         pytest tests/ -v --cov=app --cov-report=term --cov-report=xml
     
@@ -139,13 +140,15 @@ jobs:
     
     - name: Run database migration
       env:
-        DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_REDIS_URL: redis://localhost:6379/0
       run: |
         python -c "from app.db.session import engine; from app.db.models import Base; Base.metadata.create_all(bind=engine)"
     
     - name: Test health endpoint
       env:
-        DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_DATABASE_URL: postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter
+        HUNTER_REDIS_URL: redis://localhost:6379/0
       run: |
         python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 5

@@ -13,11 +13,15 @@ from app.db.models import Base
 # Test database URL - use PostgreSQL from environment or fallback to test DB
 # In Docker container: use 'postgres' (service name)
 # Local testing: use 'localhost'
+# Priority: TEST_DATABASE_URL > HUNTER_DATABASE_URL > DATABASE_URL > default
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
     os.getenv(
-        "DATABASE_URL",
-        "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        "HUNTER_DATABASE_URL",
+        os.getenv(
+            "DATABASE_URL",
+            "postgresql://dyn365hunter:password123@localhost:5432/dyn365hunter"
+        )
     )
     # Keep DATABASE_URL as-is (postgres:5432 in container, localhost:5432 locally)
     # Don't replace - container uses 'postgres', local uses 'localhost'
