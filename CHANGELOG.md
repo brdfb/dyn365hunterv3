@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Stabilization Sprint - Gün 2: Monitoring ve Safety** (2025-01-28) - Observability ve güvenlik katmanları
+  - Cache hit metrics - Redis cache hit/miss counter, hit rate calculation, TTL expiration tracking (`app/core/cache.py`)
+  - Rate limit metrics - Rate limit hit counter, per-key metrics, circuit breaker state tracking (`app/core/distributed_rate_limiter.py`)
+  - Bulk operations metrics - Batch success/failure rate, average processing time, deadlock count, partial commit recovery count (`app/core/tasks.py`)
+  - Error trend logging - Sentry error categorization (component, severity, error_type), error grouping, daily/weekly error count tracking (`app/core/error_tracking.py`)
+  - Metrics endpoint - `GET /healthz/metrics` - Unified metrics endpoint for cache, rate limit, bulk operations, and error metrics (`app/api/health.py`)
+  - Deadlock simulation testleri (`tests/test_deadlock_prevention.py`) - Concurrent transaction test, deadlock detection, retry logic test, transaction timeout test, batch isolation test (5/5 passed)
+  - Cache invalidation simulation testleri (`tests/test_cache_invalidation.py`) - Rescan cache invalidation, TTL expiration, cache key collision, cache consistency test (7/7 skipped - Redis yok, beklenen)
+  - Redis skip mekanizması - Cache invalidation testleri Redis yoksa otomatik skip edilir (CI/local ortam uyumluluğu)
+  - Test coverage: 12 yeni test eklendi (5 passed, 7 skipped - beklenen)
+  - Status: ✅ Gün 2 tamamlandı ve kilitlendi
 - **Stabilization Sprint - Gün 1: Core Stabilizasyon** (2025-01-28) - Test ve doğrulama katmanları
   - Alembic migration testleri (`tests/test_alembic.py`) - Schema drift detection, rollback testleri, run_migration.py wrapper testleri (10 passed, 1 skipped)
   - Distributed rate limiting testleri (`tests/test_distributed_rate_limiter.py`) - Multi-worker rate limiting, Redis fallback, circuit breaker recovery (11 passed)

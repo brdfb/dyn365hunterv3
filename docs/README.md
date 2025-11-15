@@ -59,6 +59,10 @@ Sales team documentation has been organized into a dedicated folder:
 - `P1-API-VERSIONING-PREPARATION.md` - API versioning preparation
 - `KALAN-ISLER-PRIORITY.md` - P1/P2 priority list and dependencies
 
+#### Stabilization Sprint Documentation
+- `STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - Gün 1 ✅, Gün 2 ✅, Gün 3: UI Stabilizasyon
+- `UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3)
+
 **Note:** Active documentation contains reference guides, production readiness documentation, and P1 implementation documentation. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
 
 ### Archived Documentation

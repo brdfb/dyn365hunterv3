@@ -192,6 +192,12 @@ A simple web interface for demo and internal use:
 
 ### Health Check
 - `GET /healthz` - Health check and database connection status
+- `GET /healthz/live` - Liveness probe (Kubernetes/Docker)
+- `GET /healthz/ready` - Readiness probe (checks database and Redis connections)
+- `GET /healthz/startup` - Startup probe (checks if application has finished starting)
+- `GET /healthz/metrics` - Metrics endpoint (Stabilization Sprint - Gün 2)
+  - Returns: Cache metrics (hits, misses, hit rate), rate limit metrics (hits, acquired, circuit breaker state), bulk operations metrics (batch success/failure, processing time, deadlock count), error metrics (total errors, errors by component, error trends)
+  - Example response: `{"cache": {...}, "rate_limit": {...}, "bulk_operations": {...}, "errors": {...}}`
 
 ### Ingest
 - `POST /api/v1/ingest/domain` or `POST /ingest/domain` - Ingest single domain
