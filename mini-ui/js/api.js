@@ -3,7 +3,7 @@
 const API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
 
 /**
- * Fetch leads with filters
+ * Fetch leads with filters (G19: Updated for paginated response)
  */
 export async function fetchLeads(filters = {}) {
     const params = new URLSearchParams();
@@ -12,6 +12,13 @@ export async function fetchLeads(filters = {}) {
         params.append('min_score', filters.minScore);
     }
     if (filters.provider) params.append('provider', filters.provider);
+    
+    // G19: Add pagination and sorting parameters
+    if (filters.page) params.append('page', filters.page);
+    if (filters.pageSize) params.append('page_size', filters.pageSize);
+    if (filters.sortBy) params.append('sort_by', filters.sortBy);
+    if (filters.sortOrder) params.append('sort_order', filters.sortOrder);
+    if (filters.search) params.append('search', filters.search);
 
     const url = `${API_BASE_URL}/leads${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url);
@@ -20,7 +27,20 @@ export async function fetchLeads(filters = {}) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    
+    // G19: Handle new paginated response format
+    // Backward compatibility: if response is array, return as-is
+    // If response is object with 'leads' property, extract leads array
+    if (Array.isArray(data)) {
+        return data; // Old format (backward compatibility)
+    } else if (data.leads && Array.isArray(data.leads)) {
+        // New format: return leads array for now (pagination metadata can be added later)
+        return data.leads;
+    } else {
+        // Unexpected format, return as-is
+        return data;
+    }
 }
 
 /**
