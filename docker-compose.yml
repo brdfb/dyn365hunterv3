@@ -48,6 +48,11 @@ services:
       API_PORT: ${API_PORT:-8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      # Azure AD (G19) - Microsoft SSO
+      HUNTER_AZURE_CLIENT_ID: ${HUNTER_AZURE_CLIENT_ID:-}
+      HUNTER_AZURE_CLIENT_SECRET: ${HUNTER_AZURE_CLIENT_SECRET:-}
+      HUNTER_AZURE_TENANT_ID: ${HUNTER_AZURE_TENANT_ID:-}
+      HUNTER_AZURE_REDIRECT_URI: ${HUNTER_AZURE_REDIRECT_URI:-http://localhost:8000/auth/callback}
     ports:
       - "8000:8000"
     volumes:
