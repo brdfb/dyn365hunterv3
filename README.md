@@ -41,6 +41,10 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Mini UI (HTML + Vanilla JS) - Simple web interface for demo and internal use
 - ✅ **Progress tracking** - Real-time progress updates for CSV ingestion and scanning operations
 - ✅ **Bulk Scan** - Async bulk domain scanning with progress tracking (G15)
+- ✅ **G19: Microsoft SSO Authentication** - Azure AD integration with OAuth 2.0 flow
+- ✅ **G19: UI Upgrade** - Sorting, pagination, and full-text search for leads table
+- ✅ **G19: Dashboard KPI** - New `/dashboard/kpis` endpoint with high priority leads count
+- ✅ **G19: Score Breakdown** - Detailed score analysis with modal UI
 
 ## Tech Stack
 
@@ -162,6 +166,11 @@ A simple web interface for demo and internal use:
 
 ## API Endpoints
 
+**Interactive API Documentation:**
+- Swagger UI: `http://localhost:8000/docs` (interactive API explorer)
+- ReDoc: `http://localhost:8000/redoc` (alternative documentation format)
+- OpenAPI JSON: `http://localhost:8000/openapi.json` (machine-readable schema)
+
 ### Health Check
 - `GET /healthz` - Health check and database connection status
 
@@ -201,13 +210,21 @@ A simple web interface for demo and internal use:
   - Only available for completed jobs
 
 ### Leads
-- `GET /leads` - Query leads with filters
+- `GET /leads` - Query leads with filters, sorting, pagination, and search (G19)
   - Query parameters:
     - `segment` (optional): Filter by segment (Migration, Existing, Cold, Skip)
     - `min_score` (optional): Minimum readiness score (0-100)
     - `provider` (optional): Filter by provider (M365, Google, etc.)
     - `favorite` (optional): Filter by favorites (true = only favorites, false = all leads)
-  - Returns: Array of lead objects with `priority_score` field (1-6, where 1 is highest priority)
+    - `sort_by` (optional): Sort by field (domain, readiness_score, priority_score, segment, provider, scanned_at)
+    - `sort_order` (optional): Sort order (asc or desc, default: asc)
+    - `page` (optional): Page number (1-based, default: 1)
+    - `page_size` (optional): Number of items per page (default: 50, max: 200)
+    - `search` (optional): Full-text search in domain, canonical_name, and provider
+  - Returns: Paginated response with `leads`, `total`, `page`, `page_size`, `total_pages`
+  - Each lead includes `priority_score` field (1-6, where 1 is highest priority)
+- `GET /leads/{domain}/score-breakdown` - Get detailed score breakdown for a domain (G19)
+  - Returns: Score breakdown with base_score, provider points, signal points, risk points, and total_score
 - `GET /leads/{domain}` - Get single lead details
   - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), and metadata
 - `POST /leads/{domain}/enrich` - Manually enrich a lead with contact emails
@@ -294,9 +311,12 @@ A simple web interface for demo and internal use:
 - **Daily rescan**: Automatically runs daily via Celery Beat scheduler
 
 ### Dashboard
-- `GET /dashboard` - Get aggregated dashboard statistics
-  - Returns: `{"total_leads": 150, "migration": 25, "existing": 50, "cold": 60, "skip": 15, "avg_score": 55.5, "high_priority": 10}`
-  - Provides segment distribution, average score, and high priority lead count
+- `GET /dashboard` - Get aggregated dashboard statistics (legacy endpoint)
+  - Returns: `{"total_leads": 150, "migration": 25, "existing": 50, "cold": 60, "skip": 15, "avg_score": 55.5, "max_score": 90, "high_priority": 10}`
+  - Provides segment distribution, average score, max score, and high priority lead count
+- `GET /dashboard/kpis` - Get dashboard KPIs (G19)
+  - Returns: `{"total_leads": 150, "migration_leads": 25, "high_priority": 10}`
+  - Lightweight endpoint for KPI cards (total leads, migration leads, high priority leads)
 
 ### Webhook Ingestion (G16)
 - `POST /ingest/webhook` - Ingest data from webhook with API key authentication
@@ -309,6 +329,25 @@ A simple web interface for demo and internal use:
     - Lead enrichment (contact emails, quality score, LinkedIn pattern detection)
     - Retry logic with exponential backoff for failed requests
     - Error logging and tracking
+
+### Authentication (G19: Microsoft SSO)
+- `GET /auth/login` - Initiate Microsoft SSO login
+  - Redirects to Azure AD login page
+  - Returns: Redirect to Azure AD OAuth 2.0 authorization endpoint
+- `GET /auth/callback` - OAuth callback endpoint
+  - Handles Azure AD OAuth callback with authorization code
+  - Returns: Redirect to frontend with access_token and refresh_token
+- `GET /auth/me` - Get current user information
+  - **Authentication**: Requires `Authorization: Bearer {access_token}` header
+  - Returns: User information (id, email, display_name)
+- `POST /auth/refresh` - Refresh access token
+  - Request body: `{"refresh_token": "..."}`
+  - Returns: New access_token and refresh_token
+- `POST /auth/logout` - Logout current user
+  - **Authentication**: Requires `Authorization: Bearer {access_token}` header
+  - Revokes refresh token and clears session
+  - Returns: 200 OK
+- **Setup**: See [Azure AD Setup Guide](docs/active/G19-AZURE-AD-SETUP.md) for configuration instructions
 
 ### Admin (API Key Management)
 - `POST /admin/api-keys` - Create a new API key

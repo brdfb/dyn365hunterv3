@@ -29,7 +29,8 @@ export function renderLeadsTable(leads) {
                 <td class="leads-table__cell">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
-                <td class="leads-table__cell ${scoreClass}">
+                <td class="leads-table__cell ${scoreClass} ${lead.readiness_score !== null && lead.readiness_score !== undefined ? 'score-clickable' : ''}" 
+                    ${lead.readiness_score !== null && lead.readiness_score !== undefined ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? lead.readiness_score : '-'}
                 </td>
             </tr>
@@ -38,7 +39,29 @@ export function renderLeadsTable(leads) {
 }
 
 /**
- * Render dashboard stats (KPI area)
+ * Render dashboard KPIs (G19 - New endpoint)
+ */
+export function renderKPIs(kpis) {
+    if (!kpis) return;
+    
+    const totalEl = document.getElementById('kpi-total');
+    const migrationEl = document.getElementById('kpi-migration');
+    const highPriorityEl = document.getElementById('kpi-high-priority');
+    const maxScoreEl = document.getElementById('kpi-max-score');
+    
+    if (totalEl) totalEl.textContent = kpis.total_leads || 0;
+    if (migrationEl) migrationEl.textContent = kpis.migration_leads || 0;
+    if (highPriorityEl) highPriorityEl.textContent = kpis.high_priority || 0;
+    if (maxScoreEl) {
+        // Max score is not in KPIs endpoint, keep from legacy dashboard if available
+        // Or fetch from legacy endpoint separately
+        const maxScore = window.state.dashboard?.max_score;
+        maxScoreEl.textContent = (maxScore !== null && maxScore !== undefined) ? maxScore : '-';
+    }
+}
+
+/**
+ * Render dashboard stats (legacy - kept for backward compatibility)
  */
 export function renderStats(dashboard) {
     if (!dashboard) return;
@@ -50,7 +73,12 @@ export function renderStats(dashboard) {
     const maxScore = dashboard.max_score !== null && dashboard.max_score !== undefined 
         ? dashboard.max_score 
         : '-';
-    document.getElementById('kpi-max-score').textContent = maxScore;
+    const maxScoreEl = document.getElementById('kpi-max-score');
+    if (maxScoreEl) maxScoreEl.textContent = maxScore;
+    
+    // High priority from legacy endpoint
+    const highPriorityEl = document.getElementById('kpi-high-priority');
+    if (highPriorityEl) highPriorityEl.textContent = dashboard.high_priority || 0;
 }
 
 /**
@@ -139,5 +167,93 @@ export function showError(message) {
  */
 export function hideError() {
     document.getElementById('error').style.display = 'none';
+}
+
+/**
+ * Show score breakdown modal (G19)
+ */
+export function showScoreBreakdown(breakdown, domain) {
+    const modal = document.getElementById('score-breakdown-modal');
+    const content = document.getElementById('score-breakdown-content');
+    
+    if (!modal || !content) return;
+    
+    // Build HTML content
+    let html = `<div class="score-breakdown">`;
+    
+    // Domain info
+    html += `<div class="score-breakdown__section">
+        <div class="score-breakdown__item">
+            <span class="score-breakdown__label">Domain</span>
+            <span class="score-breakdown__value">${escapeHtml(domain)}</span>
+        </div>
+    </div>`;
+    
+    // Base score
+    html += `<div class="score-breakdown__section">
+        <div class="score-breakdown__section-title">Temel Skor</div>
+        <div class="score-breakdown__item">
+            <span class="score-breakdown__label">Başlangıç Skoru</span>
+            <span class="score-breakdown__value">${breakdown.base_score || 0}</span>
+        </div>
+    </div>`;
+    
+    // Provider points
+    if (breakdown.provider) {
+        html += `<div class="score-breakdown__section">
+            <div class="score-breakdown__section-title">Provider</div>
+            <div class="score-breakdown__item">
+                <span class="score-breakdown__label">${escapeHtml(breakdown.provider.name || 'Unknown')}</span>
+                <span class="score-breakdown__value score-breakdown__value--positive">+${breakdown.provider.points || 0}</span>
+            </div>
+        </div>`;
+    }
+    
+    // Signal points (positive)
+    if (breakdown.signal_points && Object.keys(breakdown.signal_points).length > 0) {
+        html += `<div class="score-breakdown__section">
+            <div class="score-breakdown__section-title">Pozitif Sinyaller</div>`;
+        for (const [signal, points] of Object.entries(breakdown.signal_points)) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">${escapeHtml(signal.toUpperCase())}</span>
+                <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+    
+    // Risk points (negative)
+    if (breakdown.risk_points && Object.keys(breakdown.risk_points).length > 0) {
+        html += `<div class="score-breakdown__section">
+            <div class="score-breakdown__section-title">Risk Faktörleri</div>`;
+        for (const [risk, points] of Object.entries(breakdown.risk_points)) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">${escapeHtml(risk.replace(/_/g, ' ').toUpperCase())}</span>
+                <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+    
+    // Total score
+    html += `<div class="score-breakdown__total">
+        <span class="score-breakdown__total-label">Toplam Skor</span>
+        <span class="score-breakdown__total-value">${breakdown.total_score || 0}</span>
+    </div>`;
+    
+    html += `</div>`;
+    
+    content.innerHTML = html;
+    modal.style.display = 'block';
+}
+
+/**
+ * Hide score breakdown modal (G19)
+ */
+export function hideScoreBreakdown() {
+    const modal = document.getElementById('score-breakdown-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 

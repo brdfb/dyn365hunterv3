@@ -365,3 +365,31 @@ class AlertConfig(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+class User(Base):
+    """User information from Microsoft SSO (G19)."""
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    microsoft_id = Column(
+        String(255), nullable=False, unique=True, index=True
+    )  # Azure AD object ID
+    email = Column(String(255), nullable=False, unique=True, index=True)
+    display_name = Column(String(255), nullable=True)
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
+    refresh_token_encrypted = Column(
+        Text, nullable=True
+    )  # Encrypted refresh token (optional, for future use)
+    last_login_at = Column(TIMESTAMP(timezone=True), nullable=True, index=True)
+    created_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )

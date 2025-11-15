@@ -8,6 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G19: Microsoft SSO Authentication + UI Upgrade** - Authentication and enhanced UI features
+  - Microsoft SSO Authentication:
+    - `GET /auth/login` - Initiate Azure AD OAuth 2.0 login
+    - `GET /auth/callback` - OAuth callback handler
+    - `GET /auth/me` - Get current user information
+    - `POST /auth/refresh` - Refresh access token
+    - `POST /auth/logout` - Logout and revoke tokens
+    - JWT token management (access + refresh tokens)
+    - User management (users table with Azure AD integration)
+    - Security hardening:
+      - OAuth state/nonce storage (Redis)
+      - Token revocation table
+      - Refresh token encryption (Fernet)
+    - Favorites migration: Session-based → user-based (on first login)
+    - Setup guide: `docs/active/G19-AZURE-AD-SETUP.md`
+  - UI Upgrade (Lead Table):
+    - Sorting: Sort by domain, readiness_score, priority_score, segment, provider, scanned_at
+    - Pagination: Page-based pagination with configurable page size (default: 50, max: 200)
+    - Full-text search: Search in domain, canonical_name, and provider fields
+    - Frontend: Clickable table headers, pagination UI, search input with debounce
+  - Dashboard KPI:
+    - `GET /dashboard/kpis` - New lightweight endpoint for KPI cards
+    - Returns: total_leads, migration_leads, high_priority
+    - Frontend: 4 KPI cards (Total, Migration, High Priority, Max Score)
+  - Score Breakdown:
+    - `GET /leads/{domain}/score-breakdown` - Detailed score analysis
+    - Returns: base_score, provider points, signal points, risk points, total_score
+    - Frontend: Modal UI with clickable score cells
+  - Tests: Comprehensive test suite
+    - `tests/test_ui_upgrade.py` - UI upgrade tests (sorting, pagination, search) - 20+ test cases
+    - `tests/test_integration_g19.py` - Integration tests (auth e2e, UI upgrade e2e, protected routes) - 15+ test cases
+    - `tests/test_auth.py` - Auth tests (OAuth flow, token generation, user management) - 22 test cases
+  - Post-MVP Sprint 6 feature (authentication + UI enhancement)
 - Production readiness documentation:
   - `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
   - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
@@ -15,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - Added comprehensive production readiness critique (v2) with health checks & probes
 - Added production engineering guide (v1) with SRE practices and incident response runbook
+- Added Azure AD setup guide (G19) with step-by-step instructions
 - Archived completed phase documentation to `docs/archive/`
 
 ## [1.0.0] - 2025-11-14

@@ -23,6 +23,7 @@ from app.api import (
     rescan,
     alerts,
     health,
+    auth,
 )
 
 # Create FastAPI app
@@ -37,6 +38,7 @@ app.add_middleware(RequestIDMiddleware)
 
 # Register routers
 app.include_router(health.router)
+app.include_router(auth.router)  # G19: Microsoft SSO
 app.include_router(ingest.router)
 app.include_router(scan.router)
 app.include_router(leads.router)

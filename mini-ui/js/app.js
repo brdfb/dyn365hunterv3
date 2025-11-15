@@ -1,7 +1,7 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchDashboard, exportLeads } from './api.js';
-import { renderLeadsTable, renderStats, showLoading, hideLoading, showError, hideError } from './ui-leads.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, exportLeads } from './api.js';
+import { renderLeadsTable, renderStats, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 
 // Global state (single object)
@@ -78,13 +78,78 @@ async function init() {
         });
     }
     
+    // G19: Bind score breakdown modal
+    const modalClose = document.getElementById('modal-close');
+    const modal = document.getElementById('score-breakdown-modal');
+    if (modalClose) {
+        modalClose.addEventListener('click', hideScoreBreakdown);
+    }
+    if (modal) {
+        const overlay = modal.querySelector('.modal__overlay');
+        if (overlay) {
+            overlay.addEventListener('click', hideScoreBreakdown);
+        }
+    }
+    
+    // G19: Bind score click handlers (delegated event listener)
+    document.addEventListener('click', async (e) => {
+        const scoreCell = e.target.closest('.score-clickable');
+        if (scoreCell) {
+            const domain = scoreCell.getAttribute('data-domain');
+            if (domain) {
+                showLoading();
+                try {
+                    const breakdown = await fetchScoreBreakdown(domain);
+                    showScoreBreakdown(breakdown, domain);
+                } catch (error) {
+                    showError(`Skor detayı yüklenemedi: ${error.message}`);
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+    });
+    
     // Load initial data
-    await loadDashboard();
+    await loadKPIs();  // G19: Use new KPIs endpoint
     await loadLeads();
 }
 
 /**
- * Load dashboard statistics
+ * Load dashboard KPIs (G19 - New endpoint)
+ */
+async function loadKPIs() {
+    try {
+        // Fetch KPIs from new endpoint
+        const kpis = await fetchKPIs();
+        window.state.kpis = kpis;
+        
+        // Also fetch legacy dashboard for max_score (not in KPIs endpoint)
+        try {
+            const dashboard = await fetchDashboard();
+            window.state.dashboard = dashboard;
+            // Render KPIs with max_score from dashboard
+            renderKPIs(kpis);
+        } catch (dashboardError) {
+            // If dashboard fails, still render KPIs without max_score
+            console.warn('Dashboard load error (non-critical):', dashboardError);
+            renderKPIs(kpis);
+        }
+    } catch (error) {
+        console.error('KPIs load error:', error);
+        // Fallback to legacy dashboard endpoint
+        try {
+            const dashboard = await fetchDashboard();
+            window.state.dashboard = dashboard;
+            renderStats(dashboard);
+        } catch (fallbackError) {
+            console.error('Dashboard fallback error:', fallbackError);
+        }
+    }
+}
+
+/**
+ * Load dashboard statistics (legacy - kept for backward compatibility)
  */
 async function loadDashboard() {
     try {
@@ -118,8 +183,8 @@ async function loadLeads() {
         updateSortIcons();  // G19: Update sort icons
         bindSortableHeaders();  // G19: Re-bind sortable headers (in case table was re-rendered)
         
-        // Update dashboard after leads load
-        await loadDashboard();
+        // Update KPIs after leads load
+        await loadKPIs();  // G19: Use new KPIs endpoint
     } catch (error) {
         showError(`Lead yükleme hatası: ${error.message}`);
         console.error('Leads load error:', error);

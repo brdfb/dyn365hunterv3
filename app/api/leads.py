@@ -697,19 +697,18 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
         "spf": domain_signal.spf,
         "dkim": domain_signal.dkim,
         "dmarc_policy": domain_signal.dmarc_policy,
-        "spf_record": domain_signal.spf_record,  # Optional, for risk analysis
+        "spf_record": getattr(domain_signal, "spf_record", None),  # Optional, for risk analysis (may not exist in model)
     }
 
     # Get MX records (if available)
     mx_records = None
-    if domain_signal.mx_records:
-        if isinstance(domain_signal.mx_records, list):
-            mx_records = domain_signal.mx_records
+    mx_records_attr = getattr(domain_signal, "mx_records", None)
+    if mx_records_attr:
+        if isinstance(mx_records_attr, list):
+            mx_records = mx_records_attr
         else:
             # Handle case where it might be stored differently
-            mx_records = (
-                list(domain_signal.mx_records) if domain_signal.mx_records else None
-            )
+            mx_records = list(mx_records_attr) if mx_records_attr else None
 
     # Calculate score breakdown
     breakdown = calculate_score_breakdown(

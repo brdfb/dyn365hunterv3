@@ -96,7 +96,7 @@ All completed planning documentation has been moved to `docs/archive/`:
 ### TODOs
 
 **Active TODOs:**
-- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (📋 Planned)
+- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (🚧 In Progress - Backend: ~70% complete)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:

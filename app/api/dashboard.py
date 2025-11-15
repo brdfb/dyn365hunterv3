@@ -12,6 +12,14 @@ from app.core.constants import HIGH_PRIORITY_SCORE
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
+class KPIsResponse(BaseModel):
+    """Response model for dashboard KPIs (G19)."""
+
+    total_leads: int
+    migration_leads: int
+    high_priority: int
+
+
 class DashboardResponse(BaseModel):
     """Response model for dashboard statistics."""
 
@@ -82,6 +90,47 @@ async def get_dashboard(db: Session = Depends(get_db)):
             skip=row.skip or 0,
             avg_score=float(row.avg_score) if row.avg_score else 0.0,
             max_score=int(row.max_score) if row.max_score is not None else None,
+            high_priority=row.high_priority or 0,
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/kpis", response_model=KPIsResponse)
+async def get_kpis(db: Session = Depends(get_db)):
+    """
+    Get dashboard KPIs (G19).
+
+    Returns:
+        KPIsResponse with:
+        - total_leads: Total number of scanned leads
+        - migration_leads: Count of Migration segment leads
+        - high_priority: Count of high priority leads (Migration + score >= HIGH_PRIORITY_SCORE)
+    """
+    try:
+        query = """
+            SELECT 
+                COUNT(*) AS total_leads,
+                COUNT(CASE WHEN segment = 'Migration' THEN 1 END) AS migration_leads,
+                COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= :high_priority_score THEN 1 END) AS high_priority
+            FROM leads_ready
+            WHERE readiness_score IS NOT NULL
+        """
+
+        result = db.execute(text(query), {"high_priority_score": HIGH_PRIORITY_SCORE})
+        row = result.fetchone()
+
+        if not row:
+            return KPIsResponse(
+                total_leads=0,
+                migration_leads=0,
+                high_priority=0,
+            )
+
+        return KPIsResponse(
+            total_leads=row.total_leads or 0,
+            migration_leads=row.migration_leads or 0,
             high_priority=row.high_priority or 0,
         )
 

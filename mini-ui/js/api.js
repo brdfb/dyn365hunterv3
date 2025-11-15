@@ -192,13 +192,40 @@ export async function exportLeads(filters = {}) {
 }
 
 /**
- * Fetch dashboard statistics
+ * Fetch dashboard statistics (legacy endpoint - kept for backward compatibility)
  */
 export async function fetchDashboard() {
     const response = await fetch(`${API_BASE_URL}/dashboard`);
     
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+}
+
+/**
+ * Fetch dashboard KPIs (G19 - New endpoint)
+ */
+export async function fetchKPIs() {
+    const response = await fetch(`${API_BASE_URL}/dashboard/kpis`);
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+}
+
+/**
+ * Fetch score breakdown for a domain (G19)
+ */
+export async function fetchScoreBreakdown(domain) {
+    const response = await fetch(`${API_BASE_URL}/leads/${encodeURIComponent(domain)}/score-breakdown`);
+    
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
     }
     
     return await response.json();
