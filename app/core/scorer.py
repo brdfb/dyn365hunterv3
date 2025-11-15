@@ -3,6 +3,7 @@
 import json
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
+from app.core.cache import get_cached_scoring, set_cached_scoring
 
 
 _RULES_CACHE: Optional[Dict] = None
@@ -213,12 +214,15 @@ def score_domain(
     provider: str,
     signals: Dict[str, Any],
     mx_records: Optional[List[str]] = None,
+    use_cache: bool = True,
 ) -> Dict[str, Any]:
     """
     Calculate score and determine segment for a domain.
 
     Hard-fail rules are checked first. If any hard-fail condition
     is met, returns Skip segment with score 0 immediately.
+
+    Uses Redis-based caching (1 hour TTL) with signals hash for cache key.
 
     Args:
         domain: Domain name (for logging/reference)
@@ -228,6 +232,7 @@ def score_domain(
                  - dkim: bool
                  - dmarc_policy: str or None
         mx_records: Optional list of MX record hostnames
+        use_cache: Whether to use cache (default: True)
 
     Returns:
         Dictionary with:
@@ -235,7 +240,7 @@ def score_domain(
         - segment: str ("Migration", "Existing", "Cold", "Skip")
         - reason: str (human-readable explanation)
     """
-    # Check hard-fail conditions FIRST
+    # Check hard-fail conditions FIRST (these are not cached)
     # But skip hard-fail check if domain is invalid (already filtered, but double-check)
     from app.core.normalizer import is_valid_domain
 
@@ -254,10 +259,22 @@ def score_domain(
             "reason": f"Hard-fail: {hard_fail_reason}",
         }
 
+    # Check cache (only for normal scoring, not hard-fail cases)
+    if use_cache:
+        cached_result = get_cached_scoring(domain, provider, signals)
+        if cached_result is not None:
+            return cached_result
+
     # Calculate score (includes risk scoring)
     score = calculate_score(provider, signals, mx_records)
 
     # Determine segment
     segment, reason = determine_segment(score, provider)
 
-    return {"score": score, "segment": segment, "reason": reason}
+    result = {"score": score, "segment": segment, "reason": reason}
+    
+    # Cache result
+    if use_cache:
+        set_cached_scoring(domain, provider, signals, result)
+
+    return result

@@ -5,10 +5,11 @@ This folder contains TODO lists and task tracking documents.
 ## Current Status
 
 **Active TODOs:**
-- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (📋 Planned)
+- (No active TODOs - All completed TODOs have been archived)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-28-P1-PREPARATION.md` - P1 Preparation: Alembic, Rate Limiting, Caching, Bulk Operations, API Versioning (✅ Completed)
 - `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (✅ Completed)
 - `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (✅ Completed)
 - `2025-11-14-G15-bulk-scan-async.md` - G15: Sprint 2: Bulk Scan & Async Queue (✅ Completed)

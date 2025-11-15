@@ -1,9 +1,69 @@
 # Kalan İşler - Öncelik Sırası (CRITIQUE GÜNCELLEMESİ)
 
 **Tarih**: 2025-01-28  
-**Durum**: G19 Tamamlandı → P0 Hardening Tamamlandı, P1/P2 Backlog  
-**Son Güncelleme**: 2025-01-28 (Critique Sonrası Güncelleme)  
-**Not**: P0 maddelerin tamamı G19'da tamamlandı. Critique sonrası P1/P2 öncelikleri ve bağımlılıklar revize edildi.
+**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → 🔄 **Stabilization Sprint (3 Gün)** → P2 Backlog  
+**Son Güncelleme**: 2025-01-28 (Stabilization Sprint Plan eklendi)  
+**Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) entegrasyondan önce yapılmalı.** P2 backlog olarak kaldı.
+
+---
+
+## 🔄 STABILIZATION SPRINT (Entegrasyondan Önce - 3 Gün)
+
+**Durum**: 📋 **Planlama Aşaması** - Entegrasyondan önce yapılmalı
+
+**Hedef**: Enterprise-Ready / UI-Stable / Integration-Ready
+
+**Süre**: 3 Gün (18 saat)
+
+### Neden Stabilization Sprint?
+
+Hunter'ın "motoru" çalışıyor ama entegrasyondan önce:
+- ❌ Test & Doğrulama katmanları eksik
+- ❌ Monitoring & Metrics eksik
+- ❌ UI Experience %60-70 stabil
+
+**Entegrasyon kararı UI üzerinden verilir** → UI stabilization olmadan entegrasyona girmek product flow'u bozar.
+
+### 3 Günlük Plan
+
+**🟦 Gün 1 - Core Stabilizasyon (6-7 saat)**
+- Alembic drift check + rollback testleri
+- Multi-worker rate limiting test
+- Bulk operations test düzeltmeleri
+- API backward compatibility testleri
+- Redis health check
+
+**🟩 Gün 2 - Monitoring ve Safety (6-7 saat)**
+- Cache hit metrics
+- Rate limit metrics
+- Bulk operations metrics
+- Error trend logging (Sentry tags)
+- Deadlock simulation testleri
+- Cache invalidation simulation
+
+**🟧 Gün 3 - UI Stabilizasyon (5-6 saat)**
+- Table view cleanup
+- Score breakdown modal iyileştirme
+- Header/Footer sadeleştirme
+- Export/PDF basic
+- Tooltip + hover behavior
+- Favori/Tag UI mini düzenleme
+
+### Detaylı Plan
+
+**Referans**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` (tam detaylı plan)  
+**UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md` (UI detayları)
+
+### Success Criteria
+
+- ✅ Tüm testler geçiyor mu? (`pytest tests/ -v`)
+- ✅ Alembic rollback çalışıyor mu?
+- ✅ Multi-worker rate limiting test başarılı mı?
+- ✅ UI 2 dakikada kullanılabilir mi? (dogfooding test)
+- ✅ Metrics endpoint çalışıyor mu? (`/healthz/metrics`)
+- ✅ Sentry error tracking aktif mi?
+
+**Sonuç**: Hunter v1.1 → **v1.1-stable** (Enterprise-Ready / UI-Stable / Integration-Ready)
 
 ---
 
@@ -65,18 +125,19 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
 
 ---
 
-### 1. Database Migration System (Alembic) ⏱️ **2-3 gün** (revize)
+### 1. Database Migration System (Alembic) ⏱️ **2-3 gün** (revize) ✅ **TAMAMLANDI**
 
-- **Durum**: ❌ Eksik - Şu an manual SQL migration files (`app/db/migrations/`)
+- **Durum**: ✅ **TAMAMLANDI (2025-01-28)** - Alembic migration system implemented (collapsed history strategy)
 - **Etki**: Orta - Migration history ve rollback yok
 - **Öncelik**: 🔴 **EN ÖNCE** - Diğer P1 maddeleri DB'ye dokunuyor
 - **Prerequisites**: None (en önce yapılmalı)
-- **Mevcut Durum**:
-  - ✅ 6 manual SQL migration file var (`g16_webhook_enrichment.sql`, `g17_notes_tags_favorites.sql`, `g18_rescan_alerts_scoring.sql`, `g19_favorites_migration.sql`, `g19_users_auth.sql`, `g20_domain_intelligence.sql`)
-  - ✅ `app/db/run_migration.py` script var (tek migration çalıştırma)
-  - ❌ Alembic yok (`alembic/` dizini yok, `alembic.ini` yok)
-  - ❌ Migration history tracking yok
-  - ❌ Rollback capability yok
+- **Mevcut Durum** (Tamamlandı):
+  - ✅ Alembic setup tamamlandı (`alembic/` dizini, `alembic.ini` mevcut)
+  - ✅ Base revision oluşturuldu (`08f51db8dce0_base_revision.py`)
+  - ✅ Migration history tracking aktif (Alembic version table)
+  - ✅ Rollback capability mevcut (`alembic downgrade` komutları)
+  - ✅ 6 manual SQL migration file legacy olarak arşivlendi (`app/db/migrations/legacy/`)
+  - ✅ Collapsed history stratejisi uygulandı (base revision tüm geçmiş migration'ları temsil ediyor)
 - **Lokasyon**: `alembic/` (yeni dizin), `app/db/migrations/` (mevcut)
 - **Gerçekçi Süre Tahmini**:
   - Alembic setup: 2 saat
@@ -292,12 +353,14 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
 
 ---
 
-**P1 Toplam Süre**: **~5-6 gün** (revize - 2.5 gün değil)
+**P1 Toplam Süre**: ✅ **TAMAMLANDI** (~5-6 gün - 2025-01-28'de tamamlandı)
 
-**P1 Gerçekçi Teknik Takvim**:
-- **Hafta 1**: Alembic (2-3 gün) + Distributed Rate Limiting (1 gün)
-- **Hafta 2**: Caching Layer (1.5 gün) + Bulk Operations (1 gün)
-- **Hafta 3**: API Versioning (4 saat) + Test & Integration (1 gün)
+**P1 Tamamlanma Tarihleri**:
+- ✅ **P1-1: Alembic** - 2025-01-28 (Core implementation)
+- ✅ **P1-2: Distributed Rate Limiting** - 2025-01-28
+- ✅ **P1-3: Caching Layer** - 2025-01-28
+- ✅ **P1-4: Bulk Operations** - 2025-01-28
+- ✅ **P1-5: API Versioning** - 2025-01-28
 
 ---
 
@@ -378,7 +441,8 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 | Öncelik | Madde Sayısı | Toplam Süre | Prod Blocker? | Durum |
 |---------|--------------|-------------|---------------|-------|
 | **P0** | 5 | ~11 saat (1.5 gün) | ✅ Evet (artık çözüldü) | ✅ **Tamamlandı (G19)** |
-| **P1** | 5 | **~5-6 gün** (revize) | ❌ Hayır | 📋 Backlog |
+| **P1** | 5 | **~5-6 gün** | ❌ Hayır | ✅ **Tamamlandı (2025-01-28)** |
+| **🔄 Stabilization Sprint** | 3 gün | **~18 saat (3 gün)** | ⚠️ Entegrasyon öncesi | 📋 **Planlama Aşaması** |
 | **P2** | 3 | ~1 hafta | ❌ Hayır | 📋 Backlog |
 | **G19 Optional** | 3 | ~10 saat | ❌ Hayır | 📋 Backlog |
 | **G18 Optional** | 3 | ~9 saat | ❌ Hayır | 📋 Backlog |
@@ -397,21 +461,49 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 
 **Toplam**: ✅ ~11 saat (1.5 gün) - **G19'da tamamlandı**
 
-### Bu Ay (3 Hafta - P1 Performance) - **REVİZE**
+### ✅ P1 Performance - **TAMAMLANDI (2025-01-28)**
 
-**Hafta 1:**
-1. Alembic Migration (2-3 gün) - **EN ÖNCE**
-2. Distributed Rate Limiting (1 gün) - **P2'den P1'e çekildi**
+**Tamamlanan İşler:**
+1. ✅ Alembic Migration (P1-1) - **TAMAMLANDI**
+2. ✅ Distributed Rate Limiting (P1-2) - **TAMAMLANDI**
+3. ✅ Caching Layer (P1-3) - **TAMAMLANDI**
+4. ✅ Bulk Operations Optimization (P1-4) - **TAMAMLANDI**
+5. ✅ API Versioning (P1-5) - **TAMAMLANDI**
 
-**Hafta 2:**
-3. Caching Layer (1.5 gün) - **Provider/Scoring cache eklendi**
-4. Bulk Operations Optimization (1 gün) - **Deadlock/recovery eklendi**
+**Toplam**: ✅ **~5-6 gün** - **2025-01-28'de tamamlandı**
 
-**Hafta 3:**
-5. API Versioning (4 saat) - **EN SON**
-6. Test & Integration (1 gün)
+### 🔄 Stabilization Sprint - **PLANLAMA AŞAMASI (3 Gün)**
 
-**Toplam**: **~5-6 gün** (revize - 2.5 gün değil)
+**Hedef**: Enterprise-Ready / UI-Stable / Integration-Ready
+
+**3 Günlük Plan:**
+1. **Gün 1 - Core Stabilizasyon** (6-7 saat)
+   - Alembic drift check + rollback testleri
+   - Multi-worker rate limiting test
+   - Bulk operations test düzeltmeleri
+   - API backward compatibility testleri
+   - Redis health check
+
+2. **Gün 2 - Monitoring ve Safety** (6-7 saat)
+   - Cache hit metrics
+   - Rate limit metrics
+   - Bulk operations metrics
+   - Error trend logging (Sentry tags)
+   - Deadlock simulation testleri
+   - Cache invalidation simulation
+
+3. **Gün 3 - UI Stabilizasyon** (5-6 saat)
+   - Table view cleanup
+   - Score breakdown modal iyileştirme
+   - Header/Footer sadeleştirme
+   - Export/PDF basic
+   - Tooltip + hover behavior
+   - Favori/Tag UI mini düzenleme
+
+**Detaylı Plan**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md`  
+**UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md`
+
+**Toplam**: 📋 **~18 saat (3 gün)** - **Entegrasyondan önce yapılmalı**
 
 ### Backlog (İhtiyaç Olduğunda - P2 Refactor)
 - Sync-First Refactor
@@ -480,33 +572,37 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 ### Codebase Analizi (2025-01-28 - Critique Sonrası)
 
 **Caching Durumu:**
-- WHOIS: In-memory cache var (`_whois_cache` dict, 1 saat TTL) - Redis'e migrate edilmeli
-- DNS: Cache yok - Redis cache eklenmeli
-- **Provider mapping: Cache yok** - **KRİTİK EKSİK** (en çok tekrar eden pattern)
-- **Scoring: Cache yok** - **KRİTİK EKSİK** (aynı domain için tekrar scoring)
-- **Domain-level full scan: Cache yok** - **BÜYÜK EKSİK**
+- ✅ Redis-based distributed caching tamamlandı (P1-3)
+- ✅ DNS cache eklendi (1 saat TTL)
+- ✅ WHOIS cache Redis'e migrate edildi (24 saat TTL)
+- ✅ Provider mapping cache eklendi (24 saat TTL)
+- ✅ Scoring cache eklendi (1 saat TTL, signals hash ile)
+- ✅ Domain-level full scan cache eklendi (1 saat TTL)
+- ✅ Cache invalidation on rescan eklendi
 
 **Migration Durumu:**
-- 7 manual SQL migration file var (`app/db/migrations/`)
-- Alembic yok - Migration history ve rollback yok
-- **Gerçekçi süre: 2-3 gün** (1 gün değil)
+- ✅ Alembic migration system tamamlandı (P1-1)
+- ✅ Base revision oluşturuldu (`08f51db8dce0`)
+- ✅ Manual SQL migration'lar legacy olarak arşivlendi
+- ✅ Collapsed history stratejisi uygulandı
 
 **API Versioning:**
-- 14 router var, hepsi direkt `/api/...` altında
-- Version string var ama API versioning yok
-- **Sıralama: EN SON** (tüm router'lar stabil olmalı)
+- ✅ API versioning tamamlandı (P1-5)
+- ✅ V1 router structure (`/api/v1/...`) aktif
+- ✅ Backward compatibility korundu (legacy endpoints çalışıyor)
+- ✅ 13 versioned router aktif
 
 **Bulk Operations:**
-- Sequential processing var (rate limiting ile)
-- Batch insert yok (her domain için ayrı transaction)
-- **Deadlock prevent strategy yok** - **EKSİK**
-- **Batch failure recovery yok** - **EKSİK**
-- **Partial commit log yok** - **EKSİK**
+- ✅ Batch processing optimization tamamlandı (P1-4)
+- ✅ Deadlock prevention strategy eklendi (transaction timeout + retry)
+- ✅ Batch failure recovery eklendi (partial commit log)
+- ✅ Batch isolation ve bulk log context eklendi
 
 **Rate Limiting:**
-- In-memory rate limiting var (DNS, WHOIS, API key)
-- Redis-based distributed rate limiting yok
-- **P2'den P1'e çekildi** (multi-worker için kritik)
+- ✅ Redis-based distributed rate limiting tamamlandı (P1-2)
+- ✅ Circuit breaker pattern eklendi
+- ✅ Fallback to in-memory limiter eklendi
+- ✅ Multi-worker rate limiting desteği aktif
 
 **Query Optimization:**
 - Dashboard ve leads endpoint'leri VIEW/raw SQL kullanıyor (N+1 riski düşük)

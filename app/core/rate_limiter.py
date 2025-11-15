@@ -5,6 +5,7 @@ import asyncio
 from typing import Dict, Optional
 from collections import defaultdict
 from threading import Lock
+from app.core.distributed_rate_limiter import DistributedRateLimiter
 
 
 class RateLimiter:
@@ -75,29 +76,53 @@ class RateLimiter:
                 return 0.0
 
 
-# Global rate limiters (shared across workers)
-# DNS: 10 requests/second per worker
-# WHOIS: 5 requests/second per worker
-_dns_rate_limiter: Optional[RateLimiter] = None
-_whois_rate_limiter: Optional[RateLimiter] = None
+# Global rate limiters (distributed across workers using Redis)
+# DNS: 10 requests/second (shared across all workers)
+# WHOIS: 5 requests/second (shared across all workers)
+_dns_rate_limiter: Optional[DistributedRateLimiter] = None
+_whois_rate_limiter: Optional[DistributedRateLimiter] = None
 _rate_limiter_lock = Lock()
 
 
-def get_dns_rate_limiter() -> RateLimiter:
-    """Get DNS rate limiter (10 req/s)."""
+def get_dns_rate_limiter() -> DistributedRateLimiter:
+    """
+    Get DNS rate limiter (10 req/s, distributed via Redis).
+    
+    Falls back to in-memory limiter if Redis is unavailable.
+    """
     global _dns_rate_limiter
     with _rate_limiter_lock:
         if _dns_rate_limiter is None:
-            _dns_rate_limiter = RateLimiter(rate=10.0, burst=10.0)
+            # Create fallback in-memory limiter
+            fallback = RateLimiter(rate=10.0, burst=10.0)
+            # Create distributed limiter with Redis
+            _dns_rate_limiter = DistributedRateLimiter(
+                redis_key="dns",
+                rate=10.0,
+                burst=10.0,
+                fallback=fallback,
+            )
         return _dns_rate_limiter
 
 
-def get_whois_rate_limiter() -> RateLimiter:
-    """Get WHOIS rate limiter (5 req/s)."""
+def get_whois_rate_limiter() -> DistributedRateLimiter:
+    """
+    Get WHOIS rate limiter (5 req/s, distributed via Redis).
+    
+    Falls back to in-memory limiter if Redis is unavailable.
+    """
     global _whois_rate_limiter
     with _rate_limiter_lock:
         if _whois_rate_limiter is None:
-            _whois_rate_limiter = RateLimiter(rate=5.0, burst=5.0)
+            # Create fallback in-memory limiter
+            fallback = RateLimiter(rate=5.0, burst=5.0)
+            # Create distributed limiter with Redis
+            _whois_rate_limiter = DistributedRateLimiter(
+                redis_key="whois",
+                rate=5.0,
+                burst=5.0,
+                fallback=fallback,
+            )
         return _whois_rate_limiter
 
 

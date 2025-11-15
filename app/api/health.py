@@ -48,9 +48,16 @@ async def readiness_probe(db: Session = Depends(get_db)):
             detail=f"Database unavailable: {str(e)}"
         )
     
-    # Check Redis
+    # Check Redis (using connection pool from redis_client)
     try:
-        redis_client = redis.from_url(settings.redis_url)
+        from app.core.redis_client import get_redis_client
+        redis_client = get_redis_client()
+        if redis_client is None:
+            checks["redis"] = False
+            raise HTTPException(
+                status_code=503,
+                detail="Redis unavailable: client not initialized"
+            )
         redis_client.ping()
         checks["redis"] = True
     except Exception as e:
@@ -91,12 +98,16 @@ async def health_check(db: Session = Depends(get_db)):
     except Exception as e:
         db_status = f"disconnected: {str(e)}"
     
-    # Check Redis (non-blocking)
+    # Check Redis (non-blocking, using connection pool)
     redis_status = "unknown"
     try:
-        redis_client = redis.from_url(settings.redis_url)
-        redis_client.ping()
-        redis_status = "connected"
+        from app.core.redis_client import get_redis_client
+        redis_client = get_redis_client()
+        if redis_client is None:
+            redis_status = "disconnected: client not initialized"
+        else:
+            redis_client.ping()
+            redis_status = "connected"
     except Exception as e:
         redis_status = f"disconnected: {str(e)}"
 

@@ -6,6 +6,7 @@
 docs/
 ├── active/          # Active documentation (current phase)
 ├── archive/         # Archived documentation (completed phases)
+├── sales/           # Sales team documentation (guides, personas, training)
 ├── prompts/         # Important prompts, conversations, and architectural decisions
 ├── todos/           # TODO lists and task tracking
 └── plans/           # Project plans and roadmaps
@@ -26,6 +27,17 @@ docs/
 
 ## 📝 Current Status
 
+### Sales Documentation
+
+**Location:** `docs/sales/`
+
+Sales team documentation has been organized into a dedicated folder:
+- `SALES-GUIDE.md` - Satış ekibi kullanım kılavuzu (quick start, API endpoints, scenarios)
+- `SALES-PERSONA-v2.0.md` - Satışçı persona dokümantasyonu (v2.0: "Sistematik Avcı")
+- `SALES-TRAINING.md` - Satış ekibi eğitim materyali (modüller, pratik egzersizler)
+- `SALES-SCENARIOS.md` - Pratik senaryolar ve en iyi pratikler
+- `SEGMENT-GUIDE.md` - Segment ve skor açıklamaları
+
 ### Active Documentation
 
 #### Reference Guides
@@ -37,7 +49,17 @@ docs/
 - `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
 - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
 
-**Note:** Active documentation contains reference guides and production readiness documentation. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
+#### P1 Implementation Documentation
+- `P1-ALEMBIC-PREPARATION.md` - Alembic migration preparation analysis
+- `P1-ALEMBIC-STATUS.md` - Alembic migration implementation status
+- `P1-IMPLEMENTATION-PLAYBOOK.md` - P1 implementation guide and workflows
+- `P1-CACHING-PREPARATION.md` - Caching layer preparation
+- `P1-RATE-LIMITING-PREPARATION.md` - Distributed rate limiting preparation
+- `P1-BULK-OPERATIONS-PREPARATION.md` - Bulk operations preparation
+- `P1-API-VERSIONING-PREPARATION.md` - API versioning preparation
+- `KALAN-ISLER-PRIORITY.md` - P1/P2 priority list and dependencies
+
+**Note:** Active documentation contains reference guides, production readiness documentation, and P1 implementation documentation. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
 
 ### Archived Documentation
 - `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
@@ -60,6 +82,7 @@ docs/
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
+- `2025-01-28-P1-BULK-OPERATIONS-PREPARATION.md` - P1-4: Bulk Operations Optimization preparation (✅ Completed - 2025-01-28)
 - `2025-01-28-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-01-28)
 - `2025-11-15-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-11-15)
 - `2025-01-28-TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report (Archived)
@@ -83,11 +106,11 @@ docs/
 ### Project Plans
 
 **Active Plans:**
-- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - G19 completed, future sprints (G20+) planned
-- `.cursor/plans/UI-PATCH-PLAN-v1.1.md` - **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri (✅ Completed - 2025-01-28)
+- (No active plans - All sprints completed, see KALAN-ISLER-PRIORITY.md for current backlog)
 
 **Archived Plans:**
 All completed planning documentation has been moved to `docs/archive/`:
+- `2025-01-28-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - All sprints completed (✅ G15-G19 completed)
 - `2025-01-27-phase0-hotfix-scoring.md` - Phase 0: Enhanced Scoring & Hard-Fail Rules (Completed)
 - `2025-01-27-SALES-FEATURE-REQUESTS.md` - Sales team feature requests (Completed)
 - `2025-01-27-SALES-FEATURE-REQUESTS-CRITIQUE.md` - Technical review of feature requests (Completed)
@@ -101,7 +124,7 @@ All completed planning documentation has been moved to `docs/archive/`:
 ### TODOs
 
 **Active TODOs:**
-- None (All sprints completed through G19)
+- `P1-PREPARATION.md` - P1 Preparation (Pre-Implementation) - ✅ Completed
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
@@ -112,4 +135,21 @@ All completed TODO files have been moved to `docs/archive/`:
 - `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (✅ Completed)
 - `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (✅ Completed)
 - `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: Microsoft SSO Auth + UI Upgrade (✅ Completed - 2025-11-15)
+
+**P1 Implementation Status:**
+- `P1-PREPARATION.md` - P1 Preparation (Pre-Implementation) - ✅ Completed (2025-01-28)
+  - All 5 preparation documents created (Alembic, Caching, Rate Limiting, Bulk Operations, API Versioning)
+- **P1-1: Alembic Migration** - ✅ Core Implementation Completed (2025-01-28)
+- **P1-2: Distributed Rate Limiting** - ✅ Core Implementation Completed (2025-01-28)
+- **P1-3: Caching Layer** - ✅ Core Implementation Completed (2025-01-28)
+- **P1-4: Bulk Operations Optimization** - ✅ Core Implementation Completed (2025-01-28)
+  - Batch size calculation (rate-limit aware) - Optimal batch size based on DNS/WHOIS rate limits
+  - Batch commit optimization - Reduces transaction overhead
+  - Deadlock prevention - Transaction timeout and retry logic with tenacity
+  - Partial commit log - Redis-based recovery mechanism
+  - Batch isolation - One batch failure doesn't affect other batches
+  - Bulk log context - Structured logging with batch information
+  - Implementation files: `app/core/bulk_operations.py`, `app/core/tasks.py`
+  - Test coverage: `tests/test_bulk_operations_p1.py` (13 tests)
+  - Documentation: `docs/active/P1-ALEMBIC-STATUS.md`
 

@@ -81,11 +81,11 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
         )
 
     try:
-        # Perform DNS analysis
-        dns_result = analyze_dns(domain)
+        # Perform DNS analysis (uses DNS cache internally)
+        dns_result = analyze_dns(domain, use_cache=True)
 
-        # Perform WHOIS lookup (optional, graceful fail)
-        whois_result = get_whois_info(domain)
+        # Perform WHOIS lookup (optional, graceful fail, uses WHOIS cache internally)
+        whois_result = get_whois_info(domain, use_cache=True)
 
         # Determine scan status
         # Note: For score breakdown endpoint, we need scan_status = "completed"
@@ -98,9 +98,9 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
             # DNS failed - keep the DNS error status
             scan_status = dns_status
 
-        # Classify provider based on MX root
+        # Classify provider based on MX root (uses provider cache internally)
         mx_root = dns_result.get("mx_root")
-        provider = classify_provider(mx_root)
+        provider = classify_provider(mx_root, use_cache=True)
 
         # Track provider changes
         previous_provider = company.provider
@@ -120,12 +120,13 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
             "dmarc_policy": dns_result.get("dmarc_policy"),
         }
 
-        # Calculate score and determine segment
+        # Calculate score and determine segment (uses scoring cache internally)
         scoring_result = score_domain(
             domain=domain,
             provider=provider,
             signals=signals,
             mx_records=dns_result.get("mx_records", []),
+            use_cache=True,
         )
 
         # Delete any existing domain_signals for this domain (prevent duplicates)

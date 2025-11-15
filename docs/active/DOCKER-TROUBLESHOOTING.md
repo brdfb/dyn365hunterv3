@@ -85,6 +85,10 @@ docker-compose restart postgres
 
 # Wait for PostgreSQL to be ready
 docker-compose exec postgres pg_isready -U dyn365hunter
+
+# Run Alembic migration (P1-1: Database Migration System)
+docker-compose exec api alembic upgrade head
+docker-compose exec api alembic current
 ```
 
 ### 5. Port Already in Use
@@ -103,6 +107,56 @@ netstat -ano | findstr :8000  # Windows
 # Stop conflicting service or change port in docker-compose.yml
 ```
 
+### 6. Redis Connection Issues
+
+**Error:**
+```
+Redis connection failed: connection refused
+```
+
+**Solution:**
+```bash
+# Check if Redis container is running
+docker-compose ps redis
+
+# Check Redis logs
+docker-compose logs redis
+
+# Test Redis connection
+docker-compose exec redis redis-cli ping
+
+# Restart Redis
+docker-compose restart redis
+
+# Check Redis health (P1-2: Distributed Rate Limiting, P1-3: Caching Layer)
+docker-compose exec api python -c "from app.core.redis_client import get_redis_client; r = get_redis_client(); print(r.ping())"
+```
+
+### 7. Celery Worker Not Processing Tasks
+
+**Error:**
+```
+Celery tasks stuck in pending state
+```
+
+**Solution:**
+```bash
+# Check if worker container is running
+docker-compose ps worker
+
+# Check worker logs
+docker-compose logs worker
+
+# Restart worker
+docker-compose restart worker
+
+# Check worker status
+docker-compose exec worker celery -A app.core.celery_app.celery_app inspect active
+
+# Check Redis queue
+docker-compose exec redis redis-cli LLEN celery
+```
+
 ## Quick Fixes
 
 ### Complete Reset
@@ -110,7 +164,7 @@ netstat -ano | findstr :8000  # Windows
 ```bash
 # Stop and remove everything
 docker-compose down -v
-docker rm -f dyn365hunter-postgres dyn365hunter-api 2>/dev/null || true
+docker rm -f dyn365hunter-postgres dyn365hunter-api dyn365hunter-redis dyn365hunter-worker 2>/dev/null || true
 
 # Remove images (optional)
 docker rmi dyn365hunterv3-api 2>/dev/null || true
@@ -131,6 +185,8 @@ docker-compose ps
 # View logs
 docker-compose logs -f api
 docker-compose logs -f postgres
+docker-compose logs -f redis
+docker-compose logs -f worker
 ```
 
 ### Run Tests Manually
@@ -171,5 +227,27 @@ docker-compose exec api pytest tests/ -v
    
    # Then just run tests
    docker-compose exec api pytest tests/ -v
+   ```
+
+5. **Run Alembic migrations after database reset:**
+   ```bash
+   # After docker-compose down -v, run migrations
+   docker-compose up -d postgres
+   docker-compose exec api alembic upgrade head
+   ```
+
+6. **Check all services health:**
+   ```bash
+   # Check all containers
+   docker-compose ps
+   
+   # Check API health
+   curl http://localhost:8000/healthz
+   
+   # Check Redis
+   docker-compose exec redis redis-cli ping
+   
+   # Check PostgreSQL
+   docker-compose exec postgres pg_isready -U dyn365hunter
    ```
 

@@ -566,7 +566,7 @@ curl -X POST http://localhost:8000/leads/example.com/notes \
 
 ### Dokümantasyon
 - [SALES-GUIDE.md](SALES-GUIDE.md) - Satış ekibi kullanım kılavuzu
-- [SALES-PERSONA-v2.0.md](active/SALES-PERSONA-v2.0.md) - Tam persona dokümantasyonu
+- [SALES-PERSONA-v2.0.md](SALES-PERSONA-v2.0.md) - Tam persona dokümantasyonu
 - [SALES-SCENARIOS.md](SALES-SCENARIOS.md) - Pratik senaryolar
 - [SEGMENT-GUIDE.md](SEGMENT-GUIDE.md) - Segment ve skor açıklamaları
 

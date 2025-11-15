@@ -9,6 +9,9 @@
 - **Post-MVP Sprint 6 (G19)**: ✅ Completed - Auth + UI + Advanced Features
 - **UI Patch v1.1**: ✅ Completed - Skor detay modal ve UX iyileştirmeleri (2025-01-28)
 - **G20: Domain Intelligence Layer**: ✅ Completed - Local Provider, Tenant Size, DMARC Coverage (2025-01-28)
+- **P0 Hardening (G19)**: ✅ Completed - DB Connection Pooling, API Key Security, Structured Logging, Error Tracking, Health Checks
+- **P1 Performance**: ✅ Completed (2025-01-28) - Alembic, Distributed Rate Limiting, Caching, Bulk Operations, API Versioning
+- **🔄 Stabilization Sprint**: 📋 Planlama Aşaması (3 Gün) - Entegrasyondan önce yapılmalı
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20)
 
 ## Code Style & Standards
@@ -364,25 +367,33 @@ When a phase is completed (TODO status = "Completed"):
 - ✅ AI Features (optional)
 - ✅ Contact Finder (optional)
 
-### P1 Performance & Infrastructure (Backlog - 1-2 Sprint)
-- 📋 **Alembic Migration System** - Migration history tracking, rollback capability
-- 📋 **Distributed Rate Limiting** - Redis-based rate limiting for multi-worker
-- 📋 **Caching Layer** - Redis-based distributed caching (DNS, WHOIS, Provider, Scoring)
-- 📋 **Bulk Operations Optimization** - Batch processing, deadlock prevention
-- 📋 **API Versioning** - `/api/v1/` structure with backward compatibility
+### P1 Performance & Infrastructure ✅ Completed (2025-01-28)
+- ✅ **Alembic Migration System** - Migration history tracking, rollback capability
+- ✅ **Distributed Rate Limiting** - Redis-based rate limiting for multi-worker
+- ✅ **Caching Layer** - Redis-based distributed caching (DNS, WHOIS, Provider, Scoring)
+- ✅ **Bulk Operations Optimization** - Batch processing, deadlock prevention
+- ✅ **API Versioning** - `/api/v1/` structure with backward compatibility
 - **Reference**: `docs/active/P1-IMPLEMENTATION-PLAYBOOK.md`
-- **Preparation**: `docs/todos/P1-PREPARATION.md`
+
+### 🔄 Stabilization Sprint (Entegrasyondan Önce - 3 Gün)
+- 📋 **Core Stabilizasyon** - Alembic tests, rate limiting tests, bulk tests, API backward compat
+- 📋 **Monitoring & Safety** - Cache metrics, rate limit metrics, error tracking, simulation tests
+- 📋 **UI Stabilizasyon** - Table cleanup, modal improvements, export/PDF, tooltip system
+- **Reference**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md`
+- **UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md`
+- **Priority**: ⚠️ **Entegrasyondan önce yapılmalı**
 
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
 2. **Is this in the correct Post-MVP sprint?** (Check `docs/plans/2025-11-14-FINAL-ROADMAP.md`)
 3. **Is this a P1 performance/infrastructure task?** (Check `docs/active/KALAN-ISLER-PRIORITY.md` and `docs/active/P1-IMPLEMENTATION-PLAYBOOK.md`)
-4. Does this require external API calls? (Handle timeouts/errors)
-5. Will this log PII? (Only log domain)
-6. Is this testable? (Write tests)
-7. Does this break Docker setup? (Verify setup_dev.sh still works)
-8. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
-9. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
-10. **For P1 tasks**: Did I check the preparation docs? (`docs/todos/P1-PREPARATION.md`)
+4. **Is this a Stabilization Sprint task?** (Check `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` - entegrasyondan önce yapılmalı)
+5. Does this require external API calls? (Handle timeouts/errors)
+6. Will this log PII? (Only log domain)
+7. Is this testable? (Write tests)
+8. Does this break Docker setup? (Verify setup_dev.sh still works)
+9. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
+10. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
+11. **For Stabilization Sprint**: Did I check the stabilization plan? (`docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md`)
 

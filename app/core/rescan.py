@@ -11,12 +11,15 @@ from app.core.change_detection import (
 )
 from app.core.auto_tagging import apply_auto_tags
 from app.core.logging import logger
+from app.core.cache import invalidate_scan_cache
 import copy
 
 
 def rescan_domain(domain: str, db: Session) -> Dict:
     """
     Re-scan a domain and detect changes.
+
+    Invalidates cache before rescanning to ensure fresh results.
 
     Args:
         domain: Domain name (normalized)
@@ -25,6 +28,9 @@ def rescan_domain(domain: str, db: Session) -> Dict:
     Returns:
         Dictionary with scan result and detected changes
     """
+    # Invalidate cache before rescan (force fresh scan)
+    invalidate_scan_cache(domain)
+    
     # Get old signal and score for comparison (before scan)
     old_signal = db.query(DomainSignal).filter(DomainSignal.domain == domain).first()
     old_score = db.query(LeadScore).filter(LeadScore.domain == domain).first()

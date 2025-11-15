@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Stabilization Sprint - Gün 1: Core Stabilizasyon** (2025-01-28) - Test ve doğrulama katmanları
+  - Alembic migration testleri (`tests/test_alembic.py`) - Schema drift detection, rollback testleri, run_migration.py wrapper testleri (10 passed, 1 skipped)
+  - Distributed rate limiting testleri (`tests/test_distributed_rate_limiter.py`) - Multi-worker rate limiting, Redis fallback, circuit breaker recovery (11 passed)
+  - Bulk operations test düzeltmeleri - Test isolation sorunları çözüldü, unique domain fixture'ları eklendi (11 passed, 2 skipped)
+  - API backward compatibility testleri - Response format consistency, zero downtime deployment testleri eklendi (15/15 passed)
+  - Redis health check - `/healthz/ready` endpoint'ine Redis ping eklendi, connection pool kullanımı
+  - Router prefix düzeltmesi - `app/main.py`'de double prefix sorunu çözüldü (v1 ve legacy router'lar)
+  - Test coverage: 47+ yeni test eklendi, tüm testler yeşil
+  - Status: ✅ Gün 1 tamamlandı ve kilitlendi
 - **P1-5: API Versioning** - API versioning structure with backward compatibility
   - API v1 router structure (`/api/v1/...`) - All API endpoints now available under `/api/v1/` prefix
   - Backward compatibility - Legacy endpoints (`/...`) continue to work for zero downtime migration

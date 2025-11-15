@@ -20,6 +20,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application code
 COPY app/ ./app/
+# Copy Alembic migration files
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
 # Note: tests/ is mounted via volume in docker-compose.yml for development
 # Production images should not include test code
 

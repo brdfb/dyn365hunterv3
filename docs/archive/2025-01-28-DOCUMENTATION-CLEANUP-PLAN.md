@@ -1,26 +1,30 @@
 # Dokümantasyon Temizleme Planı
 
 **Tarih**: 2025-01-28  
-**Durum**: Active  
-**Sorun**: `docs/active/` klasöründe 9 dosya birikmiş, dokümantasyon yönetimi kurallarına göre temizlenmeli
+**Durum**: ✅ **Kısmen Tamamlandı** - Bazı işler yapıldı, güncelleme gerekli  
+**Sorun**: `docs/active/` klasöründe dosya birikimi, dokümantasyon yönetimi kurallarına göre temizlenmeli
 
 ---
 
 ## 📊 Mevcut Durum Analizi
 
-### `docs/active/` Klasöründe 9 Dosya:
+### `docs/active/` Klasöründe Mevcut Dosyalar (Güncellenmiş):
 
 | Dosya | Tip | Durum | Aksiyon |
 |-------|-----|-------|---------|
 | `DEVELOPMENT-ENVIRONMENT.md` | Reference Guide | ✅ Aktif | **KAL** |
 | `DOCKER-TROUBLESHOOTING.md` | Reference Guide | ✅ Aktif | **KAL** |
+| `DOCUMENTATION-CLEANUP-PLAN.md` | Plan | ✅ Aktif (güncellenmiş) | **KAL** |
 | `DOMAIN-DATA-EXPANSION-CRITIQUE.md` | Critique | ✅ Aktif (yeni) | **KAL** |
-| `G19-PRIORITY-CRITIQUE.md` | Critique | ❌ G19 tamamlandı | **ARCHIVE** |
+| `G20-IMPLEMENTATION-SUMMARY.md` | Implementation Summary | ❌ G20 tamamlandı | **✅ ARCHIVE EDİLDİ** |
 | `KALAN-ISLER-PRIORITY.md` | TODO/Backlog | ⚠️ Kısmen aktif | **GÜNCELLE** |
 | `PRODUCTION-ENGINEERING-GUIDE-V1.md` | Reference Guide | ✅ Aktif | **KAL** |
-| `PRODUCTION-READINESS-CRITIQUE-V2.md` | Critique | ❌ G19 öncesi, G19 tamamlandı | **ARCHIVE** |
-| `SATIS-EKIBI-TEST-RAPORU.md` | Test Raporu | ❌ G19 sonrası, tamamlandı | **ARCHIVE** |
+| `SALES-PERSONA-CRITIQUE.md` | Critique | ✅ Aktif | **KAL** |
+| `SALES-PERSONA-v2.0.md` | Persona | ✅ Aktif | **KAL** |
+| `SALES-TRAINING.md` | Training Material | ✅ Aktif | **KAL** |
 | `WSL-GUIDE.md` | Reference Guide | ✅ Aktif | **KAL** |
+
+**Not**: G19 ile ilgili critique'ler zaten archive edilmiş (2025-01-28-*).
 
 ---
 
@@ -43,23 +47,28 @@
 
 ## ✅ Çözüm: Archive Planı
 
-### Archive Edilecekler (3 dosya):
+### ✅ Archive Edilenler (Zaten Yapıldı):
 
-1. **`G19-PRIORITY-CRITIQUE.md`**
-   - **Neden**: G19 tamamlandı, critique artık aktif değil
-   - **Yeni Ad**: `2025-01-28-G19-PRIORITY-CRITIQUE.md`
-   - **Hedef**: `docs/archive/`
+1. **`G19-PRIORITY-CRITIQUE.md`** ✅
+   - **Durum**: Archive edildi → `docs/archive/2025-01-28-G19-PRIORITY-CRITIQUE.md`
 
-2. **`PRODUCTION-READINESS-CRITIQUE-V2.md`**
-   - **Neden**: G19 öncesi critique, G19 tamamlandı, P0 maddeler tamamlandı
-   - **Yeni Ad**: `2025-01-28-PRODUCTION-READINESS-CRITIQUE-V2.md`
-   - **Hedef**: `docs/archive/`
-   - **Not**: Production Engineering Guide v1 aktif kalmalı (reference guide)
+2. **`PRODUCTION-READINESS-CRITIQUE-V2.md`** ✅
+   - **Durum**: Archive edildi → `docs/archive/2025-01-28-PRODUCTION-READINESS-CRITIQUE-V2.md`
 
-3. **`SATIS-EKIBI-TEST-RAPORU.md`**
-   - **Neden**: G19 sonrası test raporu, sorunlar çözüldü (P0/P1)
-   - **Yeni Ad**: `2025-01-28-SATIS-EKIBI-TEST-RAPORU.md`
-   - **Hedef**: `docs/archive/`
+3. **`SATIS-EKIBI-TEST-RAPORU.md`** ✅
+   - **Durum**: Archive edildi → `docs/archive/2025-01-28-SATIS-EKIBI-TEST-RAPORU.md`
+
+4. **`G20-IMPLEMENTATION-SUMMARY.md`** ✅
+   - **Durum**: Archive edildi → `docs/archive/2025-01-28-G20-IMPLEMENTATION-SUMMARY.md`
+
+5. **Plan Dosyaları** ✅
+   - `UI-PATCH-PLAN-v1.1.md` → `docs/archive/2025-01-28-UI-PATCH-PLAN-v1.1.md`
+   - `G19-auth-ui-advanced-plan.md` → `docs/archive/2025-01-28-G19-auth-ui-advanced-plan.md`
+
+6. **Eski Prompt Dosyaları** ✅
+   - `2025-11-12-alembic-decision.md` → `docs/archive/2025-11-12-alembic-decision.md`
+   - `2025-11-12-initial-setup.md` → `docs/archive/2025-11-12-initial-setup.md`
+   - `2025-11-12-phase-completion-workflow.md` → `docs/archive/2025-11-12-phase-completion-workflow.md`
 
 ### Güncellenecekler (1 dosya):
 
@@ -103,16 +112,20 @@ mv docs/active/SATIS-EKIBI-TEST-RAPORU.md docs/archive/2025-01-28-SATIS-EKIBI-TE
 
 ## 🎯 Sonuç: Hedef Durum
 
-### `docs/active/` Klasöründe Kalacaklar (6 dosya):
+### `docs/active/` Klasöründe Kalacaklar (11 dosya - Güncellenmiş):
 
 1. ✅ `DEVELOPMENT-ENVIRONMENT.md` - Reference guide
 2. ✅ `DOCKER-TROUBLESHOOTING.md` - Reference guide
-3. ✅ `DOMAIN-DATA-EXPANSION-CRITIQUE.md` - Aktif tartışma
-4. ✅ `KALAN-ISLER-PRIORITY.md` - Backlog takibi (güncellenecek)
-5. ✅ `PRODUCTION-ENGINEERING-GUIDE-V1.md` - Reference guide
-6. ✅ `WSL-GUIDE.md` - Reference guide
+3. ✅ `DOCUMENTATION-CLEANUP-PLAN.md` - Plan (güncellenmiş)
+4. ✅ `DOMAIN-DATA-EXPANSION-CRITIQUE.md` - Aktif tartışma
+5. ✅ `KALAN-ISLER-PRIORITY.md` - Backlog takibi
+6. ✅ `PRODUCTION-ENGINEERING-GUIDE-V1.md` - Reference guide
+7. ✅ `SALES-PERSONA-CRITIQUE.md` - Critique (aktif)
+8. ✅ `SALES-PERSONA-v2.0.md` - Persona (aktif)
+9. ✅ `SALES-TRAINING.md` - Training material (aktif)
+10. ✅ `WSL-GUIDE.md` - Reference guide
 
-**Toplam**: 6 dosya (kurallara uygun: "Maximum 5-7 active files")
+**Toplam**: 10 dosya (kurallara göre "Maximum 5-7 active files" - biraz fazla ama reference guide'lar ve aktif materyaller)
 
 ---
 
@@ -131,5 +144,13 @@ mv docs/active/SATIS-EKIBI-TEST-RAPORU.md docs/archive/2025-01-28-SATIS-EKIBI-TE
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Durum**: Archive işlemi yapılacak
+**Durum**: ✅ **Kısmen Tamamlandı** - G19/G20 planları ve critique'ler archive edildi, prompt dosyaları archive edildi.
+
+**Not**: Kurallara göre `docs/active/` maksimum 5-7 dosya olmalı. Şu anda 10 dosya var. Birleştirme yapmak yerine, kurallara göre:
+- Reference guide'lar aktif kalabilir (DEVELOPMENT-ENVIRONMENT, DOCKER-TROUBLESHOOTING, PRODUCTION-ENGINEERING-GUIDE, WSL-GUIDE)
+- Feature documentation archive edilmeli (tamamlandıysa)
+- Critique'ler archive edilmeli (karar verildikten sonra)
+- Planning docs archive edilmeli (tamamlandıktan sonra)
+
+**Öneri**: Bu plan dosyası da tamamlandıktan sonra archive edilmeli.
 

@@ -128,20 +128,25 @@ docker-compose restart      # Servisleri yeniden başlat
 docker-compose ps           # Container durumlarını görüntüle
 ```
 
-### Phase 0 Deployment Sonrası Komutlar
+### Common Development Commands
 
 ```bash
-# Smoke test'leri çalıştır
-bash scripts/smoke_test_phase0.sh
-
-# Phase 0'ı tekrar deploy et
-bash scripts/deploy_phase0.sh
-
 # Health check
 curl http://localhost:8000/healthz
 
-# API version kontrolü
+# API version kontrolü (P1-5: API Versioning)
 curl http://localhost:8000/openapi.json | grep version
+
+# Test v1 endpoint (API versioning)
+curl http://localhost:8000/api/v1/leads
+
+# Test legacy endpoint (backward compatibility)
+curl http://localhost:8000/leads
+
+# Alembic migration (P1-1: Database Migration System)
+docker-compose exec api alembic upgrade head
+docker-compose exec api alembic current
+docker-compose exec api alembic history
 ```
 
 ## 🚫 Neden Git Bash Önerilmiyor?

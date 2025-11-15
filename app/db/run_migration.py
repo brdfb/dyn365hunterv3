@@ -1,55 +1,75 @@
 #!/usr/bin/env python3
 """
-Run a specific migration file against the database.
-Usage: python -m app.db.run_migration g19_users_auth
+Alembic migration runner - Wrapper for Alembic commands.
+
+This script provides a convenient interface to run Alembic migrations.
+Legacy SQL migration files have been moved to app/db/migrations/legacy/ for reference.
+
+Usage:
+    # Upgrade to latest migration
+    python -m app.db.run_migration upgrade
+
+    # Upgrade to specific revision
+    python -m app.db.run_migration upgrade <revision>
+
+    # Downgrade one step
+    python -m app.db.run_migration downgrade
+
+    # Show current revision
+    python -m app.db.run_migration current
+
+    # Show migration history
+    python -m app.db.run_migration history
+
+    # Check for schema drift
+    python -m app.db.run_migration check
 """
 import sys
+import subprocess
 from pathlib import Path
-from sqlalchemy import create_engine, text
-from app.config import settings
 
 
-def run_migration_file(migration_name: str):
-    """Run a specific migration file."""
-    migrations_dir = Path(__file__).parent / "migrations"
-    migration_file = migrations_dir / f"{migration_name}.sql"
-
-    if not migration_file.exists():
-        print(f"❌ Migration file not found: {migration_file}")
-        sys.exit(1)
-
-    # Read migration file
+def run_alembic_command(command: str, *args):
+    """Run Alembic command via subprocess."""
+    alembic_cmd = ["alembic"] + [command] + list(args)
+    
     try:
-        with open(migration_file, "r", encoding="utf-8") as f:
-            migration_sql = f.read()
+        result = subprocess.run(alembic_cmd, check=False, capture_output=False)
+        return result.returncode
+    except FileNotFoundError:
+        print("❌ Alembic not found. Make sure Alembic is installed and in PATH.")
+        print("   Install: pip install alembic")
+        sys.exit(1)
     except Exception as e:
-        print(f"❌ Failed to read migration file: {e}")
+        print(f"❌ Failed to run Alembic command: {e}")
         sys.exit(1)
 
-    # Create database engine
-    try:
-        engine = create_engine(settings.database_url, pool_pre_ping=True)
-    except Exception as e:
-        print(f"❌ Failed to create database engine: {e}")
+
+def main():
+    """Main entry point."""
+    if len(sys.argv) < 2:
+        print(__doc__)
         sys.exit(1)
 
-    # Execute migration
-    try:
-        with engine.begin() as conn:
-            conn.execute(text(migration_sql))
-        print(f"✅ Migration '{migration_name}' completed successfully")
-        return 0
-    except Exception as e:
-        print(f"❌ Migration '{migration_name}' failed: {e}")
+    command = sys.argv[1]
+    args = sys.argv[2:]
+
+    # Validate command
+    valid_commands = ["upgrade", "downgrade", "current", "history", "check", "stamp", "revision"]
+    if command not in valid_commands:
+        print(f"❌ Unknown command: {command}")
+        print(f"   Valid commands: {', '.join(valid_commands)}")
         sys.exit(1)
+
+    # Special handling for upgrade (default to 'head')
+    if command == "upgrade" and not args:
+        args = ["head"]
+
+    # Run Alembic command
+    exit_code = run_alembic_command(command, *args)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python -m app.db.run_migration <migration_name>")
-        print("Example: python -m app.db.run_migration g19_users_auth")
-        sys.exit(1)
-
-    migration_name = sys.argv[1]
-    sys.exit(run_migration_file(migration_name))
+    main()
 

@@ -16,11 +16,9 @@ WHOIS_TIMEOUT = 5
 # RDAP timeout in seconds
 RDAP_TIMEOUT = 3
 
-# Cache TTL in seconds (1 hour)
-CACHE_TTL = 3600
-
-# In-memory cache: {domain: (result, timestamp)}
-_whois_cache: Dict[str, Tuple[Optional[Dict], float]] = {}
+# Cache TTL in seconds (24 hours for WHOIS - data doesn't change)
+# Note: Using Redis cache now, TTL is handled by Redis
+from app.core.cache import get_cached_whois, set_cached_whois
 
 
 @lru_cache(maxsize=1)
@@ -127,25 +125,13 @@ def _try_rdap(domain: str) -> Optional[Dict[str, Any]]:
 
 
 def _check_cache(domain: str) -> Optional[Dict[str, Any]]:
-    """Check if domain is in cache and not expired."""
-    import time
-
-    if domain in _whois_cache:
-        result, timestamp = _whois_cache[domain]
-        if time.time() - timestamp < CACHE_TTL:
-            return result
-        else:
-            # Cache expired, remove it
-            del _whois_cache[domain]
-
-    return None
+    """Check if domain is in Redis cache."""
+    return get_cached_whois(domain)
 
 
 def _set_cache(domain: str, result: Optional[Dict[str, Any]]):
-    """Store result in cache."""
-    import time
-
-    _whois_cache[domain] = (result, time.time())
+    """Store result in Redis cache."""
+    set_cached_whois(domain, result)
 
 
 def get_whois_info(domain: str, use_cache: bool = True) -> Optional[Dict[str, Any]]:
@@ -156,7 +142,7 @@ def get_whois_info(domain: str, use_cache: bool = True) -> Optional[Dict[str, An
     - Tries RDAP first (modern, faster, JSON)
     - Falls back to traditional WHOIS if RDAP fails
     - Uses TLD-specific servers when available
-    - Implements lightweight caching (1 hour TTL)
+    - Implements Redis-based distributed caching (24 hour TTL)
     - Returns None on failure (graceful degrade)
 
     Args:

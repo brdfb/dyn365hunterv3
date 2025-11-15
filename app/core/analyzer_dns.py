@@ -6,6 +6,7 @@ import dns.resolver
 import dns.exception
 from typing import Dict, Optional, List, Any
 from urllib.parse import urlparse
+from app.core.cache import get_cached_dns, set_cached_dns
 
 
 # DNS timeout in seconds
@@ -335,7 +336,7 @@ def check_dmarc(domain: str) -> Dict[str, Any]:
         return result
 
 
-def analyze_dns(domain: str) -> Dict[str, Any]:
+def analyze_dns(domain: str, use_cache: bool = True) -> Dict[str, Any]:
     """
     Perform complete DNS analysis for a domain.
 
@@ -345,8 +346,11 @@ def analyze_dns(domain: str) -> Dict[str, Any]:
     - DKIM record
     - DMARC policy and coverage
 
+    Uses Redis-based caching (1 hour TTL) to reduce DNS queries.
+
     Args:
         domain: Domain name to analyze
+        use_cache: Whether to use cache (default: True)
 
     Returns:
         Dictionary with analysis results:
@@ -359,6 +363,12 @@ def analyze_dns(domain: str) -> Dict[str, Any]:
         - dmarc_record: str (Full DMARC record string, or None)
         - status: str ("success", "dns_timeout", "invalid_domain")
     """
+    # Check cache first
+    if use_cache:
+        cached_result = get_cached_dns(domain)
+        if cached_result is not None:
+            return cached_result
+
     result = {
         "mx_records": [],
         "mx_root": None,
@@ -395,5 +405,9 @@ def analyze_dns(domain: str) -> Dict[str, Any]:
         result["status"] = "dns_timeout"
     except Exception as e:
         result["status"] = "invalid_domain"
+
+    # Cache result (even if failed, to avoid repeated queries)
+    if use_cache:
+        set_cached_dns(domain, result)
 
     return result

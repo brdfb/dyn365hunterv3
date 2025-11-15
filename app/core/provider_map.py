@@ -5,6 +5,7 @@ import os
 import re
 from typing import Dict, List, Optional
 from pathlib import Path
+from app.core.cache import get_cached_provider, set_cached_provider
 
 
 _PROVIDERS_CACHE: Optional[Dict] = None
@@ -40,13 +41,16 @@ def load_providers() -> Dict:
     return _PROVIDERS_CACHE
 
 
-def classify_provider(mx_root: Optional[str]) -> str:
+def classify_provider(mx_root: Optional[str], use_cache: bool = True) -> str:
     """
     Classify a mail provider based on MX root domain.
+
+    Uses Redis-based caching (24 hour TTL) to reduce repeated lookups.
 
     Args:
         mx_root: Root domain of MX record (e.g., "outlook.com", "aspmx.l.google.com")
                 If None or empty, returns "Unknown"
+        use_cache: Whether to use cache (default: True)
 
     Returns:
         Provider name: "M365", "Google", "Yandex", "Zoho", "Amazon",
@@ -67,6 +71,12 @@ def classify_provider(mx_root: Optional[str]) -> str:
 
     mx_root = mx_root.lower().strip()
 
+    # Check cache first
+    if use_cache:
+        cached_provider = get_cached_provider(mx_root)
+        if cached_provider is not None:
+            return cached_provider
+
     # Load providers
     providers_data = load_providers()
     providers = providers_data.get("providers", [])
@@ -80,17 +90,29 @@ def classify_provider(mx_root: Optional[str]) -> str:
         for root in mx_roots:
             # Exact match
             if mx_root == root.lower():
-                return provider_name
+                provider = provider_name
+                # Cache result
+                if use_cache:
+                    set_cached_provider(mx_root, provider)
+                return provider
 
             # Check if mx_root ends with the provider root (for subdomains)
             # e.g., "outlook-com.olc.protection.outlook.com" should match "protection.outlook.com"
             if mx_root.endswith("." + root.lower()):
-                return provider_name
+                provider = provider_name
+                # Cache result
+                if use_cache:
+                    set_cached_provider(mx_root, provider)
+                return provider
 
             # Check if provider root is contained in mx_root
             # e.g., "mail.outlook.com" should match "outlook.com"
             if "." + root.lower() in mx_root or mx_root.startswith(root.lower() + "."):
-                return provider_name
+                provider = provider_name
+                # Cache result
+                if use_cache:
+                    set_cached_provider(mx_root, provider)
+                return provider
 
     # If no match found, check if it's a local/custom mail server
     # Local mail servers typically have the domain itself or mail.{domain}
@@ -99,7 +121,11 @@ def classify_provider(mx_root: Optional[str]) -> str:
 
     # For now, if it doesn't match any provider, return "Local"
     # (This can be refined later based on actual patterns)
-    return "Local"
+    provider = "Local"
+    # Cache result
+    if use_cache:
+        set_cached_provider(mx_root, provider)
+    return provider
 
 
 def classify_local_provider(mx_root: Optional[str]) -> Optional[str]:

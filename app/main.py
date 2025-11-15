@@ -74,36 +74,38 @@ app.include_router(health.router)
 app.include_router(auth.router)  # G19: Microsoft SSO
 
 # API v1 routers (versioned API)
+# Note: v1 routers already have their own prefixes defined in their files
 v1_router = APIRouter(prefix="/api/v1", tags=["v1"])
-v1_router.include_router(ingest_v1.router, prefix="/ingest", tags=["ingest"])
-v1_router.include_router(scan_v1.router, prefix="/scan", tags=["scan"])
-v1_router.include_router(leads_v1.router, prefix="/leads", tags=["leads"])
-v1_router.include_router(dashboard_v1.router, prefix="/dashboard", tags=["dashboard"])
-v1_router.include_router(email_tools_v1.router, prefix="/email", tags=["email"])
-v1_router.include_router(progress_v1.router, prefix="/jobs", tags=["progress"])
-v1_router.include_router(admin_v1.router, prefix="/admin", tags=["admin"])
-v1_router.include_router(notes_v1.router, prefix="/leads", tags=["notes"])
-v1_router.include_router(tags_v1.router, prefix="/leads", tags=["tags"])
-v1_router.include_router(favorites_v1.router, prefix="/leads", tags=["favorites"])
-v1_router.include_router(pdf_v1.router, prefix="/leads", tags=["pdf"])
-v1_router.include_router(rescan_v1.router, prefix="/scan", tags=["rescan"])
-v1_router.include_router(alerts_v1.router, prefix="/alerts", tags=["alerts"])
+v1_router.include_router(ingest_v1.router)  # Already has /ingest prefix
+v1_router.include_router(scan_v1.router)  # Already has /scan prefix
+v1_router.include_router(leads_v1.router)  # Already has /leads prefix
+v1_router.include_router(dashboard_v1.router)  # Already has /dashboard prefix
+v1_router.include_router(email_tools_v1.router)  # Already has /email prefix
+v1_router.include_router(progress_v1.router)  # Already has /jobs prefix
+v1_router.include_router(admin_v1.router)  # Already has /admin prefix
+v1_router.include_router(notes_v1.router)  # Already has /leads prefix
+v1_router.include_router(tags_v1.router)  # Already has /leads prefix
+v1_router.include_router(favorites_v1.router)  # Already has /leads prefix
+v1_router.include_router(pdf_v1.router)  # Already has /leads prefix
+v1_router.include_router(rescan_v1.router)  # Already has /scan prefix
+v1_router.include_router(alerts_v1.router)  # Already has /alerts prefix
 app.include_router(v1_router)
 
 # Legacy routers (backward compatibility - will be deprecated in future)
-app.include_router(ingest.router, prefix="/ingest", tags=["ingest", "legacy"])
-app.include_router(scan.router, prefix="/scan", tags=["scan", "legacy"])
-app.include_router(leads.router, prefix="/leads", tags=["leads", "legacy"])
-app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard", "legacy"])
-app.include_router(email_tools.router, prefix="/email", tags=["email", "legacy"])
-app.include_router(progress.router, prefix="/jobs", tags=["progress", "legacy"])
-app.include_router(admin.router, prefix="/admin", tags=["admin", "legacy"])
-app.include_router(notes.router, prefix="/notes", tags=["notes", "legacy"])
-app.include_router(tags.router, prefix="/leads", tags=["tags", "legacy"])  # Note: tags router uses /leads prefix
-app.include_router(favorites.router, prefix="/leads", tags=["favorites", "legacy"])  # Note: favorites router uses /leads prefix
-app.include_router(pdf.router, prefix="/leads", tags=["pdf", "legacy"])
-app.include_router(rescan.router, prefix="/scan", tags=["rescan", "legacy"])
-app.include_router(alerts.router, prefix="/alerts", tags=["alerts", "legacy"])
+# Note: Legacy routers already have their own prefixes defined in their files
+app.include_router(ingest.router, tags=["ingest", "legacy"])  # Already has /ingest prefix
+app.include_router(scan.router, tags=["scan", "legacy"])  # Already has /scan prefix
+app.include_router(leads.router, tags=["leads", "legacy"])  # Already has /leads prefix
+app.include_router(dashboard.router, tags=["dashboard", "legacy"])  # Already has /dashboard prefix
+app.include_router(email_tools.router, tags=["email", "legacy"])  # Already has /email prefix
+app.include_router(progress.router, tags=["progress", "legacy"])  # Already has /jobs prefix
+app.include_router(admin.router, tags=["admin", "legacy"])  # Already has /admin prefix
+app.include_router(notes.router, tags=["notes", "legacy"])  # Already has /notes prefix
+app.include_router(tags.router, tags=["tags", "legacy"])  # Already has /leads prefix
+app.include_router(favorites.router, tags=["favorites", "legacy"])  # Already has /leads prefix
+app.include_router(pdf.router, tags=["pdf", "legacy"])  # Already has /leads prefix
+app.include_router(rescan.router, tags=["rescan", "legacy"])  # Already has /scan prefix
+app.include_router(alerts.router, tags=["alerts", "legacy"])  # Already has /alerts prefix
 
 # Mount static files for Mini UI
 import os

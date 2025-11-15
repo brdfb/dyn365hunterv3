@@ -59,6 +59,7 @@ services:
       - ./app:/app/app
       - ./tests:/app/tests
       - ./mini-ui:/app/mini-ui
+      - ./alembic:/app/alembic
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
       interval: 10s

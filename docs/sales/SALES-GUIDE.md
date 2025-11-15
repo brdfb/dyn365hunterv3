@@ -1225,8 +1225,8 @@ http://localhost:8000/docs
 ### 📚 Detaylı Persona Dokümantasyonu
 
 Daha detaylı bilgi için:
-- [SALES-PERSONA-v2.0.md](active/SALES-PERSONA-v2.0.md) - Tam persona dokümantasyonu
-- [SALES-PERSONA-CRITIQUE.md](active/SALES-PERSONA-CRITIQUE.md) - Persona critique ve geliştirme önerileri
+- [SALES-PERSONA-v2.0.md](SALES-PERSONA-v2.0.md) - Tam persona dokümantasyonu
+- [SALES-TRAINING.md](SALES-TRAINING.md) - Eğitim materyali
 
 ---
 

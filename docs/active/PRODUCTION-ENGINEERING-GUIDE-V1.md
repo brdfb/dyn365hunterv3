@@ -702,7 +702,8 @@ kubectl exec -it redis-pod -- redis-cli LLEN celery
 - [ ] Monitoring configured (Prometheus, Grafana)
 - [ ] Logging configured (ELK or similar)
 - [ ] Error tracking configured (Sentry)
-- [ ] Database migrations tested
+- [ ] Database migrations tested (Alembic - P1-1: Database Migration System)
+- [ ] Alembic migration system verified (`alembic upgrade head`, `alembic current`)
 - [ ] Load testing completed
 - [ ] Backup strategy in place
 
@@ -722,6 +723,8 @@ kubectl exec -it redis-pod -- redis-cli LLEN celery
 - [ ] All metrics normal
 - [ ] Smoke tests passing
 - [ ] User acceptance testing (if applicable)
+- [ ] API versioning verified (v1 endpoints: `/api/v1/...`, legacy endpoints: `/...`) - P1-5: API Versioning
+- [ ] Redis health verified (distributed rate limiting, caching layer) - P1-2, P1-3
 
 ---
 
@@ -738,6 +741,22 @@ kubectl exec -it postgres-pod -- pg_dump -U dyn365hunter dyn365hunter > $BACKUP_
 
 # Restore
 kubectl exec -i postgres-pod -- psql -U dyn365hunter dyn365hunter < $BACKUP_DIR/db_backup_20250128.sql
+```
+
+### Alembic Migration (P1-1: Database Migration System)
+
+```bash
+# Run migrations
+kubectl exec -it api-pod -- alembic upgrade head
+
+# Check current migration version
+kubectl exec -it api-pod -- alembic current
+
+# View migration history
+kubectl exec -it api-pod -- alembic history
+
+# Rollback (if needed)
+kubectl exec -it api-pod -- alembic downgrade -1
 ```
 
 ### Log Rotation

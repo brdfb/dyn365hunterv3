@@ -151,6 +151,18 @@ scripts/manage_docs.sh list
 3. `scripts/manage_docs.sh create-todo G19 auth-ui-advanced`
 4. Confirm: "✅ G19 TODO created: docs/todos/G19-auth-ui-advanced.md"
 
+### Example 6: Stabilization Sprint Complete
+**User**: "Stabilization Sprint tamamlandı" or "Stabilization bitti"
+**Agent Action**:
+1. Check `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` status
+2. If completed → Run stabilization completion workflow:
+   - Archive stabilization docs: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` → `docs/archive/2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md`
+   - Archive UI checklist: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md` → `docs/archive/2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md`
+   - Update CHANGELOG.md with stabilization changes (under `[Unreleased]` or current version)
+   - Update README.md Features section (mark stabilization as ✅)
+   - Update `docs/active/KALAN-ISLER-PRIORITY.md` (mark stabilization as completed)
+3. Confirm: "✅ Stabilization Sprint completed - Documentation archived, CHANGELOG updated"
+
 ### Example 4: Important Decision
 **User**: "Bu önemli bir karar, kaydet"
 **Agent Action**:
@@ -175,6 +187,7 @@ Agent should regularly check:
 - Active documentation count (should be < 7 files, currently 5 reference guides)
 - Feature documentation in `docs/active/` (should be archived when complete)
 - Planning documentation in `docs/plans/` (should be archived when complete)
+- **Stabilization Sprint status** (check `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` for completion)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -193,8 +206,10 @@ This agent should be **always active** in the AI assistant's context. When you s
 - New test files created → Auto-update CHANGELOG.md
 - New core modules created → Auto-update CHANGELOG.md
 - TODO completed → Run full phase completion workflow
+- **Stabilization Sprint completed** → Run stabilization completion workflow
 - User mentions "save this" → Save prompt
 - User mentions "G19 başlıyor" or "Starting G19" → Create TODO
+- User mentions "Stabilization Sprint tamamlandı" → Archive stabilization docs
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
 

@@ -344,24 +344,46 @@ g20_domain_intelligence (head)
 
 ## 🚀 Sonraki Adımlar
 
-1. **Alembic Setup**
-   - `alembic init alembic`
-   - `alembic.ini` config düzenle
-   - `alembic/env.py` düzenle (SQLAlchemy models import)
+1. **Alembic Setup** ✅ **TAMAMLANDI**
+   - `alembic init alembic` ✅
+   - `alembic.ini` config düzenle ✅
+   - `alembic/env.py` düzenle (SQLAlchemy models import) ✅
 
-2. **Base Revision Oluştur**
-   - Production DB schema snapshot al
-   - `alembic revision --autogenerate -m "base_revision"`
-   - Manuel diff kontrolü
+2. **Base Revision Oluştur** ✅ **TAMAMLANDI**
+   - Production DB schema snapshot al ✅
+   - `alembic revision --autogenerate -m "base_revision"` ✅
+   - Base revision'ı stamp et (`alembic stamp 08f51db8dce0`) ✅
 
-3. **Migration'ları Alembic Revision'lara Çevir**
-   - Her migration için `alembic revision --autogenerate` veya manuel revision
-   - Dependency sırasına göre revision'ları oluştur
+3. **Legacy Migration'ları Arşivle** ✅ **TAMAMLANDI**
+   - Eski SQL migration dosyalarını `app/db/migrations/legacy/` altına taşı ✅
+   - Base revision dosyasına yorum ekle ✅
+   - Legacy README oluştur ✅
 
-4. **Test**
-   - Fresh DB'de tüm migration'ları test et
-   - Rollback testleri (`alembic downgrade`)
+4. **Gelecek Migration'lar İçin Test**
+   - Yeni migration oluşturma testi (`alembic revision --autogenerate -m "test_migration"`)
+   - Rollback testleri (`alembic downgrade -1` - gelecekteki migration'lar için)
    - Schema drift kontrolü (`alembic --autogenerate --dry-run`)
+
+## 📝 Revize Edilmiş Strateji: "Collapsed History"
+
+**ÖNEMLİ DEĞİŞİKLİK**: g16-g20 manuel SQL migration'ları Alembic revision'ına çevrilmedi.
+
+**Neden?**
+- Base revision (`08f51db8dce0`) zaten tüm geçmiş migration'ların sonucunu temsil ediyor
+- Aynı değişiklikleri tekrar Alembic revision'larında tanımlamak duplicate index/constraint/column hatalarına yol açar
+- "Collapsed history" stratejisi daha temiz ve risksiz
+
+**Yapılanlar:**
+1. Base revision oluşturuldu (mevcut schema snapshot)
+2. Base revision stamp edildi (`alembic stamp 08f51db8dce0`)
+3. Eski SQL migration dosyaları `app/db/migrations/legacy/` altına taşındı (sadece referans için)
+4. Bundan sonraki tüm schema değişiklikleri Alembic ile yönetilecek
+
+**Avantajlar:**
+- ✅ Dev ortamı yorulmadı
+- ✅ Risk minimum (sadece stamp işlemi)
+- ✅ P1 hedefi sağlandı: "bundan sonrası kontrollü migration"
+- ✅ Eski migration'lar referans olarak korunuyor
 
 ---
 

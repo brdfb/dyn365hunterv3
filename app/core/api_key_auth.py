@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.models import ApiKey
 from app.core.rate_limiter import RateLimiter
+from app.core.distributed_rate_limiter import DistributedRateLimiter
 from collections import defaultdict
 from threading import Lock
 import time
@@ -17,8 +18,8 @@ import time
 # API Key header
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
-# Per-API-key rate limiters (in-memory, per process)
-_api_key_limiters: dict[str, RateLimiter] = {}
+# Per-API-key rate limiters (distributed via Redis, fallback to in-memory)
+_api_key_limiters: dict[str, DistributedRateLimiter] = {}
 _rate_limiter_lock = Lock()
 
 
@@ -42,17 +43,30 @@ def generate_api_key() -> str:
     return secrets.token_urlsafe(32)
 
 
-def get_api_key_limiter(api_key_id: int, rate_limit_per_minute: int) -> RateLimiter:
-    """Get or create a rate limiter for a specific API key."""
+def get_api_key_limiter(api_key_id: int, rate_limit_per_minute: int) -> DistributedRateLimiter:
+    """
+    Get or create a distributed rate limiter for a specific API key.
+    
+    Uses Redis for distributed rate limiting across multiple workers.
+    Falls back to in-memory limiter if Redis is unavailable.
+    """
     limiter_key = f"api_key_{api_key_id}"
 
     with _rate_limiter_lock:
         if limiter_key not in _api_key_limiters:
             # Convert per-minute to per-second rate
             rate_per_second = rate_limit_per_minute / 60.0
-            _api_key_limiters[limiter_key] = RateLimiter(
+            # Create fallback in-memory limiter
+            fallback = RateLimiter(
                 rate=rate_per_second,
                 burst=rate_limit_per_minute,  # Allow burst up to per-minute limit
+            )
+            # Create distributed limiter with Redis
+            _api_key_limiters[limiter_key] = DistributedRateLimiter(
+                redis_key=f"api_key_{api_key_id}",
+                rate=rate_per_second,
+                burst=rate_limit_per_minute,
+                fallback=fallback,
             )
         return _api_key_limiters[limiter_key]
 
