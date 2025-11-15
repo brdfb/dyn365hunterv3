@@ -5,6 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.db.session import get_db
 from app.config import settings
+from app.core.cache import get_cache_metrics
+from app.core.distributed_rate_limiter import get_rate_limit_metrics
+from app.core.tasks import get_bulk_metrics
+from app.core.error_tracking import get_error_metrics
 import redis
 
 router = APIRouter(tags=["health"])
@@ -117,4 +121,31 @@ async def health_check(db: Session = Depends(get_db)):
         "redis": redis_status,
         "environment": settings.environment
     }
+
+
+@router.get("/healthz/metrics")
+async def metrics_endpoint():
+    """
+    Metrics endpoint - returns cache, rate limit, bulk operations, and error metrics.
+    
+    Returns:
+        Dictionary with all metrics (cache, rate limit, bulk operations, errors)
+    """
+    try:
+        cache_metrics = get_cache_metrics()
+        rate_limit_metrics = get_rate_limit_metrics()
+        bulk_metrics = get_bulk_metrics()
+        error_metrics = get_error_metrics()
+        
+        return {
+            "cache": cache_metrics,
+            "rate_limit": rate_limit_metrics,
+            "bulk_operations": bulk_metrics,
+            "errors": error_metrics,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve metrics: {str(e)}"
+        )
 

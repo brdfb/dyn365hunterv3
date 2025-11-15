@@ -8,6 +8,15 @@ from app.core.redis_client import get_redis_client, is_redis_available
 
 logger = logging.getLogger(__name__)
 
+# Cache metrics tracking (in-memory counters)
+_cache_metrics = {
+    "hits": 0,
+    "misses": 0,
+    "sets": 0,
+    "deletes": 0,
+    "ttl_expirations": 0,
+}
+
 # Cache TTL constants (in seconds)
 DNS_CACHE_TTL = 3600  # 1 hour
 WHOIS_CACHE_TTL = 86400  # 24 hours
@@ -32,18 +41,24 @@ def get_cached_value(key: str) -> Optional[Any]:
         Cached value (deserialized from JSON) or None if not found/expired
     """
     if not is_redis_available():
+        _cache_metrics["misses"] += 1
         return None
     
     redis_client = get_redis_client()
     if redis_client is None:
+        _cache_metrics["misses"] += 1
         return None
     
     try:
         cached = redis_client.get(key)
         if cached:
+            _cache_metrics["hits"] += 1
             return json.loads(cached.decode())
+        else:
+            _cache_metrics["misses"] += 1
     except Exception as e:
         logger.warning(f"Cache get failed for key {key}: {str(e)}")
+        _cache_metrics["misses"] += 1
     
     return None
 
@@ -70,6 +85,7 @@ def set_cached_value(key: str, value: Any, ttl: int) -> bool:
     try:
         serialized = json.dumps(value)
         redis_client.setex(key, ttl, serialized)
+        _cache_metrics["sets"] += 1
         return True
     except Exception as e:
         logger.warning(f"Cache set failed for key {key}: {str(e)}")
@@ -95,10 +111,47 @@ def delete_cached_value(key: str) -> bool:
     
     try:
         redis_client.delete(key)
+        _cache_metrics["deletes"] += 1
         return True
     except Exception as e:
         logger.warning(f"Cache delete failed for key {key}: {str(e)}")
         return False
+
+
+def get_cache_metrics() -> Dict[str, Any]:
+    """
+    Get cache metrics (hits, misses, hit rate, etc.).
+    
+    Returns:
+        Dictionary with cache metrics
+    """
+    hits = _cache_metrics["hits"]
+    misses = _cache_metrics["misses"]
+    total = hits + misses
+    
+    hit_rate = (hits / total * 100) if total > 0 else 0.0
+    
+    return {
+        "hits": hits,
+        "misses": misses,
+        "total": total,
+        "hit_rate_percent": round(hit_rate, 2),
+        "sets": _cache_metrics["sets"],
+        "deletes": _cache_metrics["deletes"],
+        "ttl_expirations": _cache_metrics["ttl_expirations"],
+    }
+
+
+def reset_cache_metrics():
+    """Reset cache metrics (for testing)."""
+    global _cache_metrics
+    _cache_metrics = {
+        "hits": 0,
+        "misses": 0,
+        "sets": 0,
+        "deletes": 0,
+        "ttl_expirations": 0,
+    }
 
 
 # DNS Cache Functions

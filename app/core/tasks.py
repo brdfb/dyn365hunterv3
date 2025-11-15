@@ -1,7 +1,8 @@
 """Celery tasks for async domain scanning."""
 
+import time
 from app.core.logging import logger
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import event, Engine, text
 from app.core.celery_app import celery_app
@@ -23,6 +24,19 @@ from app.core.bulk_operations import (
 )
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from sqlalchemy.exc import OperationalError
+
+# Bulk operations metrics tracking (in-memory counters)
+_bulk_metrics = {
+    "batch_success": 0,
+    "batch_failure": 0,
+    "deadlock_occurrences": 0,
+    "partial_commit_recoveries": 0,
+    "batch_processing_times": [],  # List of processing times in seconds
+    "total_batches": 0,
+    "total_domains_processed": 0,
+    "total_domains_succeeded": 0,
+    "total_domains_failed": 0,
+}
 
 
 
@@ -264,6 +278,7 @@ def process_batch_with_retry(
     # Set transaction timeout (30 seconds) for deadlock prevention
     db.execute(text("SET statement_timeout = 30000"))  # 30 seconds in milliseconds
 
+    batch_start_time = time.time()
     try:
         # Process each domain in batch (with commit=False for batch commit)
         for domain in batch:
@@ -343,6 +358,14 @@ def process_batch_with_retry(
                     )
             db.commit()
 
+        # Track batch success and processing time
+        batch_processing_time = time.time() - batch_start_time
+        _bulk_metrics["batch_success"] += 1
+        _bulk_metrics["batch_processing_times"].append(batch_processing_time)
+        # Keep only last 100 processing times to avoid memory issues
+        if len(_bulk_metrics["batch_processing_times"]) > 100:
+            _bulk_metrics["batch_processing_times"] = _bulk_metrics["batch_processing_times"][-100:]
+
         return succeeded, failed, committed, failed_results
 
     except Exception as e:
@@ -356,6 +379,7 @@ def process_batch_with_retry(
                 batch_no=batch_no,
                 error=str(e),
             )
+            _bulk_metrics["deadlock_occurrences"] += 1
             raise  # Retry
         else:
             # Non-deadlock error, don't retry
@@ -366,6 +390,7 @@ def process_batch_with_retry(
                 error=str(e),
                 exc_info=True,
             )
+            _bulk_metrics["batch_failure"] += 1
             raise
 
 
@@ -456,10 +481,20 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
                     failed=failed_results,
                 )
 
+                # Track partial commit recovery if there were failures
+                if failed > 0:
+                    _bulk_metrics["partial_commit_recoveries"] += 1
+
                 # Update progress tracker
                 processed += len(batch)
                 total_succeeded += succeeded
                 total_failed += failed
+                
+                # Update bulk metrics
+                _bulk_metrics["total_batches"] += 1
+                _bulk_metrics["total_domains_processed"] += len(batch)
+                _bulk_metrics["total_domains_succeeded"] += succeeded
+                _bulk_metrics["total_domains_failed"] += failed
 
                 # Store results for succeeded domains
                 for committed_item in committed:
@@ -635,3 +670,56 @@ def daily_rescan_task(self):
 
     finally:
         db.close()
+
+
+def get_bulk_metrics() -> Dict[str, Any]:
+    """
+    Get bulk operations metrics (batch success/failure rate, processing time, deadlock count, etc.).
+    
+    Returns:
+        Dictionary with bulk operations metrics
+    """
+    processing_times = _bulk_metrics["batch_processing_times"]
+    avg_processing_time = (
+        sum(processing_times) / len(processing_times) if processing_times else 0.0
+    )
+    
+    total_batches = _bulk_metrics["batch_success"] + _bulk_metrics["batch_failure"]
+    batch_success_rate = (
+        (_bulk_metrics["batch_success"] / total_batches * 100) if total_batches > 0 else 0.0
+    )
+    
+    total_domains = _bulk_metrics["total_domains_processed"]
+    domain_success_rate = (
+        (_bulk_metrics["total_domains_succeeded"] / total_domains * 100) if total_domains > 0 else 0.0
+    )
+    
+    return {
+        "batch_success": _bulk_metrics["batch_success"],
+        "batch_failure": _bulk_metrics["batch_failure"],
+        "batch_success_rate_percent": round(batch_success_rate, 2),
+        "deadlock_occurrences": _bulk_metrics["deadlock_occurrences"],
+        "partial_commit_recoveries": _bulk_metrics["partial_commit_recoveries"],
+        "average_batch_processing_time_seconds": round(avg_processing_time, 3),
+        "total_batches": _bulk_metrics["total_batches"],
+        "total_domains_processed": _bulk_metrics["total_domains_processed"],
+        "total_domains_succeeded": _bulk_metrics["total_domains_succeeded"],
+        "total_domains_failed": _bulk_metrics["total_domains_failed"],
+        "domain_success_rate_percent": round(domain_success_rate, 2),
+    }
+
+
+def reset_bulk_metrics():
+    """Reset bulk operations metrics (for testing)."""
+    global _bulk_metrics
+    _bulk_metrics = {
+        "batch_success": 0,
+        "batch_failure": 0,
+        "deadlock_occurrences": 0,
+        "partial_commit_recoveries": 0,
+        "batch_processing_times": [],
+        "total_batches": 0,
+        "total_domains_processed": 0,
+        "total_domains_succeeded": 0,
+        "total_domains_failed": 0,
+    }

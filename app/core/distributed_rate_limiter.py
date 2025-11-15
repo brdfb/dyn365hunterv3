@@ -3,7 +3,8 @@
 import time
 import logging
 import sentry_sdk
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, Dict, Any, TYPE_CHECKING
+from collections import defaultdict
 
 if TYPE_CHECKING:
     from app.core.rate_limiter import RateLimiter
@@ -11,6 +12,16 @@ if TYPE_CHECKING:
 from app.core.redis_client import get_redis_client, is_redis_available
 
 logger = logging.getLogger(__name__)
+
+# Rate limit metrics tracking (in-memory counters)
+_rate_limit_metrics = {
+    "hits": 0,  # Rate limit hit (blocked)
+    "acquired": 0,  # Tokens acquired successfully
+    "fallback_used": 0,  # Fallback to in-memory limiter
+    "circuit_breaker_open": 0,  # Circuit breaker opened
+    "circuit_breaker_closed": 0,  # Circuit breaker closed
+    "per_key": defaultdict(lambda: {"hits": 0, "acquired": 0}),  # Per-key metrics
+}
 
 # Import RateLimiter locally to avoid circular import
 def _get_rate_limiter_class():
@@ -42,12 +53,17 @@ class CircuitBreaker:
     
     def record_success(self):
         """Record successful operation and reset circuit breaker."""
+        was_open = self.circuit_open
         self.failure_count = 0
         self.circuit_open = False
         self.last_failure_time = None
+        # Track circuit breaker closing
+        if was_open:
+            _rate_limit_metrics["circuit_breaker_closed"] += 1
     
     def record_failure(self):
         """Record failed operation and check if circuit should open."""
+        was_open = self.circuit_open
         self.failure_count += 1
         self.last_failure_time = time.time()
         
@@ -57,6 +73,9 @@ class CircuitBreaker:
                 f"Circuit breaker opened after {self.failure_count} failures. "
                 f"Will attempt recovery after {self.recovery_timeout}s"
             )
+            # Track circuit breaker opening
+            if not was_open:
+                _rate_limit_metrics["circuit_breaker_open"] += 1
     
     def should_attempt(self) -> bool:
         """
@@ -189,10 +208,25 @@ class DistributedRateLimiter:
         Returns:
             True if tokens acquired, False if rate limited
         """
+        # Track circuit breaker state changes
+        was_open = self.circuit_breaker.circuit_open
+        
         # Try Redis if circuit breaker allows
         if self.circuit_breaker.should_attempt() and is_redis_available():
             result = self._acquire_redis(tokens)
             if result is not None:
+                # Track metrics
+                if result:
+                    _rate_limit_metrics["acquired"] += 1
+                    _rate_limit_metrics["per_key"][self.redis_key]["acquired"] += 1
+                else:
+                    _rate_limit_metrics["hits"] += 1
+                    _rate_limit_metrics["per_key"][self.redis_key]["hits"] += 1
+                
+                # Track circuit breaker state change
+                if was_open and not self.circuit_breaker.circuit_open:
+                    _rate_limit_metrics["circuit_breaker_closed"] += 1
+                
                 return result
         
         # Fallback to in-memory limiter
@@ -208,8 +242,21 @@ class DistributedRateLimiter:
                 "rate": self.rate,
                 "fallback_mode": True
             })
+            _rate_limit_metrics["fallback_used"] += 1
         
-        return self.fallback.acquire(tokens)
+        # Track circuit breaker state change
+        if not was_open and self.circuit_breaker.circuit_open:
+            _rate_limit_metrics["circuit_breaker_open"] += 1
+        
+        result = self.fallback.acquire(tokens)
+        if result:
+            _rate_limit_metrics["acquired"] += 1
+            _rate_limit_metrics["per_key"][self.redis_key]["acquired"] += 1
+        else:
+            _rate_limit_metrics["hits"] += 1
+            _rate_limit_metrics["per_key"][self.redis_key]["hits"] += 1
+        
+        return result
     
     def wait(self, tokens: int = 1) -> float:
         """
@@ -249,4 +296,37 @@ class DistributedRateLimiter:
             })
         
         return self.fallback.wait(tokens)
+
+
+def get_rate_limit_metrics() -> Dict[str, Any]:
+    """
+    Get rate limit metrics (hits, acquired, fallback usage, circuit breaker state).
+    
+    Returns:
+        Dictionary with rate limit metrics
+    """
+    # Convert defaultdict to regular dict for JSON serialization
+    per_key = {k: dict(v) for k, v in _rate_limit_metrics["per_key"].items()}
+    
+    return {
+        "hits": _rate_limit_metrics["hits"],
+        "acquired": _rate_limit_metrics["acquired"],
+        "fallback_used": _rate_limit_metrics["fallback_used"],
+        "circuit_breaker_open": _rate_limit_metrics["circuit_breaker_open"],
+        "circuit_breaker_closed": _rate_limit_metrics["circuit_breaker_closed"],
+        "per_key": per_key,
+    }
+
+
+def reset_rate_limit_metrics():
+    """Reset rate limit metrics (for testing)."""
+    global _rate_limit_metrics
+    _rate_limit_metrics = {
+        "hits": 0,
+        "acquired": 0,
+        "fallback_used": 0,
+        "circuit_breaker_open": 0,
+        "circuit_breaker_closed": 0,
+        "per_key": defaultdict(lambda: {"hits": 0, "acquired": 0}),
+    }
 
