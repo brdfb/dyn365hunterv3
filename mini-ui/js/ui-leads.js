@@ -35,6 +35,12 @@ export function renderLeadsTable(leads) {
                         : '-'
                     }
                 </td>
+                <td class="leads-table__cell" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size}` : ''}">
+                    ${lead.tenant_size ? `<span class="tenant-size-badge tenant-size-badge--${lead.tenant_size}">${escapeHtml(lead.tenant_size)}</span>` : '-'}
+                </td>
+                <td class="leads-table__cell">
+                    ${lead.local_provider ? escapeHtml(lead.local_provider) : '-'}
+                </td>
                 <td class="leads-table__cell">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
@@ -289,6 +295,35 @@ export function showScoreBreakdown(breakdown, domain) {
             <span class="score-breakdown__value">${escapeHtml(domain)}</span>
         </div>
     </div>`;
+    
+    // G20: Domain Intelligence (if available)
+    if (breakdown.tenant_size || breakdown.local_provider || breakdown.dmarc_coverage !== undefined) {
+        html += `<div class="score-breakdown__section">
+            <div class="score-breakdown__section-title">Domain Intelligence (G20)</div>`;
+        
+        if (breakdown.tenant_size) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Tenant Size</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.tenant_size)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.local_provider) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Local Provider</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.local_provider)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.dmarc_coverage !== undefined && breakdown.dmarc_coverage !== null) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">DMARC Coverage</span>
+                <span class="score-breakdown__value">${breakdown.dmarc_coverage}%</span>
+            </div>`;
+        }
+        
+        html += `</div>`;
+    }
     
     // Base score
     html += `<div class="score-breakdown__section">

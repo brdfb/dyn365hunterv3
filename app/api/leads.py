@@ -663,13 +663,17 @@ async def enrich_lead(
 
 
 class ScoreBreakdownResponse(BaseModel):
-    """Response model for score breakdown (G19)."""
+    """Response model for score breakdown (G19 + G20)."""
 
     base_score: int
     provider: Dict[str, Any]  # {"name": str, "points": int}
     signal_points: Dict[str, int]  # {"spf": int, "dkim": int, "dmarc_*": int}
     risk_points: Dict[str, int]  # {"no_spf": int, "no_dkim": int, ...}
     total_score: int
+    # G20: Domain Intelligence fields
+    tenant_size: Optional[str] = None  # G20: Tenant size (small/medium/large)
+    local_provider: Optional[str] = None  # G20: Local provider name (e.g., TürkHost)
+    dmarc_coverage: Optional[int] = None  # G20: DMARC coverage (0-100)
 
 
 @router.get("/{domain}/score-breakdown", response_model=ScoreBreakdownResponse)
@@ -737,4 +741,10 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
         mx_records=mx_records,
     )
 
-    return ScoreBreakdownResponse(**breakdown.to_dict())
+    # G20: Add domain intelligence fields
+    breakdown_dict = breakdown.to_dict()
+    breakdown_dict["tenant_size"] = company.tenant_size  # G20: Tenant size
+    breakdown_dict["local_provider"] = domain_signal.local_provider  # G20: Local provider
+    breakdown_dict["dmarc_coverage"] = domain_signal.dmarc_coverage  # G20: DMARC coverage
+
+    return ScoreBreakdownResponse(**breakdown_dict)
