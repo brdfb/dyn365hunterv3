@@ -55,6 +55,9 @@ http://localhost:8000/mini-ui/
 - Segment filtresi (Migration, Existing, Cold, Skip)
 - Min skor filtresi
 - Provider filtresi (M365, Google, Yandex, vb.)
+- **Search input** (Domain, şirket veya provider'da arama) - G19
+- **Sorting** (Table header'lara tıklayarak sıralama) - G19
+- **Pagination** (Sayfa numaraları, önceki/sonraki butonları) - G19
 - Tablo görüntüleme (Domain, Şirket, Provider, Segment, Skor)
 
 **Endpoint**: `GET /leads`
@@ -85,6 +88,11 @@ http://localhost:8000/mini-ui/
 - `segment`: Migration, Existing, Cold, Skip
 - `min_score`: 0-100 arası minimum skor
 - `provider`: M365, Google, Yandex, Zoho, Hosting, Local, Unknown
+- `search`: Domain, şirket veya provider'da arama (G19)
+- `sort_by`: Sıralama alanı (domain, readiness_score, priority_score, segment, provider, scanned_at) (G19)
+- `sort_order`: Sıralama yönü (asc, desc) (G19)
+- `page`: Sayfa numarası (1-based) (G19)
+- `page_size`: Sayfa başına kayıt sayısı (default: 50, max: 200) (G19)
 
 ---
 
@@ -107,12 +115,13 @@ mini-ui/
 ## ⚠️ Limitler
 
 ### Kod Miktarı
-- **JS toplam kod miktarı**: ~500 satır (yorumlar dahil), ~400 satır (yorumlar hariç)
-- **4 ana özellik**: Upload, Scan, Table, Export
+- **JS toplam kod miktarı**: ~900 satır (yorumlar dahil), ~700 satır (yorumlar hariç)
+- **7 ana özellik**: Upload, Scan, Table, Export, Search, Sorting, Pagination
 
 ### Özellik Sınırı
-- **5. özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
+- **8. özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
 - Kod içinde TODO ile not bırakılmalı
+- **Not**: G19 ile Search, Sorting, Pagination eklendi (3 yeni özellik)
 
 ### İş Mantığı
 - **Tüm iş mantığı backend'de kalır**
@@ -232,5 +241,5 @@ Bu Mini UI ile:
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Versiyon**: 1.0.0
+**Versiyon**: 1.1.0 (G19: Search, Sorting, Pagination eklendi)
 

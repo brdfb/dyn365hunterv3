@@ -60,10 +60,10 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
   - [x] `GET /leads?sort_by={field}&sort_order={asc|desc}` - Sorting
   - [x] `GET /leads?page={n}&page_size={n}` - Pagination
   - [x] `GET /leads?search={query}` - Full-text search
-- [ ] Frontend implementation
-  - [ ] Sorting UI (table headers clickable)
-  - [ ] Pagination UI (page numbers, prev/next)
-  - [ ] Search input + debounce
+- [x] Frontend implementation
+  - [x] Sorting UI (table headers clickable)
+  - [x] Pagination UI (page numbers, prev/next)
+  - [x] Search input + debounce
 
 #### P1 - Dashboard & Score Breakdown
 - [x] Score breakdown
@@ -95,7 +95,7 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 ### API Endpoints
 
 - [x] Auth endpoints (5 endpoint: login, callback, logout, me, refresh)
-- [ ] UI upgrade endpoints (sorting, pagination, search)
+- [x] UI upgrade endpoints (sorting, pagination, search)
 - [x] Dashboard endpoints (KPI, score-breakdown)
 - [ ] ❌ AI endpoints (G20'ye taşındı)
 - [ ] ❌ Contact Finder endpoints (G21'ye taşındı)
@@ -104,20 +104,20 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 
 - [x] Unit tests (≥15 test cases) - ✅ 22 test cases completed
   - [x] Auth tests (OAuth flow, token generation, user management)
-  - [ ] UI upgrade tests (sorting, pagination, search)
+  - [ ] UI upgrade tests (sorting, pagination, search) - ⏳ Pending
   - [x] Dashboard tests (KPI, score-breakdown) - Backend ready
   - [x] Migration tests (favorites migration) - Logic implemented
 
 - [ ] Integration tests
   - [ ] Auth end-to-end test (login → callback → me)
-  - [ ] UI upgrade end-to-end test (sorting, pagination, search)
+  - [ ] UI upgrade end-to-end test (sorting, pagination, search) - ⏳ Pending
   - [ ] Protected routes test (auth required endpoints)
 
 ### Documentation
 
 - [ ] API documentation
   - [ ] Auth endpoints docs (OpenAPI/Swagger)
-  - [ ] UI upgrade docs (sorting, pagination, search)
+  - [ ] UI upgrade docs (sorting, pagination, search) - ⏳ Pending
   - [ ] Dashboard endpoints docs (KPI, score-breakdown data contracts)
 
 - [x] Setup guide
@@ -127,7 +127,7 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 
 - [ ] README.md güncellemesi
   - [ ] Microsoft SSO setup
-  - [ ] UI upgrade features
+  - [ ] UI upgrade features - ⏳ Pending
 
 - [ ] CHANGELOG.md güncellemesi
   - [ ] G19: Auth + UI upgrade added
@@ -140,7 +140,7 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 - [x] Microsoft SSO çalışıyor (login, callback, logout, me, refresh) - ✅ Backend ready
 - [x] Security hardening tamamlandı (state storage, token revocation, encryption) - ✅ Implemented
 - [x] Favorites migration çalışıyor (session-based → user-based) - ✅ Migration script + logic ready
-- [ ] UI upgrade tamamlandı (sorting, pagination, search) - ⏳ Backend pending
+- [x] UI upgrade tamamlandı (sorting, pagination, search) - ✅ Frontend completed
 - [x] Tests passing (≥15 test cases) - ✅ 22 test cases passing
 
 ### P1 - İdeal

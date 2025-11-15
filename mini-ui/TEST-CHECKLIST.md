@@ -94,9 +94,10 @@
 
 ### Test 5: Leads Table
 - [ ] Lead tablosu görüntüleniyor mu?
-- [ ] Tablo kolonları doğru mu? (Domain, Şirket, Provider, Segment, Skor)
+- [ ] Tablo kolonları doğru mu? (Öncelik, Domain, Şirket, Provider, Segment, Skor)
 - [ ] Segment badge'leri doğru renkte mi? (Migration: green, Existing: blue, Cold: yellow, Skip: red)
 - [ ] Skor renklendirmesi doğru mu? (≥70: green, ≥50: yellow, <50: red)
+- [ ] Öncelik badge'leri görüntüleniyor mu? (🔥, ⭐, •)
 - [ ] Empty state gösteriliyor mu? (lead yoksa)
 
 ### Test 6: Filters
@@ -105,6 +106,30 @@
 - [ ] Provider filtresi çalışıyor mu?
 - [ ] Filtrele butonu çalışıyor mu?
 - [ ] Filtre sonuçları doğru mu?
+
+### Test 6.1: Search (G19)
+- [ ] Search input görüntüleniyor mu?
+- [ ] Search input'a yazı yazılabiliyor mu?
+- [ ] Debounce çalışıyor mu? (500ms sonra arama yapılıyor mu?)
+- [ ] Search sonuçları doğru mu?
+- [ ] Search temizlenince tüm lead'ler görüntüleniyor mu?
+
+### Test 6.2: Sorting (G19)
+- [ ] Table header'lar tıklanabilir mi? (Öncelik, Domain, Provider, Segment, Skor)
+- [ ] Header'a tıklayınca sıralama değişiyor mu?
+- [ ] Aynı header'a tekrar tıklayınca sıralama yönü değişiyor mu? (asc ↔ desc)
+- [ ] Sort icon'ları görüntüleniyor mu? (▲/▼)
+- [ ] Aktif sıralama icon ile gösteriliyor mu?
+
+### Test 6.3: Pagination (G19)
+- [ ] Pagination UI görüntüleniyor mu? (50+ lead varsa)
+- [ ] Sayfa numaraları görüntüleniyor mu?
+- [ ] Önceki/Sonraki butonları çalışıyor mu?
+- [ ] Sayfa bilgisi gösteriliyor mu? (örn: "1-50 / 150")
+- [ ] Sayfa numarasına tıklayınca sayfa değişiyor mu?
+- [ ] İlk sayfada "Önceki" butonu disabled mı?
+- [ ] Son sayfada "Sonraki" butonu disabled mı?
+- [ ] Tek sayfa veya sonuç yoksa pagination gizleniyor mu?
 
 ### Test 7: Export CSV
 - [ ] Export butonu çalışıyor mu?
@@ -154,26 +179,29 @@
 ### Functional
 - [ ] CSV upload çalışıyor (CSV, Excel)
 - [ ] Domain scan çalışıyor
-- [ ] Leads table görüntüleniyor (filters, sorting)
+- [ ] Leads table görüntüleniyor (filters, sorting, pagination, search)
+- [ ] Search çalışıyor (debounce ile)
+- [ ] Sorting çalışıyor (table headers clickable)
+- [ ] Pagination çalışıyor (page numbers, prev/next)
 - [ ] Export butonu çalışıyor
 - [ ] Dashboard summary görüntüleniyor
 - [ ] Responsive design (mobile-friendly)
 - [ ] Error handling çalışıyor
 
 ### Technical
-- [x] JS toplam kod miktarı ≤ 400 satır (yorumlar hariç) - **~400 satır**
-- [x] 4 ana özellik (upload, scan, table, export)
+- [x] JS toplam kod miktarı ~700 satır (yorumlar hariç) - **G19 ile artış: ~300 satır**
+- [x] 7 ana özellik (upload, scan, table, export, search, sorting, pagination)
 - [x] API-first yaklaşım (iş mantığı backend'de)
 - [x] BEM CSS pattern
 - [x] Modüler JS yapısı (api.js, ui-leads.js, ui-forms.js, app.js)
 - [x] Global state tek obje (`window.state`)
 
 ### Documentation
-- [x] `README-mini-ui.md` - Kullanım kılavuzu
-- [x] Endpoint'ler dokümante edilmiş
-- [x] Limitler belirtilmiş (4 feature, 400 satır)
+- [x] `README-mini-ui.md` - Kullanım kılavuzu (G19 özellikleri eklendi)
+- [x] Endpoint'ler dokümante edilmiş (G19 query params eklendi)
+- [x] Limitler belirtilmiş (7 feature, ~700 satır)
 
 ---
 
-**Son Güncelleme**: 2025-01-28
+**Son Güncelleme**: 2025-01-28 (G19: Search, Sorting, Pagination test senaryoları eklendi)
 
