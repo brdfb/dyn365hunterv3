@@ -7,8 +7,12 @@ This folder contains TODO lists and task tracking documents.
 **Active TODOs:**
 - (No active TODOs - All completed TODOs have been archived)
 
+**Recently Completed:**
+- `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
+
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
 - `2025-01-28-P1-PREPARATION.md` - P1 Preparation: Alembic, Rate Limiting, Caching, Bulk Operations, API Versioning (✅ Completed)
 - `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (✅ Completed)
 - `2025-11-14-G14-post-mvp-sprint1.md` - G14: Post-MVP Sprint 1: CSV Export + UI Mini (✅ Completed)
