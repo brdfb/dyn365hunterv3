@@ -23,28 +23,28 @@ export function renderLeadsTable(leads) {
         
         return `
             <tr class="leads-table__row">
-                <td class="leads-table__cell" ${priorityTooltip ? `title="${escapeHtml(priorityTooltip)}"` : ''}>${priorityBadge}</td>
-                <td class="leads-table__cell ${lead.domain && lead.domain !== '-' ? 'domain-clickable' : ''}" 
+                <td class="leads-table__cell leads-table__cell--priority" ${priorityTooltip ? `title="${escapeHtml(priorityTooltip)}"` : ''}>${priorityBadge}</td>
+                <td class="leads-table__cell leads-table__cell--domain ${lead.domain && lead.domain !== '-' ? 'domain-clickable' : ''}" 
                     ${lead.domain && lead.domain !== '-' ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${escapeHtml(lead.domain || '-')}
                 </td>
                 <td class="leads-table__cell">${escapeHtml(lead.canonical_name || '-')}</td>
-                <td class="leads-table__cell">
+                <td class="leads-table__cell leads-table__cell--provider">
                     ${lead.provider && lead.provider !== '-' 
                         ? `<span class="provider-badge ${getProviderBadgeClass(lead.provider)}">${escapeHtml(lead.provider)}</span>`
                         : '-'
                     }
                 </td>
-                <td class="leads-table__cell" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size}` : ''}">
+                <td class="leads-table__cell leads-table__cell--tenant-size" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size}` : ''}">
                     ${lead.tenant_size ? `<span class="tenant-size-badge tenant-size-badge--${lead.tenant_size}">${escapeHtml(lead.tenant_size)}</span>` : '-'}
                 </td>
-                <td class="leads-table__cell">
+                <td class="leads-table__cell leads-table__cell--local-provider">
                     ${lead.local_provider ? escapeHtml(lead.local_provider) : '-'}
                 </td>
-                <td class="leads-table__cell">
+                <td class="leads-table__cell leads-table__cell--segment">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
-                <td class="leads-table__cell ${scoreClass} ${lead.readiness_score !== null && lead.readiness_score !== undefined ? 'score-clickable' : ''}" 
+                <td class="leads-table__cell leads-table__cell--score ${scoreClass} ${lead.readiness_score !== null && lead.readiness_score !== undefined ? 'score-clickable' : ''}" 
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? lead.readiness_score : '-'}
                 </td>
@@ -203,7 +203,16 @@ function escapeHtml(text) {
  * Show loading indicator
  */
 export function showLoading() {
-    document.getElementById('loading').style.display = 'block';
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) {
+        loadingEl.innerHTML = `
+            <div class="leads-loading">
+                <div class="leads-loading__spinner"></div>
+                <span>Lead'ler yükleniyor...</span>
+            </div>
+        `;
+        loadingEl.style.display = 'block';
+    }
     document.getElementById('error').style.display = 'none';
 }
 
@@ -269,6 +278,34 @@ function getRiskLabel(risk) {
         'spf_multiple_includes': 'SPF Çoklu Include'
     };
     return labels[risk] || risk.replace(/_/g, ' ').toUpperCase();
+}
+
+/**
+ * Get signal tooltip text (Gün 3)
+ */
+function getSignalTooltip(signal) {
+    const tooltips = {
+        'spf': 'SPF (Sender Policy Framework) - Email gönderen sunucuları doğrular ve spam önleme sağlar',
+        'dkim': 'DKIM (DomainKeys Identified Mail) - Email bütünlüğünü doğrular ve sahte email gönderimini önler',
+        'dmarc_quarantine': 'DMARC Quarantine - Şüpheli emailler karantinaya alınır',
+        'dmarc_reject': 'DMARC Reject - Şüpheli emailler reddedilir (en güvenli)',
+        'dmarc_none': 'DMARC None - DMARC politikası yok (risk)'
+    };
+    return tooltips[signal] || '';
+}
+
+/**
+ * Get risk tooltip text (Gün 3)
+ */
+function getRiskTooltip(risk) {
+    const tooltips = {
+        'no_spf': 'SPF kaydı eksik - Email sahteciliği riski',
+        'dkim_missing': 'DKIM kaydı eksik - Email bütünlüğü doğrulanamıyor',
+        'dmarc_none': 'DMARC politikası yok - Email güvenliği zayıf',
+        'hosting_mx_weak': 'Hosting MX kayıtları zayıf - Email teslimat sorunları olabilir',
+        'spf_multiple_includes': 'SPF çoklu include - Yapılandırma karmaşıklığı ve risk'
+    };
+    return tooltips[risk] || '';
 }
 
 /**
@@ -360,8 +397,9 @@ export function showScoreBreakdown(breakdown, domain) {
                     continue;
                 }
                 const label = getSignalLabel(signal);
+                const tooltip = getSignalTooltip(signal);
                 html += `<div class="score-breakdown__item">
-                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__label" ${tooltip ? `data-tooltip="${escapeHtml(tooltip)}"` : ''}>${escapeHtml(label)}</span>
                     <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
                 </div>`;
             }
@@ -371,8 +409,9 @@ export function showScoreBreakdown(breakdown, domain) {
         for (const [signal, points] of Object.entries(breakdown.signal_points)) {
             if (!signalOrder.includes(signal) && !(signal === 'dmarc_none' && points === 0)) {
                 const label = getSignalLabel(signal);
+                const tooltip = getSignalTooltip(signal);
                 html += `<div class="score-breakdown__item">
-                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__label" ${tooltip ? `data-tooltip="${escapeHtml(tooltip)}"` : ''}>${escapeHtml(label)}</span>
                     <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
                 </div>`;
             }
@@ -400,8 +439,9 @@ export function showScoreBreakdown(breakdown, domain) {
             if (mergedRiskPoints[risk] !== undefined) {
                 const points = mergedRiskPoints[risk];
                 const label = getRiskLabel(risk);
+                const tooltip = getRiskTooltip(risk);
                 html += `<div class="score-breakdown__item">
-                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__label" ${tooltip ? `data-tooltip="${escapeHtml(tooltip)}"` : ''}>${escapeHtml(label)}</span>
                     <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
                 </div>`;
             }
@@ -411,8 +451,9 @@ export function showScoreBreakdown(breakdown, domain) {
         for (const [risk, points] of Object.entries(mergedRiskPoints)) {
             if (!riskOrder.includes(risk)) {
                 const label = getRiskLabel(risk);
+                const tooltip = getRiskTooltip(risk);
                 html += `<div class="score-breakdown__item">
-                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__label" ${tooltip ? `data-tooltip="${escapeHtml(tooltip)}"` : ''}>${escapeHtml(label)}</span>
                     <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
                 </div>`;
             }
@@ -426,10 +467,30 @@ export function showScoreBreakdown(breakdown, domain) {
         <span class="score-breakdown__total-value">${breakdown.total_score || 0}</span>
     </div>`;
     
+    // Gün 3: PDF Export button
+    html += `<div class="score-breakdown__section" style="margin-top: 1rem;">
+        <button type="button" id="btn-export-pdf" class="form__button" style="width: 100%;">
+            📄 PDF İndir
+        </button>
+    </div>`;
+    
     html += `</div>`;
     
     content.innerHTML = html;
     modal.style.display = 'block';
+    
+    // Gün 3: Bind PDF export button
+    const pdfButton = document.getElementById('btn-export-pdf');
+    if (pdfButton) {
+        pdfButton.addEventListener('click', async () => {
+            try {
+                const { exportPDF } = await import('./api.js');
+                await exportPDF(domain);
+            } catch (error) {
+                console.error('PDF export error:', error);
+            }
+        });
+    }
 }
 
 /**

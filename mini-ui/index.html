@@ -9,7 +9,7 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <h1 class="header__title">Dyn365Hunter Mini UI</h1>
+        <h1 class="header__title">Dyn365Hunter</h1>
     </header>
 
     <!-- KPI Area -->
@@ -112,7 +112,10 @@
                     <input type="text" id="filter-search" placeholder="Domain, şirket veya provider ara..." class="filters__input">
                 </div>
                 <button type="button" id="btn-filter" class="filters__button">Filtrele</button>
-                <button type="button" id="btn-export" class="filters__button filters__button--export">Export CSV</button>
+                <div class="filters__group filters__group--export">
+                    <button type="button" id="btn-export-csv" class="filters__button filters__button--export">Export CSV</button>
+                    <button type="button" id="btn-export-excel" class="filters__button filters__button--export">Export Excel</button>
+                </div>
             </div>
 
             <!-- Loading Indicator -->
@@ -128,28 +131,28 @@
                 <table id="leads-table" class="leads-table">
                     <thead class="leads-table__head">
                         <tr class="leads-table__row">
-                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="priority_score" title="Önceliğe göre sırala">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--priority" data-sort="priority_score" title="Önceliğe göre sırala">
                                 Öncelik <span class="sort-icon"></span>
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="domain" title="Domain'e göre sırala">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--domain" data-sort="domain" title="Domain'e göre sırala">
                                 Domain <span class="sort-icon"></span>
                             </th>
                             <th class="leads-table__cell leads-table__cell--header">
                                 Şirket
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="provider" title="Provider'a göre sırala">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--provider" data-sort="provider" title="Provider'a göre sırala">
                                 Provider <span class="sort-icon"></span>
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header" title="Tenant Size (M365/Google için)">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--tenant-size" title="Tenant Size (M365/Google için)">
                                 Tenant Size
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header" title="Local Provider (Local provider için)">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--local-provider" title="Local Provider (Local provider için)">
                                 Local Provider
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="segment" title="Segment'e göre sırala">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--segment" data-sort="segment" title="Segment'e göre sırala">
                                 Segment <span class="sort-icon"></span>
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="readiness_score" title="Skora göre sırala">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--score" data-sort="readiness_score" title="Skora göre sırala">
                                 Skor <span class="sort-icon"></span>
                             </th>
                         </tr>
@@ -174,10 +177,23 @@
 
             <!-- Empty State -->
             <div id="empty-state" class="empty-state" style="display: none;">
-                <p>Henüz lead bulunmuyor. CSV yükleyin veya domain tarayın.</p>
+                <p>Henüz lead bulunmuyor. CSV yükleyerek başlayın.</p>
+                <button type="button" class="empty-state__button" onclick="document.getElementById('csv-file').click()">CSV Yükle</button>
             </div>
         </section>
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer__content">
+            <p class="footer__version">Dyn365Hunter v1.1-stable</p>
+            <nav class="footer__nav">
+                <a href="/docs" class="footer__link">Docs</a>
+                <span class="footer__separator">|</span>
+                <a href="/support" class="footer__link">Support</a>
+            </nav>
+        </div>
+    </footer>
 
     <!-- Score Breakdown Modal (G19) -->
     <div id="score-breakdown-modal" class="modal" style="display: none;">

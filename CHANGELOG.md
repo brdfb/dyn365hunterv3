@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Stabilization Sprint - Gün 3: UI Stabilizasyon** (2025-01-28) - Satış ekibi için 2 dakikada kullanılabilir UI
+  - Table view cleanup - Column width optimization (domain, provider, score, segment, priority, tenant-size, local-provider), row hover effect with smooth transition, empty state message with CTA button, loading state spinner with animation, pagination UI improvements (page numbers, prev/next, page info) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/index.html`)
+  - Score breakdown modal improvements - Close button more prominent (absolute positioning, hover effect), backdrop click to close (fixed to only close on overlay click), ESC key to close modal, modal scroll optimization (max-height: 80vh, overflow-y: auto), score breakdown tooltips for signals and risks (SPF, DKIM, DMARC, risk factors) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/js/app.js`)
+  - Header/Footer simplification - Header title more compact ("Dyn365Hunter Mini UI" → "Dyn365Hunter"), footer addition with version info (v1.1-stable) and links (Docs, Support), responsive footer for mobile layout (`mini-ui/index.html`, `mini-ui/styles.css`)
+  - Export/PDF basic - CSV/Excel export buttons separated, export format selection, toast notification system for success/error messages, PDF export button in score breakdown modal (`mini-ui/js/ui-leads.js`, `mini-ui/js/app.js`, `mini-ui/js/api.js`, `mini-ui/styles.css`)
+  - Tooltip + hover behavior - Generic tooltip system (CSS-based), tooltip positioning, score breakdown tooltips for signals and risks, table row hover (highlight with smooth transition), button hover (scale transform + color change), badge hover (opacity transition) (`mini-ui/styles.css`, `mini-ui/js/ui-leads.js`)
+  - Favori/Tag UI improvements - Backend already supports favorites/tags, UI improvements completed through general style updates (hover effects, badge styling) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`)
+  - Status: ✅ Gün 3 tamamlandı - UI %90+ stabil, entegrasyona hazır
 - **Stabilization Sprint - Gün 2: Monitoring ve Safety** (2025-01-28) - Observability ve güvenlik katmanları
   - Cache hit metrics - Redis cache hit/miss counter, hit rate calculation, TTL expiration tracking (`app/core/cache.py`)
   - Rate limit metrics - Rate limit hit counter, per-key metrics, circuit breaker state tracking (`app/core/distributed_rate_limiter.py`)

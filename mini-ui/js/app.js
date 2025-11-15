@@ -1,6 +1,6 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, exportLeads } from './api.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown } from './api.js';
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 
@@ -38,8 +38,15 @@ async function init() {
     // Bind filter button
     document.getElementById('btn-filter').addEventListener('click', applyFilters);
     
-    // Bind export button
-    document.getElementById('btn-export').addEventListener('click', handleExport);
+    // Bind export buttons (Gün 3)
+    const btnExportCsv = document.getElementById('btn-export-csv');
+    const btnExportExcel = document.getElementById('btn-export-excel');
+    if (btnExportCsv) {
+        btnExportCsv.addEventListener('click', () => handleExport('csv'));
+    }
+    if (btnExportExcel) {
+        btnExportExcel.addEventListener('click', () => handleExport('excel'));
+    }
     
     // G19: Bind search input (debounced)
     const searchInput = document.getElementById('filter-search');
@@ -87,8 +94,20 @@ async function init() {
     if (modal) {
         const overlay = modal.querySelector('.modal__overlay');
         if (overlay) {
-            overlay.addEventListener('click', hideScoreBreakdown);
+            overlay.addEventListener('click', (e) => {
+                // Only close if clicking the overlay itself, not the content
+                if (e.target === overlay) {
+                    hideScoreBreakdown();
+                }
+            });
         }
+        
+        // Gün 3: ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                hideScoreBreakdown();
+            }
+        });
     }
     
     // G19: Bind score click handlers (delegated event listener)
@@ -240,27 +259,46 @@ function refreshLeads() {
 }
 
 /**
- * Handle CSV export
+ * Handle CSV/Excel export (Gün 3)
  */
-async function handleExport() {
-    const button = document.getElementById('btn-export');
+async function handleExport(format = 'csv') {
+    const buttonId = format === 'excel' ? 'btn-export-excel' : 'btn-export-csv';
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
     const originalText = button.textContent;
     
     button.disabled = true;
     button.textContent = 'Export ediliyor...';
     
     try {
-        await exportLeads(window.state.filters);
-        button.textContent = 'Export başarılı!';
-        setTimeout(() => {
-            button.textContent = originalText;
-        }, 2000);
+        const { exportLeads } = await import('./api.js');
+        await exportLeads(window.state.filters, format);
+        showToast(`Export başarılı! ${format.toUpperCase()} dosyası indirildi.`, 'success');
+        button.textContent = originalText;
     } catch (error) {
-        showError(`Export hatası: ${error.message}`);
+        showToast(`Export hatası: ${error.message}`, 'error');
         button.textContent = originalText;
     } finally {
         button.disabled = false;
     }
+}
+
+/**
+ * Show toast notification (Gün 3)
+ */
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
 }
 
 /**
@@ -287,10 +325,10 @@ function renderPagination() {
     
     paginationEl.style.display = 'flex';
     
-    // Update info text
+    // Update info text with page numbers
     const start = (page - 1) * page_size + 1;
     const end = Math.min(page * page_size, total);
-    paginationInfo.textContent = `${start}-${end} / ${total}`;
+    paginationInfo.innerHTML = `<span class="pagination__page-info">Sayfa <strong>${page}</strong> / ${total_pages}</span> <span class="pagination__text">(${start}-${end} / ${total})</span>`;
     
     // Update prev/next buttons
     btnPrev.disabled = page <= 1;

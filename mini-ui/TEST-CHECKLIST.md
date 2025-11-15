@@ -35,8 +35,11 @@
 - [x] `/ingest/domain` - POST (Domain ingest - scan öncesi)
 - [x] `/scan/domain` - POST (Domain scan)
 - [x] `/leads` - GET (Lead listesi)
-- [x] `/leads/export` - GET (CSV export)
+- [x] `/leads/export` - GET (CSV/Excel export) - Gün 3
+- [x] `/leads/{domain}/summary.pdf` - GET (PDF export) - Gün 3
+- [x] `/leads/{domain}/score-breakdown` - GET (Score breakdown) - G19
 - [x] `/dashboard` - GET (Dashboard stats)
+- [x] `/dashboard/kpis` - GET (Dashboard KPIs) - G19
 
 ---
 
@@ -94,11 +97,14 @@
 
 ### Test 5: Leads Table
 - [ ] Lead tablosu görüntüleniyor mu?
-- [ ] Tablo kolonları doğru mu? (Öncelik, Domain, Şirket, Provider, Segment, Skor)
+- [ ] Tablo kolonları doğru mu? (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Segment, Skor)
+- [ ] Column widths optimize edilmiş mi? (domain, provider, score, segment, priority)
+- [ ] Row hover effect çalışıyor mu? (smooth transition)
 - [ ] Segment badge'leri doğru renkte mi? (Migration: green, Existing: blue, Cold: yellow, Skip: red)
 - [ ] Skor renklendirmesi doğru mu? (≥70: green, ≥50: yellow, <50: red)
-- [ ] Öncelik badge'leri görüntüleniyor mu? (🔥, ⭐, •)
-- [ ] Empty state gösteriliyor mu? (lead yoksa)
+- [ ] Öncelik badge'leri görüntüleniyor mu? (🔥, ⭐, 🟡, 🟠, ⚪, ⚫, 🔴)
+- [ ] Empty state gösteriliyor mu? (lead yoksa + CTA button)
+- [ ] Loading state spinner görüntüleniyor mu? (lead'ler yüklenirken)
 
 ### Test 6: Filters
 - [ ] Segment filtresi çalışıyor mu?
@@ -131,27 +137,53 @@
 - [ ] Son sayfada "Sonraki" butonu disabled mı?
 - [ ] Tek sayfa veya sonuç yoksa pagination gizleniyor mu?
 
-### Test 7: Export CSV
-- [ ] Export butonu çalışıyor mu?
+### Test 7: Export CSV/Excel/PDF (Gün 3)
+- [ ] Export CSV butonu çalışıyor mu?
+- [ ] Export Excel butonu çalışıyor mu?
 - [ ] CSV dosyası indiriliyor mu?
-- [ ] Dosya adı doğru mu? (`leads_YYYY-MM-DD_HH-MM-SS.csv`)
+- [ ] Excel dosyası indiriliyor mu?
+- [ ] Dosya adı doğru mu? (`leads_YYYY-MM-DD_HH-MM-SS.csv` veya `.xlsx`)
 - [ ] Filtreler export'a uygulanıyor mu?
+- [ ] Toast notification gösteriliyor mu? (export başarı/hata)
+- [ ] PDF export butonu score breakdown modal'da görüntüleniyor mu?
+- [ ] PDF export çalışıyor mu? (new tab'de açılıyor mu?)
+
+### Test 7.1: Score Breakdown Modal (G19 + Gün 3)
+- [ ] Skor'a tıklayınca modal açılıyor mu?
+- [ ] Modal close button (X) çalışıyor mu?
+- [ ] ESC key ile modal kapanıyor mu?
+- [ ] Backdrop'a tıklayınca modal kapanıyor mu? (sadece overlay'e tıklayınca)
+- [ ] Modal scroll çalışıyor mu? (uzun içerik için)
+- [ ] Score breakdown tooltip'leri görüntüleniyor mu? (signal/risk hover'da)
+- [ ] PDF export butonu modal'da görüntüleniyor mu?
+- [ ] Domain taranmamışsa hata mesajı gösteriliyor mu?
 
 ### Test 8: Error Handling
 - [ ] Network hatası durumunda error mesajı gösteriliyor mu?
 - [ ] Invalid domain durumunda error mesajı gösteriliyor mu?
 - [ ] API hata durumunda error mesajı gösteriliyor mu?
+- [ ] Toast notification hata mesajları gösteriliyor mu? (Gün 3)
 
-### Test 9: Responsive Design
+### Test 9: UI Improvements (Gün 3)
+- [ ] Header title kompakt mı? ("Dyn365Hunter")
+- [ ] Footer görüntüleniyor mu? (version info, Docs/Support links)
+- [ ] Footer responsive mi? (mobile'de dikey layout)
+- [ ] Tooltip'ler çalışıyor mu? (score breakdown modal'da signal/risk tooltips)
+- [ ] Hover effects çalışıyor mu? (button scale, badge opacity, row highlight)
+- [ ] Toast notifications çalışıyor mu? (export başarı/hata)
+
+### Test 10: Responsive Design
 - [ ] Mobile görünümde layout doğru mu?
 - [ ] Tablet görünümde layout doğru mu?
 - [ ] Desktop görünümde layout doğru mu?
+- [ ] Column widths responsive mi? (mobile'de scroll)
 
-### Test 10: Browser Compatibility
+### Test 11: Browser Compatibility
 - [ ] Chrome'da çalışıyor mu?
 - [ ] Firefox'ta çalışıyor mu?
 - [ ] Safari'de çalışıyor mu?
 - [ ] Edge'de çalışıyor mu?
+- [ ] Modern CSS features çalışıyor mu? (backdrop-filter, transform, transition)
 
 ---
 
@@ -182,26 +214,30 @@
 - [ ] Leads table görüntüleniyor (filters, sorting, pagination, search)
 - [ ] Search çalışıyor (debounce ile)
 - [ ] Sorting çalışıyor (table headers clickable)
-- [ ] Pagination çalışıyor (page numbers, prev/next)
-- [ ] Export butonu çalışıyor
+- [ ] Pagination çalışıyor (page numbers, prev/next, page info)
+- [ ] Export butonları çalışıyor (CSV, Excel, PDF)
+- [ ] Score breakdown modal çalışıyor (ESC key, backdrop click, tooltips)
+- [ ] Toast notifications çalışıyor (export başarı/hata)
 - [ ] Dashboard summary görüntüleniyor
 - [ ] Responsive design (mobile-friendly)
 - [ ] Error handling çalışıyor
 
 ### Technical
-- [x] JS toplam kod miktarı ~700 satır (yorumlar hariç) - **G19 ile artış: ~300 satır**
-- [x] 7 ana özellik (upload, scan, table, export, search, sorting, pagination)
+- [x] JS toplam kod miktarı ~900 satır (yorumlar hariç) - **G19 + Gün 3 ile artış: ~500 satır**
+- [x] 10+ ana özellik (upload, scan, table, export CSV/Excel/PDF, search, sorting, pagination, score breakdown modal, toast notifications, tooltips)
 - [x] API-first yaklaşım (iş mantığı backend'de)
 - [x] BEM CSS pattern
 - [x] Modüler JS yapısı (api.js, ui-leads.js, ui-forms.js, app.js)
 - [x] Global state tek obje (`window.state`)
+- [x] Generic tooltip system (CSS-based)
+- [x] Toast notification system
 
 ### Documentation
-- [x] `README-mini-ui.md` - Kullanım kılavuzu (G19 özellikleri eklendi)
-- [x] Endpoint'ler dokümante edilmiş (G19 query params eklendi)
-- [x] Limitler belirtilmiş (7 feature, ~700 satır)
+- [x] `README-mini-ui.md` - Kullanım kılavuzu (G19 + Gün 3 özellikleri eklendi)
+- [x] Endpoint'ler dokümante edilmiş (G19 query params + Gün 3 PDF export eklendi)
+- [x] Limitler belirtilmiş (10+ feature, ~900 satır)
 
 ---
 
-**Son Güncelleme**: 2025-01-28 (G19: Search, Sorting, Pagination test senaryoları eklendi)
+**Son Güncelleme**: 2025-01-28 (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon test senaryoları eklendi)
 

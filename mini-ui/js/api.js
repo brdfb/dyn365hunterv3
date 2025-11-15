@@ -151,16 +151,17 @@ export async function getJobProgress(jobId) {
 }
 
 /**
- * Export leads to CSV
+ * Export leads to CSV or Excel (Gün 3)
  */
-export async function exportLeads(filters = {}) {
+export async function exportLeads(filters = {}, format = 'csv') {
     const params = new URLSearchParams();
     if (filters.segment) params.append('segment', filters.segment);
     if (filters.minScore !== null && filters.minScore !== undefined) {
         params.append('min_score', filters.minScore);
     }
     if (filters.provider) params.append('provider', filters.provider);
-    params.append('format', 'csv');
+    if (filters.search) params.append('search', filters.search);
+    params.append('format', format);
 
     const url = `${API_BASE_URL}/leads/export${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url);
@@ -176,7 +177,7 @@ export async function exportLeads(filters = {}) {
     
     // Get filename from Content-Disposition header or use default
     const contentDisposition = response.headers.get('Content-Disposition');
-    let filename = 'leads.csv';
+    let filename = format === 'excel' ? 'leads.xlsx' : 'leads.csv';
     if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch) {
@@ -189,6 +190,14 @@ export async function exportLeads(filters = {}) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(downloadUrl);
+}
+
+/**
+ * Export PDF for a domain (Gün 3)
+ */
+export async function exportPDF(domain) {
+    const url = `${API_BASE_URL}/leads/${encodeURIComponent(domain)}/summary.pdf`;
+    window.open(url, '_blank');
 }
 
 /**

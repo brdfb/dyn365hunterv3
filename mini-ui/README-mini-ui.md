@@ -1,14 +1,14 @@
 # Dyn365Hunter Mini UI
 
-**Hızlı demo ve iç kullanım için basit, temiz bir Mini UI.**
+**Internal production kullanım için stabilize edilmiş UI (v1.1-stable).**
 
 ---
 
 ## 🎯 Amaç
 
-- Hızlı demo ve iç kullanım (sales + developer)
+- **Ana kullanıcı**: Sales team + internal engineering team
 - "CSV yükle → tara → lead tablosunu gör → export et" akışını tarayıcıdan göstermek
-- Uzun vadeli "gerçek frontend" değil; **köprü**
+- **Not**: Bu UI başlangıçta demo amaçlıydı; G19 + Gün 3 sonrası **internal production kullanım için stabilize edilmiştir**. Uzun vadede React/Next.js sürümü planlanmıştır.
 
 ---
 
@@ -57,16 +57,22 @@ http://localhost:8000/mini-ui/
 - Provider filtresi (M365, Google, Yandex, vb.)
 - **Search input** (Domain, şirket veya provider'da arama) - G19
 - **Sorting** (Table header'lara tıklayarak sıralama) - G19
-- **Pagination** (Sayfa numaraları, önceki/sonraki butonları) - G19
-- Tablo görüntüleme (Domain, Şirket, Provider, Segment, Skor)
+- **Pagination** (Sayfa numaraları, önceki/sonraki butonları, sayfa bilgisi) - G19
+- Tablo görüntüleme (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Segment, Skor)
+- **Table view improvements** (Gün 3) - Column width optimization, row hover effects, empty state with CTA, loading spinner
+- **Score breakdown modal** (G19 + Gün 3) - Click skor'a tıklayarak detaylı skor analizi, tooltips for signals/risks, ESC key support, backdrop click to close
 
 **Endpoint**: `GET /leads`
 
-### 4. Export CSV
-- Filtrelenmiş lead'leri CSV olarak export etme
+### 4. Export CSV/Excel/PDF
+- Filtrelenmiş lead'leri CSV veya Excel olarak export etme - Gün 3
+- **CSV/Excel export buttons** - Ayrı butonlar (CSV ve Excel) - Gün 3
+- **Toast notifications** - Export başarı/hata mesajları - Gün 3
+- **PDF export** - Score breakdown modal'dan PDF indirme - Gün 3
 - Otomatik dosya indirme
+- **Performance Note**: PDF export high CPU load yaratır; yoğun kullanımda queue önerilir
 
-**Endpoint**: `GET /leads/export`
+**Endpoint**: `GET /leads/export` (CSV/Excel), `GET /leads/{domain}/summary.pdf` (PDF)
 
 ---
 
@@ -79,8 +85,11 @@ http://localhost:8000/mini-ui/
 | `/ingest/csv` | POST | CSV/Excel dosyası yükleme |
 | `/scan/domain` | POST | Tek domain tarama |
 | `/leads` | GET | Lead listesi (filtreli) |
-| `/leads/export` | GET | Lead export (CSV) |
-| `/dashboard` | GET | Dashboard istatistikleri |
+| `/leads/export` | GET | Lead export (CSV/Excel) - Gün 3 |
+| `/leads/{domain}/summary.pdf` | GET | PDF export (Gün 3) |
+| `/leads/{domain}/score-breakdown` | GET | Score breakdown detayları (G19) |
+| `/dashboard` | GET | Dashboard istatistikleri (tüm dashboard datası) |
+| `/dashboard/kpis` | GET | Dashboard KPIs (G19) - Internal use only |
 
 ### Query Parameters
 
@@ -110,18 +119,22 @@ mini-ui/
   README-mini-ui.md   # Bu dosya
 ```
 
+**Not**: UI tamamen modülerdir; React'e taşımaya hazır component pattern kullanır.
+
 ---
 
 ## ⚠️ Limitler
 
 ### Kod Miktarı
-- **JS toplam kod miktarı**: ~900 satır (yorumlar dahil), ~700 satır (yorumlar hariç)
-- **7 ana özellik**: Upload, Scan, Table, Export, Search, Sorting, Pagination
+- **JS toplam kod miktarı**: ~1200 satır (yorumlar dahil), ~900 satır (yorumlar hariç) - Gün 3 ile artış
+- **10+ ana özellik**: Upload, Scan, Table, Export (CSV/Excel/PDF), Search, Sorting, Pagination, Score Breakdown Modal, Toast Notifications, Tooltips
 
 ### Özellik Sınırı
-- **8. özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
+- **Mini UI şu anda 10+ özellikte, framework sınırına yaklaşmıştır**
+- **12+ özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
 - Kod içinde TODO ile not bırakılmalı
 - **Not**: G19 ile Search, Sorting, Pagination eklendi (3 yeni özellik)
+- **Not**: Gün 3 ile Export/PDF, Toast Notifications, Tooltips, Modal improvements eklendi (4+ yeni özellik)
 
 ### İş Mantığı
 - **Tüm iş mantığı backend'de kalır**
@@ -178,8 +191,9 @@ const API_BASE_URL = 'http://localhost:8000';
 ### API Çağrıları Çalışmıyor
 
 1. CORS hatası alıyorsan:
-   - Backend'de CORS middleware eklenmeli (production için)
-   - Development'ta genellikle sorun olmaz
+   - **Production kullanımda CORS whitelist gerekir** (backend'de CORS middleware)
+   - Development'ta (localhost) genellikle sorun olmaz
+   - Sales team localhost dışından açarsa CORS bozar
 
 2. Network hatası:
    - API_BASE_URL doğru mu kontrol et
@@ -238,8 +252,10 @@ Bu Mini UI ile:
 3. Lead tablosunu gör → Migration segmentinde ≥70 skor lead'leri filtrele
 4. Export et → CSV olarak indir
 
+**Kritik**: UI üzerinde Migration ≥70 filtre akışı eksiksiz çalışır (segment filter + min_score filter kombinasyonu).
+
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Versiyon**: 1.1.0 (G19: Search, Sorting, Pagination eklendi)
+**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications)
 
