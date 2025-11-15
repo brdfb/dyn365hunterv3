@@ -24,10 +24,13 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 ### Analysis & Scoring
 - ✅ DNS analysis (MX/SPF/DKIM/DMARC with 10s timeout)
+- ✅ **DMARC Coverage** (G20) - DMARC policy coverage percentage (pct parameter) ✨ YENİ
 - ✅ WHOIS lookup (graceful fail with 5s timeout)
 - ✅ Generic email generation for domains
 - ✅ Email validation (syntax, MX, optional SMTP)
 - ✅ Priority score calculation for lead prioritization
+- ✅ **Tenant Size Estimation** (G20) - MX pattern-based tenant size for M365/Google (small/medium/large) ✨ YENİ
+- ✅ **Local Provider Detection** (G20) - Specific local hosting provider identification (TürkHost, Natro, etc.) ✨ YENİ
 
 ### Data Quality & Tracking
 - ✅ **Provider change tracking** - Automatic detection and history logging when domains switch providers
@@ -195,8 +198,9 @@ A simple web interface for demo and internal use:
 ### Scan
 - `POST /scan/domain` - Analyze single domain (DNS + WHOIS + scoring)
   - Request body: `{"domain": "example.com"}`
-  - Returns: `{"domain": "example.com", "score": 75, "segment": "Migration", "reason": "...", "provider": "M365", "mx_root": "outlook.com", "spf": true, "dkim": true, "dmarc_policy": "reject", "scan_status": "success"}`
+  - Returns: `{"domain": "example.com", "score": 75, "segment": "Migration", "reason": "...", "provider": "M365", "tenant_size": "medium", "local_provider": null, "mx_root": "outlook.com", "spf": true, "dkim": true, "dmarc_policy": "reject", "dmarc_coverage": 100, "scan_status": "success"}`
   - Performs DNS analysis (MX, SPF, DKIM, DMARC) and WHOIS lookup
+  - **G20**: Extracts DMARC coverage (pct), estimates tenant size (M365/Google), detects local provider ✨ YENİ
   - Calculates readiness score and determines segment
 - `POST /scan/bulk` - Create bulk scan job for multiple domains (async)
   - Request body: `{"domain_list": ["example.com", "google.com", "microsoft.com"]}`
@@ -232,7 +236,7 @@ A simple web interface for demo and internal use:
 - `GET /leads/{domain}/score-breakdown` - Get detailed score breakdown for a domain (G19)
   - Returns: Score breakdown with base_score, provider points, signal points, risk points, and total_score
 - `GET /leads/{domain}` - Get single lead details
-  - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), and metadata
+  - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), **G20 fields (tenant_size, local_provider, dmarc_coverage)**, and metadata
 - `POST /leads/{domain}/enrich` - Manually enrich a lead with contact emails
   - Request body: `{"contact_emails": ["john@example.com", "jane@example.com"]}`
   - Returns: Enrichment results (contact_emails, contact_quality_score, linkedin_pattern)

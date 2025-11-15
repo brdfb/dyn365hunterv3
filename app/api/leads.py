@@ -27,6 +27,8 @@ class LeadResponse(BaseModel):
     canonical_name: Optional[str] = None
     domain: str
     provider: Optional[str] = None
+    tenant_size: Optional[str] = None  # G20: Tenant size (small/medium/large)
+    local_provider: Optional[str] = None  # G20: Local provider name (e.g., TürkHost)
     country: Optional[str] = None
     contact_emails: Optional[List[str]] = None  # G16: Lead enrichment
     contact_quality_score: Optional[int] = None  # G16: Lead enrichment
@@ -34,6 +36,7 @@ class LeadResponse(BaseModel):
     spf: Optional[bool] = None
     dkim: Optional[bool] = None
     dmarc_policy: Optional[str] = None
+    dmarc_coverage: Optional[int] = None  # G20: DMARC coverage (0-100)
     mx_root: Optional[str] = None
     registrar: Optional[str] = None
     expires_at: Optional[str] = None
@@ -94,10 +97,13 @@ async def export_leads(
             canonical_name,
             domain,
             provider,
+            tenant_size,
+            local_provider,
             country,
             spf,
             dkim,
             dmarc_policy,
+            dmarc_coverage,
             mx_root,
             registrar,
             expires_at,
@@ -291,10 +297,13 @@ async def get_leads(
             canonical_name,
             domain,
             provider,
+            tenant_size,
+            local_provider,
             country,
             spf,
             dkim,
             dmarc_policy,
+            dmarc_coverage,
             mx_root,
             registrar,
             expires_at,
@@ -369,10 +378,13 @@ async def get_leads(
                 canonical_name=row.canonical_name,
                 domain=row.domain,
                 provider=row.provider,
+                tenant_size=getattr(row, "tenant_size", None),  # G20: Tenant size
+                local_provider=getattr(row, "local_provider", None),  # G20: Local provider
                 country=row.country,
                 spf=row.spf,
                 dkim=row.dkim,
                 dmarc_policy=row.dmarc_policy,
+                dmarc_coverage=getattr(row, "dmarc_coverage", None),  # G20: DMARC coverage
                 mx_root=row.mx_root,
                 registrar=row.registrar,
                 expires_at=str(row.expires_at) if row.expires_at else None,
@@ -472,6 +484,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             c.canonical_name,
             c.domain,
             c.provider,
+            c.tenant_size,
             c.country,
             c.contact_emails,
             c.contact_quality_score,
@@ -479,7 +492,9 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             ds.spf,
             ds.dkim,
             ds.dmarc_policy,
+            ds.dmarc_coverage,
             ds.mx_root,
+            ds.local_provider,
             ds.registrar,
             ds.expires_at,
             ds.nameservers,
@@ -530,6 +545,8 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             canonical_name=row.canonical_name,
             domain=row.domain,
             provider=row.provider,
+            tenant_size=getattr(row, "tenant_size", None),  # G20: Tenant size
+            local_provider=getattr(row, "local_provider", None),  # G20: Local provider
             country=row.country,
             contact_emails=contact_emails,
             contact_quality_score=row.contact_quality_score,
@@ -537,6 +554,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             spf=row.spf,
             dkim=row.dkim,
             dmarc_policy=row.dmarc_policy,
+            dmarc_coverage=getattr(row, "dmarc_coverage", None),  # G20: DMARC coverage
             mx_root=row.mx_root,
             registrar=row.registrar,
             expires_at=str(row.expires_at) if row.expires_at else None,

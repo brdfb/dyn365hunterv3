@@ -7,11 +7,13 @@
 - [x] Type hints present
 
 ## ✅ Documentation
-- [x] CHANGELOG.md updated (v1.0.0)
-- [x] README.md updated (G15-G18 features)
-- [x] API documentation updated
+- [x] CHANGELOG.md updated (G20 features added)
+- [x] README.md updated (G20 features added)
+- [x] API documentation updated (G20 fields in responses)
+- [x] Sales documentation updated (SALES-GUIDE.md, SEGMENT-GUIDE.md, SALES-SCENARIOS.md)
 - [x] Test documentation added
 - [x] Docker troubleshooting guide added
+- [x] G20 implementation summary added
 
 ## ✅ Features Completed
 - [x] Dashboard endpoint (`GET /dashboard`) - v0.4.0
@@ -25,6 +27,14 @@
 - [x] G16: Webhook + Lead Enrichment - v1.0.0
 - [x] G17: Notes/Tags/Favorites + PDF Summary - v1.0.0
 - [x] G18: ReScan + Alerts + Enhanced Scoring - v1.0.0
+- [x] **G20: Domain Intelligence Layer** - Local Provider, Tenant Size, DMARC Coverage ✨ YENİ
+  - [x] Local Provider Detail (P0) - TürkHost, Natro, vb. tespiti
+  - [x] Tenant Size Estimation (P1) - M365/Google için small/medium/large
+  - [x] DMARC Coverage (P1) - pct parametresi parsing
+  - [x] Database migration completed
+  - [x] API responses updated
+  - [x] Documentation updated (SALES-GUIDE, SEGMENT-GUIDE, SALES-SCENARIOS)
+  - [x] All tests passing
 - [x] All tests passing
 - [x] Version updated to 1.0.0
 

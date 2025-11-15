@@ -84,7 +84,26 @@
     {
       "name": "Local",
       "mx_roots": [],
-      "description": "Self-hosted or custom mail servers (no known provider match)"
+      "description": "Self-hosted or custom mail servers (no known provider match)",
+      "local_providers": {
+        "turkhost.com.tr": "TürkHost",
+        "turkhost.com": "TürkHost",
+        "natro.com": "Natro",
+        "turhost.com": "Turhost",
+        "turhost.com.tr": "Turhost",
+        "superonline.net": "Superonline",
+        "superonline.com": "Superonline",
+        "ttnet.com.tr": "TTNET",
+        "ttnet.net.tr": "TTNET",
+        "dns.com.tr": "DNS",
+        "dns.com": "DNS",
+        "isimtescil.net": "İsimtescil",
+        "isimtescil.com": "İsimtescil",
+        "nic.tr": "NIC.TR",
+        "metu.edu.tr": "ODTÜ",
+        "bilkent.edu.tr": "Bilkent",
+        "ku.edu.tr": "Koç Üniversitesi"
+      }
     },
     {
       "name": "Unknown",

@@ -298,13 +298,21 @@ curl "http://localhost:8000/scan/bulk/{job_id}/results"
   "segment": "Migration",
   "reason": "High readiness score with known cloud provider. Score: 85, Provider: M365",
   "provider": "M365",
+  "tenant_size": "medium",
+  "local_provider": null,
   "mx_root": "outlook.com",
   "spf": true,
   "dkim": true,
   "dmarc_policy": "reject",
+  "dmarc_coverage": 100,
   "scan_status": "success"
 }
 ```
+
+**G20: Domain Intelligence (YENİ) ✨**
+- **tenant_size**: Tenant büyüklüğü tahmini (M365/Google için: "small", "medium", "large")
+- **local_provider**: Local provider adı (Local provider için: "TürkHost", "Natro", vb.)
+- **dmarc_coverage**: DMARC coverage yüzdesi (0-100, pct parametresi)
 
 **Skor Ne Anlama Geliyor?**
 - **70-100**: Yüksek hazırlık → Hemen aksiyon alınabilir
@@ -432,9 +440,12 @@ curl "http://localhost:8000/leads/ornek-firma.com"
 **Ne Döner?**
 - Tüm domain bilgileri
 - DNS sinyalleri (SPF, DKIM, DMARC)
+- **DMARC Coverage** (G20): DMARC coverage yüzdesi (0-100) ✨ YENİ
 - WHOIS bilgileri
 - Skor ve segment detayları
 - **Priority Score** (1-7, 1 en yüksek öncelik) - Her seviye farklı görsel ile gösteriliyor (🔥⭐🟡🟠⚪⚫🔴)
+- **Tenant Size** (G20): Tenant büyüklüğü tahmini (M365/Google için: small/medium/large) ✨ YENİ
+- **Local Provider** (G20): Local provider adı (Local provider için: TürkHost, Natro, vb.) ✨ YENİ
 - **Lead Enrichment** (G16): Contact emails, quality score, LinkedIn pattern
 - Güncelleme tarihleri
 
@@ -512,9 +523,12 @@ curl "http://localhost:8000/leads/ornek-firma.com/score-breakdown"
     "spf": true,
     "dkim": true,
     "dmarc_policy": "reject",
+    "dmarc_coverage": 100,
     "spf_record": "v=spf1 include:spf.protection.outlook.com -all"
   },
   "provider": "M365",
+  "tenant_size": "medium",
+  "local_provider": null,
   "mx_root": "outlook.com"
 }
 ```
@@ -655,9 +669,12 @@ curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score
 
 **Export İçeriği:**
 - Domain, company_name, provider, country
+- **Tenant Size** (G20): tenant_size (small/medium/large) ✨ YENİ
+- **Local Provider** (G20): local_provider (TürkHost, Natro, vb.) ✨ YENİ
 - Segment, readiness_score, priority_score
 - **Lead Enrichment** (G16): contact_emails, contact_quality_score, linkedin_pattern
 - SPF, DKIM, DMARC policy
+- **DMARC Coverage** (G20): dmarc_coverage (0-100) ✨ YENİ
 - MX root, registrar, expires_at
 - Nameservers, scan_status, scanned_at
 - Reason (skor açıklaması)
@@ -1040,6 +1057,23 @@ http://localhost:8000/docs
 
 ### Q: Hangi provider'lar destekleniyor?
 **A:** M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun, Hosting, Local, Unknown
+
+### Q: Tenant Size nedir? (G20) ✨ YENİ
+**A:** M365 ve Google Workspace kullanan domain'ler için MX pattern'den tahmin edilen tenant büyüklüğü:
+- **small**: Küçük işletmeler (genelde 1-50 kullanıcı)
+- **medium**: Orta ölçekli işletmeler (genelde 50-500 kullanıcı)
+- **large**: Büyük kurumsal işletmeler (genelde 500+ kullanıcı)
+
+### Q: Local Provider nedir? (G20) ✨ YENİ
+**A:** Local provider kullanan domain'ler için spesifik provider adı (örn: TürkHost, Natro, Turhost, Superonline, TTNET, DNS, İsimtescil). Bu bilgi satış ekibi için hangi local hosting provider'ın kullanıldığını gösterir.
+
+### Q: DMARC Coverage nedir? (G20) ✨ YENİ
+**A:** DMARC policy'nin coverage yüzdesi (pct parametresi). 0-100 arası değer:
+- **100**: Tüm email'ler DMARC policy'ye tabi (default, pct belirtilmemişse)
+- **50**: Email'lerin %50'si DMARC policy'ye tabi
+- **1**: Sadece %1'i DMARC policy'ye tabi (test aşamasında)
+
+**Önemli:** DMARC policy "reject" olsa bile coverage düşükse (örn: pct=1), gerçek uygulama sınırlıdır.
 
 ### Q: Sistem çalışmıyor, ne yapmalıyım?
 **A:** 

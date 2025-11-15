@@ -50,6 +50,9 @@ class Company(Base):
     provider = Column(
         String(50), nullable=True, index=True
     )  # 'M365', 'Google', 'Yandex', 'Hosting', 'Local', 'Unknown'
+    tenant_size = Column(
+        String(50), nullable=True, index=True
+    )  # 'small', 'medium', 'large' (G20: Domain Intelligence)
     country = Column(String(2), nullable=True)  # ISO 3166-1 alpha-2 country code
     contact_emails = Column(
         JSONB, nullable=True
@@ -106,7 +109,13 @@ class DomainSignal(Base):
     dmarc_policy = Column(
         String(50), nullable=True
     )  # 'none', 'quarantine', 'reject', etc.
+    dmarc_coverage = Column(
+        Integer, nullable=True, index=True
+    )  # 0-100, DMARC coverage percentage (G20: Domain Intelligence)
     mx_root = Column(String(255), nullable=True, index=True)  # Root domain of MX record
+    local_provider = Column(
+        String(255), nullable=True, index=True
+    )  # Local provider name (e.g., 'TürkHost', 'Natro') (G20: Domain Intelligence)
     registrar = Column(String(255), nullable=True)
     expires_at = Column(Date, nullable=True)
     nameservers = Column(ARRAY(Text), nullable=True)  # Array of nameserver hostnames

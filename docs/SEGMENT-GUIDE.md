@@ -307,18 +307,23 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
   "score": 90,
   "segment": "Migration",
   "provider": "M365",
+  "tenant_size": "large",
+  "local_provider": null,
   "spf": true,
   "dkim": true,
   "dmarc_policy": "reject",
+  "dmarc_coverage": 100,
   "priority_score": 1
 }
 ```
 
 **Yorum:**
 - ✅ M365 kullanıyor (50 puan)
+- ✅ Tenant size: large (büyük kurumsal işletme) - G20 ✨ YENİ
 - ✅ SPF var (10 puan)
 - ✅ DKIM var (10 puan)
 - ✅ DMARC reject (20 puan)
+- ✅ DMARC coverage: 100% (tüm email'ler korunuyor) - G20 ✨ YENİ
 - **Toplam: 90 puan** → Migration segment'i
 - **Priority Score: 1** → En yüksek öncelik
 - **Aksiyon:** Hemen iletişime geç, migration teklifi hazırla
@@ -333,18 +338,23 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
   "score": 60,
   "segment": "Existing",
   "provider": "Google",
+  "tenant_size": "medium",
+  "local_provider": null,
   "spf": true,
   "dkim": false,
   "dmarc_policy": "quarantine",
+  "dmarc_coverage": 100,
   "priority_score": 4
 }
 ```
 
 **Yorum:**
 - ✅ Google kullanıyor (50 puan)
+- ✅ Tenant size: medium (orta ölçekli işletme) - G20 ✨ YENİ
 - ✅ SPF var (10 puan)
 - ❌ DKIM yok (0 puan)
 - ⚠️ DMARC quarantine (15 puan)
+- ✅ DMARC coverage: 100% (tüm email'ler korunuyor) - G20 ✨ YENİ
 - **Toplam: 60 puan** → Existing segment'i
 - **Priority Score: 4** → Orta öncelik
 - **Aksiyon:** Müşteri durumunu kontrol et, takip et
@@ -359,14 +369,17 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
   "score": 30,
   "segment": "Cold",
   "provider": "Hosting",
+  "tenant_size": null,
+  "local_provider": null,
   "spf": true,
   "dkim": false,
-  "dmarc_policy": "none"
+  "dmarc_policy": "none",
+  "dmarc_coverage": null
 }
 ```
 
 **Yorum:**
-- ⚠️ Hosting kullanıyor (10 puan)
+- ⚠️ Hosting kullanıyor (20 puan)
 - ✅ SPF var (10 puan)
 - ❌ DKIM yok (0 puan)
 - ❌ DMARC none (0 puan)
@@ -383,14 +396,18 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
   "score": 5,
   "segment": "Skip",
   "provider": "Local",
+  "tenant_size": null,
+  "local_provider": "TürkHost",
   "spf": false,
   "dkim": false,
-  "dmarc_policy": "none"
+  "dmarc_policy": "none",
+  "dmarc_coverage": null
 }
 ```
 
 **Yorum:**
-- ❌ Local kullanıyor (0 puan)
+- ❌ Local kullanıyor (10 puan)
+- ✅ Local provider: TürkHost (hangi local hosting kullanıldığı bilgisi) - G20 ✨ YENİ
 - ❌ SPF yok (0 puan)
 - ❌ DKIM yok (0 puan)
 - ❌ DMARC none (0 puan)

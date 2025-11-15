@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -99,3 +100,105 @@ def classify_provider(mx_root: Optional[str]) -> str:
     # For now, if it doesn't match any provider, return "Local"
     # (This can be refined later based on actual patterns)
     return "Local"
+
+
+def classify_local_provider(mx_root: Optional[str]) -> Optional[str]:
+    """
+    Classify local provider from MX root domain.
+    
+    This function identifies Turkish/local hosting providers from MX records.
+    
+    Args:
+        mx_root: Root domain of MX record (e.g., "mail.turkhost.com.tr")
+    
+    Returns:
+        Local provider name (e.g., "TürkHost", "Natro") or None if not recognized
+    
+    Examples:
+        >>> classify_local_provider("mail.turkhost.com.tr")
+        'TürkHost'
+        >>> classify_local_provider("mail.natro.com")
+        'Natro'
+        >>> classify_local_provider("mail.example.com")
+        None
+    """
+    if not mx_root:
+        return None
+    
+    mx_lower = mx_root.lower().strip()
+    
+    # Load providers and get local provider mappings
+    providers_data = load_providers()
+    providers = providers_data.get("providers", [])
+    
+    # Find Local provider entry
+    for provider in providers:
+        if provider.get("name") == "Local":
+            local_providers = provider.get("local_providers", {})
+            
+            # Check if mx_root contains any local provider domain
+            for provider_domain, provider_name in local_providers.items():
+                if provider_domain in mx_lower:
+                    return provider_name
+    
+    return None
+
+
+def estimate_tenant_size(provider: str, mx_root: Optional[str]) -> Optional[str]:
+    """
+    Estimate tenant size from MX pattern.
+    
+    This function analyzes MX patterns to estimate tenant size (small/medium/large).
+    
+    Args:
+        provider: Provider name (e.g., "M365", "Google")
+        mx_root: Root domain of MX record (e.g., "outlook-com.olc.protection.outlook.com")
+    
+    Returns:
+        Tenant size: "small", "medium", "large", or None if cannot be determined
+    
+    Examples:
+        >>> estimate_tenant_size("M365", "outlook-com.olc.protection.outlook.com")
+        'small'
+        >>> estimate_tenant_size("M365", "mail.protection.outlook.com")
+        'large'
+        >>> estimate_tenant_size("Google", "aspmx.l.google.com")
+        'medium'
+    """
+    if not provider or not mx_root:
+        return None
+    
+    mx_lower = mx_root.lower().strip()
+    
+    if provider == "M365":
+        # Enterprise pattern (mail.protection.outlook.com)
+        if "mail.protection.outlook.com" in mx_lower:
+            return "large"
+        
+        # Regional pattern (eur05, us01, etc.)
+        # Pattern: {region}{number}.protection.outlook.com
+        if re.search(r'[a-z]{3}\d{2}\.protection\.outlook\.com', mx_lower):
+            return "small"
+        
+        # OLC pattern (Office 365 Cloud)
+        # Pattern: *-*.olc.protection.outlook.com
+        if "olc.protection.outlook.com" in mx_lower:
+            return "small"
+        
+        # Default for other M365 patterns
+        return "medium"
+    
+    elif provider == "Google":
+        # Default Google Workspace pattern
+        if "aspmx.l.google.com" in mx_lower:
+            return "medium"
+        
+        # Enterprise patterns (custom domains)
+        # If it's Google but not standard pattern, likely enterprise
+        if "google.com" in mx_lower or "googlemail.com" in mx_lower:
+            return "large"
+        
+        return "medium"
+    
+    # For other providers, we don't have enough pattern data
+    return None

@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G20: Domain Intelligence Layer** - Enhanced domain intelligence features
+  - **Local Provider Detail** (P0): Automatic detection of specific local hosting providers
+    - `local_provider` field in `domain_signals` table
+    - Classification for Turkish local providers (TürkHost, Natro, Turhost, Superonline, TTNET, DNS, İsimtescil, etc.)
+    - Implementation: `app/core/provider_map.py` - `classify_local_provider()` function
+    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
+  - **Tenant Size Estimation** (P1): MX pattern-based tenant size estimation for M365 and Google Workspace
+    - `tenant_size` field in `companies` table (values: "small", "medium", "large")
+    - Pattern-based estimation for M365 (OLC, Enterprise, Regional patterns)
+    - Pattern-based estimation for Google Workspace
+    - Implementation: `app/core/provider_map.py` - `estimate_tenant_size()` function
+    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
+  - **DMARC Coverage** (P1): DMARC policy coverage percentage extraction
+    - `dmarc_coverage` field in `domain_signals` table (0-100, pct parameter)
+    - Enhanced `check_dmarc()` function in `app/core/analyzer_dns.py` to parse pct parameter
+    - Default coverage: 100% (if pct not specified)
+    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
+  - API updates:
+    - `GET /leads` and `GET /leads/{domain}` now return `tenant_size`, `local_provider`, and `dmarc_coverage`
+    - `POST /scan/domain` response includes new fields
+    - Export endpoints include new fields in CSV/Excel exports
+  - Database schema:
+    - Added `tenant_size` column to `companies` table (VARCHAR(50), indexed)
+    - Added `local_provider` column to `domain_signals` table (VARCHAR(255), indexed)
+    - Added `dmarc_coverage` column to `domain_signals` table (INTEGER, indexed)
+    - Updated `leads_ready` view to include new columns
+  - Documentation:
+    - Updated `docs/SALES-GUIDE.md` with G20 features and examples
+    - Updated `docs/SEGMENT-GUIDE.md` with G20 fields in score examples
+    - Updated `docs/SALES-SCENARIOS.md` with G20 usage scenarios
+    - Added FAQ entries for Tenant Size, Local Provider, and DMARC Coverage
+  - Implementation files:
+    - `app/core/provider_map.py` - Local provider classification and tenant size estimation
+    - `app/core/analyzer_dns.py` - DMARC coverage parsing
+    - `app/core/tasks.py` - Scan task integration
+    - `app/api/leads.py` - API response models updated
+    - `app/db/models.py` - Database models updated
+    - `app/data/providers.json` - Local provider mappings added
+  - Tests: All functions tested and verified
+    - Local provider classification tests
+    - Tenant size estimation tests
+    - DMARC coverage parsing tests
+  - Post-MVP feature (domain intelligence enhancement)
+
 - **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri
   - Skor detay modal iyileştirmeleri:
     - DKIM çift gösterimi düzeltildi: `no_dkim` (-10) ve `dkim_none` (-5) tek satırda birleştirildi → "DKIM Eksik: -15"

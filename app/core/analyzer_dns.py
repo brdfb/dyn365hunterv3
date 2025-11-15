@@ -1,9 +1,10 @@
 """DNS analysis utilities for domain signals."""
 
 import socket
+import re
 import dns.resolver
 import dns.exception
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from urllib.parse import urlparse
 
 
@@ -269,16 +270,25 @@ def check_dkim(domain: str, selector: str = "default") -> bool:
         return False
 
 
-def check_dmarc(domain: str) -> Optional[str]:
+def check_dmarc(domain: str) -> Dict[str, Any]:
     """
-    Check DMARC policy for a domain.
+    Check DMARC policy and coverage for a domain.
 
     Args:
         domain: Domain name to check
 
     Returns:
-        DMARC policy string: "none", "quarantine", "reject", or None if not found
+        Dictionary with:
+        - policy: "none", "quarantine", "reject", or None if not found
+        - coverage: Integer 0-100 (default: 100 if not specified)
+        - record: Full DMARC record string (for reference)
     """
+    result = {
+        "policy": None,
+        "coverage": 100,  # Default coverage is 100%
+        "record": None,
+    }
+    
     try:
         resolver = _get_resolver()
         dmarc_domain = f"_dmarc.{domain}"
@@ -292,28 +302,40 @@ def check_dmarc(domain: str) -> Optional[str]:
                 ]
             )
             if "v=DMARC1" in txt_string:
+                result["record"] = txt_string
+                
                 # Parse policy
                 if "p=none" in txt_string or "p=NONE" in txt_string:
-                    return "none"
+                    result["policy"] = "none"
                 elif "p=quarantine" in txt_string or "p=QUARANTINE" in txt_string:
-                    return "quarantine"
+                    result["policy"] = "quarantine"
                 elif "p=reject" in txt_string or "p=REJECT" in txt_string:
-                    return "reject"
+                    result["policy"] = "reject"
                 else:
                     # Default to "none" if policy not explicitly set
-                    return "none"
+                    result["policy"] = "none"
+                
+                # Parse coverage (pct=)
+                # DMARC spec: pct=0-100 (default: 100)
+                pct_match = re.search(r'pct=(\d+)', txt_string, re.IGNORECASE)
+                if pct_match:
+                    coverage = int(pct_match.group(1))
+                    # Ensure coverage is in valid range (0-100)
+                    result["coverage"] = max(0, min(100, coverage))
+                
+                return result
 
-        return None
+        return result
 
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers):
-        return None
+        return result
     except (dns.exception.Timeout, socket.timeout):
-        return None
+        return result
     except Exception:
-        return None
+        return result
 
 
-def analyze_dns(domain: str) -> Dict[str, any]:
+def analyze_dns(domain: str) -> Dict[str, Any]:
     """
     Perform complete DNS analysis for a domain.
 
@@ -321,7 +343,7 @@ def analyze_dns(domain: str) -> Dict[str, any]:
     - MX records (and extracts root domain)
     - SPF record
     - DKIM record
-    - DMARC policy
+    - DMARC policy and coverage
 
     Args:
         domain: Domain name to analyze
@@ -333,6 +355,8 @@ def analyze_dns(domain: str) -> Dict[str, any]:
         - spf: bool (SPF record exists)
         - dkim: bool (DKIM record exists)
         - dmarc_policy: str ("none", "quarantine", "reject", or None)
+        - dmarc_coverage: int (0-100, default: 100)
+        - dmarc_record: str (Full DMARC record string, or None)
         - status: str ("success", "dns_timeout", "invalid_domain")
     """
     result = {
@@ -341,6 +365,8 @@ def analyze_dns(domain: str) -> Dict[str, any]:
         "spf": False,
         "dkim": False,
         "dmarc_policy": None,
+        "dmarc_coverage": 100,
+        "dmarc_record": None,
         "status": "success",
     }
 
@@ -359,8 +385,11 @@ def analyze_dns(domain: str) -> Dict[str, any]:
         # Check DKIM
         result["dkim"] = check_dkim(domain)
 
-        # Check DMARC
-        result["dmarc_policy"] = check_dmarc(domain)
+        # Check DMARC (returns dict with policy, coverage, record)
+        dmarc_result = check_dmarc(domain)
+        result["dmarc_policy"] = dmarc_result.get("policy")
+        result["dmarc_coverage"] = dmarc_result.get("coverage", 100)
+        result["dmarc_record"] = dmarc_result.get("record")
 
     except (dns.exception.Timeout, socket.timeout):
         result["status"] = "dns_timeout"

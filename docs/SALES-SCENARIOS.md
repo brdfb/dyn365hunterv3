@@ -319,6 +319,9 @@ curl -X POST http://localhost:8000/scan/domain \
   "score": 85,
   "segment": "Migration",
   "provider": "M365",
+  "tenant_size": "large",
+  "local_provider": null,
+  "dmarc_coverage": 100,
   "priority_score": 1
 }
 ```
@@ -327,6 +330,8 @@ curl -X POST http://localhost:8000/scan/domain \
 - ✅ Skor 85 → Yüksek hazırlık
 - ✅ Segment Migration → Hemen aksiyon
 - ✅ Provider M365 → Cloud kullanıyor
+- ✅ Tenant size: large → Büyük kurumsal işletme (G20) ✨ YENİ
+- ✅ DMARC coverage: 100% → Tüm email'ler korunuyor (G20) ✨ YENİ
 - ✅ Priority Score 1 → En yüksek öncelik
 
 **Aksiyon:** Hemen iletişime geç, migration teklifi hazırla
