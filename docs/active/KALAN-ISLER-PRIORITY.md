@@ -1,9 +1,9 @@
-# Kalan İşler - Öncelik Sırası
+# Kalan İşler - Öncelik Sırası (CRITIQUE GÜNCELLEMESİ)
 
 **Tarih**: 2025-01-28  
 **Durum**: G19 Tamamlandı → P0 Hardening Tamamlandı, P1/P2 Backlog  
-**Son Güncelleme**: 2025-01-28  
-**Not**: P0 maddelerin tamamı G19'da tamamlandı. Artık production blocker yok.
+**Son Güncelleme**: 2025-01-28 (Critique Sonrası Güncelleme)  
+**Not**: P0 maddelerin tamamı G19'da tamamlandı. Critique sonrası P1/P2 öncelikleri ve bağımlılıklar revize edildi.
 
 ---
 
@@ -13,64 +13,12 @@
 
 Bu maddeler **production blocker** idi - G19'da tamamlandı.
 
-### 1. Database Connection Pooling ⏱️ 1 saat
-- **Durum**: ✅ **Tamamlandı (G19)**
-- **Etki**: Yüksek - Concurrent request'lerde connection exhaustion riski
-- **Lokasyon**: `app/db/session.py`
-- **Tamamlanan İşler**:
-  - [x] `pool_size=20`, `max_overflow=10`, `pool_recycle=3600` eklendi
-  - [x] Environment variable'lara taşındı (`HUNTER_DB_POOL_SIZE`, `HUNTER_DB_MAX_OVERFLOW`)
-  - [x] Concurrent request test (100+ parallel requests)
-- **Blocker**: ✅ Evet (artık çözüldü)
-
-### 2. API Key Security (bcrypt/Argon2) ⏱️ 2 saat
-- **Durum**: ✅ **Tamamlandı (G19)**
-- **Etki**: Yüksek - Security vulnerability
-- **Lokasyon**: `app/core/api_key_auth.py`
-- **Tamamlanan İşler**:
-  - [x] `bcrypt` dependency eklendi
-  - [x] `hash_api_key()` ve `verify_api_key()` fonksiyonları güncellendi
-  - [x] Migration stratejisi (eski key'ler için backward compatibility)
-  - [x] Test: API key verification testleri
-- **Blocker**: ✅ Evet (artık çözüldü)
-
-### 3. Structured Logging ⏱️ 4 saat
-- **Durum**: ✅ **Tamamlandı (G19)**
-- **Etki**: Orta - Production debugging zor
-- **Lokasyon**: `app/core/logging.py`
-- **Tamamlanan İşler**:
-  - [x] Structured logging setup (structlog, JSON format)
-  - [x] Log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  - [x] Request ID tracking
-  - [x] PII maskeleme (email, domain)
-  - [x] Tüm endpoint'lere logging eklendi
-  - [x] Test: Log output kontrolü
-- **Blocker**: ✅ Evet (artık çözüldü)
-
-### 4. Error Tracking (Sentry) ⏱️ 2 saat
-- **Durum**: ✅ **Tamamlandı (G19)**
-- **Etki**: Orta - Production error tracking yok
-- **Lokasyon**: `app/core/error_tracking.py`
-- **Tamamlanan İşler**:
-  - [x] `sentry-sdk` dependency eklendi
-  - [x] `HUNTER_SENTRY_DSN` environment variable eklendi
-  - [x] Sentry initialization (`app/main.py`)
-  - [x] FastAPI + SQLAlchemy integrations
-  - [x] Test: Exception fırlat, Sentry'de görünüyor mu?
-- **Blocker**: ✅ Evet (artık çözüldü)
-
-### 5. Health Checks & Probes ⏱️ 2 saat
-- **Durum**: ✅ **Tamamlandı (G19)**
-- **Etki**: Yüksek - Kubernetes/Docker orchestration için kritik
-- **Lokasyon**: `app/api/health.py`
-- **Tamamlanan İşler**:
-  - [x] `/healthz/live` - Liveness probe
-  - [x] `/healthz/ready` - Readiness probe (DB + Redis ping)
-  - [x] `/healthz/startup` - Startup probe
-  - [x] Legacy `/healthz` endpoint'i güncellendi (Redis eklendi)
-  - [x] HTTP status code'ları düzeltildi (503 Service Unavailable)
-  - [x] Kubernetes deployment örneği eklendi (docs)
-- **Blocker**: ✅ Evet (artık çözüldü)
+### 1-5. P0 Hardening (G19) ✅
+- ✅ Database Connection Pooling
+- ✅ API Key Security (bcrypt)
+- ✅ Structured Logging
+- ✅ Error Tracking (Sentry)
+- ✅ Health Checks & Probes
 
 **P0 Toplam Süre**: ✅ **Tamamlandı (G19'da ~11 saat)**
 
@@ -78,51 +26,277 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
 
 ## ⚠️ P1 - HIGH PRIORITY (Bu Ay - 1-2 Sprint)
 
-Bu maddeler production için önemli ama blocker değil.
+**⚠️ KRİTİK**: P1 maddeleri birbirine bağımlı. **Sıralama ve bağımlılık grafiği aşağıda.**
 
-### 6. Caching Layer (DNS/WHOIS) ⏱️ 1 gün
-- **Durum**: ❌ Eksik
-- **Etki**: Yüksek - Performance ve rate limit koruması
-- **Lokasyon**: `app/core/cache.py` (yeni dosya)
-- **Aksiyon**:
-  - [ ] DNS cache implementasyonu (1 saat TTL)
-  - [ ] WHOIS cache implementasyonu (24 saat TTL)
-  - [ ] `analyzer_dns.py` ve `analyzer_whois.py`'ye cache ekle
-  - [ ] Test: Aynı domain'i 2 kez scan et, cache hit kontrol et
-- **Blocker**: ❌ Hayır - Performance optimization
+### 📊 P1 Bağımlılık Grafiği
 
-### 7. Database Migration System (Alembic) ⏱️ 1 gün
-- **Durum**: ❌ Eksik - Şu an manual SQL migration files
+```
+┌─────────────────┐
+│  1. Alembic     │ ← En önce (migration foundation)
+└────────┬────────┘
+         │
+         ├─→ ┌─────────────────┐
+         │   │ 2. Distributed   │ ← Alembic sonrası (DB stable)
+         │   │    Rate Limiting │
+         └──→└────────┬──────────┘
+                      │
+                      ├─→ ┌─────────────────┐
+                      │   │ 3. Caching      │ ← Rate limit + DB stable
+                      │   │    Layer        │
+                      └──→└────────┬────────┘
+                                   │
+                                   ├─→ ┌─────────────────┐
+                                   │   │ 4. Bulk         │ ← Cache + Rate limit
+                                   │   │    Operations   │
+                                   └──→└────────┬────────┘
+                                                │
+                                                └─→ ┌─────────────────┐
+                                                    │ 5. API          │ ← EN SON
+                                                    │    Versioning   │
+                                                    └─────────────────┘
+```
+
+**Sıralama Mantığı:**
+1. **Alembic** → Migration foundation (diğer her şey DB'ye dokunuyor)
+2. **Distributed Rate Limiting** → Multi-worker için kritik (P2'den P1'e çekildi)
+3. **Caching Layer** → Rate limit + DB stable olmalı
+4. **Bulk Operations** → Cache + Rate limit olmalı
+5. **API Versioning** → EN SON (tüm router'lar stabil olmalı)
+
+---
+
+### 1. Database Migration System (Alembic) ⏱️ **2-3 gün** (revize)
+
+- **Durum**: ❌ Eksik - Şu an manual SQL migration files (`app/db/migrations/`)
 - **Etki**: Orta - Migration history ve rollback yok
-- **Lokasyon**: `alembic/` (yeni dizin)
-- **Aksiyon**:
+- **Öncelik**: 🔴 **EN ÖNCE** - Diğer P1 maddeleri DB'ye dokunuyor
+- **Prerequisites**: None (en önce yapılmalı)
+- **Mevcut Durum**:
+  - ✅ 6 manual SQL migration file var (`g16_webhook_enrichment.sql`, `g17_notes_tags_favorites.sql`, `g18_rescan_alerts_scoring.sql`, `g19_favorites_migration.sql`, `g19_users_auth.sql`, `g20_domain_intelligence.sql`)
+  - ✅ `app/db/run_migration.py` script var (tek migration çalıştırma)
+  - ❌ Alembic yok (`alembic/` dizini yok, `alembic.ini` yok)
+  - ❌ Migration history tracking yok
+  - ❌ Rollback capability yok
+- **Lokasyon**: `alembic/` (yeni dizin), `app/db/migrations/` (mevcut)
+- **Gerçekçi Süre Tahmini**:
+  - Alembic setup: 2 saat
+  - 6 migration'ı çevirme: 1 gün (ortalama 20-40 satır SQL → manual rewrite)
+  - Test suite backtest: 4 saat
+  - Docker/CI entegrasyonu: 4 saat
+  - Rollback verification: 4 saat
+  - Dev/prod config ayrımı: 2 saat
+  - **Toplam: 2-3 gün** (1 gün değil)
+- **Base Revision Stratejisi**:
+  - Base revision, current production schema'ya göre oluşturulacak (`alembic revision --autogenerate`)
+  - Manuel diff ile doğrulanacak (production DB schema vs. autogenerated revision)
+  - Empty base revision değil, mevcut schema snapshot'ı base olacak
+- **Risksiz Migration Planı**:
   - [ ] Alembic setup (`alembic init alembic`)
-  - [ ] Mevcut migration'ları Alembic'e migrate et
-  - [ ] Migration script güncelle
-  - [ ] Rollback testleri
+  - [ ] Base revision oluştur (current production schema'dan autogenerate + manuel diff)
+  - [ ] Mevcut migration'ları Alembic format'ına çevir (7 migration file)
+  - [ ] Migration history table oluştur
+  - [ ] `run_migration.py` script'ini Alembic kullanacak şekilde güncelle
+  - [ ] **Schema drift kontrolü**: Alembic migration sonrası canlı DB şeması ile SQLAlchemy modelleri diff kontrolü (`alembic --autogenerate dry-run`)
+  - [ ] **Test**: Her migration'ı ayrı ayrı test et (up/down)
+  - [ ] **Test**: Tüm migration'ları sırayla test et (fresh DB'de)
+  - [ ] **Test**: Rollback testleri (`alembic downgrade -1`, `alembic downgrade base`)
+  - [ ] **Test**: Production-like environment'ta test (Docker)
+  - [ ] CI/CD'ye migration check ekle (pre-commit hook)
+  - [ ] Dev/prod config ayrımı (env-based migration path)
 - **Blocker**: ❌ Hayır - Code quality improvement
+- **Bağımlılık**: Hiçbiri (en önce yapılmalı)
 
-### 8. API Versioning ⏱️ 4 saat
-- **Durum**: ❌ Eksik
-- **Etki**: Düşük - Backward compatibility için
-- **Lokasyon**: `app/api/v1/` (yeni dizin yapısı)
+---
+
+### 2. Distributed Rate Limiting ⏱️ 1 gün (P2'den P1'e çekildi)
+
+- **Durum**: ⚠️ Kısmi - Şu an in-memory rate limiting
+- **Etki**: 🔴 **YÜKSEK** - Multi-instance deployment için kritik
+- **Öncelik**: 🔴 **P1** (P2'den çekildi)
+- **Prerequisites**: Alembic (DB stable olmalı)
+- **Neden P1?**
+  - Hunter gerçek dünyada 2 node'a çıkarsa **WHOIS + DNS rate limit** sıradan şekilde kırılır
+  - Satış ekibi birden fazla kişi kullanırsa yanlış sonuç çıkarır
+  - Microsoft SSO geldi → concurrency artacak
+- **Mevcut Durum**:
+  - ✅ In-memory rate limiting var (`app/core/rate_limiter.py` - `RateLimiter` class)
+  - ✅ DNS rate limiter (10 req/s), WHOIS rate limiter (5 req/s)
+  - ✅ API key rate limiter var (`app/core/api_key_auth.py` - `_api_key_limiters` dict)
+  - ❌ Redis-based distributed rate limiting yok
+  - ❌ Multi-worker'da rate limit tutarsız (her worker kendi limit'ini tutuyor)
+- **Lokasyon**: `app/core/rate_limiter.py`, `app/core/api_key_auth.py`
 - **Aksiyon**:
-  - [ ] API versioning yapısı (`/api/v1/`, `/api/v2/`)
-  - [ ] Mevcut endpoint'leri `/api/v1/` altına taşı
-  - [ ] Version deprecation strategy
-- **Blocker**: ❌ Hayır - Future-proofing
+  - [ ] Redis-based distributed rate limiting implementasyonu
+  - [ ] DNS/WHOIS rate limiter'ı Redis'e migrate et
+  - [ ] API key rate limiter'ı Redis'e migrate et
+  - [ ] In-memory limiter'ı fallback olarak bırak (Redis down durumu için)
+  - [ ] **Redis down durumu**: Circuit breaker + degrade mode log'u (WARN level, Sentry tag)
+  - [ ] **Test**: Multi-worker rate limiting test (2 worker, aynı API key, limit kontrolü)
+  - [ ] **Test**: Redis down durumu (fallback to in-memory, circuit breaker test)
+- **Blocker**: ❌ Hayır - Scale için
+- **Bağımlılık**: Alembic (DB stable olmalı)
 
-### 9. Bulk Operations Optimization ⏱️ 4 saat
+---
+
+### 3. Caching Layer (DNS/WHOIS/Provider/Scoring) ⏱️ 1.5 gün (revize)
+
+- **Durum**: ⚠️ Kısmi - WHOIS için in-memory cache var, DNS için yok, Redis-based distributed cache yok
+- **Etki**: Yüksek - Performance ve rate limit koruması
+- **Öncelik**: 🔴 **P1** - En pahalı işlemler için kritik
+- **Prerequisites**: Alembic + Distributed Rate Limiting (Redis stable olmalı)
+- **Mevcut Durum**:
+  - ✅ WHOIS: In-memory cache var (`analyzer_whois.py` - `_whois_cache` dict, 1 saat TTL)
+  - ❌ DNS: Cache yok (`analyzer_dns.py` - her seferinde DNS query)
+  - ❌ **Provider mapping cache yok** → **EKSİK** (en çok tekrar eden pattern)
+  - ❌ **Scoring cache yok** → **EKSİK** (aynı domain için tekrar scoring)
+  - ❌ **Domain-level full scan cache yok** → **BÜYÜK EKSİK**
+  - ❌ Redis-based distributed cache yok (multi-worker için gerekli)
+- **Gerçek Yük Analizi**:
+  - 100 domain → DNS root → provider mapping (en çok tekrar eden)
+  - Birçok MX root tekrar eden pattern → cache burada daha kritik
+  - WHOIS → doğru (zaten var)
+  - DNS → doğru (eklenmeli)
+  - **Provider mapping → EKSİK** (kritik)
+  - **Scoring → EKSİK** (kritik)
+- **Lokasyon**: `app/core/cache.py` (yeni dosya), `app/core/analyzer_dns.py`, `app/core/analyzer_whois.py`, `app/core/provider_map.py`, `app/core/scorer.py`
+- **Redis Tasarımı (Final)**:
+  ```python
+  # app/core/cache.py
+  # Cache keys:
+  # - dns:{domain} → TTL: 1 saat
+  # - whois:{domain} → TTL: 24 saat (WHOIS data değişmez)
+  # - provider:{mx_root} → TTL: 24 saat (provider mapping değişmez)
+  # - scoring:{domain}:{provider}:{signals_hash} → TTL: 1 saat
+  # - scan:{domain} → TTL: 1 saat (full scan result cache)
+  
+  # Signals hash generation:
+  # signals_hash = sha256(json.dumps(signals, sort_keys=True).encode())[:16]
+  # (sort_keys=True ensures stable hash for same signals)
+  
+  # Cache invalidation:
+  # - DNS: 1 saat TTL (otomatik expire)
+  # - WHOIS: 24 saat TTL (otomatik expire)
+  # - Provider: 24 saat TTL (otomatik expire)
+  # - Scoring: 1 saat TTL (otomatik expire)
+  # - Scan: 1 saat TTL (otomatik expire)
+  
+  # TTL uyumu:
+  # Scan cache TTL'i, DNS/WHOIS TTL'lerinden uzun olmayacak;
+  # konsistensi bozmamak için üst sınır 1 saat.
+  ```
+- **Aksiyon**:
+  - [ ] Redis-based distributed cache implementasyonu (`app/core/cache.py`)
+  - [ ] DNS cache implementasyonu (1 saat TTL, Redis)
+  - [ ] WHOIS cache'i Redis'e migrate et (24 saat TTL - WHOIS data değişmez)
+  - [ ] **Provider mapping cache ekle** (24 saat TTL - `classify_provider()` için)
+  - [ ] **Scoring cache ekle** (1 saat TTL - `score_domain()` için, signals hash ile)
+  - [ ] **Domain-level full scan cache ekle** (1 saat TTL - tüm scan result)
+  - [ ] `analyzer_dns.py` ve `analyzer_whois.py`'ye Redis cache ekle
+  - [ ] `provider_map.py`'ye Redis cache ekle
+  - [ ] `scorer.py`'ye Redis cache ekle
+  - [ ] In-memory cache'i kaldır (multi-worker için)
+  - [ ] **Test**: Aynı domain'i 2 kez scan et, cache hit kontrol et (Redis'te görünüyor mu?)
+  - [ ] **Test**: Provider mapping cache test (aynı MX root → cache hit)
+  - [ ] **Test**: Scoring cache test (aynı signals → cache hit)
+- **Blocker**: ❌ Hayır - Performance optimization
+- **Bağımlılık**: Distributed Rate Limiting (Redis stable olmalı)
+
+---
+
+### 4. Bulk Operations Optimization ⏱️ **1 gün** (revize - 4 saat değil)
+
 - **Durum**: ⚠️ Kısmi - Bulk scan var ama optimize edilebilir
 - **Etki**: Yüksek - Performance improvement
-- **Lokasyon**: `app/api/scan.py`, `app/core/tasks.py`
-- **Aksiyon**:
-  - [ ] Batch insert optimization (bulk insert)
-  - [ ] Database transaction optimization
-  - [ ] Memory usage optimization (streaming)
+- **Prerequisites**: Alembic + Distributed Rate Limiting + Caching Layer (cache hit rate yüksek olmalı)
+- **Mevcut Durum**:
+  - ✅ Bulk scan task var (`bulk_scan_task` - Celery task)
+  - ✅ Sequential processing var (rate limiting ile)
+  - ❌ Batch insert yok (her domain için ayrı `db.add()` ve `db.commit()`)
+  - ❌ Database transaction optimization yok (her domain için ayrı transaction)
+  - ❌ Memory usage optimization yok (tüm domain listesi memory'de)
+  - ❌ **Deadlock prevent strategy yok** → **EKSİK**
+  - ❌ **Batch failure recovery yok** → **EKSİK**
+  - ❌ **Partial commit log yok** → **EKSİK**
+  - ❌ **Batch size adaptasyonu yok** → **EKSİK**
+- **Lokasyon**: `app/core/tasks.py` (`bulk_scan_task`), `app/api/scan.py`
+- **Gerçek Dünya Güvenlik Katmanı**:
+  - [ ] Batch insert optimization (bulk insert - `bulk_insert_mappings()` veya `bulk_save_objects()`)
+  - [ ] Database transaction optimization (batch'ler halinde commit - 100 domain/batch)
+  - [ ] **Deadlock prevent strategy** (transaction timeout, retry logic)
+  - [ ] **Batch failure recovery** (failed batch'leri log'la, retry mekanizması)
+  - [ ] **Partial commit log** (hangi domain'ler commit edildi, hangileri edilmedi)
+  - [ ] **Bulk işlemler için ayrı log context** (bulk_id, batch_no, total_batches)
+  - [ ] **Batch size adaptasyonu** (DNS/WHOIS yüküne göre batch size ayarla)
+  - [ ] **Rate-limit aware**: Bulk scan, default olarak rate-limit aware olacak; batch boyutu, DNS/WHOIS rate limitlerine göre hesaplanacak
+  - [ ] Memory usage optimization (streaming - generator kullan)
+  - [ ] Progress tracking optimize et (her domain yerine batch bazlı)
+  - [ ] **Test**: Deadlock senaryosu (2 worker, aynı domain'leri scan et)
+  - [ ] **Test**: Batch failure recovery (DB down, Redis down)
+  - [ ] **Test**: Partial commit verification (100 domain, 50 başarılı, 50 başarısız)
 - **Blocker**: ❌ Hayır - Performance optimization
+- **Bağımlılık**: Caching Layer (cache hit rate yüksek olmalı)
 
-**P1 Toplam Süre**: ~2.5 gün
+---
+
+### 5. API Versioning ⏱️ 4 saat (EN SON)
+
+- **Durum**: ❌ Eksik - Tüm endpoint'ler direkt `/api/...` altında
+- **Etki**: Düşük - Backward compatibility için
+- **Öncelik**: 🔴 **EN SON** - Tüm router'lar stabil olmalı
+- **Prerequisites**: Alembic + Distributed Rate Limiting + Caching Layer + Bulk Operations (tüm router'lar stabil olmalı)
+- **Neden En Son?**
+  - Tüm router'lar stabil değil
+  - P1'de 3 madde daha aynı router'lara dokunuyor
+  - Versioning erken yapılırsa migration + caching + bulk sırasında PATH kırılır
+- **Mevcut Durum**:
+  - ✅ Tüm router'lar direkt `/api/...` prefix'i ile (`app/main.py`)
+  - ✅ API version string var (`version="1.0.0"` - ama bu API versioning değil)
+  - ❌ `/api/v1/` yapısı yok
+  - ❌ Version deprecation strategy yok
+- **Lokasyon**: `app/api/v1/` (yeni dizin yapısı), `app/main.py` (router registration)
+- **Zero Downtime Geçiş Planı**:
+  - [ ] API versioning yapısı oluştur (`/api/v1/`, `/api/v2/`)
+  - [ ] Tüm router'ları `/api/v1/` altına taşı (14 router var: health, auth, ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts)
+  - [ ] **Backward compatibility**: Eski endpoint'leri `/api/...` altında bırak (redirect veya proxy)
+  - [ ] OpenAPI docs'u güncelle (version bilgisi)
+  - [ ] Version deprecation strategy belirle (örn: v1 6 ay desteklenir)
+  - [ ] **Test**: Eski endpoint'ler çalışıyor mu kontrol et (backward compatibility)
+  - [ ] **Test**: Zero downtime deployment (yeni version deploy, eski version çalışmaya devam)
+- **Blocker**: ❌ Hayır - Future-proofing
+- **Bağımlılık**: Bulk Operations (tüm router'lar stabil olmalı)
+
+---
+
+## 🔴 P1 Operasyonel Risk Değerlendirmesi
+
+**Prod v1.1 devreye alma sırasında beklenen hata olasılığı ve risk profili**
+
+| Madde | Teknik Karmaşıklık | Prod Risk | Başarısızlık Tipi | Etki | Mitigation |
+|-------|-------------------|-----------|-------------------|------|------------|
+| **Alembic Migration** | Yüksek | 🔴 **HIGH** | Migration drift, downgrade fail, schema mismatch | Yüksek | Base revision snapshot, dry-run, rollback test, schema drift kontrolü |
+| **Distributed Rate Limiting** | Orta | 🟡 **MEDIUM** | Redis unavailable, limiter mismatch, fallback failure | Orta | Circuit breaker + fallback in-memory, degrade mode logging |
+| **Caching Layer** (DNS/WHOIS/Provider/Scoring) | Orta | 🔴 **HIGH** | Stale cache, TTL mismatch, consistency loss, cache invalidation | Orta/Yüksek | TTL alignment, versioned cache keys, metrics, signals hash stability |
+| **Bulk Operations** | Orta/Yüksek | 🔴 **HIGH** | Deadlock, batch corruption, partial commit, transaction timeout | Yüksek | Retry logic, partial commit log, batch isolation, deadlock prevention |
+| **API Versioning** | Düşük | 🟢 **LOW** | 404/route mismatch, BC break, dual-path routing failure | Düşük | Dual-path routing (v1 + legacy), backward compatibility tests, zero downtime deployment |
+
+**Risk Özeti:**
+- **HIGH Risk**: Alembic, Caching, Bulk Operations → Detaylı test ve rollback planı gerekli
+- **MEDIUM Risk**: Distributed Rate Limiting → Fallback mekanizması kritik
+- **LOW Risk**: API Versioning → En az riskli, son yapılacak
+
+**Sprint Planlaması İçin:**
+- HIGH risk maddeleri için ekstra buffer süre ayrılmalı (test + rollback verification)
+- MEDIUM risk maddeleri için fallback senaryoları test edilmeli
+- LOW risk maddeleri için minimal buffer yeterli
+
+---
+
+**P1 Toplam Süre**: **~5-6 gün** (revize - 2.5 gün değil)
+
+**P1 Gerçekçi Teknik Takvim**:
+- **Hafta 1**: Alembic (2-3 gün) + Distributed Rate Limiting (1 gün)
+- **Hafta 2**: Caching Layer (1.5 gün) + Bulk Operations (1 gün)
+- **Hafta 3**: API Versioning (4 saat) + Test & Integration (1 gün)
 
 ---
 
@@ -142,16 +316,32 @@ Bu maddeler code quality ve maintainability için iyi ama acil değil.
 - **Açıklama**: Repository pattern ve service layer ekle
 - **Blocker**: ❌ Hayır - Architecture improvement
 
-### 12. Distributed Rate Limiting ⏱️ 1 gün
-- **Durum**: ⚠️ Kısmi - Şu an in-memory rate limiting
-- **Etki**: Düşük - Multi-instance deployment için
-- **Açıklama**: Redis-based distributed rate limiting
-- **Blocker**: ❌ Hayır - Scale için
+### 12. N+1 Query Prevention ⏱️ 1 gün (revize)
 
-### 13. N+1 Query Prevention ⏱️ 1 gün
-- **Durum**: ⚠️ Potansiyel sorun - Dashboard query'leri
+- **Durum**: ⚠️ Potansiyel sorun - Doğru risk bölgeleri analiz edilmeli
 - **Etki**: Orta - Performance (scale için)
-- **Açıklama**: Eager loading (joinedload, selectinload) ekle
+- **Mevcut Durum**:
+  - ✅ Dashboard query'leri VIEW kullanıyor (`leads_ready` VIEW - raw SQL, N+1 riski düşük)
+  - ✅ Leads endpoint raw SQL JOIN kullanıyor (`get_lead` - LEFT JOIN, N+1 yok)
+  - ⚠️ Leads list endpoint (`get_leads`) VIEW kullanıyor ama eager loading kontrolü gerekli
+  - ❌ **Gerçek N+1 riski**: `leads_ready` VIEW'ın SQL optimize edilmemesi
+  - ❌ **Gerçek N+1 riski**: JOIN + ORDER BY + LIMIT pattern'i
+  - ❌ **Gerçek N+1 riski**: Provider filtering sırasında unnecessary join'ler
+  - ❌ **Gerçek N+1 riski**: Pagination'da yanlış COUNT(*) stratejisi
+  - ⚠️ Notes/tags/favorites → **küçük dataset** (N+1 riski düşük)
+- **Lokasyon**: `app/api/dashboard.py`, `app/api/leads.py`, `app/db/schema.sql` (VIEW definition)
+- **Doğru Risk Bölgeleri**:
+  1. `leads_ready` VIEW'ın SQL optimize edilmemesi
+  2. JOIN + ORDER BY + LIMIT pattern'i (pagination)
+  3. Provider filtering sırasında unnecessary join'ler
+  4. Pagination'da yanlış COUNT(*) stratejisi
+- **Aksiyon**:
+  - [ ] `leads_ready` VIEW SQL'ini audit et (N+1 var mı?)
+  - [ ] JOIN + ORDER BY + LIMIT pattern'ini optimize et
+  - [ ] Provider filtering'de unnecessary join'leri kaldır
+  - [ ] Pagination COUNT(*) stratejisini optimize et (window function?)
+  - [ ] Eager loading ekle (joinedload, selectinload) - gerekli yerlerde
+  - [ ] **Test**: Query count kontrol et (N+1 yok mu? - SQLAlchemy query logging)
 - **Blocker**: ❌ Hayır - Performance optimization
 
 **P2 Toplam Süre**: ~1 hafta
@@ -162,48 +352,12 @@ Bu maddeler code quality ve maintainability için iyi ama acil değil.
 
 G19 tamamlandı ama bazı optional feature'lar ertelendi.
 
-### 14. PDF Preview (Frontend) ⏱️ 2 saat
-- **Durum**: ❌ Eksik - Backend var, frontend yok
-- **Etki**: Düşük - UX improvement
-- **Lokasyon**: `mini-ui/` (frontend)
-- **Aksiyon**:
-  - [ ] PDF.js integration
-  - [ ] In-browser PDF viewer
-  - [ ] PDF download button
-- **Öncelik**: 🟢 Düşük - Nice to have
-
-### 15. Dashboard Charts ⏱️ 4 saat
-- **Durum**: ❌ Eksik - Backend endpoint yok
-- **Etki**: Düşük - Dashboard visualization
-- **Lokasyon**: `app/api/dashboard.py`, `mini-ui/`
-- **Aksiyon**:
-  - [ ] Backend: `GET /dashboard/charts` endpoint
-  - [ ] Frontend: Chart.js integration
-  - [ ] Segment distribution chart (pie chart)
-  - [ ] Score distribution chart (histogram)
-- **Öncelik**: 🟢 Düşük - Nice to have
-
-### 16. Recent Activity Feed ⏱️ 4 saat
-- **Durum**: ❌ Eksik
-- **Etki**: Düşük - Dashboard activity tracking
-- **Lokasyon**: `app/api/dashboard.py`, `mini-ui/`
-- **Aksiyon**:
-  - [ ] Backend: `GET /dashboard/activity` endpoint
-  - [ ] Activity tracking (last 10 scans, favorites, notes)
-  - [ ] Frontend: Recent activity feed component
-- **Öncelik**: 🟢 Düşük - Nice to have
-
-### 17. AI Features (G20'ye Taşındı) ⏱️ 1 hafta
-- **Durum**: 📋 Planlandı - G20 sprint'ine taşındı
-- **Etki**: Orta - AI-enhanced recommendations
-- **Açıklama**: AI recommendation engine, AI-enhanced summary
-- **Öncelik**: 🟡 Orta - Future sprint
-
-### 18. Contact Finder (G21'ye Taşındı) ⏱️ 1 hafta
-- **Durum**: 📋 Planlandı - G21 sprint'ine taşındı
-- **Etki**: Orta - Contact discovery
-- **Açıklama**: Web scraping, pattern generation, SMTP-check
-- **Öncelik**: 🟡 Orta - Future sprint (legal review gerekli)
+### 14-18. Optional Features (Backlog)
+- PDF Preview (Frontend) ⏱️ 2 saat
+- Dashboard Charts ⏱️ 4 saat
+- Recent Activity Feed ⏱️ 4 saat
+- AI Features (G20'ye Taşındı) ⏱️ 1 hafta
+- Contact Finder (G21'ye Taşındı) ⏱️ 1 hafta
 
 ---
 
@@ -211,51 +365,27 @@ G19 tamamlandı ama bazı optional feature'lar ertelendi.
 
 G18 tamamlandı ama bazı optional feature'lar eksik.
 
-### 19. Schedule Configuration Endpoint ⏱️ 2 saat
-- **Durum**: ❌ Eksik - Schedule hardcoded
-- **Etki**: Düşük - Schedule sadece kod içinde değiştirilebilir
-- **Lokasyon**: `app/api/scheduler.py` (yeni dosya)
-- **Aksiyon**:
-  - [ ] `GET /scheduler/config` - Mevcut schedule'ı göster
-  - [ ] `POST /scheduler/config` - Schedule'ı değiştir (daily/weekly/monthly)
-- **Öncelik**: 🟢 Düşük - Nice to have
-
-### 20. Slack Notifications ⏱️ 3 saat
-- **Durum**: ❌ Eksik - Sadece webhook ve email var
-- **Etki**: Düşük - Optional notification method
-- **Lokasyon**: `app/core/notifications.py`
-- **Aksiyon**:
-  - [ ] `send_slack_notification()` fonksiyonu ekle
-  - [ ] Slack webhook URL ile HTTP POST
-  - [ ] Alert config'e Slack seçeneği ekle
-- **Öncelik**: 🟢 Düşük - Optional
-
-### 21. Daily Digest Frequency ⏱️ 4 saat
-- **Durum**: ❌ Eksik - Alert config'de var ama implementasyon yok
-- **Etki**: Orta - Feature eksik
-- **Lokasyon**: `app/core/notifications.py`
-- **Aksiyon**:
-  - [ ] Daily digest için ayrı Celery Beat task
-  - [ ] Veya `process_pending_alerts()` içinde frequency kontrolü
-  - [ ] Daily digest aggregation logic
-- **Öncelik**: 🟡 Orta - Feature completion
+### 19-21. Optional Features (Backlog)
+- Schedule Configuration Endpoint ⏱️ 2 saat
+- Slack Notifications ⏱️ 3 saat
+- Daily Digest Frequency ⏱️ 4 saat
 
 ---
 
-## 📊 Öncelik Özeti
+## 📊 Öncelik Özeti (Revize)
 
 | Öncelik | Madde Sayısı | Toplam Süre | Prod Blocker? | Durum |
 |---------|--------------|-------------|---------------|-------|
 | **P0** | 5 | ~11 saat (1.5 gün) | ✅ Evet (artık çözüldü) | ✅ **Tamamlandı (G19)** |
-| **P1** | 4 | ~2.5 gün | ❌ Hayır | 📋 Backlog |
-| **P2** | 4 | ~1 hafta | ❌ Hayır | 📋 Backlog |
+| **P1** | 5 | **~5-6 gün** (revize) | ❌ Hayır | 📋 Backlog |
+| **P2** | 3 | ~1 hafta | ❌ Hayır | 📋 Backlog |
 | **G19 Optional** | 3 | ~10 saat | ❌ Hayır | 📋 Backlog |
 | **G18 Optional** | 3 | ~9 saat | ❌ Hayır | 📋 Backlog |
 | **Future Sprints** | 2 | ~2 hafta | ❌ Hayır | 📋 Planlandı |
 
 ---
 
-## 🎯 Önerilen Aksiyon Planı
+## 🎯 Önerilen Aksiyon Planı (Revize)
 
 ### ✅ Tamamlandı (G19 - P0 Hardening)
 1. ✅ DB Connection Pooling (1 saat) - **Tamamlandı**
@@ -266,19 +396,26 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 
 **Toplam**: ✅ ~11 saat (1.5 gün) - **G19'da tamamlandı**
 
-### Bu Ay (2-3 Hafta - P1 Performance)
-1. ✅ Caching Layer (1 gün)
-2. ✅ Bulk Operations Optimization (4 saat)
-3. ✅ Alembic Migration (1 gün)
-4. ✅ API Versioning (4 saat)
+### Bu Ay (3 Hafta - P1 Performance) - **REVİZE**
 
-**Toplam**: ~2.5 gün
+**Hafta 1:**
+1. Alembic Migration (2-3 gün) - **EN ÖNCE**
+2. Distributed Rate Limiting (1 gün) - **P2'den P1'e çekildi**
+
+**Hafta 2:**
+3. Caching Layer (1.5 gün) - **Provider/Scoring cache eklendi**
+4. Bulk Operations Optimization (1 gün) - **Deadlock/recovery eklendi**
+
+**Hafta 3:**
+5. API Versioning (4 saat) - **EN SON**
+6. Test & Integration (1 gün)
+
+**Toplam**: **~5-6 gün** (revize - 2.5 gün değil)
 
 ### Backlog (İhtiyaç Olduğunda - P2 Refactor)
 - Sync-First Refactor
 - Repository/Service Layer
-- Distributed Rate Limiting
-- N+1 Query Prevention
+- N+1 Query Prevention (doğru risk bölgeleri)
 
 ### Optional Features (Zaman Kalırsa)
 - PDF Preview
@@ -296,7 +433,10 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 
 ## 🚦 Production Go/No-Go Checklist
 
-### ✅ Go (Production'a Çıkabilir) - G19'da Tamamlandı
+### ✅ Prod v1.0 (P0-only) - G19'da Tamamlandı
+
+**Şartlar**: P0 checklist yeşil
+
 - [x] P0 maddelerin tamamı tamamlandı ✅ **G19'da**
 - [x] Microsoft SSO authentication çalışıyor ✅ **G19'da**
 - [x] Error tracking aktif ✅ **G19'da**
@@ -305,19 +445,91 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 - [x] API key security (bcrypt) aktif ✅ **G19'da**
 - [x] Health checks & probes (liveness/readiness/startup) aktif ✅ **G19'da**
 
-**Sonuç**: ✅ **Production'a çıkılabilir** - Tüm P0 maddeler G19'da tamamlandı.
+**Sonuç**: ✅ **Production v1.0'a çıkılabilir** - Tüm P0 maddeler G19'da tamamlandı.
 
-### ⚠️ No-Go (Production'a Çıkmadan Önce) - Artık Geçerli Değil
-- ~~[ ] P0 maddelerden herhangi biri eksik~~ → ✅ **Tümü tamamlandı**
-- ~~[ ] Authentication yok~~ → ✅ **Microsoft SSO eklendi**
-- ~~[ ] Error tracking yok~~ → ✅ **Sentry eklendi**
-- ~~[ ] Structured logging yok~~ → ✅ **structlog eklendi**
-- ~~[ ] DB connection pooling yok~~ → ✅ **Pooling yapılandırıldı**
-- ~~[ ] API key security (SHA-256, salt yok)~~ → ✅ **bcrypt'e migrate edildi**
-- ~~[ ] Health checks eksik~~ → ✅ **Liveness/readiness/startup eklendi**
+---
+
+### ⚠️ Prod v1.1 (P1-enabled) - P1 Sonrası Checklist
+
+**Şartlar**: P0 + P1 Go/No-Go (Redis health, Alembic rollback tested, DRL tested, cache hit metrics, bulk tests)
+
+**P1 tamamlandıktan sonra eklenmesi gerekenler:**
+
+- [ ] Redis health check eklendi (`/healthz/ready` - Redis ping)
+- [ ] Versioning paths test edildi (backward compatibility)
+- [ ] Alembic migration test eklendi (rollback verification)
+- [ ] Bulk transaction test eklendi (deadlock, recovery)
+- [ ] Cache hit rate monitoring eklendi (Redis metrics)
+- [ ] Distributed rate limiting test eklendi (multi-worker)
+- [ ] Provider/Scoring cache test eklendi (performance improvement)
+
+**Not**: P1 maddeleri production için önemli ama blocker değil. P0 tamamlandığı için production v1.0'a çıkılabilir. P1 tamamlandıktan sonra v1.1'e geçilebilir.
+
+---
+
+| Versiyon | Şartlar                                                                                             |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| **v1.0** | P0 checklist yeşil                                                                                  |
+| **v1.1** | P0 + P1 Go/No-Go (Redis health, Alembic rollback tested, DRL tested, cache hit metrics, bulk tests) |
+
+---
+
+## 📝 Derinleştirilmiş Analiz Notları
+
+### Codebase Analizi (2025-01-28 - Critique Sonrası)
+
+**Caching Durumu:**
+- WHOIS: In-memory cache var (`_whois_cache` dict, 1 saat TTL) - Redis'e migrate edilmeli
+- DNS: Cache yok - Redis cache eklenmeli
+- **Provider mapping: Cache yok** - **KRİTİK EKSİK** (en çok tekrar eden pattern)
+- **Scoring: Cache yok** - **KRİTİK EKSİK** (aynı domain için tekrar scoring)
+- **Domain-level full scan: Cache yok** - **BÜYÜK EKSİK**
+
+**Migration Durumu:**
+- 7 manual SQL migration file var (`app/db/migrations/`)
+- Alembic yok - Migration history ve rollback yok
+- **Gerçekçi süre: 2-3 gün** (1 gün değil)
+
+**API Versioning:**
+- 14 router var, hepsi direkt `/api/...` altında
+- Version string var ama API versioning yok
+- **Sıralama: EN SON** (tüm router'lar stabil olmalı)
+
+**Bulk Operations:**
+- Sequential processing var (rate limiting ile)
+- Batch insert yok (her domain için ayrı transaction)
+- **Deadlock prevent strategy yok** - **EKSİK**
+- **Batch failure recovery yok** - **EKSİK**
+- **Partial commit log yok** - **EKSİK**
+
+**Rate Limiting:**
+- In-memory rate limiting var (DNS, WHOIS, API key)
+- Redis-based distributed rate limiting yok
+- **P2'den P1'e çekildi** (multi-worker için kritik)
+
+**Query Optimization:**
+- Dashboard ve leads endpoint'leri VIEW/raw SQL kullanıyor (N+1 riski düşük)
+- **Gerçek N+1 riski**: VIEW SQL optimize edilmemesi, JOIN + ORDER BY + LIMIT, pagination COUNT(*)
+- Notes/tags/favorites → küçük dataset (N+1 riski düşük)
+
+**Eksik Analizler (Durum Tag'leri ile):**
+- `[PLANNED]` Log volume & log rotation strategy
+- `[PLANNED]` Connection leak detection
+- `[NOT STARTED]` WHOIS fallback strategy (API fallback? third party?)
+- `[NOT STARTED]` DNS retry mekanizması
+- `[DEFERRED]` Provider mapping override mekanizması (UI gerekli)
+- `[PLANNED]` Data normalizasyon conflict resolution
+- `[PLANNED]` Duplicate lead resolution
+- `[NOT STARTED]` VIEW refresh frequency (PostgreSQL materialized view?)
+- `[PLANNED]` Error code matrix
+- `[PLANNED]` Test suite coverage target mapping
+- `[PLANNED]` Sentry categorization strategy
+- `[NOT STARTED]` P1 ve P2'nin WSL2 + Docker'da resource consumption analizi
+- `[PLANNED]` Production-ready memory footprint
+- `[PLANNED]` Health check metrics (scanner latency + DNS latency)
 
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Durum**: Active - Production hardening + future planning
-
+**Durum**: Active - Production hardening + future planning  
+**Analiz**: Critique sonrası P1/P2 öncelikleri ve bağımlılıklar revize edildi. Gerçekçi süre tahminleri ve risksiz migration planları eklendi.

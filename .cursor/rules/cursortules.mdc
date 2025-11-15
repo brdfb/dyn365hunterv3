@@ -7,7 +7,9 @@ alwaysApply: true
 - **Target**: ≤2 minute "kahvelik" analysis flow for sales team
 - **MVP Status**: ✅ Completed (G1-G14)
 - **Post-MVP Sprint 1-5 (G14-G18)**: ✅ Completed
-- **Post-MVP Sprint 6 (G19)**: 📋 Planned - Auth + UI + Advanced Features
+- **Post-MVP Sprint 6 (G19)**: ✅ Completed - Auth + UI + Advanced Features
+- **P0 Hardening (G19)**: ✅ Completed - DB Connection Pooling, API Key Security, Structured Logging, Error Tracking, Health Checks
+- **P1 Performance (Backlog)**: 📋 Planned - Alembic Migration, Distributed Rate Limiting, Caching Layer, Bulk Operations, API Versioning
 - **Out of Scope**: D365 adapter, `scripts/demo_run.sh`
 
 ## Code Style & Standards
@@ -123,9 +125,14 @@ alwaysApply: true
 - Priority score calculation
 - Basic tests, README
 
-### P1 (Should Have)
-- Edge case tests, error handling improvements
-- Healthcheck improvements, logging enhancements
+### P1 (Should Have - Performance & Infrastructure)
+- **Alembic Migration System** - Migration history tracking, rollback capability, schema drift detection
+- **Distributed Rate Limiting** - Redis-based rate limiting for multi-worker deployments
+- **Caching Layer** - Redis-based distributed caching (DNS, WHOIS, Provider, Scoring, Scan)
+- **Bulk Operations Optimization** - Batch processing, deadlock prevention, partial commit recovery
+- **API Versioning** - `/api/v1/` structure with backward compatibility
+- **Reference**: `docs/active/P1-IMPLEMENTATION-PLAYBOOK.md` for implementation guide
+- **Preparation**: `docs/todos/P1-PREPARATION.md` for pre-implementation analysis
 
 ### P2 (Nice to Have)
 - Performance optimizations, additional test coverage
@@ -274,12 +281,14 @@ When a phase is completed (TODO status = "Completed"):
 
 1. Is this in MVP scope? (Check Cut List)
 2. **Is this in the correct Post-MVP sprint?** (Check `docs/plans/2025-11-14-FINAL-ROADMAP.md`)
-3. Does this require external API calls? (Handle timeouts/errors)
-4. Will this log PII? (Only log domain)
-5. Is this testable? (Write tests)
-6. Does this break Docker setup? (Verify setup_dev.sh still works)
-7. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
-8. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
+3. **Is this a P1 performance/infrastructure task?** (Check `docs/active/KALAN-ISLER-PRIORITY.md` and `docs/active/P1-IMPLEMENTATION-PLAYBOOK.md`)
+4. Does this require external API calls? (Handle timeouts/errors)
+5. Will this log PII? (Only log domain)
+6. Is this testable? (Write tests)
+7. Does this break Docker setup? (Verify setup_dev.sh still works)
+8. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
+9. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
+10. **For P1 tasks**: Did I check the preparation docs? (`docs/todos/P1-PREPARATION.md`)
 
 
 ---
