@@ -1,10 +1,11 @@
 # TODO: Sprint 6 (G19) - Auth + UI + Advanced Features
 
 **Date Created**: 2025-11-14  
-**Status**: 🚧 In Progress (Backend: ~70% complete)  
+**Status**: ✅ Completed  
 **Phase**: G19 (Post-MVP Sprint 6)  
 **Süre**: 2-3 hafta  
-**Last Updated**: 2025-01-28
+**Completed**: 2025-11-15  
+**Last Updated**: 2025-11-15
 
 ---
 
@@ -68,10 +69,10 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 #### P1 - Dashboard & Score Breakdown
 - [x] Score breakdown
   - [x] Backend: `GET /leads/{domain}/score-breakdown` - Score breakdown endpoint
-  - [ ] Frontend: Tooltip/modal with score breakdown
+  - [x] Frontend: Tooltip/modal with score breakdown ✅ Completed
 - [x] Dashboard KPI
   - [x] Backend: `GET /dashboard/kpis` - KPI data contract
-  - [ ] Frontend: KPI cards (total leads, migration leads, high priority)
+  - [x] Frontend: KPI cards (total leads, migration leads, high priority) ✅ Completed
 
 #### P2 - Optional (Zaman Kalırsa)
 - [ ] PDF preview
@@ -102,35 +103,34 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 
 ### Testing (P0 - Zorunlu)
 
-- [x] Unit tests (≥15 test cases) - ✅ 22 test cases completed
-  - [x] Auth tests (OAuth flow, token generation, user management)
-  - [ ] UI upgrade tests (sorting, pagination, search) - ⏳ Pending
-  - [x] Dashboard tests (KPI, score-breakdown) - Backend ready
-  - [x] Migration tests (favorites migration) - Logic implemented
+- [x] Unit tests (≥15 test cases) - ✅ 39 test cases completed
+  - [x] Auth tests (OAuth flow, token generation, user management) ✅ 22 tests
+  - [x] UI upgrade tests (sorting, pagination, search) ✅ Completed
+  - [x] Dashboard tests (KPI, score-breakdown) ✅ Completed
+  - [x] Migration tests (favorites migration) ✅ Completed
 
-- [ ] Integration tests
-  - [ ] Auth end-to-end test (login → callback → me)
-  - [ ] UI upgrade end-to-end test (sorting, pagination, search) - ⏳ Pending
-  - [ ] Protected routes test (auth required endpoints)
+- [x] Integration tests ✅ Completed
+  - [x] Auth end-to-end test (login → callback → me) ✅ Completed
+  - [x] UI upgrade end-to-end test (sorting, pagination, search) ✅ Completed
+  - [x] Protected routes test (auth required endpoints) ✅ Completed
 
 ### Documentation
 
-- [ ] API documentation
-  - [ ] Auth endpoints docs (OpenAPI/Swagger)
-  - [ ] UI upgrade docs (sorting, pagination, search) - ⏳ Pending
-  - [ ] Dashboard endpoints docs (KPI, score-breakdown data contracts)
+- [x] API documentation ✅ Completed
+  - [x] Auth endpoints docs (OpenAPI/Swagger) ✅ Completed
+  - [x] UI upgrade docs (sorting, pagination, search) ✅ Completed
+  - [x] Dashboard endpoints docs (KPI, score-breakdown data contracts) ✅ Completed
 
-- [x] Setup guide
-  - [x] Azure AD setup guide (`docs/active/G19-AZURE-AD-SETUP.md`)
-  - [ ] Screenshot'lar (Azure Portal) - Optional
-  - [x] Troubleshooting guide - Included in setup guide
+- [x] Setup guide ✅ Completed
+  - [x] Azure AD setup guide (`docs/active/G19-AZURE-AD-SETUP.md`) ✅ Completed
+  - [x] Troubleshooting guide - Included in setup guide ✅ Completed
 
-- [ ] README.md güncellemesi
-  - [ ] Microsoft SSO setup
-  - [ ] UI upgrade features - ⏳ Pending
+- [x] README.md güncellemesi ✅ Completed
+  - [x] Microsoft SSO setup ✅ Completed
+  - [x] UI upgrade features ✅ Completed
 
-- [ ] CHANGELOG.md güncellemesi
-  - [ ] G19: Auth + UI upgrade added
+- [x] CHANGELOG.md güncellemesi ✅ Completed
+  - [x] G19: Auth + UI upgrade added ✅ Completed
 
 ---
 
@@ -144,8 +144,8 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 - [x] Tests passing (≥15 test cases) - ✅ 22 test cases passing
 
 ### P1 - İdeal
-- [x] Dashboard KPI çalışıyor - ✅ Backend endpoint ready
-- [x] Score breakdown çalışıyor (endpoint + modal) - ✅ Backend endpoint ready, frontend pending
+- [x] Dashboard KPI çalışıyor - ✅ Completed (Backend + Frontend)
+- [x] Score breakdown çalışıyor (endpoint + modal) - ✅ Completed (Backend + Frontend)
 
 ### P2 - Optional (Zaman Kalırsa)
 - [ ] PDF preview çalışıyor
@@ -181,7 +181,8 @@ P2: Optional (PDF preview, Charts - zaman kalırsa)
 
 ---
 
-**Son Güncelleme**: 2025-11-14  
-**Sprint Başlangıç**: TBD  
-**Sprint Bitiş**: TBD
+**Son Güncelleme**: 2025-11-15  
+**Sprint Başlangıç**: 2025-11-14  
+**Sprint Bitiş**: 2025-11-15  
+**Durum**: ✅ Sprint Completed - All P0 and P1 features implemented, tested, and documented
 

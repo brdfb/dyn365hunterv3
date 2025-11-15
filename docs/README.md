@@ -36,7 +36,6 @@ docs/
 #### Production Readiness Documentation
 - `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
 - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
-- `G19-PRE-FLIGHT-CHECKLIST.md` - G19 pre-flight checklist (✅ Completed - Production hardening)
 
 **Note:** Active documentation contains reference guides and production readiness documentation. Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
 
@@ -54,10 +53,15 @@ docs/
 - `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (Completed)
 - `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (Completed)
 - `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (Completed)
+- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: Microsoft SSO Auth + UI Upgrade (✅ Completed - 2025-11-15)
+- `2025-11-15-G19-AZURE-AD-SETUP.md` - G19: Azure AD Setup Guide (Completed)
+- `2025-11-15-G19-IMPLEMENTATION-PLAN.md` - G19: Implementation Plan (Completed)
+- `2025-11-15-G19-TEST-SUMMARY.md` - G19: Test Summary (Completed)
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
 - `2025-01-28-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-01-28)
+- `2025-11-15-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-11-15)
 - `2025-01-28-TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report (Archived)
 - `2025-01-28-TESTING.md` - Testing guide and troubleshooting (Archived)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
@@ -79,7 +83,7 @@ docs/
 ### Project Plans
 
 **Active Plans:**
-- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - Active roadmap (G19 planned)
+- `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - G19 completed, future sprints (G20+) planned
 
 **Archived Plans:**
 All completed planning documentation has been moved to `docs/archive/`:
@@ -96,7 +100,7 @@ All completed planning documentation has been moved to `docs/archive/`:
 ### TODOs
 
 **Active TODOs:**
-- `G19-auth-ui-advanced.md` - Sprint 6: Auth + UI + Advanced Features (🚧 In Progress - Backend: ~70% complete)
+- None (All sprints completed through G19)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
@@ -106,4 +110,5 @@ All completed TODO files have been moved to `docs/archive/`:
 - `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (✅ Completed)
 - `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (✅ Completed)
 - `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (✅ Completed)
+- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: Microsoft SSO Auth + UI Upgrade (✅ Completed - 2025-11-15)
 

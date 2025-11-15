@@ -30,11 +30,15 @@ Satış ekibi yeni bir lead listesi aldı (100 domain). Hangi domain'ler önceli
    - Sonuçları gör
    - **Not:** CSV upload ile otomatik scan yapıldıysa, bu adım gerekli değildir
 
-4. **Lead'leri Gör ve Filtrele**
+4. **Lead'leri Gör ve Filtrele** (G19: UI Upgrade) ✨ YENİ
    - Segment filtresi: Migration
    - Min skor: 70
+   - **Search** (G19): Arama kutusuna domain veya şirket adı yaz (anlık arama)
+   - **Sorting** (G19): Tablo başlıklarına tıklayarak sıralama (skor, domain, segment)
+   - **Pagination** (G19): Sayfa numaraları ile sayfalama (10, 25, 50, 100 kayıt/sayfa)
    - "Filtrele" butonuna tıkla
    - Tabloda yüksek öncelikli lead'leri gör
+   - **Score Breakdown** (G19): Skorlara tıklayarak detaylı skor analizi modal'ı aç
 
 5. **Export Et**
    - Filtreleri ayarla
@@ -51,8 +55,11 @@ Satış ekibi yeni bir lead listesi aldı (100 domain). Hangi domain'ler önceli
 
 ### Dashboard ile Hızlı Kontrol
 ```bash
-# Önce dashboard'a bak, genel durumu gör
+# Legacy dashboard (backward compatible)
 curl "http://localhost:8000/dashboard"
+
+# New KPI endpoint (G19) ✨ YENİ
+curl "http://localhost:8000/dashboard/kpis"
 ```
 
 **Örnek Sonuç:**
@@ -180,20 +187,48 @@ done < yeni-leadler.csv
 - Scan sırasında provider değişiklikleri otomatik olarak tespit edilir ve kaydedilir
 - Örnek: Google → M365 geçişi otomatik olarak `provider_change_history` tablosuna kaydedilir
 
-#### 3. Öncelikli Lead'leri Görüntüle
+#### 3. Öncelikli Lead'leri Görüntüle (G19: UI Upgrade) ✨ YENİ
 ```bash
-# Migration segment'i (yüksek öncelik)
+# Migration segment'i (yüksek öncelik) - Basit filtre
 curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+
+# Migration segment'i + Sorting (skora göre sıralama) - G19
+curl "http://localhost:8000/leads?segment=Migration&min_score=70&sort_by=readiness_score&sort_order=desc"
+
+# Migration segment'i + Search + Sorting + Pagination - G19
+curl "http://localhost:8000/leads?segment=Migration&min_score=70&search=example&sort_by=readiness_score&sort_order=desc&page=1&page_size=25"
 
 # Existing segment'i (orta öncelik)
 curl "http://localhost:8000/leads?segment=Existing&min_score=50"
 ```
 
-#### 4. Dashboard Özeti
+**G19 UI Upgrade Özellikleri:**
+- **Sorting**: `sort_by` (domain, readiness_score, segment, provider) + `sort_order` (asc, desc)
+- **Pagination**: `page` (sayfa numarası) + `page_size` (10, 25, 50, 100)
+- **Search**: `search` (domain veya company_name içinde arama)
+- **Score Breakdown**: Skorlara tıklayarak detaylı analiz modal'ı açılır
+
+#### 4. Dashboard Özeti (G19: Enhanced) ✨ YENİ
 ```bash
-# Tüm lead'lerin özet istatistikleri
+# Legacy dashboard (backward compatible)
 curl "http://localhost:8000/dashboard"
+
+# New KPI endpoint (G19)
+curl "http://localhost:8000/dashboard/kpis"
 ```
+
+**G19 KPI Endpoint Yanıtı:**
+```json
+{
+  "total_leads": 100,
+  "migration_leads": 15,
+  "high_priority": 8
+}
+```
+
+**G19 Enhancement:**
+- **High Priority KPI**: Priority Score 1-2 olan lead sayısı
+- **Optimized Response**: Sadece gerekli KPI metrikleri (daha hızlı)
 
 **Ne Gösterir?**
 - Toplam lead sayısı
@@ -867,6 +902,9 @@ curl "http://localhost:8000/leads/ornek-firma.com/summary.pdf" -o ornek-firma-su
 - ✅ Otomatik refresh (upload/scan sonrası)
 - ✅ Hızlı export (tek tıkla CSV indirme)
 - ✅ Hata mesajları görsel
+- ✅ **G19: UI Upgrade** - Sorting, pagination, search ile gelişmiş tablo yönetimi
+- ✅ **G19: Score Breakdown** - Skorlara tıklayarak detaylı analiz
+- ✅ **G19: Microsoft SSO** - Güvenli giriş ve kullanıcı bazlı favoriler
 
 **Ne Zaman API Kullanılır?**
 - Script'ler ve otomasyon için
@@ -896,6 +934,13 @@ http://localhost:8000/mini-ui/
 - CSV'den ekleme yaparken batch processing kullanın
 - Her analiz arasında 2 saniye bekleyin (rate limiting)
 - Hata durumlarını log'layın
+
+### 2.1. UI Upgrade ile Verimli Çalışma (G19) ✨ YENİ
+- **Sorting**: Skora göre sıralama yaparak yüksek öncelikli lead'leri üstte görün
+- **Pagination**: Büyük listelerde sayfalama kullanarak performansı artırın
+- **Search**: Domain veya şirket adı ile hızlı arama yapın (debounce ile optimize)
+- **Score Breakdown**: Skorlara tıklayarak detaylı analiz yapın, eksik sinyalleri görün
+- **Kombine Kullanım**: Search + Filter + Sort + Pagination ile güçlü filtreleme
 
 ### 3. Düzenli Kontrol
 - **Migration/Existing**: Haftalık kontrol

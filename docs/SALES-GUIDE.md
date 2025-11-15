@@ -56,20 +56,31 @@ http://localhost:8000/mini-ui/
    - Tarama sonucu gösterimi (skor, segment, provider)
    - Otomatik lead listesi güncelleme
 
-3. **Leads Table + Filtreler**
+3. **Leads Table + Filtreler** (G19: UI Upgrade) ✨ YENİ
    - Segment filtresi (Migration, Existing, Cold, Skip)
    - Min skor filtresi
    - Provider filtresi
+   - **Sorting** (G19): Tablo başlıklarına tıklayarak sıralama (domain, skor, segment, vb.)
+   - **Pagination** (G19): Sayfa numaraları ile sayfalama (10, 25, 50, 100 kayıt/sayfa)
+   - **Search** (G19): Arama kutusu ile anlık arama (debounce ile optimize edilmiş)
    - Tablo görüntüleme (Domain, Şirket, Provider, Segment, Skor)
+   - **Score Breakdown** (G19): Skorlara tıklayarak detaylı skor analizi modal'ı açma
 
 4. **Export CSV**
    - Filtrelenmiş lead'leri CSV olarak export
    - Otomatik dosya indirme
 
-5. **Dashboard Stats (KPI)**
+5. **Dashboard Stats (KPI)** (G19: Enhanced) ✨ YENİ
    - Toplam lead sayısı
    - Migration lead sayısı
+   - **Yüksek Öncelik** (G19): Priority Score 1-2 olan lead sayısı
    - En yüksek skor
+
+6. **Microsoft SSO Authentication** (G19) ✨ YENİ
+   - Microsoft hesabı ile giriş yapma
+   - Oturum yönetimi (token-based)
+   - Güvenli çıkış (logout)
+   - Kullanıcı bazlı favoriler (session-based → user-based migration)
 
 **Detaylı bilgi için:** [mini-ui/README-mini-ui.md](../../mini-ui/README-mini-ui.md)
 
@@ -311,7 +322,7 @@ Detaylı açıklama için: [SEGMENT-GUIDE.md](SEGMENT-GUIDE.md)
 curl "http://localhost:8000/leads"
 ```
 
-### Filtreleme
+### Filtreleme ve UI Upgrade (G19) ✨ YENİ
 
 #### Migration Segment'i (Yüksek Öncelik)
 
@@ -342,6 +353,68 @@ curl "http://localhost:8000/leads?segment=Migration&min_score=70&provider=M365"
 - `min_score`: Minimum skor (0-100)
 - `provider`: M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun, Hosting, Local, Unknown
 
+### UI Upgrade Özellikleri (G19) ✨ YENİ
+
+#### Sorting (Sıralama)
+
+```bash
+# Skora göre sıralama (yüksekten düşüğe)
+curl "http://localhost:8000/leads?sort_by=readiness_score&sort_order=desc"
+
+# Domain'e göre sıralama (alfabetik)
+curl "http://localhost:8000/leads?sort_by=domain&sort_order=asc"
+
+# Segment'e göre sıralama
+curl "http://localhost:8000/leads?sort_by=segment&sort_order=asc"
+```
+
+**Sıralama Seçenekleri:**
+- `sort_by`: `domain`, `readiness_score`, `segment`, `provider`, `company_name`
+- `sort_order`: `asc` (artan) veya `desc` (azalan)
+
+**Mini UI'de:** Tablo başlıklarına tıklayarak sıralama yapılabilir.
+
+#### Pagination (Sayfalama)
+
+```bash
+# İlk sayfa (varsayılan: 10 kayıt/sayfa)
+curl "http://localhost:8000/leads?page=1"
+
+# İkinci sayfa, 25 kayıt/sayfa
+curl "http://localhost:8000/leads?page=2&page_size=25"
+
+# Üçüncü sayfa, 50 kayıt/sayfa
+curl "http://localhost:8000/leads?page=3&page_size=50"
+```
+
+**Pagination Parametreleri:**
+- `page`: Sayfa numarası (1'den başlar)
+- `page_size`: Sayfa başına kayıt sayısı (10, 25, 50, 100)
+
+**Mini UI'de:** Sayfa numaraları ve önceki/sonraki butonları ile sayfalama yapılabilir.
+
+#### Search (Arama)
+
+```bash
+# Domain veya şirket adında arama
+curl "http://localhost:8000/leads?search=example"
+
+# Kombine: Arama + Filtre + Sıralama
+curl "http://localhost:8000/leads?search=example&segment=Migration&sort_by=readiness_score&sort_order=desc"
+```
+
+**Search Parametresi:**
+- `search`: Domain veya company_name içinde arama (case-insensitive, partial match)
+
+**Mini UI'de:** Arama kutusuna yazıldığında otomatik arama yapılır (debounce ile optimize edilmiş, 300ms gecikme).
+
+#### Kombine Kullanım Örneği
+
+```bash
+# Migration segment'indeki, "example" içeren, skora göre sıralanmış, 2. sayfa (25 kayıt/sayfa)
+curl "http://localhost:8000/leads?segment=Migration&search=example&sort_by=readiness_score&sort_order=desc&page=2&page_size=25"
+```
+
 ### Tek Lead Detayı
 
 ```bash
@@ -368,10 +441,14 @@ curl "http://localhost:8000/leads/ornek-firma.com"
 ### Dashboard (Özet Görünüm)
 
 ```bash
+# Legacy dashboard endpoint (backward compatible)
 curl "http://localhost:8000/dashboard"
+
+# New KPI endpoint (G19) ✨ YENİ
+curl "http://localhost:8000/dashboard/kpis"
 ```
 
-**Ne Döner?**
+**Legacy Dashboard Yanıtı:**
 ```json
 {
   "total_leads": 150,
@@ -384,11 +461,63 @@ curl "http://localhost:8000/dashboard"
 }
 ```
 
+**New KPI Endpoint Yanıtı (G19):**
+```json
+{
+  "total_leads": 150,
+  "migration_leads": 25,
+  "high_priority": 10
+}
+```
+
 **Ne İşe Yarar?**
 - Hızlı özet görünüm
 - Segment dağılımını görme
 - Ortalama skor takibi
-- Yüksek öncelikli lead sayısı (Migration + skor >= 70)
+- Yüksek öncelikli lead sayısı (Priority Score 1-2)
+- **G19 Enhancement**: High Priority KPI metric eklendi
+
+### Score Breakdown (G19) ✨ YENİ
+
+Bir domain'in skor detaylarını görüntüleme:
+
+```bash
+curl "http://localhost:8000/leads/ornek-firma.com/score-breakdown"
+```
+
+**Ne Döner?**
+```json
+{
+  "domain": "ornek-firma.com",
+  "readiness_score": 85,
+  "breakdown": {
+    "base_score": 0,
+    "provider_points": 50,
+    "signal_points": 35,
+    "risk_points": 0,
+    "total": 85
+  },
+  "signals": {
+    "spf": true,
+    "dkim": true,
+    "dmarc_policy": "reject",
+    "spf_record": "v=spf1 include:spf.protection.outlook.com -all"
+  },
+  "provider": "M365",
+  "mx_root": "outlook.com"
+}
+```
+
+**Mini UI'de Kullanım:**
+- Skorlara tıklayarak modal açılır
+- Detaylı skor analizi görüntülenir
+- Provider, sinyaller ve risk puanları gösterilir
+
+**Ne İşe Yarar?**
+- Skorun nasıl hesaplandığını anlama
+- Hangi sinyallerin eksik olduğunu görme
+- Risk puanlarını değerlendirme
+- Migration hazırlık seviyesini anlama
 
 ### Lead Enrichment (G16) ✨ YENİ
 
@@ -743,7 +872,48 @@ curl "http://localhost:8000/leads/DOMAIN-BURAYA"
 
 ### Dashboard Özeti
 ```bash
+# Legacy dashboard
 curl "http://localhost:8000/dashboard"
+
+# New KPI endpoint (G19) ✨ YENİ
+curl "http://localhost:8000/dashboard/kpis"
+```
+
+### Score Breakdown (G19) ✨ YENİ
+```bash
+curl "http://localhost:8000/leads/DOMAIN-BURAYA/score-breakdown"
+```
+
+### UI Upgrade: Sorting, Pagination, Search (G19) ✨ YENİ
+```bash
+# Sorting (skora göre sıralama)
+curl "http://localhost:8000/leads?sort_by=readiness_score&sort_order=desc"
+
+# Pagination (2. sayfa, 25 kayıt/sayfa)
+curl "http://localhost:8000/leads?page=2&page_size=25"
+
+# Search (domain veya şirket adında arama)
+curl "http://localhost:8000/leads?search=example"
+
+# Kombine: Arama + Filtre + Sıralama + Sayfalama
+curl "http://localhost:8000/leads?segment=Migration&search=example&sort_by=readiness_score&sort_order=desc&page=1&page_size=25"
+```
+
+### Microsoft SSO Authentication (G19) ✨ YENİ
+```bash
+# Login (redirect to Azure AD)
+curl "http://localhost:8000/auth/login"
+
+# Current user info (requires Authorization header)
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" "http://localhost:8000/auth/me"
+
+# Logout
+curl -X POST http://localhost:8000/auth/logout \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Refresh token
+curl -X POST http://localhost:8000/auth/refresh \
+  -H "Authorization: Bearer YOUR_REFRESH_TOKEN"
 ```
 
 ### Lead Export (CSV/Excel)
