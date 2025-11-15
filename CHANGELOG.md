@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Support Endpoint** (2025-11-15) - Added `/support` endpoint for support information
+  - Returns support information with API documentation links
+  - Footer link in Mini UI now functional
+- **PDF Turkish Character Support** (2025-11-15) - Fixed Turkish character encoding in PDF generation
+  - Table cells now use Paragraph objects for UTF-8 support
+  - Turkish characters (ı, ş, ğ, ü, ö, ç) now display correctly in PDF
+  - Fixed "Zayıf sinyaller" → "Zay f sinyaller" issue
+  - Applied to all tables: Domain Information, Security Status, Scores, Signals
+  - Analysis section now properly displays Turkish text
 - **Stabilization Sprint - Gün 3: UI Stabilizasyon** (2025-01-28) - Satış ekibi için 2 dakikada kullanılabilir UI
   - Table view cleanup - Column width optimization (domain, provider, score, segment, priority, tenant-size, local-provider), row hover effect with smooth transition, empty state message with CTA button, loading state spinner with animation, pagination UI improvements (page numbers, prev/next, page info) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/index.html`)
   - Score breakdown modal improvements - Close button more prominent (absolute positioning, hover effect), backdrop click to close (fixed to only close on overlay click), ESC key to close modal, modal scroll optimization (max-height: 80vh, overflow-y: auto), score breakdown tooltips for signals and risks (SPF, DKIM, DMARC, risk factors) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/js/app.js`)

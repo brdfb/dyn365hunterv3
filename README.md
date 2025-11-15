@@ -196,6 +196,7 @@ A simple web interface for demo and internal use:
 - Swagger UI: `http://localhost:8000/docs` (interactive API explorer)
 - ReDoc: `http://localhost:8000/redoc` (alternative documentation format)
 - OpenAPI JSON: `http://localhost:8000/openapi.json` (machine-readable schema)
+- Support: `http://localhost:8000/support` (support information endpoint)
 
 ### Health Check
 - `GET /healthz` - Health check and database connection status
@@ -315,6 +316,7 @@ A simple web interface for demo and internal use:
   - Returns: PDF file download
   - Includes: Provider info, SPF/DKIM/DMARC status, expiry date, signals, scores, risks
   - File name: `{domain}_summary.pdf`
+  - **Turkish Character Support**: Full UTF-8 support for Turkish characters (ı, ş, ğ, ü, ö, ç)
 
 ### ReScan (G18: Automation)
 - `POST /scan/{domain}/rescan` - Re-scan a single domain and detect changes

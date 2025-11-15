@@ -11,6 +11,8 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from datetime import datetime
 from app.db.session import get_db
 from app.db.models import Company, DomainSignal, LeadScore
@@ -108,6 +110,22 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
 
         # Define styles
         styles = getSampleStyleSheet()
+        
+        # Create table cell style for Turkish characters (UTF-8 support)
+        # ReportLab Paragraph already supports UTF-8, so we use Paragraph in Table cells
+        table_cell_style = ParagraphStyle(
+            "TableCell",
+            parent=styles["Normal"],
+            fontSize=10,
+        )
+        
+        table_cell_bold_style = ParagraphStyle(
+            "TableCellBold",
+            parent=styles["Normal"],
+            fontSize=10,
+            fontName="Helvetica-Bold",
+        )
+        
         title_style = ParagraphStyle(
             "CustomTitle",
             parent=styles["Heading1"],
@@ -132,11 +150,12 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
 
         # Domain Information
         elements.append(Paragraph("Domain Information", heading_style))
+        # Use Paragraph for Turkish character support
         domain_data = [
-            ["Domain:", normalized_domain],
-            ["Company:", row.canonical_name or "N/A"],
-            ["Provider:", row.provider or "Unknown"],
-            ["Country:", row.country or "N/A"],
+            [Paragraph("Domain:", table_cell_bold_style), Paragraph(normalized_domain, table_cell_style)],
+            [Paragraph("Company:", table_cell_bold_style), Paragraph(row.canonical_name or "N/A", table_cell_style)],
+            [Paragraph("Provider:", table_cell_bold_style), Paragraph(row.provider or "Unknown", table_cell_style)],
+            [Paragraph("Country:", table_cell_bold_style), Paragraph(row.country or "N/A", table_cell_style)],
         ]
         domain_table = Table(domain_data, colWidths=[2 * inch, 4 * inch])
         domain_table.setStyle(
@@ -145,8 +164,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
                     ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ecf0f1")),
                     ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
@@ -159,9 +177,9 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
         # Security Status
         elements.append(Paragraph("Security Status", heading_style))
         security_data = [
-            ["SPF:", "Yes" if row.spf else "No"],
-            ["DKIM:", "Yes" if row.dkim else "No"],
-            ["DMARC Policy:", row.dmarc_policy or "None"],
+            [Paragraph("SPF:", table_cell_bold_style), Paragraph("Yes" if row.spf else "No", table_cell_style)],
+            [Paragraph("DKIM:", table_cell_bold_style), Paragraph("Yes" if row.dkim else "No", table_cell_style)],
+            [Paragraph("DMARC Policy:", table_cell_bold_style), Paragraph(row.dmarc_policy or "None", table_cell_style)],
         ]
         security_table = Table(security_data, colWidths=[2 * inch, 4 * inch])
         security_table.setStyle(
@@ -170,8 +188,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
                     ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ecf0f1")),
                     ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
@@ -184,9 +201,9 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
         # Scores
         elements.append(Paragraph("Scores", heading_style))
         scores_data = [
-            ["Readiness Score:", f"{row.readiness_score}/100"],
-            ["Segment:", row.segment or "N/A"],
-            ["Priority Score:", f"{priority_score}/7" if priority_score else "N/A"],
+            [Paragraph("Readiness Score:", table_cell_bold_style), Paragraph(f"{row.readiness_score}/100", table_cell_style)],
+            [Paragraph("Segment:", table_cell_bold_style), Paragraph(row.segment or "N/A", table_cell_style)],
+            [Paragraph("Priority Score:", table_cell_bold_style), Paragraph(f"{priority_score}/7" if priority_score else "N/A", table_cell_style)],
         ]
         scores_table = Table(scores_data, colWidths=[2 * inch, 4 * inch])
         scores_table.setStyle(
@@ -195,8 +212,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
                     ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ecf0f1")),
                     ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
@@ -209,10 +225,10 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
         # Signals
         elements.append(Paragraph("Signals", heading_style))
         signals_data = [
-            ["MX Root:", row.mx_root or "N/A"],
-            ["Registrar:", row.registrar or "N/A"],
-            ["Expires At:", str(row.expires_at) if row.expires_at else "N/A"],
-            ["Nameservers:", ", ".join(row.nameservers) if row.nameservers else "N/A"],
+            [Paragraph("MX Root:", table_cell_bold_style), Paragraph(row.mx_root or "N/A", table_cell_style)],
+            [Paragraph("Registrar:", table_cell_bold_style), Paragraph(row.registrar or "N/A", table_cell_style)],
+            [Paragraph("Expires At:", table_cell_bold_style), Paragraph(str(row.expires_at) if row.expires_at else "N/A", table_cell_style)],
+            [Paragraph("Nameservers:", table_cell_bold_style), Paragraph(", ".join(row.nameservers) if row.nameservers else "N/A", table_cell_style)],
         ]
         signals_table = Table(signals_data, colWidths=[2 * inch, 4 * inch])
         signals_table.setStyle(
@@ -221,8 +237,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
                     ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#ecf0f1")),
                     ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
                     ("TOPPADDING", (0, 0), (-1, -1), 8),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
@@ -250,6 +265,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
         # Reason
         if row.reason:
             elements.append(Paragraph("Analysis", heading_style))
+            # Paragraph already supports UTF-8, so Turkish characters will work
             elements.append(Paragraph(row.reason, styles["Normal"]))
             elements.append(Spacer(1, 0.2 * inch))
 

@@ -136,3 +136,14 @@ if mini_ui_path:
 async def root():
     """Root endpoint."""
     return {"message": "Dyn365Hunter MVP API", "version": "1.0.0", "docs": "/docs"}
+
+
+@app.get("/support")
+async def support():
+    """Support information endpoint."""
+    return {
+        "message": "Dyn365Hunter MVP Support",
+        "documentation": "/docs",
+        "api_version": "1.0.0",
+        "contact": "For support, please refer to the API documentation at /docs"
+    }
