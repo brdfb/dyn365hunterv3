@@ -4,6 +4,7 @@ const API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
 
 /**
  * Fetch leads with filters (G19: Updated for paginated response)
+ * Returns: { leads: [], total: 0, page: 1, page_size: 50, total_pages: 0 }
  */
 export async function fetchLeads(filters = {}) {
     const params = new URLSearchParams();
@@ -30,16 +31,34 @@ export async function fetchLeads(filters = {}) {
     const data = await response.json();
     
     // G19: Handle new paginated response format
-    // Backward compatibility: if response is array, return as-is
-    // If response is object with 'leads' property, extract leads array
+    // Backward compatibility: if response is array, wrap it
     if (Array.isArray(data)) {
-        return data; // Old format (backward compatibility)
+        // Old format (backward compatibility)
+        return {
+            leads: data,
+            total: data.length,
+            page: 1,
+            page_size: data.length,
+            total_pages: 1
+        };
     } else if (data.leads && Array.isArray(data.leads)) {
-        // New format: return leads array for now (pagination metadata can be added later)
-        return data.leads;
+        // New format: return full pagination metadata
+        return {
+            leads: data.leads,
+            total: data.total || 0,
+            page: data.page || 1,
+            page_size: data.page_size || 50,
+            total_pages: data.total_pages || 1
+        };
     } else {
         // Unexpected format, return as-is
-        return data;
+        return {
+            leads: [],
+            total: 0,
+            page: 1,
+            page_size: 50,
+            total_pages: 0
+        };
     }
 }
 

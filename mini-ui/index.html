@@ -103,6 +103,10 @@
                         <option value="Unknown">Unknown</option>
                     </select>
                 </div>
+                <div class="filters__group filters__group--search">
+                    <label for="filter-search" class="filters__label">Ara</label>
+                    <input type="text" id="filter-search" placeholder="Domain, şirket veya provider ara..." class="filters__input">
+                </div>
                 <button type="button" id="btn-filter" class="filters__button">Filtrele</button>
                 <button type="button" id="btn-export" class="filters__button filters__button--export">Export CSV</button>
             </div>
@@ -120,18 +124,42 @@
                 <table id="leads-table" class="leads-table">
                     <thead class="leads-table__head">
                         <tr class="leads-table__row">
-                            <th class="leads-table__cell leads-table__cell--header">Öncelik</th>
-                            <th class="leads-table__cell leads-table__cell--header">Domain</th>
-                            <th class="leads-table__cell leads-table__cell--header">Şirket</th>
-                            <th class="leads-table__cell leads-table__cell--header">Provider</th>
-                            <th class="leads-table__cell leads-table__cell--header">Segment</th>
-                            <th class="leads-table__cell leads-table__cell--header">Skor</th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="priority_score">
+                                Öncelik <span class="sort-icon"></span>
+                            </th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="domain">
+                                Domain <span class="sort-icon"></span>
+                            </th>
+                            <th class="leads-table__cell leads-table__cell--header">
+                                Şirket
+                            </th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="provider">
+                                Provider <span class="sort-icon"></span>
+                            </th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="segment">
+                                Segment <span class="sort-icon"></span>
+                            </th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable" data-sort="readiness_score">
+                                Skor <span class="sort-icon"></span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="leads-table-body" class="leads-table__body">
                         <!-- Dynamic content -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination" style="display: none;">
+                <button type="button" id="btn-prev" class="pagination__button pagination__button--prev" disabled>Önceki</button>
+                <div class="pagination__info">
+                    <span id="pagination-info" class="pagination__text"></span>
+                </div>
+                <div class="pagination__pages" id="pagination-pages">
+                    <!-- Dynamic page numbers -->
+                </div>
+                <button type="button" id="btn-next" class="pagination__button pagination__button--next">Sonraki</button>
             </div>
 
             <!-- Empty State -->
