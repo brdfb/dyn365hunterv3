@@ -8,6 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri
+  - Skor detay modal iyileştirmeleri:
+    - DKIM çift gösterimi düzeltildi: `no_dkim` (-10) ve `dkim_none` (-5) tek satırda birleştirildi → "DKIM Eksik: -15"
+    - DMARC_NONE kategorisi düzeltildi: 0 puanlı `dmarc_none` "Pozitif Sinyaller" bölümünden çıkarıldı, sadece "Risk Faktörleri" bölümünde görünüyor
+    - Sıralama tutarlılığı: Signal ve risk faktörleri sabit sırada gösteriliyor (SPF → DKIM → DMARC → Riskler)
+    - Kullanıcı dostu label'lar: Teknik terimler yerine anlaşılır Türkçe label'lar (örn: "SPF Eksik", "DKIM Eksik")
+  - Provider renkli badge'ler:
+    - M365 → Mavi (#0078d4)
+    - Google → Kırmızı (#ea4335)
+    - Yandex → Turuncu (#fc3f1d)
+    - Local → Koyu gri (#343a40)
+    - Tüm provider'lar için renkli badge'ler eklendi
+  - Sort ikonları iyileştirmeleri:
+    - İkon boyutu artırıldı (0.7rem → 0.85rem)
+    - Active durumda daha belirgin (0.9rem, bold)
+    - Hover tooltip'ler eklendi (kolon başlıklarına)
+    - Hover'da renk değişimi eklendi
+  - Dosyalar:
+    - `mini-ui/js/ui-leads.js` - `showScoreBreakdown()` fonksiyonu yeniden yazıldı, helper fonksiyonlar eklendi
+    - `mini-ui/styles.css` - Provider badge CSS'leri ve sort icon iyileştirmeleri eklendi
+    - `mini-ui/index.html` - Sort column'larına tooltip'ler eklendi
+  - Plan: `.cursor/plans/UI-PATCH-PLAN-v1.1.md`
+
+### Added
 - **Priority Score Improvements** - Enhanced priority scoring system
   - Extended priority range from 1-6 to 1-7 for better granularity
   - Migration segment now always gets priority (even with low scores: Priority 3-4)

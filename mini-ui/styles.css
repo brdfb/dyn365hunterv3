@@ -409,11 +409,15 @@ body {
 .leads-table__cell--sortable.sort-asc .sort-icon::after {
     content: ' ▲';
     color: #3498db;
+    font-size: 0.9rem;  /* Slightly larger when active */
+    font-weight: bold;
 }
 
 .leads-table__cell--sortable.sort-desc .sort-icon::after {
     content: ' ▼';
     color: #3498db;
+    font-size: 0.9rem;  /* Slightly larger when active */
+    font-weight: bold;
 }
 
 .sort-icon {
@@ -421,12 +425,19 @@ body {
     right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
+    font-size: 0.85rem;  /* Increased from 0.7rem */
+    cursor: pointer;
 }
 
 .sort-icon::after {
     content: ' ⇅';
     color: #999;
-    font-size: 0.7rem;
+    font-size: 0.85rem;  /* Increased from 0.7rem */
+    transition: color 0.2s;
+}
+
+.leads-table__cell--sortable:hover .sort-icon::after {
+    color: #2980b9;  /* Darker blue on hover */
 }
 
 /* Segment Badges */
@@ -437,6 +448,67 @@ body {
     font-size: 0.75rem;
     font-weight: 500;
     text-transform: uppercase;
+}
+
+/* Provider Badges */
+.provider-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: white;
+}
+
+.provider-badge--m365 {
+    background-color: #0078d4;  /* Microsoft Blue */
+    color: white;
+}
+
+.provider-badge--google {
+    background-color: #ea4335;  /* Google Red */
+    color: white;
+}
+
+.provider-badge--yandex {
+    background-color: #fc3f1d;  /* Yandex Orange */
+    color: white;
+}
+
+.provider-badge--zoho {
+    background-color: #c8202b;  /* Zoho Red */
+    color: white;
+}
+
+.provider-badge--amazon {
+    background-color: #ff9900;  /* Amazon Orange */
+    color: white;
+}
+
+.provider-badge--sendgrid {
+    background-color: #1a82e2;  /* SendGrid Blue */
+    color: white;
+}
+
+.provider-badge--mailgun {
+    background-color: #f06a4a;  /* Mailgun Orange */
+    color: white;
+}
+
+.provider-badge--hosting {
+    background-color: #6c757d;  /* Gray */
+    color: white;
+}
+
+.provider-badge--local {
+    background-color: #343a40;  /* Dark Gray */
+    color: white;
+}
+
+.provider-badge--unknown {
+    background-color: #adb5bd;  /* Light Gray */
+    color: #333;
 }
 
 .segment-badge--migration {

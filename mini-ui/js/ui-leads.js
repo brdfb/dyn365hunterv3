@@ -29,7 +29,12 @@ export function renderLeadsTable(leads) {
                     ${escapeHtml(lead.domain || '-')}
                 </td>
                 <td class="leads-table__cell">${escapeHtml(lead.canonical_name || '-')}</td>
-                <td class="leads-table__cell">${escapeHtml(lead.provider || '-')}</td>
+                <td class="leads-table__cell">
+                    ${lead.provider && lead.provider !== '-' 
+                        ? `<span class="provider-badge ${getProviderBadgeClass(lead.provider)}">${escapeHtml(lead.provider)}</span>`
+                        : '-'
+                    }
+                </td>
                 <td class="leads-table__cell">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
@@ -95,6 +100,15 @@ function getSegmentClass(segment) {
     if (lower === 'cold') return 'cold';
     if (lower === 'skip') return 'skip';
     return '';
+}
+
+/**
+ * Get provider badge class
+ */
+function getProviderBadgeClass(provider) {
+    if (!provider || provider === '-') return '';
+    const providerLower = provider.toLowerCase();
+    return `provider-badge--${providerLower}`;
 }
 
 /**
@@ -222,7 +236,37 @@ export function hideError() {
 }
 
 /**
- * Show score breakdown modal (G19)
+ * Get user-friendly signal label
+ */
+function getSignalLabel(signal) {
+    const labels = {
+        'spf': 'SPF',
+        'dkim': 'DKIM',
+        'dmarc_quarantine': 'DMARC Quarantine',
+        'dmarc_reject': 'DMARC Reject',
+        'dmarc_none': 'DMARC None'
+    };
+    return labels[signal] || signal.toUpperCase();
+}
+
+/**
+ * Get user-friendly risk label
+ */
+function getRiskLabel(risk) {
+    const labels = {
+        'no_spf': 'SPF Eksik',
+        'dkim_missing': 'DKIM Eksik',
+        'no_dkim': 'DKIM Eksik',  // Fallback
+        'dkim_none': 'DKIM Eksik',  // Fallback
+        'dmarc_none': 'DMARC Yok (Risk)',
+        'hosting_mx_weak': 'Hosting MX Zayıf',
+        'spf_multiple_includes': 'SPF Çoklu Include'
+    };
+    return labels[risk] || risk.replace(/_/g, ' ').toUpperCase();
+}
+
+/**
+ * Show score breakdown modal (G19 - UI Patch v1.1)
  */
 export function showScoreBreakdown(breakdown, domain) {
     const modal = document.getElementById('score-breakdown-modal');
@@ -266,28 +310,77 @@ export function showScoreBreakdown(breakdown, domain) {
         </div>`;
     }
     
-    // Signal points (positive)
+    // Signal points (positive) - Fixed order and filter dmarc_none if 0
+    const signalOrder = ['spf', 'dkim', 'dmarc_quarantine', 'dmarc_reject'];
     if (breakdown.signal_points && Object.keys(breakdown.signal_points).length > 0) {
         html += `<div class="score-breakdown__section">
             <div class="score-breakdown__section-title">Pozitif Sinyaller</div>`;
+        
+        // Show in fixed order
+        for (const signal of signalOrder) {
+            if (breakdown.signal_points[signal] !== undefined) {
+                const points = breakdown.signal_points[signal];
+                // Skip dmarc_none if it's 0 (it's a neutral/negative signal)
+                if (signal === 'dmarc_none' && points === 0) {
+                    continue;
+                }
+                const label = getSignalLabel(signal);
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
+                </div>`;
+            }
+        }
+        
+        // Show any remaining signals not in fixed order (except dmarc_none with 0 points)
         for (const [signal, points] of Object.entries(breakdown.signal_points)) {
-            html += `<div class="score-breakdown__item">
-                <span class="score-breakdown__label">${escapeHtml(signal.toUpperCase())}</span>
-                <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
-            </div>`;
+            if (!signalOrder.includes(signal) && !(signal === 'dmarc_none' && points === 0)) {
+                const label = getSignalLabel(signal);
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__value score-breakdown__value--positive">+${points}</span>
+                </div>`;
+            }
         }
         html += `</div>`;
     }
     
-    // Risk points (negative)
+    // Risk points (negative) - Merge DKIM risks and fixed order
+    const riskOrder = ['no_spf', 'dkim_missing', 'no_dkim', 'dkim_none', 'dmarc_none', 'hosting_mx_weak', 'spf_multiple_includes'];
     if (breakdown.risk_points && Object.keys(breakdown.risk_points).length > 0) {
         html += `<div class="score-breakdown__section">
             <div class="score-breakdown__section-title">Risk Faktörleri</div>`;
-        for (const [risk, points] of Object.entries(breakdown.risk_points)) {
-            html += `<div class="score-breakdown__item">
-                <span class="score-breakdown__label">${escapeHtml(risk.replace(/_/g, ' ').toUpperCase())}</span>
-                <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
-            </div>`;
+        
+        // Merge no_dkim and dkim_none into single entry
+        const mergedRiskPoints = { ...breakdown.risk_points };
+        if (mergedRiskPoints.no_dkim !== undefined && mergedRiskPoints.dkim_none !== undefined) {
+            const dkimTotal = mergedRiskPoints.no_dkim + mergedRiskPoints.dkim_none;
+            delete mergedRiskPoints.no_dkim;
+            delete mergedRiskPoints.dkim_none;
+            mergedRiskPoints.dkim_missing = dkimTotal;
+        }
+        
+        // Show in fixed order
+        for (const risk of riskOrder) {
+            if (mergedRiskPoints[risk] !== undefined) {
+                const points = mergedRiskPoints[risk];
+                const label = getRiskLabel(risk);
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
+                </div>`;
+            }
+        }
+        
+        // Show any remaining risks not in fixed order
+        for (const [risk, points] of Object.entries(mergedRiskPoints)) {
+            if (!riskOrder.includes(risk)) {
+                const label = getRiskLabel(risk);
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">${escapeHtml(label)}</span>
+                    <span class="score-breakdown__value score-breakdown__value--negative">${points}</span>
+                </div>`;
+            }
         }
         html += `</div>`;
     }
