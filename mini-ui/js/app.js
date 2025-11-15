@@ -1,7 +1,7 @@
 // App - Global state, initialization, orchestration
 
 import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, exportLeads } from './api.js';
-import { renderLeadsTable, renderStats, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown } from './ui-leads.js';
+import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 
 // Global state (single object)
@@ -93,6 +93,18 @@ async function init() {
     
     // G19: Bind score click handlers (delegated event listener)
     document.addEventListener('click', async (e) => {
+        // Handle domain click - open website in new tab
+        const domainCell = e.target.closest('.domain-clickable');
+        if (domainCell) {
+            const domain = domainCell.getAttribute('data-domain');
+            if (domain && domain !== '-') {
+                // Open domain website in new tab
+                window.open(`https://${domain}`, '_blank', 'noopener,noreferrer');
+                return;
+            }
+        }
+        
+        // Handle score click - show score breakdown
         const scoreCell = e.target.closest('.score-clickable');
         if (scoreCell) {
             const domain = scoreCell.getAttribute('data-domain');
@@ -102,12 +114,22 @@ async function init() {
                     const breakdown = await fetchScoreBreakdown(domain);
                     showScoreBreakdown(breakdown, domain);
                 } catch (error) {
-                    showError(`Skor detayı yüklenemedi: ${error.message}`);
+                    // Check if domain is not scanned
+                    if (error.message.includes('henüz taranmamış') || error.message.includes('has not been scanned')) {
+                        showScoreBreakdownError(domain, error.message);
+                    } else {
+                        showError(`Skor detayı yüklenemedi: ${error.message}`);
+                    }
                 } finally {
                     hideLoading();
                 }
             }
         }
+    });
+    
+    // Listen for refresh events
+    window.addEventListener('refreshLeads', () => {
+        setTimeout(() => loadLeads(), 1000);
     });
     
     // Load initial data

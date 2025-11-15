@@ -88,13 +88,15 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
         whois_result = get_whois_info(domain)
 
         # Determine scan status
-        scan_status = dns_result.get("status", "success")
-        if scan_status == "success" and whois_result is None:
-            # WHOIS failed but DNS succeeded
-            scan_status = "whois_failed"
-        elif scan_status != "success":
-            # DNS failed
-            pass  # Keep DNS status
+        # Note: For score breakdown endpoint, we need scan_status = "completed"
+        # if the scan was successful (even if WHOIS failed)
+        dns_status = dns_result.get("status", "success")
+        if dns_status == "success":
+            # DNS succeeded - mark as completed (even if WHOIS failed)
+            scan_status = "completed"
+        else:
+            # DNS failed - keep the DNS error status
+            scan_status = dns_status
 
         # Classify provider based on MX root
         mx_root = dns_result.get("mx_root")

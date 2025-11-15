@@ -1,6 +1,8 @@
 """FastAPI application entry point."""
 
+import json
 from fastapi import FastAPI, Depends
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -26,11 +28,26 @@ from app.api import (
     auth,
 )
 
-# Create FastAPI app
+
+class UTF8JSONResponse(JSONResponse):
+    """Custom JSONResponse that ensures UTF-8 encoding for Turkish characters."""
+    
+    def render(self, content: any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+        ).encode("utf-8")
+
+
+# Create FastAPI app with custom JSON encoder
 app = FastAPI(
     title="Dyn365Hunter MVP",
     description="Lead intelligence engine for domain-based analysis",
     version="1.0.0",
+    default_response_class=UTF8JSONResponse,
 )
 
 # Add request ID middleware

@@ -149,7 +149,7 @@ async def export_leads(
                 "country": row.country or "",
                 "segment": row.segment or "",
                 "readiness_score": row.readiness_score or 0,
-                "priority_score": priority_score or 6,
+                "priority_score": priority_score or 7,
                 "spf": "Yes" if row.spf else "No",
                 "dkim": "Yes" if row.dkim else "No",
                 "dmarc_policy": row.dmarc_policy or "None",
@@ -175,11 +175,13 @@ async def export_leads(
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         if format == "csv":
-            # Generate CSV content
+            # Generate CSV content with UTF-8 encoding (with BOM for Excel compatibility)
             csv_content = df.to_csv(index=False)
+            # Add UTF-8 BOM for Excel compatibility
+            csv_bytes = "\ufeff".encode("utf-8") + csv_content.encode("utf-8")
 
             return Response(
-                content=csv_content,
+                content=csv_bytes,
                 media_type="text/csv",
                 headers={
                     "Content-Disposition": f"attachment; filename=leads_{timestamp}.csv",
@@ -671,14 +673,14 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
     normalized_domain = normalize_domain(domain)
 
     if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
+        raise HTTPException(status_code=400, detail="Geçersiz domain formatı")
 
     # Get domain data
     company = db.query(Company).filter(Company.domain == normalized_domain).first()
     if not company:
         raise HTTPException(
             status_code=404,
-            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
+            detail=f"Domain {normalized_domain} bulunamadı. Lütfen önce /ingest/domain ile domain'i ekleyin",
         )
 
     # Get domain signals
@@ -689,7 +691,7 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
     if not domain_signal or domain_signal.scan_status != "completed":
         raise HTTPException(
             status_code=404,
-            detail=f"Domain {normalized_domain} has not been scanned yet. Please use /scan/domain first.",
+            detail=f"Domain {normalized_domain} henüz taranmamış. Lütfen önce /scan/domain ile tarayın.",
         )
 
     # Prepare signals dictionary

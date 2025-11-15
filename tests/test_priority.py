@@ -19,8 +19,12 @@ class TestPriorityScore:
 
     def test_priority_migration_low_score(self):
         """Test Migration segment with low score (<70)."""
-        assert calculate_priority_score("Migration", 65) == 6
-        assert calculate_priority_score("Migration", 0) == 6
+        # Migration 50-69 → Priority 3
+        assert calculate_priority_score("Migration", 65) == 3
+        assert calculate_priority_score("Migration", 50) == 3
+        # Migration 0-49 → Priority 4
+        assert calculate_priority_score("Migration", 49) == 4
+        assert calculate_priority_score("Migration", 0) == 4
 
     def test_priority_existing_high_score(self):
         """Test Existing segment with high score (70+)."""
@@ -34,7 +38,11 @@ class TestPriorityScore:
 
     def test_priority_existing_low_score(self):
         """Test Existing segment with low score (<50)."""
-        assert calculate_priority_score("Existing", 40) == 6
+        # Existing 30-49 → Priority 5
+        assert calculate_priority_score("Existing", 40) == 5
+        assert calculate_priority_score("Existing", 30) == 5
+        # Existing 0-29 → Priority 6
+        assert calculate_priority_score("Existing", 29) == 6
         assert calculate_priority_score("Existing", 0) == 6
 
     def test_priority_cold_high_score(self):
@@ -44,21 +52,25 @@ class TestPriorityScore:
 
     def test_priority_cold_low_score(self):
         """Test Cold segment with low score (<40)."""
+        # Cold 20-39 → Priority 6
         assert calculate_priority_score("Cold", 30) == 6
-        assert calculate_priority_score("Cold", 0) == 6
+        assert calculate_priority_score("Cold", 20) == 6
+        # Cold 0-19 → Priority 7
+        assert calculate_priority_score("Cold", 19) == 7
+        assert calculate_priority_score("Cold", 0) == 7
 
     def test_priority_skip_segment(self):
         """Test Skip segment (always lowest priority)."""
-        assert calculate_priority_score("Skip", 100) == 6
-        assert calculate_priority_score("Skip", 0) == 6
+        assert calculate_priority_score("Skip", 100) == 7
+        assert calculate_priority_score("Skip", 0) == 7
 
     def test_priority_none_values(self):
-        """Test None values (should return 6)."""
-        assert calculate_priority_score(None, 80) == 6
-        assert calculate_priority_score("Migration", None) == 6
-        assert calculate_priority_score(None, None) == 6
+        """Test None values (should return 7)."""
+        assert calculate_priority_score(None, 80) == 7
+        assert calculate_priority_score("Migration", None) == 7
+        assert calculate_priority_score(None, None) == 7
 
     def test_priority_unknown_segment(self):
-        """Test unknown segment (should return 6)."""
-        assert calculate_priority_score("Unknown", 80) == 6
-        assert calculate_priority_score("", 80) == 6
+        """Test unknown segment (should return 7)."""
+        assert calculate_priority_score("Unknown", 80) == 7
+        assert calculate_priority_score("", 80) == 7

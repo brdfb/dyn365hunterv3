@@ -222,7 +222,7 @@ A simple web interface for demo and internal use:
     - `page_size` (optional): Number of items per page (default: 50, max: 200)
     - `search` (optional): Full-text search in domain, canonical_name, and provider
   - Returns: Paginated response with `leads`, `total`, `page`, `page_size`, `total_pages`
-  - Each lead includes `priority_score` field (1-6, where 1 is highest priority)
+  - Each lead includes `priority_score` field (1-7, where 1 is highest priority)
 - `GET /leads/{domain}/score-breakdown` - Get detailed score breakdown for a domain (G19)
   - Returns: Score breakdown with base_score, provider points, signal points, risk points, and total_score
 - `GET /leads/{domain}` - Get single lead details

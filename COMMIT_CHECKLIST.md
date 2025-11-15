@@ -16,6 +16,7 @@
 ## ✅ Features Completed
 - [x] Dashboard endpoint (`GET /dashboard`) - v0.4.0
 - [x] Priority Score feature - v0.4.0
+- [x] Priority Score improvements - Enhanced priority scoring (1-7, Migration always prioritized, improved UI visualization)
 - [x] Hard-Fail Rules (MX missing → Skip) - v0.5.0
 - [x] Risk Scoring (negative points) - v0.5.0
 - [x] Provider Points updated (Hosting: 20, Local: 10) - v0.5.0

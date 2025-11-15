@@ -18,6 +18,7 @@ class KPIsResponse(BaseModel):
     total_leads: int
     migration_leads: int
     high_priority: int
+    max_score: Optional[int] = None  # Maximum readiness score
 
 
 class DashboardResponse(BaseModel):
@@ -107,13 +108,15 @@ async def get_kpis(db: Session = Depends(get_db)):
         - total_leads: Total number of scanned leads
         - migration_leads: Count of Migration segment leads
         - high_priority: Count of high priority leads (Migration + score >= HIGH_PRIORITY_SCORE)
+        - max_score: Maximum readiness score
     """
     try:
         query = """
             SELECT 
                 COUNT(*) AS total_leads,
                 COUNT(CASE WHEN segment = 'Migration' THEN 1 END) AS migration_leads,
-                COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= :high_priority_score THEN 1 END) AS high_priority
+                COUNT(CASE WHEN segment = 'Migration' AND readiness_score >= :high_priority_score THEN 1 END) AS high_priority,
+                MAX(readiness_score) AS max_score
             FROM leads_ready
             WHERE readiness_score IS NOT NULL
         """
@@ -126,12 +129,14 @@ async def get_kpis(db: Session = Depends(get_db)):
                 total_leads=0,
                 migration_leads=0,
                 high_priority=0,
+                max_score=None,
             )
 
         return KPIsResponse(
             total_leads=row.total_leads or 0,
             migration_leads=row.migration_leads or 0,
             high_priority=row.high_priority or 0,
+            max_score=int(row.max_score) if row.max_score is not None else None,
         )
 
     except Exception as e:

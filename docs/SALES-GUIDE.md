@@ -48,6 +48,7 @@ http://localhost:8000/mini-ui/
 1. **CSV/Excel Upload**
    - Dosya seçme (CSV, Excel)
    - Otomatik kolon tespiti (OSB dosyaları için)
+   - **Progress Tracking**: Yükleme sırasında ilerleme çubuğu ve istatistikler gösterilir
    - Yükleme sonrası otomatik lead listesi güncelleme
 
 2. **Tek Domain Scan**
@@ -61,10 +62,17 @@ http://localhost:8000/mini-ui/
    - Min skor filtresi
    - Provider filtresi
    - **Sorting** (G19): Tablo başlıklarına tıklayarak sıralama (domain, skor, segment, vb.)
-   - **Pagination** (G19): Sayfa numaraları ile sayfalama (10, 25, 50, 100 kayıt/sayfa)
+     - Tablo başlıklarında sıralama ikonları görünür (⇅)
+     - Aktif sıralama yönü gösterilir (▲ asc, ▼ desc)
+   - **Pagination** (G19): Sayfa numaraları ile sayfalama (50 kayıt/sayfa varsayılan)
+     - Sayfa numaraları görünür (1, 2, 3, ...)
+     - Aktif sayfa vurgulanır
+     - Önceki/Sonraki butonları
    - **Search** (G19): Arama kutusu ile anlık arama (debounce ile optimize edilmiş)
    - Tablo görüntüleme (Domain, Şirket, Provider, Segment, Skor)
    - **Score Breakdown** (G19): Skorlara tıklayarak detaylı skor analizi modal'ı açma
+     - Skorlar tıklanabilir (altı çizili görünür)
+     - Modal'da detaylı skor analizi gösterilir (temel skor, provider puanları, sinyal puanları, risk faktörleri)
 
 4. **Export CSV**
    - Filtrelenmiş lead'leri CSV olarak export
@@ -271,9 +279,9 @@ curl "http://localhost:8000/scan/bulk/{job_id}/results"
 
 **Özellikler:**
 - ✅ **Async processing** - Arka planda çalışır, HTTP timeout yok
-- ✅ **Progress tracking** - Gerçek zamanlı ilerleme takibi
+- ✅ **Progress tracking** - Gerçek zamanlı ilerleme takibi (progress bar, istatistikler)
 - ✅ **Rate limiting** - DNS (10 req/s), WHOIS (5 req/s) otomatik sınırlama
-- ✅ **Error handling** - Hata olan domain'ler işlenmeye devam eder
+- ✅ **Error handling** - Hata olan domain'ler işlenmeye devam eder, hata mesajları Türkçe gösterilir
 - ✅ **Max 1000 domain** - Tek job'da en fazla 1000 domain
 - ✅ **Polling-based** - İlerleme kontrolü için polling kullanın
 
@@ -426,17 +434,20 @@ curl "http://localhost:8000/leads/ornek-firma.com"
 - DNS sinyalleri (SPF, DKIM, DMARC)
 - WHOIS bilgileri
 - Skor ve segment detayları
-- **Priority Score** (1-6, 1 en yüksek öncelik)
+- **Priority Score** (1-7, 1 en yüksek öncelik) - Her seviye farklı görsel ile gösteriliyor (🔥⭐🟡🟠⚪⚫🔴)
 - **Lead Enrichment** (G16): Contact emails, quality score, LinkedIn pattern
 - Güncelleme tarihleri
 
 **Priority Score Nedir?**
-- **1**: Migration + Skor 80+ → En yüksek öncelik
-- **2**: Migration + Skor 70-79 → Yüksek öncelik
-- **3**: Existing + Skor 70+ → Orta-yüksek öncelik
-- **4**: Existing + Skor 50-69 → Orta öncelik
-- **5**: Cold + Skor 40+ → Düşük öncelik
-- **6**: Diğerleri → En düşük öncelik
+- **1** 🔥: Migration + Skor 80+ → En yüksek öncelik
+- **2** ⭐: Migration + Skor 70-79 → Yüksek öncelik
+- **3** 🟡: Migration + Skor 50-69, Existing + Skor 70+ → Orta-yüksek öncelik
+- **4** 🟠: Migration + Skor 0-49, Existing + Skor 50-69 → Orta öncelik
+- **5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ → Düşük-orta öncelik
+- **6** ⚫: Existing + Skor 0-29, Cold + Skor 20-39 → Düşük öncelik
+- **7** 🔴: Cold + Skor 0-19, Skip → En düşük öncelik
+
+**Önemli:** Migration segmenti artık düşük skorlu olsa bile öncelikli (Priority 3-4)!
 
 ### Dashboard (Özet Görünüm)
 
@@ -1035,6 +1046,21 @@ http://localhost:8000/docs
 1. `curl http://localhost:8000/healthz` ile kontrol edin
 2. Docker container'ları çalışıyor mu kontrol edin: `docker-compose ps`
 3. Log'lara bakın: `docker-compose logs api`
+
+### Q: Hata mesajları İngilizce görünüyor?
+**A:** Tüm hata mesajları artık Türkçe gösterilir. Eğer İngilizce görüyorsanız, API'yi yeniden başlatın: `docker-compose restart api`
+
+### Q: CSV yükleme sırasında ilerleme göremiyorum?
+**A:** Mini UI'de CSV yükleme sonrası otomatik olarak progress bar gösterilir. Eğer görünmüyorsa, tarayıcı konsolunu kontrol edin (F12).
+
+### Q: Skorlara tıklayınca modal açılmıyor?
+**A:** Skorlar tıklanabilir olmalı (altı çizili görünür). Eğer çalışmıyorsa, tarayıcı konsolunu kontrol edin ve API endpoint'inin çalıştığından emin olun: `curl http://localhost:8000/leads/{domain}/score-breakdown`
+
+### Q: Tablo başlıklarına tıklayınca sıralama yapılmıyor?
+**A:** Tablo başlıklarında sıralama ikonları (⇅) görünmeli. Eğer çalışmıyorsa, tarayıcı konsolunu kontrol edin.
+
+### Q: Sayfa numaraları görünmüyor?
+**A:** Pagination UI'de sayfa numaraları otomatik olarak gösterilir. Eğer görünmüyorsa, toplam sayfa sayısı 1'den fazla olmalı.
 
 ---
 

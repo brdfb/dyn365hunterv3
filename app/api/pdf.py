@@ -186,7 +186,7 @@ async def get_pdf_summary(domain: str, db: Session = Depends(get_db)):
         scores_data = [
             ["Readiness Score:", f"{row.readiness_score}/100"],
             ["Segment:", row.segment or "N/A"],
-            ["Priority Score:", f"{priority_score}/6" if priority_score else "N/A"],
+            ["Priority Score:", f"{priority_score}/7" if priority_score else "N/A"],
         ]
         scores_table = Table(scores_data, colWidths=[2 * inch, 4 * inch])
         scores_table.setStyle(

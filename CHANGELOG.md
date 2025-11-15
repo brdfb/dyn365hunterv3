@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Priority Score Improvements** - Enhanced priority scoring system
+  - Extended priority range from 1-6 to 1-7 for better granularity
+  - Migration segment now always gets priority (even with low scores: Priority 3-4)
+  - Improved priority distribution:
+    - Migration + Score 50-69 → Priority 3 (was Priority 6)
+    - Migration + Score 0-49 → Priority 4 (was Priority 6)
+    - Existing + Score 30-49 → Priority 5 (was Priority 6)
+    - Existing + Score 0-29 → Priority 6 (was Priority 6)
+    - Cold + Score 20-39 → Priority 6 (was Priority 6)
+    - Cold + Score 0-19 → Priority 7 (new)
+    - Skip → Priority 7 (was Priority 6)
+  - Enhanced UI visualization:
+    - Each priority level now has unique visual indicator (🔥⭐🟡🟠⚪⚫🔴)
+    - Tooltip support for priority badges with detailed information
+  - Updated constants and thresholds in `app/core/constants.py`
+  - Updated priority calculation logic in `app/core/priority.py`
+  - Updated UI components in `mini-ui/js/ui-leads.js`
+  - Updated API default values (Priority 6 → 7)
+  - Updated test suite in `tests/test_priority.py`
+  - Updated documentation (SEGMENT-GUIDE.md, SALES-GUIDE.md, SALES-SCENARIOS.md, README.md)
+
 - **G19: Microsoft SSO Authentication + UI Upgrade** - Authentication and enhanced UI features
   - Microsoft SSO Authentication:
     - `GET /auth/login` - Initiate Azure AD OAuth 2.0 login

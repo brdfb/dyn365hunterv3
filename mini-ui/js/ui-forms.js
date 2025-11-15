@@ -9,11 +9,27 @@ export function bindCsvUploadForm(onSuccess) {
     const form = document.getElementById('form-csv-upload');
     const messageEl = document.getElementById('csv-upload-message');
     
+    if (!form) {
+        console.error('CSV upload form not found');
+        return;
+    }
+    
+    if (!messageEl) {
+        console.error('CSV upload message element not found');
+        return;
+    }
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const fileInput = document.getElementById('csv-file');
-        const autoDetect = document.getElementById('auto-detect').checked;
+        if (!fileInput) {
+            showMessage(messageEl, 'Dosya input elementi bulunamadı', 'error');
+            return;
+        }
+        
+        const autoDetectEl = document.getElementById('auto-detect');
+        const autoDetect = autoDetectEl ? autoDetectEl.checked : false;
         const file = fileInput.files[0];
         
         if (!file) {
@@ -22,6 +38,10 @@ export function bindCsvUploadForm(onSuccess) {
         }
         
         const button = form.querySelector('button[type="submit"]');
+        if (!button) {
+            showMessage(messageEl, 'Submit butonu bulunamadı', 'error');
+            return;
+        }
         button.disabled = true;
         
         // Create progress container

@@ -109,7 +109,7 @@ async def ingest_domain(request: DomainIngestRequest, db: Session = Depends(get_
     if not final_domain:
         raise HTTPException(
             status_code=400,
-            detail="Could not determine valid domain from provided inputs",
+            detail="Sağlanan bilgilerden geçerli domain belirlenemedi",
         )
 
     try:
@@ -145,7 +145,7 @@ async def ingest_domain(request: DomainIngestRequest, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Sunucu hatası: {str(e)}")
 
 
 @router.post("/csv", status_code=202)
@@ -192,7 +192,7 @@ async def ingest_csv(
 
     if not (is_csv or is_excel):
         raise HTTPException(
-            status_code=400, detail="File must be CSV (.csv) or Excel (.xlsx, .xls)"
+            status_code=400, detail="Dosya CSV (.csv) veya Excel (.xlsx, .xls) formatında olmalı"
         )
 
     try:
@@ -212,8 +212,8 @@ async def ingest_csv(
             if not company_col or not domain_col:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Could not detect columns. Company: {company_col}, Domain: {domain_col}. "
-                    f"Available columns: {list(df.columns)}",
+                    detail=f"Kolonlar otomatik tespit edilemedi. Şirket: {company_col}, Domain: {domain_col}. "
+                    f"Mevcut kolonlar: {list(df.columns)}",
                 )
 
             # Rename columns to standard names for processing
@@ -226,7 +226,7 @@ async def ingest_csv(
         if "domain" not in df.columns:
             raise HTTPException(
                 status_code=400,
-                detail="CSV must contain a 'domain' column (or use auto_detect_columns=true)",
+                detail="CSV dosyası 'domain' kolonu içermeli (veya auto_detect_columns=true kullanın)",
             )
 
         # Create job for progress tracking
@@ -245,14 +245,14 @@ async def ingest_csv(
                 # Get domain (required)
                 domain = str(row.get("domain", "")).strip()
                 if not domain:
-                    errors.append(f"Row {idx + 1}: Empty domain")
+                    errors.append(f"Satır {idx + 1}: Boş domain")
                     continue
 
                 # Normalize domain
                 normalized_domain = normalize_domain(domain)
                 if not normalized_domain:
                     errors.append(
-                        f"Row {idx + 1}: Invalid domain format '{domain}' (geçersiz domain formatı)"
+                        f"Satır {idx + 1}: Geçersiz domain formatı '{domain}'"
                     )
                     continue
 
@@ -261,7 +261,7 @@ async def ingest_csv(
 
                 if not is_valid_domain(normalized_domain):
                     errors.append(
-                        f"Row {idx + 1}: Invalid domain after normalization '{normalized_domain}' (normalizasyon sonrası geçersiz)"
+                        f"Satır {idx + 1}: Normalizasyon sonrası geçersiz domain '{normalized_domain}'"
                     )
                     continue
 
@@ -317,7 +317,7 @@ async def ingest_csv(
                 )
 
             except Exception as e:
-                error_msg = f"Row {idx + 1}: {str(e)}"
+                error_msg = f"Satır {idx + 1}: {str(e)}"
                 errors.append(error_msg)
                 update_job_progress(
                     job_id,
@@ -439,7 +439,7 @@ async def ingest_csv(
                     )
 
                 except Exception as e:
-                    error_msg = f"Scan error for {domain}: {str(e)}"
+                    error_msg = f"{domain} için tarama hatası: {str(e)}"
                     errors.append(error_msg)
                     total_processed = ingested_count + scan_index
                     update_job_progress(
@@ -470,12 +470,12 @@ async def ingest_csv(
         }
 
     except pd.errors.EmptyDataError:
-        raise HTTPException(status_code=400, detail="CSV file is empty")
+        raise HTTPException(status_code=400, detail="CSV dosyası boş")
     except pd.errors.ParserError as e:
         raise HTTPException(status_code=400, detail=f"CSV parsing error: {str(e)}")
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Sunucu hatası: {str(e)}")
 
 
 class WebhookRequest(BaseModel):

@@ -8,20 +8,27 @@
 
 ### Priority Score Nedir?
 
-Priority Score, segment ve readiness score kombinasyonuna göre hesaplanan öncelik seviyesidir (1-6).
+Priority Score, segment ve readiness score kombinasyonuna göre hesaplanan öncelik seviyesidir (1-7, 1 en yüksek öncelik).
 
 | Priority | Segment + Skor | Anlam | Aksiyon Zamanı |
 |----------|----------------|-------|----------------|
-| **1** | Migration + 80+ | 🟢 En yüksek öncelik | Hemen (1 gün) |
-| **2** | Migration + 70-79 | 🟢 Yüksek öncelik | Hemen (1-2 gün) |
-| **3** | Existing + 70+ | 🟡 Orta-yüksek öncelik | 1 hafta içinde |
-| **4** | Existing + 50-69 | 🟡 Orta öncelik | 1-2 hafta |
-| **5** | Cold + 40+ | 🟠 Düşük öncelik | 1-2 ay |
-| **6** | Diğerleri | 🔴 En düşük öncelik | 3-6 ay |
+| **1** 🔥 | Migration + 80+ | 🟢 En yüksek öncelik | Hemen (1 gün) |
+| **2** ⭐ | Migration + 70-79 | 🟢 Yüksek öncelik | Hemen (1-2 gün) |
+| **3** 🟡 | Migration + 50-69<br>Existing + 70+ | 🟡 Orta-yüksek öncelik | 1 hafta içinde |
+| **4** 🟠 | Migration + 0-49<br>Existing + 50-69 | 🟠 Orta öncelik | 1-2 hafta |
+| **5** ⚪ | Existing + 30-49<br>Cold + 40+ | ⚪ Düşük-orta öncelik | 1-2 ay |
+| **6** ⚫ | Existing + 0-29<br>Cold + 20-39 | ⚫ Düşük öncelik | 2-3 ay |
+| **7** 🔴 | Cold + 0-19<br>Skip | 🔴 En düşük öncelik | 3-6 ay |
+
+**Önemli Değişiklikler:**
+- **Migration segmenti** artık düşük skorlu olsa bile öncelikli (Priority 3-4)
+- Her priority seviyesi farklı görsel ile gösteriliyor (🔥⭐🟡🟠⚪⚫🔴)
+- Priority 7 eklendi (en düşük öncelik - Cold düşük skorlu ve Skip segmenti)
 
 **Kullanım:**
 - Lead listelerinde `priority_score` field'ı ile sıralama yapabilirsiniz
 - Priority Score 1-2 olan lead'lere öncelik verin
+- Migration segmenti lead'leri her zaman öncelikli (Priority 1-4)
 - Dashboard'da yüksek öncelikli lead sayısını görebilirsiniz
 
 ---

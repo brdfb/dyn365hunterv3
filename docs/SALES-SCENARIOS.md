@@ -917,12 +917,13 @@ http://localhost:8000/mini-ui/
 ```
 
 ### 1. Öncelik Sıralaması (Priority Score)
-1. **Priority 1**: Migration + Skor 80+ → En yüksek öncelik, hemen aksiyon
-2. **Priority 2**: Migration + Skor 70-79 → Yüksek öncelik, hemen aksiyon
-3. **Priority 3**: Existing + Skor 70+ → Orta-yüksek öncelik, 1 hafta içinde
-4. **Priority 4**: Existing + Skor 50-69 → Orta öncelik, takip et
-5. **Priority 5**: Cold + Skor 40+ → Düşük öncelik, 1-2 ay sonra kontrol
-6. **Priority 6**: Diğerleri → En düşük öncelik, 3-6 ay sonra kontrol
+1. **Priority 1** 🔥: Migration + Skor 80+ → En yüksek öncelik, hemen aksiyon
+2. **Priority 2** ⭐: Migration + Skor 70-79 → Yüksek öncelik, hemen aksiyon
+3. **Priority 3** 🟡: Migration + Skor 50-69, Existing + Skor 70+ → Orta-yüksek öncelik, 1 hafta içinde
+4. **Priority 4** 🟠: Migration + Skor 0-49, Existing + Skor 50-69 → Orta öncelik, takip et
+5. **Priority 5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ → Düşük-orta öncelik, 1-2 ay sonra kontrol
+6. **Priority 6** ⚫: Existing + Skor 0-29, Cold + Skor 20-39 → Düşük öncelik, 2-3 ay sonra kontrol
+7. **Priority 7** 🔴: Cold + Skor 0-19, Skip → En düşük öncelik, 3-6 ay sonra kontrol
 
 **Eski Segment Bazlı Sıralama:**
 1. **Migration (70+)**: Hemen aksiyon
