@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from pydantic import BaseModel, Field
 import pandas as pd
@@ -13,7 +13,8 @@ from app.db.session import get_db
 from app.core.normalizer import normalize_domain
 from app.core.priority import calculate_priority_score
 from app.core.enrichment import enrich_company_data
-from app.db.models import Company, Favorite
+from app.core.score_breakdown import calculate_score_breakdown
+from app.db.models import Company, Favorite, DomainSignal
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -555,3 +556,82 @@ async def enrich_lead(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+class ScoreBreakdownResponse(BaseModel):
+    """Response model for score breakdown (G19)."""
+
+    base_score: int
+    provider: Dict[str, Any]  # {"name": str, "points": int}
+    signal_points: Dict[str, int]  # {"spf": int, "dkim": int, "dmarc_*": int}
+    risk_points: Dict[str, int]  # {"no_spf": int, "no_dkim": int, ...}
+    total_score: int
+
+
+@router.get("/{domain}/score-breakdown", response_model=ScoreBreakdownResponse)
+async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
+    """
+    Get detailed score breakdown for a domain (G19).
+
+    Args:
+        domain: Domain name (will be normalized)
+        db: Database session
+
+    Returns:
+        ScoreBreakdownResponse with detailed score components
+
+    Raises:
+        404: If domain not found or not scanned
+    """
+    # Normalize domain
+    normalized_domain = normalize_domain(domain)
+
+    if not normalized_domain:
+        raise HTTPException(status_code=400, detail="Invalid domain format")
+
+    # Get domain data
+    company = db.query(Company).filter(Company.domain == normalized_domain).first()
+    if not company:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
+        )
+
+    # Get domain signals
+    domain_signal = (
+        db.query(DomainSignal).filter(DomainSignal.domain == normalized_domain).first()
+    )
+
+    if not domain_signal or domain_signal.scan_status != "completed":
+        raise HTTPException(
+            status_code=404,
+            detail=f"Domain {normalized_domain} has not been scanned yet. Please use /scan/domain first.",
+        )
+
+    # Prepare signals dictionary
+    signals = {
+        "spf": domain_signal.spf,
+        "dkim": domain_signal.dkim,
+        "dmarc_policy": domain_signal.dmarc_policy,
+        "spf_record": domain_signal.spf_record,  # Optional, for risk analysis
+    }
+
+    # Get MX records (if available)
+    mx_records = None
+    if domain_signal.mx_records:
+        if isinstance(domain_signal.mx_records, list):
+            mx_records = domain_signal.mx_records
+        else:
+            # Handle case where it might be stored differently
+            mx_records = (
+                list(domain_signal.mx_records) if domain_signal.mx_records else None
+            )
+
+    # Calculate score breakdown
+    breakdown = calculate_score_breakdown(
+        provider=company.provider or "Unknown",
+        signals=signals,
+        mx_records=mx_records,
+    )
+
+    return ScoreBreakdownResponse(**breakdown.to_dict())
