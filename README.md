@@ -59,7 +59,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 - **Backend**: FastAPI (Python 3.10)
 - **Database**: PostgreSQL 15
+- **Migration**: Alembic (P1) - Database migration management system
 - **Queue**: Celery + Redis
+- **Rate Limiting**: Redis-based distributed rate limiting (P1-2) - Multi-worker support with fallback
+- **Caching**: Redis-based distributed caching (P1-3) - DNS, WHOIS, Provider, Scoring, Scan cache
+- **Bulk Operations**: Batch processing optimization (P1-4) - Rate-limit aware batch processing with deadlock prevention
 - **DNS Analysis**: dnspython
 - **WHOIS**: python-whois
 - **Deployment**: Docker Compose
@@ -139,7 +143,7 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
    - Create `.env` from `.env.example`
    - Start Docker Compose services (PostgreSQL, Redis, API, Worker)
    - Wait for PostgreSQL and Redis to be ready
-   - Run database schema migration
+   - Run database schema migration (via Alembic)
    - Verify `/healthz` endpoint
 
 4. **Verify installation:**
@@ -175,6 +179,12 @@ A simple web interface for demo and internal use:
 
 ## API Endpoints
 
+**API Versioning (P1-5):**
+- **V1 Endpoints**: All API endpoints are available under `/api/v1/` prefix (e.g., `/api/v1/leads`, `/api/v1/scan/domain`)
+- **Legacy Endpoints**: Legacy endpoints (e.g., `/leads`, `/scan/domain`) continue to work for backward compatibility
+- **Infrastructure Endpoints**: Health check (`/healthz`) and authentication (`/auth/*`) endpoints are not versioned
+- **Migration**: Clients can gradually migrate to v1 endpoints while legacy endpoints remain active
+
 **Interactive API Documentation:**
 - Swagger UI: `http://localhost:8000/docs` (interactive API explorer)
 - ReDoc: `http://localhost:8000/redoc` (alternative documentation format)
@@ -184,7 +194,7 @@ A simple web interface for demo and internal use:
 - `GET /healthz` - Health check and database connection status
 
 ### Ingest
-- `POST /ingest/domain` - Ingest single domain
+- `POST /api/v1/ingest/domain` or `POST /ingest/domain` - Ingest single domain
   - Request body: `{"domain": "example.com", "company_name": "Example Inc", "email": "user@example.com", "website": "https://example.com"}`
   - Returns: `{"domain": "example.com", "company_id": 1, "message": "Domain ingested successfully"}`
 - `POST /ingest/csv` - Ingest domains from CSV or Excel file
@@ -449,6 +459,55 @@ The project includes GitHub Actions workflows:
 Workflows run on:
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
+
+## Database Migrations
+
+The project uses **Alembic** for database migration management (P1).
+
+### Migration Commands
+
+```bash
+# Upgrade to latest migration
+python -m app.db.run_migration upgrade
+
+# Upgrade to specific revision
+python -m app.db.run_migration upgrade <revision>
+
+# Downgrade one step
+python -m app.db.run_migration downgrade
+
+# Show current revision
+python -m app.db.run_migration current
+
+# Show migration history
+python -m app.db.run_migration history
+
+# Check for schema drift
+python -m app.db.run_migration check
+```
+
+### Creating New Migrations
+
+```bash
+# Create a new migration (autogenerate from models)
+alembic revision --autogenerate -m "add_new_feature"
+
+# Apply migration
+alembic upgrade head
+
+# Rollback if needed
+alembic downgrade -1
+```
+
+### Migration Strategy
+
+- **Base Revision**: `08f51db8dce0` represents the current production schema (includes all historical migrations g16-g20)
+- **Legacy Migrations**: Historical SQL migration files are in `app/db/migrations/legacy/` for reference
+- **Future Changes**: All schema changes will be managed through Alembic revisions
+
+**Documentation**: See `docs/active/P1-ALEMBIC-STATUS.md` for detailed migration status and usage.
+
+---
 
 ## Environment Variables
 

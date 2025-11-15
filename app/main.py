@@ -27,6 +27,22 @@ from app.api import (
     health,
     auth,
 )
+from app.api.v1 import (
+    ingest as ingest_v1,
+    scan as scan_v1,
+    leads as leads_v1,
+    dashboard as dashboard_v1,
+    email_tools as email_tools_v1,
+    progress as progress_v1,
+    admin as admin_v1,
+    notes as notes_v1,
+    tags as tags_v1,
+    favorites as favorites_v1,
+    pdf as pdf_v1,
+    rescan as rescan_v1,
+    alerts as alerts_v1,
+)
+from fastapi import APIRouter
 
 
 class UTF8JSONResponse(JSONResponse):
@@ -53,22 +69,41 @@ app = FastAPI(
 # Add request ID middleware
 app.add_middleware(RequestIDMiddleware)
 
-# Register routers
+# Health and auth routers (no versioning - infrastructure endpoints)
 app.include_router(health.router)
 app.include_router(auth.router)  # G19: Microsoft SSO
-app.include_router(ingest.router)
-app.include_router(scan.router)
-app.include_router(leads.router)
-app.include_router(dashboard.router)
-app.include_router(email_tools.router)
-app.include_router(progress.router)
-app.include_router(admin.router)
-app.include_router(notes.router)
-app.include_router(tags.router)
-app.include_router(favorites.router)
-app.include_router(pdf.router)
-app.include_router(rescan.router)
-app.include_router(alerts.router)
+
+# API v1 routers (versioned API)
+v1_router = APIRouter(prefix="/api/v1", tags=["v1"])
+v1_router.include_router(ingest_v1.router, prefix="/ingest", tags=["ingest"])
+v1_router.include_router(scan_v1.router, prefix="/scan", tags=["scan"])
+v1_router.include_router(leads_v1.router, prefix="/leads", tags=["leads"])
+v1_router.include_router(dashboard_v1.router, prefix="/dashboard", tags=["dashboard"])
+v1_router.include_router(email_tools_v1.router, prefix="/email", tags=["email"])
+v1_router.include_router(progress_v1.router, prefix="/jobs", tags=["progress"])
+v1_router.include_router(admin_v1.router, prefix="/admin", tags=["admin"])
+v1_router.include_router(notes_v1.router, prefix="/leads", tags=["notes"])
+v1_router.include_router(tags_v1.router, prefix="/leads", tags=["tags"])
+v1_router.include_router(favorites_v1.router, prefix="/leads", tags=["favorites"])
+v1_router.include_router(pdf_v1.router, prefix="/leads", tags=["pdf"])
+v1_router.include_router(rescan_v1.router, prefix="/scan", tags=["rescan"])
+v1_router.include_router(alerts_v1.router, prefix="/alerts", tags=["alerts"])
+app.include_router(v1_router)
+
+# Legacy routers (backward compatibility - will be deprecated in future)
+app.include_router(ingest.router, prefix="/ingest", tags=["ingest", "legacy"])
+app.include_router(scan.router, prefix="/scan", tags=["scan", "legacy"])
+app.include_router(leads.router, prefix="/leads", tags=["leads", "legacy"])
+app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard", "legacy"])
+app.include_router(email_tools.router, prefix="/email", tags=["email", "legacy"])
+app.include_router(progress.router, prefix="/jobs", tags=["progress", "legacy"])
+app.include_router(admin.router, prefix="/admin", tags=["admin", "legacy"])
+app.include_router(notes.router, prefix="/notes", tags=["notes", "legacy"])
+app.include_router(tags.router, prefix="/leads", tags=["tags", "legacy"])  # Note: tags router uses /leads prefix
+app.include_router(favorites.router, prefix="/leads", tags=["favorites", "legacy"])  # Note: favorites router uses /leads prefix
+app.include_router(pdf.router, prefix="/leads", tags=["pdf", "legacy"])
+app.include_router(rescan.router, prefix="/scan", tags=["rescan", "legacy"])
+app.include_router(alerts.router, prefix="/alerts", tags=["alerts", "legacy"])
 
 # Mount static files for Mini UI
 import os

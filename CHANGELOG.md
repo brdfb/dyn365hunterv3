@@ -8,6 +8,112 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P1-5: API Versioning** - API versioning structure with backward compatibility
+  - API v1 router structure (`/api/v1/...`) - All API endpoints now available under `/api/v1/` prefix
+  - Backward compatibility - Legacy endpoints (`/...`) continue to work for zero downtime migration
+  - Dual-path routing - Both v1 and legacy endpoints active simultaneously
+  - 13 versioned routers: ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts
+  - Health and auth endpoints excluded from versioning (infrastructure endpoints)
+  - Implementation files:
+    - `app/api/v1/` - V1 router directory with proxy pattern handlers
+    - `app/api/v1/__init__.py` - V1 router exports
+    - `app/api/v1/*.py` - Individual v1 router files (13 routers)
+    - `app/main.py` - Updated to register v1 routers and maintain legacy routers
+  - Test coverage:
+    - `tests/test_api_versioning.py` - API versioning tests (10 tests)
+    - Backward compatibility tests
+    - Dual-path routing tests
+  - Status: ✅ Core implementation completed
+  - Benefits: Future-proof API structure, zero downtime migration, backward compatibility
+- **P1-4: Bulk Operations Optimization** - Batch processing optimization for bulk scan operations
+  - Batch size calculation (rate-limit aware) - Optimal batch size based on DNS/WHOIS rate limits (default: 50 domains/batch)
+  - Batch commit optimization - Reduces transaction overhead by batching commits instead of per-domain commits
+  - Deadlock prevention - Transaction timeout (30s) and retry logic (3 attempts with exponential backoff) using tenacity
+  - Partial commit log - Redis-based recovery mechanism for batch failures
+  - Batch isolation - One batch failure doesn't affect other batches
+  - Bulk log context - Structured logging with batch information (bulk_id, batch_no, total_batches, batch_size)
+  - scan_single_domain commit=False support - Allows batch-level commit control for batch processing
+  - Implementation files:
+    - `app/core/bulk_operations.py` - Batch utilities (batch size calculation, partial commit log, bulk log context)
+    - `app/core/tasks.py` - Updated bulk_scan_task with batch processing, process_batch_with_retry function
+    - `requirements.txt` - Added tenacity>=8.2.3 for retry logic
+  - Test coverage:
+    - `tests/test_bulk_operations_p1.py` - Comprehensive P1-4 tests (13 tests)
+    - Batch size calculation tests (5 tests)
+    - Partial commit log tests (2 tests)
+    - Bulk log context tests (1 test)
+    - Integration tests (2 skipped - require Redis)
+  - Status: ✅ Core implementation completed
+  - Benefits: Significant performance improvement for bulk operations, reduced transaction overhead, better deadlock handling
+- **P1-3: Caching Layer** - Redis-based distributed caching for DNS, WHOIS, Provider, Scoring, and Scan results
+  - Redis-based cache utilities (`app/core/cache.py`) with generic get/set/delete functions
+  - DNS cache (1 hour TTL) - Reduces DNS queries and rate limit pressure
+  - WHOIS cache migrated to Redis (24 hour TTL) - Replaced in-memory cache for multi-worker support
+  - Provider mapping cache (24 hour TTL) - Caches MX root to provider mappings (most repeated pattern)
+  - Scoring cache (1 hour TTL) - Caches scoring results with signals hash for stable cache keys
+  - Domain-level full scan cache (1 hour TTL) - Caches complete scan results
+  - Cache invalidation on rescan - Ensures fresh results when domains are re-scanned
+  - Graceful fallback when Redis unavailable - All cache operations degrade gracefully
+  - Implementation files:
+    - `app/core/cache.py` - Redis-based cache utilities
+    - `app/core/analyzer_dns.py` - Updated with DNS cache
+    - `app/core/analyzer_whois.py` - Migrated to Redis cache (removed in-memory cache)
+    - `app/core/provider_map.py` - Added provider mapping cache
+    - `app/core/scorer.py` - Added scoring cache with signals hash
+    - `app/core/tasks.py` - Added full scan cache
+    - `app/core/rescan.py` - Added cache invalidation on rescan
+    - `app/api/scan.py` - Updated to use cache
+  - Test coverage:
+    - `tests/test_cache.py` - Comprehensive cache tests (14 tests)
+    - Cache hit/miss tests for all cache types
+    - Redis unavailable fallback tests
+    - Signals hash stability tests
+  - Status: ✅ Core implementation completed
+  - Benefits: Significant performance improvement, reduced DNS/WHOIS queries, better multi-worker support
+- **P1-2: Distributed Rate Limiting** - Redis-based distributed rate limiting for multi-worker deployments
+  - Redis client wrapper with connection pooling (`app/core/redis_client.py`)
+  - DistributedRateLimiter class with Redis-based token bucket algorithm
+  - Circuit breaker pattern for Redis availability (5 failure threshold, 60s recovery timeout)
+  - Fallback to in-memory rate limiter when Redis is unavailable
+  - Degrade mode logging (WARN level + Sentry tags) for monitoring
+  - DNS rate limiter migrated to Redis (10 req/s, shared across all workers)
+  - WHOIS rate limiter migrated to Redis (5 req/s, shared across all workers)
+  - API key rate limiter migrated to Redis (per-key limits, shared across all workers)
+  - Health check endpoint already includes Redis health check (`/healthz/ready`)
+  - Implementation files:
+    - `app/core/redis_client.py` - Redis client wrapper with connection pooling
+    - `app/core/distributed_rate_limiter.py` - Distributed rate limiter with circuit breaker
+    - `app/core/rate_limiter.py` - Updated to use DistributedRateLimiter
+    - `app/core/api_key_auth.py` - Updated to use DistributedRateLimiter
+  - Status: ✅ Core implementation completed
+  - Benefits: Multi-worker deployments now share rate limits correctly, preventing rate limit bypass
+- **P1: Alembic Migration System** - Database migration management system
+  - Alembic setup and configuration (`alembic/`, `alembic.ini`, `alembic/env.py`)
+  - Base revision created (`08f51db8dce0_base_revision.py`) representing current production schema
+  - "Collapsed history" strategy: Base revision represents all historical migrations (g16-g20)
+  - Legacy SQL migration files moved to `app/db/migrations/legacy/` for reference
+  - Schema drift detection via `alembic check` command
+  - `run_migration.py` script updated to use Alembic (wrapper for Alembic commands)
+  - Docker integration: Alembic files included in Dockerfile and docker-compose.yml
+  - Migration commands:
+    - `python -m app.db.run_migration upgrade` - Upgrade to latest migration
+    - `python -m app.db.run_migration downgrade` - Downgrade one step
+    - `python -m app.db.run_migration current` - Show current revision
+    - `python -m app.db.run_migration check` - Check for schema drift
+  - Documentation:
+    - `docs/active/P1-ALEMBIC-PREPARATION.md` - Preparation analysis
+    - `docs/active/P1-ALEMBIC-STATUS.md` - Implementation status
+    - `app/db/migrations/legacy/README.md` - Legacy migration reference
+  - Implementation files:
+    - `alembic/versions/08f51db8dce0_base_revision.py` - Base revision
+    - `alembic/env.py` - Alembic environment configuration
+    - `alembic.ini` - Alembic configuration file
+    - `app/db/run_migration.py` - Migration runner script (updated)
+    - `requirements.txt` - Alembic dependency added
+    - `Dockerfile` - Alembic files included
+    - `docker-compose.yml` - Alembic directory volume mount
+  - Status: ✅ Core implementation completed
+  - Strategy: All future schema changes will be managed through Alembic revisions
 - **Sales Persona v2.0: "Sistematik Avcı"** - Comprehensive sales persona documentation and training materials
   - **Persona v2.0 Documentation** (`docs/active/SALES-PERSONA-v2.0.md`):
     - Hunter-native satışçı profili (G17, G18, G20 özelliklerini kullanan)
