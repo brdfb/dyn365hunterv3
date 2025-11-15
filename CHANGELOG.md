@@ -28,7 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - API updates:
     - `GET /leads` and `GET /leads/{domain}` now return `tenant_size`, `local_provider`, and `dmarc_coverage`
     - `POST /scan/domain` response includes new fields
+    - `GET /leads/{domain}/score-breakdown` now includes G20 fields in response
     - Export endpoints include new fields in CSV/Excel exports
+  - Mini UI integration:
+    - Added "Tenant Size" column to leads table with color-coded badges (small/medium/large)
+    - Added "Local Provider" column to leads table
+    - Updated score breakdown modal to display G20 fields (tenant_size, local_provider, dmarc_coverage)
+    - Tenant size badge styling: small (green), medium (orange), large (blue)
+    - Files: `mini-ui/index.html`, `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`
   - Database schema:
     - Added `tenant_size` column to `companies` table (VARCHAR(50), indexed)
     - Added `local_provider` column to `domain_signals` table (VARCHAR(255), indexed)

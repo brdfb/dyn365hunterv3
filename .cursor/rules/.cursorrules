@@ -8,7 +8,8 @@
 - **Post-MVP Sprint 2-5 (G15-G18)**: ✅ Completed - Bulk Scan, Webhook, Notes/Tags/Favorites/PDF, ReScan/Alerts/Enhanced Scoring
 - **Post-MVP Sprint 6 (G19)**: ✅ Completed - Auth + UI + Advanced Features
 - **UI Patch v1.1**: ✅ Completed - Skor detay modal ve UX iyileştirmeleri (2025-01-28)
-- **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring
+- **G20: Domain Intelligence Layer**: ✅ Completed - Local Provider, Tenant Size, DMARC Coverage (2025-01-28)
+- **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20)
 
 ## Code Style & Standards
 
