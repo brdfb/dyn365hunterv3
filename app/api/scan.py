@@ -44,10 +44,13 @@ class ScanDomainResponse(BaseModel):
     segment: str
     reason: str
     provider: Optional[str] = None
+    local_provider: Optional[str] = None  # G20: Local provider name
+    tenant_size: Optional[str] = None  # G20: Tenant size estimate
     mx_root: Optional[str] = None
     spf: bool = False
     dkim: bool = False
     dmarc_policy: Optional[str] = None
+    dmarc_coverage: Optional[int] = None  # G20: DMARC coverage percentage
     scan_status: str
 
 
@@ -102,15 +105,29 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
         mx_root = dns_result.get("mx_root")
         provider = classify_provider(mx_root, use_cache=True)
 
+        # G20: Classify local provider (if provider is Local)
+        local_provider = None
+        if provider == "Local" and mx_root:
+            from app.core.provider_map import classify_local_provider
+            local_provider = classify_local_provider(mx_root)
+
+        # G20: Estimate tenant size (for M365 and Google)
+        tenant_size = None
+        if provider in ["M365", "Google"] and mx_root:
+            from app.core.provider_map import estimate_tenant_size
+            tenant_size = estimate_tenant_size(provider, mx_root)
+
         # Track provider changes
         previous_provider = company.provider
         provider_changed = False
 
-        # Update company provider if we have new information
+        # Update company provider and tenant_size if we have new information
         if provider and provider != "Unknown":
             if previous_provider != provider:
                 provider_changed = True
             company.provider = provider
+            if tenant_size:
+                company.tenant_size = tenant_size
             db.commit()
 
         # Prepare signals for scoring
@@ -138,7 +155,9 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
             spf=dns_result.get("spf", False),
             dkim=dns_result.get("dkim", False),
             dmarc_policy=dns_result.get("dmarc_policy"),
+            dmarc_coverage=dns_result.get("dmarc_coverage"),  # G20: DMARC coverage
             mx_root=mx_root,
+            local_provider=local_provider,  # G20: Local provider name
             registrar=whois_result.get("registrar") if whois_result else None,
             expires_at=whois_result.get("expires_at") if whois_result else None,
             nameservers=whois_result.get("nameservers") if whois_result else None,
@@ -187,10 +206,13 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
             segment=scoring_result["segment"],
             reason=scoring_result["reason"],
             provider=provider,
+            local_provider=local_provider,  # G20: Local provider name
+            tenant_size=tenant_size,  # G20: Tenant size estimate
             mx_root=mx_root,
             spf=dns_result.get("spf", False),
             dkim=dns_result.get("dkim", False),
             dmarc_policy=dns_result.get("dmarc_policy"),
+            dmarc_coverage=dns_result.get("dmarc_coverage"),  # G20: DMARC coverage
             scan_status=scan_status,
         )
 

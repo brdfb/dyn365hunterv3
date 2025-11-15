@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **G20: Scan Endpoint Missing Fields** (2025-11-15) - Fixed missing G20 fields in `/scan/domain` endpoint
+  - Added `tenant_size` calculation and saving for M365/Google providers
+  - Added `local_provider` detection and saving for Local providers
+  - Added `dmarc_coverage` saving from DNS analysis
+  - Response model now includes all G20 fields (tenant_size, local_provider, dmarc_coverage)
+  - Fixes issue where tenant_size and local_provider were not populated during domain scanning
+
 ### Added
 - **Support Endpoint** (2025-11-15) - Added `/support` endpoint for support information
   - Returns support information with API documentation links
