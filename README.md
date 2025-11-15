@@ -347,7 +347,7 @@ A simple web interface for demo and internal use:
   - **Authentication**: Requires `Authorization: Bearer {access_token}` header
   - Revokes refresh token and clears session
   - Returns: 200 OK
-- **Setup**: See [Azure AD Setup Guide](docs/active/G19-AZURE-AD-SETUP.md) for configuration instructions
+- **Setup**: See [Azure AD Setup Guide](docs/archive/2025-11-15-G19-AZURE-AD-SETUP.md) for configuration instructions
 
 ### Admin (API Key Management)
 - `POST /admin/api-keys` - Create a new API key

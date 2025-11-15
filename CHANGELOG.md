@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - Token revocation table
       - Refresh token encryption (Fernet)
     - Favorites migration: Session-based → user-based (on first login)
-    - Setup guide: `docs/active/G19-AZURE-AD-SETUP.md`
+    - Setup guide: `docs/archive/2025-11-15-G19-AZURE-AD-SETUP.md` (archived after completion)
   - UI Upgrade (Lead Table):
     - Sorting: Sort by domain, readiness_score, priority_score, segment, provider, scanned_at
     - Pagination: Page-based pagination with configurable page size (default: 50, max: 200)
