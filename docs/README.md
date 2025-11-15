@@ -84,6 +84,7 @@ docs/
 
 **Active Plans:**
 - `2025-11-14-FINAL-ROADMAP.md` - **Final Roadmap - Post-MVP Sprint 2-6 (G15-G19)** - G19 completed, future sprints (G20+) planned
+- `.cursor/plans/UI-PATCH-PLAN-v1.1.md` - **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri (✅ Completed - 2025-01-28)
 
 **Archived Plans:**
 All completed planning documentation has been moved to `docs/archive/`:

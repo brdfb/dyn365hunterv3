@@ -6,7 +6,8 @@
 - **MVP Status**: ✅ Completed (G1-G14)
 - **Post-MVP Sprint 1 (G14)**: ✅ Completed - CSV Export + UI Mini
 - **Post-MVP Sprint 2-5 (G15-G18)**: ✅ Completed - Bulk Scan, Webhook, Notes/Tags/Favorites/PDF, ReScan/Alerts/Enhanced Scoring
-- **Post-MVP Sprint 6 (G19)**: 📋 Planned - Auth + UI + Advanced Features
+- **Post-MVP Sprint 6 (G19)**: ✅ Completed - Auth + UI + Advanced Features
+- **UI Patch v1.1**: ✅ Completed - Skor detay modal ve UX iyileştirmeleri (2025-01-28)
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring
 
 ## Code Style & Standards

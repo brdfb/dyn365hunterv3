@@ -45,6 +45,12 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ **G19: UI Upgrade** - Sorting, pagination, and full-text search for leads table
 - ✅ **G19: Dashboard KPI** - New `/dashboard/kpis` endpoint with high priority leads count
 - ✅ **G19: Score Breakdown** - Detailed score analysis with modal UI
+- ✅ **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri
+  - DKIM çift gösterimi düzeltildi (tek satır: "DKIM Eksik: -15")
+  - DMARC_NONE kategorisi düzeltildi (Pozitif Sinyaller'den çıkarıldı)
+  - Sıralama tutarlılığı (SPF → DKIM → DMARC → Riskler)
+  - Provider renkli badge'ler (M365, Google, Yandex, Local, vb.)
+  - Sort ikonları iyileştirmeleri (tooltip + daha belirgin)
 
 ## Tech Stack
 
