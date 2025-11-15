@@ -46,6 +46,16 @@ class LeadResponse(BaseModel):
     priority_score: Optional[int] = None
 
 
+class LeadsListResponse(BaseModel):
+    """Response model for paginated leads list (G19)."""
+
+    leads: List[LeadResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
 @router.get("/export")
 async def export_leads(
     segment: Optional[str] = Query(
@@ -222,7 +232,7 @@ def get_user_id(request: Request) -> str:
     return session_id
 
 
-@router.get("", response_model=List[LeadResponse])
+@router.get("", response_model=LeadsListResponse)
 async def get_leads(
     segment: Optional[str] = Query(
         None, description="Filter by segment (Migration, Existing, Cold, Skip)"
@@ -237,20 +247,40 @@ async def get_leads(
         None,
         description="Filter by favorites (true = only favorites, false = all leads)",
     ),
+    # G19: UI upgrade - Sorting, pagination, search
+    sort_by: Optional[str] = Query(
+        None,
+        description="Sort by field (domain, readiness_score, priority_score, segment, provider, scanned_at)",
+    ),
+    sort_order: Optional[str] = Query(
+        "asc", pattern="^(asc|desc)$", description="Sort order (asc or desc)"
+    ),
+    page: Optional[int] = Query(1, ge=1, description="Page number (1-based)"),
+    page_size: Optional[int] = Query(
+        50, ge=1, le=200, description="Number of items per page (max 200)"
+    ),
+    search: Optional[str] = Query(
+        None, description="Full-text search in domain, canonical_name, and provider"
+    ),
     request: Request = None,
     db: Session = Depends(get_db),
 ):
     """
-    Get filtered list of leads.
+    Get filtered, sorted, and paginated list of leads (G19).
 
     Query parameters:
     - segment: Filter by segment (Migration, Existing, Cold, Skip)
     - min_score: Minimum readiness score (0-100)
     - provider: Filter by provider name
     - favorite: Filter by favorites (true = only favorites, false = all leads)
+    - sort_by: Sort by field (domain, readiness_score, priority_score, segment, provider, scanned_at)
+    - sort_order: Sort order (asc or desc, default: asc)
+    - page: Page number (1-based, default: 1)
+    - page_size: Number of items per page (default: 50, max: 200)
+    - search: Full-text search in domain, canonical_name, and provider
 
     Returns:
-        List of LeadResponse objects matching the filters
+        LeadsListResponse with paginated leads and metadata
     """
     # Build query using leads_ready VIEW
     query = """
@@ -291,11 +321,22 @@ async def get_leads(
         query += " AND provider = :provider"
         params["provider"] = provider
 
+    # G19: Add search filter (full-text search in domain, canonical_name, provider)
+    if search:
+        search_pattern = f"%{search.lower()}%"
+        query += """ AND (
+            LOWER(domain) LIKE :search 
+            OR LOWER(canonical_name) LIKE :search 
+            OR LOWER(provider) LIKE :search
+        )"""
+        params["search"] = search_pattern
+
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
 
     # Note: We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
+    # Default sorting (if sort_by not specified) is by priority_score
     query += " ORDER BY readiness_score DESC, domain ASC"
 
     try:
@@ -343,16 +384,59 @@ async def get_leads(
             )
             leads.append(lead)
 
-        # Sort by priority_score ASC (1 = highest priority), then readiness_score DESC
-        # This ensures Migration leads with high scores appear first
-        leads.sort(
-            key=lambda x: (
-                x.priority_score if x.priority_score is not None else 999,
-                -(x.readiness_score if x.readiness_score is not None else 0),
-            )
-        )
+        # G19: Apply sorting
+        # Default: priority_score ASC (1 = highest priority), then readiness_score DESC
+        if sort_by:
+            # Map sort_by field names to sort keys
+            sort_key_map = {
+                "domain": lambda x: (x.domain or "",),
+                "readiness_score": lambda x: (
+                    x.readiness_score if x.readiness_score is not None else -1,
+                ),
+                "priority_score": lambda x: (
+                    x.priority_score if x.priority_score is not None else 999,
+                ),
+                "segment": lambda x: (x.segment or "",),
+                "provider": lambda x: (x.provider or "",),
+                "scanned_at": lambda x: (
+                    x.scanned_at if x.scanned_at else "",
+                ),
+            }
 
-        return leads
+            if sort_by in sort_key_map:
+                reverse = sort_order == "desc"
+                leads.sort(key=sort_key_map[sort_by], reverse=reverse)
+            else:
+                # Invalid sort_by, use default sorting
+                leads.sort(
+                    key=lambda x: (
+                        x.priority_score if x.priority_score is not None else 999,
+                        -(x.readiness_score if x.readiness_score is not None else 0),
+                    )
+                )
+        else:
+            # Default sorting: priority_score ASC, then readiness_score DESC
+            leads.sort(
+                key=lambda x: (
+                    x.priority_score if x.priority_score is not None else 999,
+                    -(x.readiness_score if x.readiness_score is not None else 0),
+                )
+            )
+
+        # G19: Apply pagination
+        total = len(leads)
+        total_pages = (total + page_size - 1) // page_size  # Ceiling division
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        paginated_leads = leads[start_idx:end_idx]
+
+        return LeadsListResponse(
+            leads=paginated_leads,
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
