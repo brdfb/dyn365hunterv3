@@ -985,6 +985,501 @@ http://localhost:8000/mini-ui/
 
 ---
 
+## 🚀 Senaryo 10: Persona v2.0 - "Sistematik Avcı" Senaryoları ✨ YENİ
+
+### Senaryo 10.1: Alert Tabanlı Proaktif Satış (v2.0)
+
+**Durum:** Sabah alert kontrolünde MX değişikliği tespit edildi.
+
+**Adımlar:**
+
+#### 1. Alert Kontrolü
+```bash
+# Alert'leri kontrol et
+curl "http://localhost:8000/alerts?alert_type=mx_changed"
+```
+
+**Yanıt:**
+```json
+{
+  "alerts": [
+    {
+      "alert_id": "uuid",
+      "alert_type": "mx_changed",
+      "domain": "example.com",
+      "message": "MX record changed from Google to M365",
+      "created_at": "2025-01-28T09:00:00Z"
+    }
+  ]
+}
+```
+
+#### 2. Domain'i ReScan Et
+```bash
+# Domain'i rescan et (değişiklikleri tespit et)
+curl -X POST http://localhost:8000/scan/example.com/rescan
+```
+
+**Yanıt:**
+```json
+{
+  "domain": "example.com",
+  "changes_detected": true,
+  "changes": {
+    "mx_changed": true,
+    "old_provider": "Google",
+    "new_provider": "M365",
+    "score_changed": true,
+    "old_score": 45,
+    "new_score": 85,
+    "segment_changed": true,
+    "old_segment": "Cold",
+    "new_segment": "Migration"
+  }
+}
+```
+
+#### 3. Hunter'a Not ve Tag Ekle
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "MX değişti (Google → M365), migration fırsatı tespit edildi, hemen outreach yapılacak"}'
+
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "mx-changed"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "migration-opportunity"}'
+```
+
+#### 4. Favorilere Ekle
+```bash
+# Favorilere ekle (öncelikli takip için)
+curl -X POST http://localhost:8000/leads/example.com/favorite
+```
+
+#### 5. Lead Enrichment
+```bash
+# Generic email üret ve doğrula
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com", "use_smtp": false}'
+
+# Contact enrichment
+curl -X POST http://localhost:8000/leads/example.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contact_emails": [
+      "it@example.com",
+      "cfo@example.com",
+      "info@example.com"
+    ]
+  }'
+```
+
+#### 6. Multi-Threaded Outreach
+- **IT Direktörü**: "MX kayıtlarınız Google'dan M365'e değişti. Migration planı hazırlayalım mı?"
+- **CFO**: "Mail altyapınızı M365'e geçirdiğinizi görüyorum. Migration desteği sunabiliriz."
+- **Genel Müdür**: "M365 migration sürecinizde destek olabiliriz."
+
+#### 7. Dynamics CRM'e Aktar
+```bash
+# Export et
+curl "http://localhost:8000/leads/export?format=csv&domain=example.com" -o example-lead.csv
+
+# Dynamics CRM'e import (webhook veya manuel)
+```
+
+**Sonuç:**
+- ✅ Alert tespit edildi
+- ✅ ReScan ile değişiklikler doğrulandı
+- ✅ Hunter'a not ve tag eklendi
+- ✅ Favorilere eklendi
+- ✅ Lead enrichment yapıldı
+- ✅ Multi-threaded outreach başlatıldı
+- ✅ Dynamics CRM'e aktarıldı
+
+---
+
+### Senaryo 10.2: Multi-Threaded Outreach (v2.0)
+
+**Durum:** Priority 1 lead bulundu, birden fazla karar vericiye ulaşılacak.
+
+**Adımlar:**
+
+#### 1. Lead Enrichment
+```bash
+# Generic email üret ve doğrula
+curl -X POST http://localhost:8000/email/generate-and-validate \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com", "use_smtp": false}'
+
+# Contact enrichment
+curl -X POST http://localhost:8000/leads/example.com/enrich \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contact_emails": [
+      "it.director@example.com",
+      "cfo@example.com",
+      "gm@example.com",
+      "cto@example.com"
+    ]
+  }'
+```
+
+#### 2. Role-Based Mesajlaşma
+
+**IT Direktörü:**
+```
+"MX kayıtlarınız Google'dan görünse de SPF/DKIM eksik. Bunu iyileştirmek email deliverability'nizi %25 artırır. 5 dakikada ücretsiz check yapayım ister misiniz?"
+```
+
+**CFO:**
+```
+"Mail deliverability %40 düşüyor, müşteri kaybı riski var. M365 migration ile bu riski ortadan kaldırabiliriz. ROI hesaplaması hazır, 15 dakikalık görüşme yapabilir miyiz?"
+```
+
+**Genel Müdür:**
+```
+"Şirket mail altyapınızda güvenlik açığı tespit ettik (DMARC none → phishing riski). İsterseniz raporlayıp öneri çıkarayım. 10 dakikalık görüşme yeterli."
+```
+
+**CTO:**
+```
+"DMARC none → phishing riskiniz yüksek. M365 + Defender ile bunu hemen çözebiliriz. Migration planı hazır, 15 dakikalık teknik görüşme yapabilir miyiz?"
+```
+
+#### 3. Champion Building
+```bash
+# IT ekibinden contact bul (LinkedIn veya Hunter'dan)
+# Champion'a özel mesaj gönder
+
+# Hunter'a not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "4 role'e ulaşıldı, IT ekibinden Ahmet Bey champion, migration planı hazırlanıyor"}'
+
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "champion-found"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "multi-threaded"}'
+```
+
+**Sonuç:**
+- ✅ 4 role'e ulaşıldı (IT Direktörü, CFO, Genel Müdür, CTO)
+- ✅ Role-based mesajlaşma yapıldı
+- ✅ Champion bulundu (IT ekibinden Ahmet Bey)
+- ✅ Hunter'a not ve tag eklendi
+
+---
+
+### Senaryo 10.3: Rejection Handling - "Şu An İlgilenmiyoruz" (v2.0)
+
+**Durum:** Müşteri "şu an ilgilenmiyoruz" dedi.
+
+**Adımlar:**
+
+#### 1. Hunter'a Not Ekle
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Müşteri şu an ilgilenmiyor, 6 ay sonra tekrar denenecek. IT Direktörü ile görüşüldü, migration planı hazır ama şu an bütçe yok."}'
+```
+
+#### 2. Tag Ekle
+```bash
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "not-interested"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "follow-up-6months"}'
+```
+
+#### 3. Alert Konfigürasyonu
+```bash
+# 6 ay sonra rescan için alert konfigürasyonu
+curl -X POST http://localhost:8000/alerts/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alert_type": "score_changed",
+    "notification_method": "webhook",
+    "webhook_url": "https://dynamics-crm.example.com/webhook",
+    "enabled": true,
+    "frequency": "immediate"
+  }'
+```
+
+#### 4. Dynamics CRM'de Stage Güncelle
+- Priority Score → "Long-term" stage'ine taşı
+- 6 ay sonra tekrar denenecek notu ekle
+
+**Sonuç:**
+- ✅ Hunter'a not eklendi
+- ✅ Tag'ler eklendi (not-interested, follow-up-6months)
+- ✅ Alert konfigürasyonu yapıldı
+- ✅ Dynamics CRM'de stage güncellendi
+
+---
+
+### Senaryo 10.4: Rejection Handling - "Zaten Başka Bir Çözüm Kullanıyoruz" (v2.0)
+
+**Durum:** Müşteri zaten M365 kullanıyor (Existing segment).
+
+**Adımlar:**
+
+#### 1. Upsell Fırsatı Tespit Et
+- Defender paketleri
+- Power Automate
+- Dynamics 365
+- Consulting services
+
+#### 2. Hunter'a Not Ekle
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Müşteri zaten M365 kullanıyor, Defender upsell fırsatı. IT Direktörü ile görüşüldü, Defender paketleri sunulacak."}'
+```
+
+#### 3. Tag Ekle
+```bash
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "existing-customer"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "upsell-opportunity"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "defender-ready"}'
+```
+
+#### 4. ReScan ile Domain Değişikliklerini Takip
+```bash
+# Domain'i rescan et (DMARC eklendi mi? MX değişti mi?)
+curl -X POST http://localhost:8000/scan/example.com/rescan
+```
+
+**Sonuç:**
+- ✅ Upsell fırsatı tespit edildi
+- ✅ Hunter'a not eklendi
+- ✅ Tag'ler eklendi (existing-customer, upsell-opportunity, defender-ready)
+- ✅ ReScan ile domain değişiklikleri takip ediliyor
+
+---
+
+### Senaryo 10.5: Pricing Strategy - Tenant Size'a Göre Teklif (v2.0)
+
+**Durum:** Demo yapıldı, tenant size'a göre teklif hazırlanacak.
+
+**Adımlar:**
+
+#### 1. Tenant Size Tespit Et
+```bash
+# Lead detayını gör (tenant_size bilgisi ile)
+curl "http://localhost:8000/leads/example.com"
+```
+
+**Yanıt:**
+```json
+{
+  "domain": "example.com",
+  "provider": "M365",
+  "tenant_size": "large",
+  "readiness_score": 85,
+  "segment": "Migration"
+}
+```
+
+#### 2. Tenant Size'a Göre Teklif Hazırla
+
+**Small (1-50 kullanıcı):**
+- Business Basic: €5/kullanıcı/ay
+- Migration: €500 (tek seferlik)
+- Toplam: €5,500/yıl (50 kullanıcı)
+
+**Medium (50-500 kullanıcı):**
+- Business Standard: €10/kullanıcı/ay
+- Migration: €2,000 (tek seferlik)
+- Defender: €5/kullanıcı/ay (opsiyonel)
+- Toplam: €60,000/yıl (500 kullanıcı, Defender ile)
+
+**Large (500+ kullanıcı):**
+- Enterprise: €20/kullanıcı/ay
+- Migration: €10,000 (tek seferlik)
+- Defender: €10/kullanıcı/ay (opsiyonel)
+- Consulting: €50,000 (tek seferlik)
+- Toplam: €1,200,000/yıl (500 kullanıcı, Defender + Consulting ile)
+
+#### 3. Value-Based Pricing Hazırla
+```bash
+# Hunter'dan risk sinyallerini çıkar
+curl "http://localhost:8000/leads/example.com"
+```
+
+**Risk Sinyalleri:**
+- SPF yok → Phishing riski
+- DMARC none → Email spoofing riski
+- Domain expire soon → Domain kaybı riski
+
+**Value Proposition:**
+- "Mail deliverability %40 artış → €X müşteri kaybı önleme"
+- "DMARC reject → €Y phishing saldırısı önleme"
+- "M365 migration → €Z IT maliyeti düşüşü"
+
+#### 4. PDF Summary Oluştur
+```bash
+# PDF summary oluştur (satış sunumu için)
+curl "http://localhost:8000/leads/example.com/summary.pdf" -o example-summary.pdf
+```
+
+**Sonuç:**
+- ✅ Tenant size tespit edildi (large)
+- ✅ Tenant size'a göre teklif hazırlandı (Enterprise + Defender + Consulting)
+- ✅ Value-based pricing hazırlandı (ROI hesaplama)
+- ✅ PDF summary oluşturuldu
+
+---
+
+### Senaryo 10.6: Competition Awareness - Google Workspace → M365 Migration (v2.0)
+
+**Durum:** Müşteri Google Workspace kullanıyor, M365 migration fırsatı.
+
+**Adımlar:**
+
+#### 1. Provider Tespit Et
+```bash
+# Lead detayını gör
+curl "http://localhost:8000/leads/example.com"
+```
+
+**Yanıt:**
+```json
+{
+  "domain": "example.com",
+  "provider": "Google",
+  "readiness_score": 75,
+  "segment": "Migration"
+}
+```
+
+#### 2. Migration Fırsatı Sun
+- "M365 daha iyi Office entegrasyonu, Dynamics 365 ile uyumlu"
+- "M365 daha güvenli, daha profesyonel, daha ölçeklenebilir"
+
+#### 3. Hunter'a Not Ekle
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "Google Workspace kullanıyor, M365 migration fırsatı. IT Direktörü ile görüşüldü, migration planı hazırlanıyor."}'
+```
+
+#### 4. Tag Ekle
+```bash
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "google-workspace"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "migration-opportunity"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "m365-migration"}'
+```
+
+#### 5. ReScan ile MX Değişikliklerini Takip
+```bash
+# Domain'i rescan et (MX değişikliği var mı?)
+curl -X POST http://localhost:8000/scan/example.com/rescan
+```
+
+**Sonuç:**
+- ✅ Provider tespit edildi (Google)
+- ✅ Migration fırsatı sunuldu
+- ✅ Hunter'a not eklendi
+- ✅ Tag'ler eklendi (google-workspace, migration-opportunity, m365-migration)
+- ✅ ReScan ile MX değişiklikleri takip ediliyor
+
+---
+
+### Senaryo 10.7: Competition Awareness - Local Provider → M365 Migration (v2.0)
+
+**Durum:** Müşteri yerel hosting firması kullanıyor (TürkHost), M365 migration fırsatı.
+
+**Adımlar:**
+
+#### 1. Local Provider Tespit Et
+```bash
+# Lead detayını gör
+curl "http://localhost:8000/leads/example.com"
+```
+
+**Yanıt:**
+```json
+{
+  "domain": "example.com",
+  "provider": "Local",
+  "local_provider": "TürkHost",
+  "readiness_score": 80,
+  "segment": "Migration"
+}
+```
+
+#### 2. Migration Fırsatı Sun
+- "TürkHost'tan M365'e geçiş yapıyoruz, sorunsuz migration garantisi"
+- "M365 daha güvenli, daha profesyonel, daha ölçeklenebilir"
+
+#### 3. Hunter'a Not Ekle
+```bash
+# Not ekle
+curl -X POST http://localhost:8000/leads/example.com/notes \
+  -H "Content-Type: application/json" \
+  -d '{"note": "TürkHost kullanıyor, M365 migration fırsatı. IT Direktörü ile görüşüldü, TürkHost'tan M365'e geçiş planı hazırlanıyor."}'
+```
+
+#### 4. Tag Ekle
+```bash
+# Tag ekle
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "local-mx"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "migration-opportunity"}'
+
+curl -X POST http://localhost:8000/leads/example.com/tags \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "turkhost-migration"}'
+```
+
+**Sonuç:**
+- ✅ Local provider tespit edildi (TürkHost)
+- ✅ Migration fırsatı sunuldu (TürkHost → M365)
+- ✅ Hunter'a not eklendi
+- ✅ Tag'ler eklendi (local-mx, migration-opportunity, turkhost-migration)
+
+---
+
 ## 🔧 Yardımcı Script'ler
 
 ### Toplu Analiz Script'i

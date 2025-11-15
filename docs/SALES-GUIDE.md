@@ -1098,6 +1098,138 @@ http://localhost:8000/docs
 
 ---
 
+## 👤 Satışçı Personası: "Sistematik Avcı" v2.0
+
+**Hunter-native, CRM-integrated, multi-threaded satış avcısı profili**
+
+### 🎭 Temel Profil
+
+**İsim**: Emir Kara  
+**Rol**: B2B Cloud Solutions Sales Specialist  
+**Kıdem**: 2-3 yıl (SAAS + Cloud satış tecrübesi)  
+**Kullanılan Araçlar**: Dyn365Hunter, LinkedIn Sales Navigator, Power BI, Dynamics CRM  
+**Odak Alanı**: Domain → IT Decision Maker → Migration fırsatı → Teklif → Kapanış  
+**KPI**: M365 Migration, Security Upsell (Defender), Cloud App Consulting, yıllık MRR
+
+**v2.0 Farkı**: Hunter'ın tüm özelliklerini kullanan, CRM pipeline'a entegre, multi-threaded, sistematik satış avcısı.
+
+### 🎯 Günlük Çalışma Akışı
+
+#### 1. Sabah (09:00 – 10:00): Hunter Taraması + Alert Kontrolü + Automation
+
+**Hunter Taraması:**
+- Priority 1–2 lead'leri filtreler (`GET /leads?priority_score=1,2`)
+- Migration segmenti ve 80+ skorları direkt işaretler
+- Domain expire <60 gün olanları ayırır
+- Provider change history'ye bakar
+
+**Alert Kontrolü (v2.0):**
+- Alert'leri kontrol eder (`GET /alerts`)
+  - `mx_changed` → Migration fırsatı! Hemen aksiyon
+  - `dmarc_added` → Güvenlik iyileştirmesi, upsell fırsatı!
+  - `expire_soon` → Domain yenileme fırsatı!
+  - `score_changed` → Lead durumu değişti, pipeline güncelle
+
+**Hunter-native Özellikler (v2.0):**
+- **Favorilere ekler** (`POST /leads/{domain}/favorite`)
+- **Auto-tag'leri kontrol eder** (migration-ready, security-risk, expire-soon)
+- **Tenant size'a göre filtreleme** (large → yüksek bütçe)
+- **Local provider detayına bakar** (TürkHost → migration stratejisi)
+
+**Aksiyon:** 5 firmayı listesine alır → hemen outreach
+
+#### 2. Öğle Öncesi (10:30 – 12:00): İlk Temas + Lead Enrichment + Multi-Threaded Outreach
+
+**Lead Enrichment (v2.0):**
+- Generic email üretme ve doğrulama (`POST /email/generate-and-validate`)
+- Contact enrichment (`POST /leads/{domain}/enrich`)
+- Contact quality score'a bakar
+
+**Multi-Threaded Outreach (v2.0):**
+- **IT Direktörü**: Teknik mesaj (MX, SPF, DKIM, DMARC)
+- **CFO**: Finansal mesaj (Mail deliverability, müşteri kaybı riski)
+- **Genel Müdür**: Stratejik mesaj (Güvenlik açığı, risk yönetimi)
+- **CTO**: Teknik + Stratejik mesaj (DMARC, phishing riski)
+
+**Champion Building (v2.0):**
+- IT ekibinden, güvenlik ekibinden contact bulur
+- Champion'a özel mesaj
+- Hunter'a not ekler: "IT ekibinden Ahmet Bey champion"
+
+#### 3. Öğleden Sonra (13:00 – 16:00): Lead Qualification / Demo + Hunter Notları
+
+**Demo Süreci:**
+- 15 dakikalık hızlı Zoom
+- Hunter ekran görüntüsü ile risk ve fırsat anlatımı
+- **Tenant size'a göre teklif hazırlar** (v2.0)
+  - Small → Business Basic
+  - Medium → Business Standard
+  - Large → Enterprise + Defender
+- **Local provider detayına göre migration stratejisi** (v2.0)
+
+**Hunter Notları ve Tag'ler (v2.0):**
+- Görüşme sonrası not ekler (`POST /leads/{domain}/notes`)
+- Tag ekler (`POST /leads/{domain}/tags`)
+- PDF summary oluşturur (`GET /leads/{domain}/summary.pdf`)
+
+#### 4. Gün Sonu (16:00 – 17:00): CRM Güncelleme & Follow-Up + ReScan Pipeline
+
+**Hunter → Dynamics CRM Entegrasyonu (v2.0):**
+- Hunter'dan export alır (`GET /leads/export?format=csv`)
+- Dynamics CRM'e import eder
+- Notes/tags senkronizasyonu
+- Alert konfigürasyonu (`POST /alerts/config`)
+
+**CRM Pipeline Mapping (v2.0):**
+
+| Hunter Priority | Dynamics CRM Stage | Aksiyon Zamanı |
+|----------------|-------------------|----------------|
+| 1-2 🔥⭐ | "Qualified Lead" | Hemen (1-2 gün) |
+| 3 🟡 | "Nurturing" | 1 hafta içinde |
+| 4 🟠 | "Cold Lead" | 1-2 hafta |
+| 5-7 ⚪⚫🔴 | "Long-term" | 1-6 ay |
+
+**ReScan Pipeline (v2.0):**
+- Favorilere eklediği lead'leri rescan eder (`POST /scan/{domain}/rescan`)
+- Toplu rescan (`POST /scan/bulk/rescan`)
+- Alert konfigürasyonu
+
+### 🧨 Rejection Handling Stratejisi (v2.0)
+
+#### 1. "Şu An İlgilenmiyoruz"
+- Hunter'a not ekler: "6 ay sonra tekrar denenecek"
+- Tag ekler: `not-interested`, `follow-up-6months`
+- Alert konfigürasyonu: 6 ay sonra rescan
+
+#### 2. "Zaten Başka Bir Çözüm Kullanıyoruz"
+- Upsell fırsatı: Defender, Power Automate, Dynamics 365
+- Hunter'a not ekler: "Existing customer, Defender upsell fırsatı"
+- Tag ekler: `existing-customer`, `upsell-opportunity`
+
+#### 3. "Bütçe Yok"
+- Alternatif çözümler: Business Basic, aşamalı migration, free trial
+- Hunter'a not ekler: "3 ay sonra tekrar denenecek"
+- Tag ekler: `budget-constraint`, `follow-up-3months`
+
+### 💰 Pricing Strategy (v2.0)
+
+**Tenant Size'a Göre Pricing:**
+- **Small (1-50)**: Business Basic €5/kullanıcı/ay, Migration €500
+- **Medium (50-500)**: Business Standard €10/kullanıcı/ay, Migration €2,000
+- **Large (500+)**: Enterprise €20/kullanıcı/ay, Migration €10,000, Consulting €50,000
+
+**Value-Based Pricing:**
+- ROI hesaplama: Mail deliverability artışı, phishing önleme, IT maliyeti düşüşü
+- Hunter'dan risk sinyallerini kullanır (SPF yok, DMARC none, domain expire soon)
+
+### 📚 Detaylı Persona Dokümantasyonu
+
+Daha detaylı bilgi için:
+- [SALES-PERSONA-v2.0.md](active/SALES-PERSONA-v2.0.md) - Tam persona dokümantasyonu
+- [SALES-PERSONA-CRITIQUE.md](active/SALES-PERSONA-CRITIQUE.md) - Persona critique ve geliştirme önerileri
+
+---
+
 ## 🎬 Hızlı Demo
 
 Hazır demo script'i çalıştırın:

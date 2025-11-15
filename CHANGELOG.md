@@ -8,6 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Sales Persona v2.0: "Sistematik Avcı"** - Comprehensive sales persona documentation and training materials
+  - **Persona v2.0 Documentation** (`docs/active/SALES-PERSONA-v2.0.md`):
+    - Hunter-native satışçı profili (G17, G18, G20 özelliklerini kullanan)
+    - CRM-integrated workflow (Hunter → Dynamics CRM pipeline mapping)
+    - Multi-threaded outreach stratejisi (IT Direktörü, CFO, Genel Müdür, CTO)
+    - Rejection handling senaryoları (3 senaryo: "İlgilenmiyoruz", "Başka çözüm", "Bütçe yok")
+    - Competition awareness (Google Workspace → M365, Local Provider → M365)
+    - Pricing strategy (Tenant size'a göre pricing, value-based pricing)
+    - Günlük çalışma akışı (4 zaman dilimi: Sabah, Öğle Öncesi, Öğleden Sonra, Gün Sonu)
+  - **Persona Critique** (`docs/active/SALES-PERSONA-CRITIQUE.md`):
+    - v1.0 persona'nın eleştirel analizi
+    - Eksik özellikler ve geliştirme önerileri
+    - Hunter özelliklerini tam kullanma stratejisi
+    - CRM entegrasyonu detayları
+  - **Training Material** (`docs/active/SALES-TRAINING.md`):
+    - 7 modüllük eğitim programı (Hunter Temelleri, Hunter-native Özellikler, CRM Entegrasyonu, Multi-Threaded Outreach, Rejection Handling, Pricing Strategy, Competition Awareness)
+    - Her modül için pratik egzersizler
+    - Değerlendirme testleri
+    - Eğitim tamamlama checklist'i
+  - **Sales Guide Integration** (`docs/SALES-GUIDE.md`):
+    - Persona v2.0 bölümü eklendi (özet)
+    - Günlük çalışma akışı
+    - Hunter-native özellikler
+    - CRM pipeline mapping tablosu
+    - Rejection handling stratejisi
+    - Pricing strategy
+  - **Sales Scenarios v2.0** (`docs/SALES-SCENARIOS.md`):
+    - Senaryo 10.1: Alert Tabanlı Proaktif Satış
+    - Senaryo 10.2: Multi-Threaded Outreach
+    - Senaryo 10.3: Rejection Handling - "Şu An İlgilenmiyoruz"
+    - Senaryo 10.4: Rejection Handling - "Zaten Başka Bir Çözüm Kullanıyoruz"
+    - Senaryo 10.5: Pricing Strategy - Tenant Size'a Göre Teklif
+    - Senaryo 10.6: Competition Awareness - Google Workspace → M365 Migration
+    - Senaryo 10.7: Competition Awareness - Local Provider → M365 Migration
+  - Documentation structure:
+    - Persona v2.0: `docs/active/SALES-PERSONA-v2.0.md` (tam dokümantasyon)
+    - Persona Critique: `docs/active/SALES-PERSONA-CRITIQUE.md` (eleştirel analiz)
+    - Training Material: `docs/active/SALES-TRAINING.md` (eğitim materyali)
+    - Sales Guide: `docs/SALES-GUIDE.md` (özet bölüm eklendi)
+    - Sales Scenarios: `docs/SALES-SCENARIOS.md` (7 yeni senaryo eklendi)
 - **G20: Domain Intelligence Layer** - Enhanced domain intelligence features
   - **Local Provider Detail** (P0): Automatic detection of specific local hosting providers
     - `local_provider` field in `domain_signals` table
