@@ -89,13 +89,18 @@ API contract documentation:
   - Complete implementation guide with configuration, testing checklist, deployment strategy
   - Feature flag: `HUNTER_ENRICHMENT_ENABLED` (default: `false`)
   - No-break upgrade design - can be deployed with flag disabled
+  - **Configuration** (2025-01-28): Simplified env format (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
+  - **Country DB Support** (2025-01-28): Optional `GeoLite2-Country.mmdb` as fallback for country-only lookups
+  - **Backward Compatible**: Legacy format (`HUNTER_ENRICHMENT_DB_PATH_*`) still supported
   - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
     - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
     - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
     - Backward compatible: Optional field (None if no enrichment data available)
 - `IP-ENRICHMENT-QUICK-START.md` - IP Enrichment quick setup guide (2025-01-28)
   - Step-by-step guide for downloading DB files and enabling enrichment
-  - 10-minute setup: Download 3 DB files → Place in project → Update .env → Restart
+  - 10-minute setup: Download DB files → Place in project → Update .env (new format) → Restart
+  - New env format: `MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`
+  - Country DB setup instructions (optional fallback)
   - Troubleshooting guide and verification checklist
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.

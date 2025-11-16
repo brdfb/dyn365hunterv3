@@ -57,6 +57,9 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ **Duplicate prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
 - ✅ **Domain validation** - Enhanced validation to filter invalid domains (nan, web sitesi, etc.)
 - ✅ **IP Enrichment** - IP geolocation, ASN, ISP, and proxy detection (MaxMind, IP2Location, IP2Proxy) ✨ YENİ
+  - **Data Sources**: MaxMind GeoLite2 (City/Country/ASN), IP2Location LITE, IP2Proxy LITE
+  - **Configuration**: Simplified env format (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
+  - **Country DB Support**: Optional `GeoLite2-Country.mmdb` as fallback for country-only lookups
   - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
   - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
   - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
@@ -688,6 +691,18 @@ LOG_LEVEL=INFO
 
 # Development
 ENVIRONMENT=development
+
+# IP Enrichment (Feature flag: disabled by default)
+# HUNTER_ENRICHMENT_ENABLED=false
+
+# MaxMind GeoIP Databases (new format - recommended)
+MAXMIND_CITY_DB=app/data/maxmind/GeoLite2-City.mmdb
+MAXMIND_COUNTRY_DB=app/data/maxmind/GeoLite2-Country.mmdb
+# MAXMIND_ASN_DB=app/data/maxmind/GeoLite2-ASN.mmdb  # Optional - only add if you use ASN database
+
+# IP2Location & IP2Proxy
+IP2LOCATION_DB=app/data/ip2location/IP2LOCATION-LITE-DB11.BIN
+IP2PROXY_DB=app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
 ```
 
 ## Example Usage

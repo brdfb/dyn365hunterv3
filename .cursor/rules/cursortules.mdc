@@ -90,6 +90,7 @@ alwaysApply: true
 - **ReScan infrastructure** (`POST /scan/{domain}/rescan`, `POST /scan/bulk/rescan`) - Manual and bulk rescan with change detection
 - **Alerts system** (`GET /alerts`, `POST /alerts/config`) - Change alerts (MX, DMARC, expiry, score)
 - **Enhanced scoring** - Signal-based improvements (DKIM none penalty, SPF multiple includes risk)
+- **IP Enrichment** - IP geolocation, ASN, ISP, and proxy detection (MaxMind, IP2Location, IP2Proxy) with simplified env format (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
 - Docker Compose setup
 - Basic tests (8+ test files)
 
