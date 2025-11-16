@@ -120,10 +120,10 @@ API contract documentation:
 - `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (Completed)
 - `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (Completed)
 - `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (Completed)
-- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: Microsoft SSO Auth + UI Upgrade (✅ Completed - 2025-11-15)
-- `2025-11-15-G19-AZURE-AD-SETUP.md` - G19: Azure AD Setup Guide (Completed)
-- `2025-11-15-G19-IMPLEMENTATION-PLAN.md` - G19: Implementation Plan (Completed)
-- `2025-11-15-G19-TEST-SUMMARY.md` - G19: Test Summary (Completed)
+- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: UI Upgrade (✅ Completed - 2025-11-15) - **Note**: SSO removed (2025-01-28), switched to Internal Access Mode
+- `2025-11-15-G19-AZURE-AD-SETUP.md` - G19: Azure AD Setup Guide (Archived - SSO removed 2025-01-28)
+- `2025-11-15-G19-IMPLEMENTATION-PLAN.md` - G19: Implementation Plan (Archived - SSO removed 2025-01-28)
+- `2025-11-15-G19-TEST-SUMMARY.md` - G19: Test Summary (Archived - SSO removed 2025-01-28)
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
@@ -212,7 +212,7 @@ All completed TODO files have been moved to `docs/archive/`:
 - `2025-11-14-G16-webhook-enrichment.md` - G16: Sprint 3: Webhook + Basit Lead Enrichment (✅ Completed)
 - `2025-11-14-G17-notes-tags-pdf.md` - G17: Sprint 4: Notes/Tags/Favorites + Basit PDF (✅ Completed)
 - `2025-11-14-G18-rescan-alerts-scoring.md` - G18: Sprint 5: ReScan + Alerts + Enhanced Scoring (✅ Completed)
-- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: Microsoft SSO Auth + UI Upgrade (✅ Completed - 2025-11-15)
+- `2025-11-15-G19-auth-ui-advanced.md` - G19: Sprint 6: UI Upgrade (✅ Completed - 2025-11-15) - **Note**: SSO removed (2025-01-28), switched to Internal Access Mode
 
 **P1 Implementation Status:**
 - `P1-PREPARATION.md` - P1 Preparation (Pre-Implementation) - ✅ Completed (2025-01-28)

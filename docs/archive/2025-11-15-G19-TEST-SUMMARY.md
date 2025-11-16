@@ -1,8 +1,10 @@
 # G19 - Test Summary
 
+> ⚠️ **DEPRECATED** (2025-01-28): SSO authentication has been removed. Test file `tests/test_auth.py` has been deleted. Hunter now uses Internal Access Mode (network-level authentication). See CHANGELOG.md for details.
+
 **Tarih**: 2025-01-28  
 **Sprint**: G19 (Post-MVP Sprint 6)  
-**Test Dosyası**: `tests/test_auth.py`
+**Test Dosyası**: `tests/test_auth.py` (DELETED - 2025-01-28)
 
 ---
 

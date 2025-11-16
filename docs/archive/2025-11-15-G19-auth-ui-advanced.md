@@ -1,11 +1,13 @@
 # TODO: Sprint 6 (G19) - Auth + UI + Advanced Features
 
+> ⚠️ **DEPRECATED** (2025-01-28): SSO authentication has been removed. Hunter now uses Internal Access Mode (network-level authentication). See CHANGELOG.md for details.
+
 **Date Created**: 2025-11-14  
-**Status**: ✅ Completed  
+**Status**: ✅ Completed (SSO REMOVED - 2025-01-28)  
 **Phase**: G19 (Post-MVP Sprint 6)  
 **Süre**: 2-3 hafta  
 **Completed**: 2025-11-15  
-**Last Updated**: 2025-11-15
+**Last Updated**: 2025-01-28
 
 ---
 

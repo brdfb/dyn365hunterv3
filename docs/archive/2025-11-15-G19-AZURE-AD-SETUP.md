@@ -1,8 +1,10 @@
 # Azure AD Setup Guide (G19)
 
+> ⚠️ **DEPRECATED** (2025-01-28): This feature has been removed. SSO implementation was not used in any core flows. Hunter now uses Internal Access Mode (network-level authentication). See CHANGELOG.md for details.
+
 **Tarih**: 2025-01-28  
 **Sprint**: G19 (Post-MVP Sprint 6)  
-**Feature**: Microsoft SSO Authentication
+**Feature**: Microsoft SSO Authentication (REMOVED)
 
 ---
 

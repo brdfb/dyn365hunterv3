@@ -14,6 +14,12 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
+- **SSO Removal - Internal Access Mode** (✅ Completed) - Removed unused Microsoft SSO authentication, switched to Internal Access Mode
+  - Removed SSO implementation (~400+ lines of code) - Not used in any core flows
+  - Removed dependencies: `msal`, `python-jose`, `cryptography` (SSO-specific)
+  - Removed `User` model and Azure AD configuration
+  - Simplified authentication: Network-level access control for internal tool (3-10 users)
+  - Impact: Reduced code complexity, removed maintenance burden
 - **Integration Roadmap - Phase 1: Mini UI Stabilization** (✅ Completed) - UI polish and stability improvements
   - Button & Modal Fixes (Task 1.1 ✅) - Improved hover states, modal scroll optimization
   - Score Breakdown Improvements (Task 1.2 ✅) - Data flow fixes, tooltip positioning, signal order, loading states
@@ -79,7 +85,6 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Mini UI (HTML + Vanilla JS) - Simple web interface for demo and internal use
 - ✅ **Progress tracking** - Real-time progress updates for CSV ingestion and scanning operations
 - ✅ **Bulk Scan** - Async bulk domain scanning with progress tracking (G15)
-- ✅ **G19: Microsoft SSO Authentication** - Azure AD integration with OAuth 2.0 flow
 - ✅ **G19: UI Upgrade** - Sorting, pagination, and full-text search for leads table
 - ✅ **G19: Dashboard KPI** - New `/dashboard/kpis` endpoint with high priority leads count
 - ✅ **G19: Score Breakdown** - Detailed score analysis with modal UI
@@ -264,8 +269,6 @@ A simple web interface for demo and internal use:
 | **Leads** | `/leads/{domain}/summary.pdf` | GET | Generate PDF account summary |
 | **Dashboard** | `/dashboard` | GET | Get aggregated dashboard statistics |
 | **Dashboard** | `/dashboard/kpis` | GET | Get dashboard KPIs (lightweight) |
-| **Auth** | `/auth/login` | GET | Initiate Microsoft SSO login |
-| **Auth** | `/auth/me` | GET | Get current user information |
 | **Admin** | `/admin/api-keys` | POST | Create API key |
 | **Email** | `/email/generate` | POST | Generate generic email addresses |
 | **Email** | `/email/generate-and-validate` | POST | Generate and validate emails |
@@ -498,25 +501,6 @@ A simple web interface for demo and internal use:
     - Lead enrichment (contact emails, quality score, LinkedIn pattern detection)
     - Retry logic with exponential backoff for failed requests
     - Error logging and tracking
-
-### Authentication (G19: Microsoft SSO)
-- `GET /auth/login` - Initiate Microsoft SSO login
-  - Redirects to Azure AD login page
-  - Returns: Redirect to Azure AD OAuth 2.0 authorization endpoint
-- `GET /auth/callback` - OAuth callback endpoint
-  - Handles Azure AD OAuth callback with authorization code
-  - Returns: Redirect to frontend with access_token and refresh_token
-- `GET /auth/me` - Get current user information
-  - **Authentication**: Requires `Authorization: Bearer {access_token}` header
-  - Returns: User information (id, email, display_name)
-- `POST /auth/refresh` - Refresh access token
-  - Request body: `{"refresh_token": "..."}`
-  - Returns: New access_token and refresh_token
-- `POST /auth/logout` - Logout current user
-  - **Authentication**: Requires `Authorization: Bearer {access_token}` header
-  - Revokes refresh token and clears session
-  - Returns: 200 OK
-- **Setup**: See [Azure AD Setup Guide](docs/archive/2025-11-15-G19-AZURE-AD-SETUP.md) for configuration instructions
 
 ### Debug Endpoints (Internal/Admin Use)
 - `GET /debug/ip-enrichment/{ip}` - Debug IP enrichment for a specific IP address

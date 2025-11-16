@@ -1,7 +1,9 @@
 # G19 - Implementation Plan
 
+> ⚠️ **DEPRECATED** (2025-01-28): SSO authentication has been removed. Hunter now uses Internal Access Mode (network-level authentication). See CHANGELOG.md for details.
+
 **Tarih**: 2025-01-28  
-**Durum**: 📋 Planlama  
+**Durum**: 📋 Planlama (SSO REMOVED - 2025-01-28)  
 **Sprint**: G19 (Post-MVP Sprint 6)  
 **Süre**: 2-3 hafta
 

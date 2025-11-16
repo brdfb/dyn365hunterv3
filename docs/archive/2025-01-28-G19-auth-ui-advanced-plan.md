@@ -1,10 +1,12 @@
 # G19 - Auth + UI + Advanced Features - Detaylı Teknik Plan
 
+> ⚠️ **DEPRECATED** (2025-01-28): SSO authentication has been removed. Hunter now uses Internal Access Mode (network-level authentication). See CHANGELOG.md for details.
+
 **Tarih**: 2025-01-28  
-**Durum**: ✅ **Tamamlandı (P0/P1)** - P2 optional features backlog'a taşındı  
+**Durum**: ✅ **Tamamlandı (P0/P1)** - SSO REMOVED (2025-01-28) - P2 optional features backlog'a taşındı  
 **Sprint**: G19 (Post-MVP Sprint 6)  
 **Süre**: 2-3 hafta  
-**Tamamlanma**: 2025-11-15
+**Tamamlanma**: 2025-11-15 (SSO removed: 2025-01-28)
 
 ---
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **Microsoft SSO Authentication (G19)** (2025-01-28) - Removed unused SSO implementation, switched to Internal Access Mode
+  - **Removed Files**: `app/core/auth.py`, `app/api/auth.py`, `app/core/favorites_migration.py`, `tests/test_auth.py`
+  - **Removed Dependencies**: `msal`, `python-jose`, `cryptography` (SSO-specific)
+  - **Removed Models**: `User` model (SSO-specific)
+  - **Removed Config**: Azure AD and JWT configuration from `app/config.py` and `.env.example`
+  - **Updated Code**: `app/api/sales_summary.py` - Removed SSO fallback, using session-based user ID only
+  - **Updated Tests**: `tests/test_integration_g19.py` - Removed SSO tests, kept UI upgrade tests
+  - **Reason**: SSO was not used in any core flows (ingest, scan, leads, dashboard). Internal tool (3-10 users) doesn't require SSO complexity. Network-level authentication is sufficient.
+  - **Impact**: Reduced code complexity (~400+ lines), removed maintenance burden, simplified authentication model
+  - **Status**: ✅ Completed
+
 ### Enhanced
 - **Mini UI - Production Improvements** (2025-01-28) - Code quality and error handling enhancements
   - **Production-Safe Logging**: Added logger utility (`mini-ui/js/logger.js`) with debug mode control

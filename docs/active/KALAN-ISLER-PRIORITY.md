@@ -264,7 +264,7 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
 - **Neden P1?**
   - Hunter gerçek dünyada 2 node'a çıkarsa **WHOIS + DNS rate limit** sıradan şekilde kırılır
   - Satış ekibi birden fazla kişi kullanırsa yanlış sonuç çıkarır
-  - Microsoft SSO geldi → concurrency artacak
+  - ~~Microsoft SSO geldi → concurrency artacak~~ (REMOVED - 2025-01-28: Internal Access Mode kullanılıyor)
 - **Tamamlanan İşler**:
   - ✅ Redis client wrapper oluşturuldu (`app/core/redis_client.py` - connection pooling)
   - ✅ DistributedRateLimiter class oluşturuldu (`app/core/distributed_rate_limiter.py`)
@@ -641,7 +641,7 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 **Şartlar**: P0 checklist yeşil
 
 - [x] P0 maddelerin tamamı tamamlandı ✅ **G19'da**
-- [x] Microsoft SSO authentication çalışıyor ✅ **G19'da**
+- [x] Microsoft SSO authentication çalışıyor ✅ **G19'da** (⚠️ REMOVED - 2025-01-28: Internal Access Mode kullanılıyor)
 - [x] Error tracking aktif ✅ **G19'da**
 - [x] Structured logging aktif ✅ **G19'da**
 - [x] DB connection pooling yapılandırıldı ✅ **G19'da**
