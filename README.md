@@ -14,11 +14,36 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
+- **Sales Documentation Consistency** (✅ Completed) - Documentation cleanup and standardization
+  - Kanonik Segment-Priority Matrisi added (single source of truth)
+  - Cross-references added across all sales documentation
+  - v1.0 (MVP) vs v2.0 (Target) distinction clarified
+  - Tuning Factor status documented (design-only, not in production UI)
+- **Partner Center Integration - Phase 2** (🅿️ Parked - MVP-safe mode) - Partner Center referral ingestion and lifecycle tracking
+  - Core components completed: API client (MSAL + Device Code Flow), database model, referral ingestion pipeline
+  - Features: Lead type detection (Co-sell, Marketplace, Solution Provider), domain extraction fallback, Azure Tenant ID signal, idempotent domain scanning
+  - Status: Tasks 2.1, 2.2, 2.3 completed. Parked in MVP-safe mode (feature flag disabled by default, no impact on MVP Go/No-Go)
+  - Next: Post-MVP - API endpoints, background sync, UI integration, scoring pipeline integration
 - **IP Enrichment Minimal UI** (✅ Completed) - Added IP enrichment to score breakdown and sales summary
   - Backend: IP enrichment integrated into score-breakdown and sales-summary endpoints
   - UI: Network & Location section added to score breakdown modal (country + proxy warning)
   - Sales Engine: IP context (country, proxy) integrated into sales intelligence text generation
   - Impact: Improves score accuracy, enhances sales intelligence, strengthens Hunter's positioning
+- **IP Enrichment Validation** (✅ Completed) - Validation test script and status documentation
+  - Test Script: Created validation script for 11 real-world domains (Türkiye hosting, M365, Global big tech)
+  - Test Results: IP resolution 100% success (11/11), Enrichment 100% success (11/11) - Full validation completed
+  - Status Documentation: Created comprehensive status tracking document
+  - MVP Decision: ✅ ACCEPTED FOR MVP (country + city data quality acceptable)
+  - Status: Production-ready (enrichment enabled, DB files available)
+- **Mini UI v1.1 Polish** (✅ Completed - 7/10 tasks) - Sales-friendly UI improvements
+  - Search Input: Optimized debounce (500ms → 400ms)
+  - Empty State: Improved message with action buttons
+  - Error Messages: Sales-friendly Turkish messages (technical details hidden)
+  - Loading Indicators: Button disable + "Yükleniyor..." text
+  - Score Breakdown Modal: Added "Neden bu skor?" header with explanation
+  - Segment Tooltips: Sales-friendly explanations (Existing, Migration, Cold, Skip)
+  - Location Info: More prominent display with "(IP bazlı tahmin)" note
+  - Remaining: Dogfooding test, duplicate request detection, modal cache (pending manual testing)
 - **Regression Dataset Rename & Expansion** (✅ Completed) - Renamed "golden dataset" to "silver regression dataset"
   - Renamed test file and variables for clarity (synthetic regression set, not ground truth)
   - Expanded regression dataset from 14-15 to 26 test cases

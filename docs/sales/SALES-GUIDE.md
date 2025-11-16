@@ -321,12 +321,12 @@ curl "http://localhost:8000/scan/bulk/{job_id}/results"
 - **0-19**: Çok düşük → Şimdilik atlanabilir
 
 **Segment Ne Anlama Geliyor?**
-- **Migration**: Yüksek öncelik, hemen iletişime geç
-- **Existing**: Zaten müşteri olabilir, takip et
-- **Cold**: Düşük öncelik, daha fazla sinyal gerekli
-- **Skip**: Şimdilik atla
+- **Migration**: Yüksek öncelik, hemen iletişime geç (Provider: Google/Yandex/Zoho/Hosting/Local + Score ≥ 60)
+- **Existing**: Zaten müşteri olabilir, takip et (Provider: M365, her koşulda)
+- **Cold**: Düşük öncelik, daha fazla sinyal gerekli (Score: 5-59 Local / 40-59 diğer)
+- **Skip**: Şimdilik atla (Score: 0-39)
 
-Detaylı açıklama için: [SEGMENT-GUIDE.md](SEGMENT-GUIDE.md)
+**Detaylı Segment-Priority Matrisi:** [SEGMENT-GUIDE.md](SEGMENT-GUIDE.md) - Kanonik Segment-Priority Matrisi bölümüne bakın.
 
 ---
 
@@ -343,7 +343,7 @@ curl "http://localhost:8000/leads"
 #### Migration Segment'i (Yüksek Öncelik)
 
 ```bash
-curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 ```
 
 **Ne Döner?**
@@ -361,7 +361,7 @@ curl "http://localhost:8000/leads?provider=M365&min_score=50"
 #### Kombine Filtre
 
 ```bash
-curl "http://localhost:8000/leads?segment=Migration&min_score=70&provider=M365"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 ```
 
 **Filtre Seçenekleri:**
@@ -452,11 +452,11 @@ curl "http://localhost:8000/leads/ornek-firma.com"
 **Priority Score Nedir?**
 - **1** 🔥: Migration + Skor 80+ → En yüksek öncelik
 - **2** ⭐: Migration + Skor 70-79 → Yüksek öncelik
-- **3** 🟡: Migration + Skor 50-69, Existing + Skor 70+ → Orta-yüksek öncelik
-- **4** 🟠: Migration + Skor 0-49, Existing + Skor 50-69 → Orta öncelik
-- **5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ → Düşük-orta öncelik
+- **3** 🟡: Migration + Skor 60-69, Existing + Skor 70+ → Orta-yüksek öncelik
+- **4** 🟠: Migration + Skor 0-59 (artık mümkün değil, Migration için min 60), Existing + Skor 50-69 → Orta öncelik
+- **5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ (Local: 5-39) → Düşük-orta öncelik
 - **6** ⚫: Existing + Skor 0-29, Cold + Skor 20-39 → Düşük öncelik
-- **7** 🔴: Cold + Skor 0-19, Skip → En düşük öncelik
+- **7** 🔴: Cold + Skor 0-19 (Local: 5-19), Skip (0-39) → En düşük öncelik
 
 **Önemli:** Migration segmenti artık düşük skorlu olsa bile öncelikli (Priority 3-4)!
 
@@ -711,13 +711,13 @@ curl "http://localhost:8000/leads/export?format=xlsx" -o leads.xlsx
 **Filtreleme ile Export:**
 ```bash
 # Migration segment'indeki lead'leri export et
-curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=60" -o migration-leads.csv
 
 # Belirli provider'ı export et
 curl "http://localhost:8000/leads/export?format=csv&provider=M365" -o m365-leads.csv
 
 # Kombine filtre
-curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70&provider=Google" -o google-migration.xlsx
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=60&provider=Google" -o google-migration.xlsx
 ```
 
 **Export Parametreleri:**
@@ -867,7 +867,7 @@ curl -X POST http://localhost:8000/ingest/csv \
 curl "http://localhost:8000/dashboard"
 
 # 4. Migration segment'indeki yüksek skorlu lead'leri görüntüle
-curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 ```
 
 ### Senaryo 2: Tek Domain Hızlı Kontrol
@@ -949,7 +949,7 @@ curl "http://localhost:8000/scan/bulk/{job_id}/results"
 
 ### Migration Lead'leri Gör
 ```bash
-curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 ```
 
 ### Tek Lead Detayı
@@ -1020,8 +1020,8 @@ curl "http://localhost:8000/leads/export?format=csv" -o leads.csv
 # Excel export
 curl "http://localhost:8000/leads/export?format=xlsx" -o leads.xlsx
 
-# Filtreli export (Migration, skor 70+)
-curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+# Filtreli export (Migration, skor 60+)
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=60" -o migration-leads.csv
 ```
 
 ### Email Üret ve Doğrula
@@ -1366,10 +1366,10 @@ Bu script:
    curl "http://localhost:8000/dashboard"
    
    # Detaylı lead listesi (Priority Score ile)
-   curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+   curl "http://localhost:8000/leads?segment=Migration&min_score=60"
    
    # Lead'leri CSV/Excel olarak export et
-   curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+   curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=60" -o migration-leads.csv
    ```
 
 **İpuçları:**

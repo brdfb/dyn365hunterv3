@@ -2,8 +2,10 @@
 
 **Versiyon**: 2.0  
 **Tarih**: 2025-01-28  
-**Durum**: Güncellenmiş - Hunter-native, CRM-integrated, Multi-threaded  
-**Önceki Versiyon**: v1.0 "Akıllı Avcı" (MVP seviyesi)
+**Durum**: **Hedef Durum** - Hunter-native, CRM-integrated, Multi-threaded  
+**Önceki Versiyon**: v1.0 "Akıllı Avcı" (MVP seviyesi - **Bugünkü Gerçeklik**)
+
+**⚠️ ÖNEMLİ:** Bu doküman **hedef durumu** (v2.0) anlatır. MVP'de (v1.0) henüz tüm özellikler mevcut değildir. Mevcut durum için [SALES-GUIDE.md](SALES-GUIDE.md) dosyasına bakın.
 
 ---
 
@@ -75,7 +77,7 @@ Hunter'daki notes, tags, favorites, alerts → lead takibi ve pipeline yönetimi
   - Priority 1-2 lead'leri favorilere ekler
   - `GET /leads?favorite=true` ile takip eder
 - **Auto-tag'leri kontrol eder**
-  - `migration-ready` → Migration segment + score >= 70
+  - `migration-ready` → Migration segment + score >= 60
   - `security-risk` → SPF/DKIM yok
   - `expire-soon` → Domain 30 gün içinde expire
   - `google-workspace` → Provider Google
@@ -189,11 +191,11 @@ Hunter Priority Score → Dynamics CRM Stage Mapping:
 |----------------|----------------|-------------------|----------------|
 | **1** 🔥 | Migration + 80+ | "Qualified Lead" | Hemen (1 gün) |
 | **2** ⭐ | Migration + 70-79 | "Qualified Lead" | Hemen (1-2 gün) |
-| **3** 🟡 | Migration + 50-69<br>Existing + 70+ | "Nurturing" | 1 hafta içinde |
-| **4** 🟠 | Migration + 0-49<br>Existing + 50-69 | "Cold Lead" | 1-2 hafta |
-| **5** ⚪ | Existing + 30-49<br>Cold + 40+ | "Long-term" | 1-2 ay |
+| **3** 🟡 | Migration + 60-69<br>Existing + 70+ | "Nurturing" | 1 hafta içinde |
+| **4** 🟠 | Migration + 0-59 (artık mümkün değil, Migration için min 60)<br>Existing + 50-69 | "Cold Lead" | 1-2 hafta |
+| **5** ⚪ | Existing + 30-49<br>Cold + 40+ (Local: 5-39) | "Long-term" | 1-2 ay |
 | **6** ⚫ | Existing + 0-29<br>Cold + 20-39 | "Long-term" | 2-3 ay |
-| **7** 🔴 | Cold + 0-19<br>Skip | "Archive" | 3-6 ay |
+| **7** 🔴 | Cold + 0-19 (Local: 5-19)<br>Skip (0-39) | "Archive" | 3-6 ay |
 
 #### **YENİ v2.0**: ReScan Pipeline
 - **Favorilere eklediği lead'leri rescan eder** (`POST /scan/{domain}/rescan`)

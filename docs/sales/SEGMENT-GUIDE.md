@@ -14,16 +14,42 @@ Priority Score, segment ve readiness score kombinasyonuna göre hesaplanan önce
 |----------|----------------|-------|----------------|
 | **1** 🔥 | Migration + 80+ | 🟢 En yüksek öncelik | Hemen (1 gün) |
 | **2** ⭐ | Migration + 70-79 | 🟢 Yüksek öncelik | Hemen (1-2 gün) |
-| **3** 🟡 | Migration + 50-69<br>Existing + 70+ | 🟡 Orta-yüksek öncelik | 1 hafta içinde |
-| **4** 🟠 | Migration + 0-49<br>Existing + 50-69 | 🟠 Orta öncelik | 1-2 hafta |
-| **5** ⚪ | Existing + 30-49<br>Cold + 40+ | ⚪ Düşük-orta öncelik | 1-2 ay |
-| **6** ⚫ | Existing + 0-29<br>Cold + 20-39 | ⚫ Düşük öncelik | 2-3 ay |
-| **7** 🔴 | Cold + 0-19<br>Skip | 🔴 En düşük öncelik | 3-6 ay |
+| **3** 🟡 | Migration + 60-69<br>Existing + 70+ | 🟡 Orta-yüksek öncelik | 1 hafta içinde |
+| **4** 🟠 | Migration + 0-59 (teorik, pratikte Migration segment'inde görülmez)<br>Existing + 50-69 | 🟠 Orta öncelik | 1-2 hafta |
+| **5** ⚪ | Existing + 30-49<br>Cold + 40+ (Local: 5-39) | ⚪ Düşük-orta öncelik | 1-2 ay |
+| **6** ⚫ | Existing + 0-29<br>Cold + 20-39 (Local: 5-19) | ⚫ Düşük öncelik | 2-3 ay |
+| **7** 🔴 | Cold + 0-19 (Local: 5-19)<br>Skip (0-39) | 🔴 En düşük öncelik | 3-6 ay |
 
 **Önemli Değişiklikler:**
 - **Migration segmenti** artık düşük skorlu olsa bile öncelikli (Priority 3-4)
 - Her priority seviyesi farklı görsel ile gösteriliyor (🔥⭐🟡🟠⚪⚫🔴)
 - Priority 7 eklendi (en düşük öncelik - Cold düşük skorlu ve Skip segmenti)
+
+**Gerçek Hesaplama Formülü** (Backend: `app/core/priority.py`):
+
+```python
+# Migration segment (min_score = 60, so 0-59 is theoretical only)
+if score >= 80: return 1
+elif score >= 70: return 2
+elif score >= 60: return 3  # Migration segment requires min_score 60
+else: return 4  # Migration + 0-59 is theoretical (Migration segment min_score = 60)
+
+# Existing segment
+if score >= 70: return 3
+elif score >= 50: return 4
+elif score >= 30: return 5
+else: return 6
+
+# Cold segment
+if score >= 40: return 5
+elif score >= 20: return 6
+else: return 7
+
+# Skip segment
+return 7  # En düşük öncelik
+```
+
+**Not**: Migration segment için min_score 60 olduğu için, Migration segment'inde sadece 60+ skorlar görülür. Priority 4 (0-59) teorik olarak mümkün ama pratikte Migration segment'inde görülmez.
 
 **Kullanım:**
 - Lead listelerinde `priority_score` field'ı ile sıralama yapabilirsiniz
@@ -83,6 +109,8 @@ Bazı durumlarda domain otomatik olarak **Skip** segmentine atanır (skor 0):
 - **DMARC policy = none**: -10 puan (ek risk)
 - **Hosting + SPF/DKIM yok**: -10 puan (zayıf hosting MX)
 
+> **Not:** Hosting weak risk UI'da **score breakdown modal'da gösteriliyor**. Skorlara tıklayarak detaylı skor analizi modal'ını açabilirsiniz. "Risk Faktörleri" section'ında "Hosting MX Zayıf" olarak görünür.
+
 **Örnek 1 (Pozitif):**
 - Provider: M365 (50 puan)
 - SPF var (10 puan)
@@ -110,13 +138,20 @@ Bazı durumlarda domain otomatik olarak **Skip** segmentine atanır (skor 0):
 ### 1. Migration (Yüksek Öncelik) 🟢
 
 **Ne Demek?**
-- Yüksek hazırlık skoru (70+) ile bilinen cloud provider kullanıyor
+- Yüksek hazırlık skoru (60+) ile bilinen cloud provider kullanıyor
 - Migration için hazır görünüyor
 - Hemen iletişime geçilebilir
 
+**⚠️ KRİTİK: Migration Segment Mantığı**
+- **Provider ∈ {Google, Yandex, Zoho, Hosting, Local}** VE
+- **Skor ≥ 60** (min_score = 60)
+- Segment = "kimin ne kullandığı" + "hazırlık seviyesi"
+- Priority Score = "ne kadar acil" (segment + skor kombinasyonu)
+
 **Koşullar:**
-- Skor: **70 ve üzeri**
-- Provider: M365, Google, Yandex, Zoho
+- Skor: **60 ve üzeri** (min_score = 60, kesin eşik)
+- Provider: Google, Yandex, Zoho, Hosting, Local
+- **Not:** M365 provider'ı Migration segment'ine girmez (Existing'e girer)
 
 **Aksiyon Planı:**
 1. ✅ **Hemen iletişime geç** - Yüksek öncelik
@@ -128,9 +163,20 @@ Bazı durumlarda domain otomatik olarak **Skip** segmentine atanır (skor 0):
 ```
 Domain: ornek-firma.com
 Skor: 85
-Provider: M365
-Segment: Migration
+Provider: Google
+Segment: Migration (Google + 60+)
+Priority Score: 85 → Priority 1 (Migration + 80+)
 Aksiyon: Hemen arama yap, migration teklifi hazırla
+```
+
+**Örnek Senaryo 2 (Düşük Skor):**
+```
+Domain: dusuk-skor-migration.com
+Skor: 60 (minimum eşik)
+Provider: Local
+Segment: Migration (Local + 60+)
+Priority Score: 60 → Priority 3 (Migration + 60-69)
+Aksiyon: Migration segment'inde ama düşük skor, 1 hafta içinde takip et
 ```
 
 ---
@@ -138,13 +184,18 @@ Aksiyon: Hemen arama yap, migration teklifi hazırla
 ### 2. Existing (Mevcut Müşteri) 🟡
 
 **Ne Demek?**
-- Orta-yüksek hazırlık skoru (50+) ile cloud/hosting provider kullanıyor
+- **M365 provider kullanan tüm domain'ler** (skor ne olursa olsun)
 - Zaten müşteri olabilir veya yakın zamanda olabilir
 - Takip edilmeli
 
+**⚠️ KRİTİK: Existing Segment Mantığı**
+- **Provider = M365 ise → Her koşulda Existing segment'i**
+- **Readiness skoru ne olursa olsun** (0 bile olsa) → Existing
+- Segment = "kimin ne kullandığı" (provider bazlı)
+- Priority Score = "ne kadar acil" (segment + skor kombinasyonu)
+
 **Koşullar:**
-- Skor: **50 ve üzeri**
-- Provider: M365, Google, Yandex, Zoho, Amazon, SendGrid, Mailgun
+- Provider: **M365** (tek koşul, skor eşiği yok)
 
 **Aksiyon Planı:**
 1. ✅ **Müşteri durumunu kontrol et** - Zaten müşteri mi?
@@ -155,10 +206,21 @@ Aksiyon: Hemen arama yap, migration teklifi hazırla
 **Örnek Senaryo:**
 ```
 Domain: mevcut-musteri.com
-Skor: 65
+Skor: 65 (veya 0, 10, 20... fark etmez)
 Provider: M365
-Segment: Existing
+Segment: Existing (M365 = her koşulda Existing)
+Priority Score: Skor 65 → Priority 4 (Existing + 50-69)
 Aksiyon: CRM'de kontrol et, müşteri ise upsell değerlendir
+```
+
+**Örnek Senaryo 2 (Düşük Skor):**
+```
+Domain: dusuk-skor-m365.com
+Skor: 5 (SPF/DKIM/DMARC eksik)
+Provider: M365
+Segment: Existing (M365 = her koşulda Existing)
+Priority Score: Skor 5 → Priority 6 (Existing + 0-29)
+Aksiyon: M365 kullanıyor ama güvenlik sinyalleri zayıf, Defender upsell fırsatı
 ```
 
 ---
@@ -166,12 +228,13 @@ Aksiyon: CRM'de kontrol et, müşteri ise upsell değerlendir
 ### 3. Cold (Soğuk Lead) 🟠
 
 **Ne Demek?**
-- Düşük-orta hazırlık skoru (20-49)
+- Düşük-orta hazırlık skoru (5-59)
 - Daha fazla sinyal gerekli
 - Şimdilik düşük öncelik
+- **Local provider için özel kural**: Self-hosted mail sunucusu kullananlar (score 5-59) → Cold segment'inde
 
 **Koşullar:**
-- Skor: **20-49 arası**
+- Skor: **5-59 arası** (Local provider için) veya **40-59 arası** (diğer provider'lar için)
 - Provider: Herhangi biri (veya bilinmeyen)
 
 **Aksiyon Planı:**
@@ -194,12 +257,14 @@ Aksiyon: 1 ay sonra tekrar analiz et, genel bilgilendirme gönder
 ### 4. Skip (Atla) 🔴
 
 **Ne Demek?**
-- Çok düşük hazırlık skoru (0-19)
+- Çok düşük hazırlık skoru (0-39)
 - Şimdilik atlanabilir
 - Zaman kaybı olabilir
+- **Local provider için özel durum**: Local + score 0-4 → Skip (çok düşük), Local + score 5-59 → Cold (migration potansiyeli var)
 
 **Koşullar:**
-- Skor: **0-19 arası**
+- Skor: **0-39 arası** (genel kural, max_score: 39)
+- **Local provider için**: Skor **0-4 arası** → Skip (Local Cold kuralı 5'ten başlıyor)
 - Provider: Herhangi biri (genelde Local veya Unknown)
 
 **Aksiyon Planı:**
@@ -213,9 +278,32 @@ Aksiyon: 1 ay sonra tekrar analiz et, genel bilgilendirme gönder
 Domain: atlanabilir.com
 Skor: 5
 Provider: Local
-Segment: Skip
-Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
+Segment: Cold (Local provider için özel kural: score 5-59 → Cold)
+Aksiyon: 1-2 ay sonra tekrar kontrol et, genel bilgilendirme gönder
+
+Domain: cok-dusuk.com
+Skor: 3
+Provider: Local
+Segment: Skip (Local + score 0-4 → Skip)
+Aksiyon: Şimdilik atla, 3-6 ay sonra tekrar kontrol et
 ```
+
+**⚠️ ÖNEMLİ: Segment Evaluation Order** (Kritik - `app/data/rules.json`):
+Segment kuralları **sırayla değerlendirilir** (yukarıdan aşağıya), **ilk eşleşen kural kazanır**:
+
+1. **Existing** (M365 provider) - checked first
+2. **Migration** (60+, Google/Yandex/Zoho/Hosting/Local) - checked second
+3. **Cold** (Local, 5-59) - checked third (Local-specific)
+4. **Cold** (40-59, general) - checked fourth
+5. **Skip** (max_score: 39) - checked last (catch-all)
+
+**Gerçek Davranış Örnekleri:**
+- Local + score 0-4 → **Skip** (general Skip rule, max_score: 39) ✅
+- Local + score 5-39 → **Cold** (Local-specific Cold rule, min_score: 5) ✅
+- Local + score 40-59 → **Cold** (Local-specific Cold rule, 5-59 range) ✅
+- Local + score 60+ → **Migration** (Migration rule matches first, 60+ threshold) ✅
+
+**Not**: Local provider + score 0-4 **asla Cold'a düşmez** - general Skip rule (max_score: 39) önce kontrol edilir ve eşleşir.
 
 ---
 
@@ -223,10 +311,10 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
 
 | Segment | Skor Aralığı | Öncelik | Aksiyon Zamanı | Başarı Olasılığı |
 |---------|--------------|---------|----------------|-----------------|
-| **Migration** | 70-100 | 🟢 Yüksek | Hemen | Yüksek |
+| **Migration** | 60-100 | 🟢 Yüksek | Hemen | Yüksek |
 | **Existing** | 50-69 | 🟡 Orta | 1-2 hafta | Orta-Yüksek |
-| **Cold** | 20-49 | 🟠 Düşük | 1-2 ay | Düşük-Orta |
-| **Skip** | 0-19 | 🔴 Çok Düşük | 3-6 ay | Çok Düşük |
+| **Cold** | 5-59 (Local) / 40-59 (diğer) | 🟠 Düşük | 1-2 ay | Düşük-Orta |
+| **Skip** | 0-39 (Local: 0-4) | 🔴 Çok Düşük | 3-6 ay | Çok Düşük |
 
 ---
 
@@ -411,8 +499,10 @@ Aksiyon: Şimdilik atla, 3 ay sonra tekrar kontrol et
 - ❌ SPF yok (0 puan)
 - ❌ DKIM yok (0 puan)
 - ❌ DMARC none (0 puan)
-- **Toplam: 5 puan** → Skip segment'i
-- **Aksiyon:** Şimdilik atla, 3-6 ay sonra tekrar kontrol et
+- **Toplam: 5 puan** → **Cold segment'i** (Local provider için özel kural: score 5-59 → Cold)
+- **Aksiyon:** 1-2 ay sonra tekrar kontrol et, genel bilgilendirme gönder
+
+**Not:** Eğer score 0-4 olsaydı → Skip segment'i olurdu (Local provider için de geçerli).
 
 ---
 
@@ -554,26 +644,60 @@ GET /alerts/config
 
 ---
 
-## 📊 Özet Tablo
+## 📊 Kanonik Segment-Priority Matrisi (Single Source of Truth)
+
+**⚠️ ÖNEMLİ:** Bu tablo tüm dokümantasyon için tek kaynak gerçekliktir. Diğer dokümanlarda bu tabloya referans verilir.
+
+| Provider | Score Band | Segment | Priority | Öncelik | İlk Aksiyon | Takip |
+|----------|------------|---------|----------|---------|-------------|-------|
+| **M365** | Any (0-100) | Existing | 3-6 | 🟡-⚫ | 1 hafta - 2-3 ay | Aylık |
+| **M365** | 70+ | Existing | 3 | 🟡 | 1 hafta | Aylık |
+| **M365** | 50-69 | Existing | 4 | 🟠 | 1-2 hafta | Aylık |
+| **M365** | 30-49 | Existing | 5 | ⚪ | 1-2 ay | Aylık |
+| **M365** | 0-29 | Existing | 6 | ⚫ | 2-3 ay | Aylık |
+| **Google/Yandex/Zoho/Hosting/Local** | 80+ | Migration | 1 | 🔥 | 1 gün | Haftalık |
+| **Google/Yandex/Zoho/Hosting/Local** | 70-79 | Migration | 2 | ⭐ | 1-2 gün | Haftalık |
+| **Google/Yandex/Zoho/Hosting/Local** | 60-69 | Migration | 3 | 🟡 | 1 hafta | Haftalık |
+| **Local** | 5-39 | Cold | 6-7 | ⚫-🔴 | 2-3 ay | 2-3 ayda bir |
+| **Local** | 40-59 | Cold | 5-6 | ⚪-⚫ | 1-2 ay | 2-3 ayda bir |
+| **Google/Yandex/Zoho/Hosting** | 40-59 | Cold | 5-6 | ⚪-⚫ | 1-2 ay | 2-3 ayda bir |
+| **Any** | 0-39 (Local: 0-4) | Skip | 7 | 🔴 | 3-6 ay | 6 ayda bir |
+
+**Segment Evaluation Order (Kritik):**
+1. Existing (M365 provider) - checked first
+2. Migration (60+, Google/Yandex/Zoho/Hosting/Local) - checked second
+3. Cold (Local, 5-59) - checked third (Local-specific)
+4. Cold (40-59, general) - checked fourth
+5. Skip (max_score: 39) - checked last (catch-all)
+
+**Not:** Migration segment için min_score = 60 olduğu için, Migration segment'inde sadece 60+ skorlar görülür. Priority 4 (0-59) teorik olarak mümkün ama pratikte Migration segment'inde görülmez.
+
+---
+
+## 📊 Özet Tablo (Hızlı Referans)
 
 | Segment | Skor | Priority Score | Öncelik | İlk Aksiyon | Takip |
 |---------|------|----------------|---------|-------------|-------|
 | **Migration** | 80+ | 1 | 🟢 En Yüksek | 1 gün | Haftalık |
 | **Migration** | 70-79 | 2 | 🟢 Yüksek | 1-2 gün | Haftalık |
+| **Migration** | 60-69 | 3 | 🟡 Orta-Yüksek | 1 hafta | Haftalık |
 | **Existing** | 70+ | 3 | 🟡 Orta-Yüksek | 1 hafta | Aylık |
 | **Existing** | 50-69 | 4 | 🟡 Orta | 1-2 hafta | Aylık |
-| **Cold** | 40+ | 5 | 🟠 Düşük | 1-2 ay | 2-3 ayda bir |
+| **Cold** | 5-59 (Local) / 40-59 (diğer) | 5-7 | 🟠 Düşük | 1-2 ay | 2-3 ayda bir |
 | **Diğerleri** | - | 6 | 🔴 Çok Düşük | 3-6 ay | 6 ayda bir |
 
 ---
 
 ## ❓ Sık Sorulan Sorular
 
-### Q: Skor 70 ama segment Migration değil, neden?
-**A:** Segment belirlenirken hem skor hem de provider kontrol edilir. Migration için skor 70+ VE provider M365/Google/Yandex/Zoho olmalı.
+### Q: Skor 60 ama segment Migration değil, neden?
+**A:** Segment belirlenirken hem skor hem de provider kontrol edilir. Migration için skor 60+ VE provider Google/Yandex/Zoho/Hosting/Local olmalı. (Not: M365 provider'ı Existing segment'ine girer, Migration'a girmez.)
+
+### Q: M365 provider'ı neden Existing segment'ine giriyor, skor 0 bile olsa?
+**A:** Existing segment'i **tamamen provider bazlıdır**. Provider = M365 ise, readiness skoru ne olursa olsun (0 bile olsa) Existing segment'ine girer. Öncelik için Priority Score'a bakılır (Existing + skor 0 → Priority 6, Existing + skor 70+ → Priority 3).
 
 ### Q: Skor 50 ama segment Existing değil, neden?
-**A:** Existing için skor 50+ VE provider cloud/hosting provider olmalı. Local veya Unknown provider ise Existing olmaz.
+**A:** Existing segment'i **tamamen provider bazlıdır**. Provider = M365 ise Existing, değilse Existing değildir. Skor eşiği yoktur. (Not: Google/Yandex/Zoho gibi provider'lar Migration segment'ine girer, Existing'e girmez.)
 
 ### Q: Skor nasıl artırılır?
 **A:** SPF, DKIM, DMARC sinyalleri eklenerek veya provider cloud provider'a geçirilerek skor artırılabilir.

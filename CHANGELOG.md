@@ -7,7 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Partner Center Integration - Phase 2** (2025-01-28) - Partner Center referral ingestion and lifecycle tracking
+  - **Config**: Added Partner Center feature flag and OAuth configuration (`app/config.py`)
+    - Feature flag: `partner_center_enabled` (disabled by default)
+    - OAuth settings: Client ID, Tenant ID, API URL, scope, token cache path
+    - Scoring settings: Co-sell bonus (+15), Azure Tenant score (55)
+  - **API Client**: Minimal Partner Center API client (`app/core/partner_center.py`)
+    - MSAL + Device Code Flow authentication (delegated permissions support)
+    - `get_referrals()` function with basic rate limiting (`time.sleep(1)`)
+    - Basic retry logic (2 attempts for transient failures)
+    - Token expiry handling with silent token acquisition
+    - Structured logging with PII masking
+    - MVP approach: 50-70 lines minimal client
+  - **Database Model**: Partner Center referral tracking (`app/db/models.py`)
+    - `PartnerCenterReferral` model with lifecycle tracking
+    - Fields: `referral_id` (unique), `referral_type`, `domain`, `azure_tenant_id`, `status`, `raw_data`
+    - Indexes: domain, status, synced_at, referral_type, azure_tenant_id
+    - Hybrid model: `raw_leads` ingestion + `partner_center_referrals` tracking
+  - **Migration**: Alembic migration for `partner_center_referrals` table
+    - Migration file: `alembic/versions/XXXX_add_partner_center_referrals.py`
+    - Supports upgrade/downgrade operations
+  - **Referral Ingestion**: Complete referral processing pipeline (`app/core/referral_ingestion.py`)
+    - Lead type detection (Co-sell, Marketplace, Solution Provider)
+    - Domain extraction fallback chain (website → email → skip)
+    - Azure Tenant ID signal (Company.provider='M365' override during ingestion)
+    - `raw_leads` ingestion (source='partnercenter', payload JSONB)
+    - `partner_center_referrals` tracking (referral lifecycle)
+    - Company upsert with provider override
+    - Idempotent domain scan trigger (domain-based, not referral-based)
+    - Independent referral processing (one error doesn't affect others)
+    - `sync_referrals_from_partner_center()` main sync function
+  - **Status**: ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
+  - **Next Steps**: API endpoints, background sync, UI integration, scoring pipeline integration
+  - **Files Created**: `app/core/partner_center.py`, `app/core/referral_ingestion.py`
+  - **Files Modified**: `app/config.py`, `app/db/models.py`
+  - **Documentation**: `docs/todos/PARTNER-CENTER-PHASE2.md` - Complete task list and progress tracking
+
 ### Enhanced
+- **Sales Documentation Consistency** (2025-01-28) - Documentation cleanup and standardization
+  - **Kanonik Segment-Priority Matrisi**: Added single source of truth table in `SEGMENT-GUIDE.md`
+    - Provider + Score Band → Segment + Priority mapping table
+    - Segment Evaluation Order clearly documented
+    - All other docs now reference this canonical matrix
+  - **Cross-References**: Added links from all sales docs to canonical matrix
+    - `REALITY-CHECK-2025-01-28.md` → SEGMENT-GUIDE.md
+    - `PHASE-2-1-SOFT-TUNING.md` → SEGMENT-GUIDE.md
+    - `SALES-GUIDE.md` → SEGMENT-GUIDE.md
+  - **Version Clarity**: Added v1.0 (MVP - Today) vs v2.0 (Target) distinction
+    - `SALES-PERSONA-v2.0.md` - Clear "Hedef Durum" vs "Bugünkü Gerçeklik" labels
+    - `SALES-TRAINING.md` - Version separation in training materials
+  - **Tuning Factor Status**: Clarified that Tuning Factor is design-only (not in production UI)
+    - Added "Durum: Tasarım - Henüz production kodda yok" warning
+    - Backend env var exists but no UI/admin interface
+  - **Impact**: Eliminated documentation inconsistencies, single source of truth established
+  - **Files Modified**: `docs/sales/SEGMENT-GUIDE.md`, `docs/sales/PHASE-2-1-SOFT-TUNING.md`, `docs/sales/REALITY-CHECK-2025-01-28.md`, `docs/sales/SALES-PERSONA-v2.0.md`, `docs/sales/SALES-TRAINING.md`, `docs/sales/SALES-GUIDE.md`
 - **IP Enrichment Minimal UI** (2025-01-28) - Added IP enrichment data to score breakdown and sales summary
   - **Backend**: Added `ip_enrichment` field to `ScoreBreakdownResponse` model
   - **Backend**: Integrated IP enrichment into `get_score_breakdown` endpoint
@@ -18,6 +72,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Impact**: Improves score accuracy, enhances sales intelligence, strengthens Hunter's "what CRM can't do" positioning
   - **Status**: ✅ Completed
   - **Files Modified**: `app/api/leads.py`, `app/core/sales_engine.py`, `app/api/sales_summary.py`, `mini-ui/js/ui-leads.js`
+- **IP Enrichment Validation** (2025-01-28) - Validation test script and status documentation
+  - **Test Script**: Created `scripts/test_ip_enrichment_validation.py` for comprehensive IP enrichment validation
+    - Tests 11 real-world domains (5 Türkiye hosting/Local, 4 M365 Kurumsal, 2 Global big tech)
+    - Validates IP resolution, enrichment, database records, error handling
+    - Saves results to JSON file for analysis
+  - **Status Documentation**: Created `docs/active/IP-ENRICHMENT-STATUS.md` for validation tracking
+    - Test results summary (IP resolution: 11/11 success, Enrichment: pending)
+    - Domain test results by category (Türkiye hosting, M365, Global big tech)
+    - Error handling and logging validation
+    - MVP decision tracking (pending full test with enrichment enabled)
+  - **Validation Checklist**: Updated `docs/active/IP-ENRICHMENT-VALIDATION-CHECKLIST.md`
+    - Test execution checklist
+    - Next steps for full validation (requires enrichment enabled + DB files)
+  - **Test Results**: `docs/active/IP-ENRICHMENT-VALIDATION-RESULTS.json` - JSON results from validation test
+  - **Status**: ✅ Full validation completed (IP resolution ✅ 11/11, Enrichment ✅ 11/11)
+  - **MVP Decision**: ✅ ACCEPTED FOR MVP (country + city data quality acceptable)
+  - **Test Environment**: Docker (enrichment enabled, DB files available)
+  - **Files Created**: `scripts/test_ip_enrichment_validation.py`, `docs/active/IP-ENRICHMENT-STATUS.md`, `docs/active/IP-ENRICHMENT-VALIDATION-RESULTS.json`
+  - **Files Modified**: `docs/active/IP-ENRICHMENT-VALIDATION-CHECKLIST.md`
+- **Mini UI v1.1 Polish** (2025-01-28) - Sales-friendly UI improvements and UX enhancements
+  - **Search Input**: Optimized debounce from 500ms to 400ms for better UX
+  - **Empty State**: Improved message and added two action buttons (CSV Upload, Domain Scan)
+  - **Error Messages**: Sales-friendly error messages (converts technical errors to user-friendly Turkish messages)
+    - Network errors: "Sunucuya ulaşamadık. Birkaç dakika sonra tekrar dene."
+    - Server errors: "Bir şeyler ters gitti. Lütfen daha sonra tekrar dene."
+    - Technical details logged to console, not shown to user
+  - **Loading Indicators**: Button disable + "Yükleniyor..." text for all form buttons (CSV Upload, Domain Scan)
+  - **Score Breakdown Modal**: Added header with "Neden bu skor?" title and explanation
+    - Explains that score is calculated based on M365 usage, Google Workspace, DNS and IP data
+  - **Segment Tooltips**: Added sales-friendly tooltips for segment badges
+    - Existing: "M365 kullanıyor → yenileme / ek lisans fırsatı"
+    - Migration: "Google Workspace kullanıyor → migration fırsatı"
+    - Cold: "Email provider tespit edilemedi → yeni müşteri potansiyeli"
+    - Skip: "Düşük skor / risk → düşük öncelik"
+  - **Location Information**: Made location info more prominent in score breakdown modal
+    - Shows country + city with "(IP bazlı tahmin)" note
+    - Changed label from "Country" to "Konum" (Turkish)
+  - **Status**: ✅ 7/10 tasks completed (search debounce, empty state, error messages, loading indicators, score breakdown header, segment tooltips, location info)
+  - **Remaining**: Dogfooding test, duplicate request detection, modal cache (pending manual testing)
+  - **Files Modified**: `mini-ui/js/app.js`, `mini-ui/js/ui-leads.js`, `mini-ui/js/ui-forms.js`, `mini-ui/index.html`
+  - **Documentation**: `docs/active/MINI-UI-POLISH-NOTES.md` - Dogfooding notes and polish tracking
 
 ### Changed
 - **Regression Dataset Rename** (2025-01-28) - Renamed "golden dataset" to "silver regression dataset" for clarity

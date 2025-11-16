@@ -6,6 +6,12 @@
 **Versiyon**: 2.0  
 **Hedef Kitle**: Yeni satış ekibi üyeleri, mevcut satışçılar (v2.0 güncellemesi)
 
+**⚠️ ÖNEMLİ:** Bu eğitim materyali **hedef durumu** (v2.0) anlatır. MVP'de (v1.0) henüz tüm özellikler mevcut değildir. Mevcut durum için [SALES-GUIDE.md](SALES-GUIDE.md) dosyasına bakın.
+
+**Versiyon Ayrımı:**
+- **v1.0 (Bugün - MVP)**: Temel Hunter özellikleri (Priority, Segment, Skor, Notes, Tags, Favorites, ReScan, Alerts)
+- **v2.0 (Hedef)**: Tam entegrasyon (CRM pipeline mapping, multi-threaded outreach, automation heaven)
+
 ---
 
 ## 🎯 Eğitim Hedefleri
@@ -41,7 +47,7 @@ Bu eğitim sonunda satış ekibi:
 curl "http://localhost:8000/leads?priority_score=1,2"
 
 # Migration segment'indeki yüksek skorlu lead'leri filtrele
-curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 ```
 
 #### 1.3 Hunter'ın Temel Workflow'u
@@ -225,7 +231,7 @@ curl "http://localhost:8000/leads/example.com/summary.pdf" -o example-summary.pd
 **Pratik Egzersiz:**
 ```bash
 # Hunter'dan export
-curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=60" -o migration-leads.csv
 
 # Dynamics CRM'e import (manuel veya webhook)
 ```

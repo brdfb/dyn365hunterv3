@@ -33,13 +33,20 @@ docs/
 
 Sales team documentation has been organized into a dedicated folder:
 - `SALES-GUIDE.md` - Satış ekibi kullanım kılavuzu (quick start, API endpoints, scenarios)
-- `SALES-PERSONA-v2.0.md` - Satışçı persona dokümantasyonu (v2.0: "Sistematik Avcı")
+- `SALES-PERSONA-v2.0.md` - Satışçı persona dokümantasyonu (v2.0: "Sistematik Avcı" - **Hedef Durum**, v1.0: MVP - **Bugünkü Gerçeklik**)
 - `SALES-TRAINING.md` - Satış ekibi eğitim materyali (modüller, pratik egzersizler)
 - `SALES-SCENARIOS.md` - Pratik senaryolar ve en iyi pratikler
-- `SEGMENT-GUIDE.md` - Segment ve skor açıklamaları
+- `SEGMENT-GUIDE.md` - Segment ve skor açıklamaları (**Kanonik Segment-Priority Matrisi** - Single Source of Truth)
 - `SALES-ENGINE-REAL-WORLD-SMOKE-1.md` - Sales Engine real-world smoke test results
-- `PHASE-2-1-SOFT-TUNING.md` - Sales Engine soft tuning mechanism
+- `PHASE-2-1-SOFT-TUNING.md` - Sales Engine soft tuning mechanism (Tuning Factor: Tasarım aşamasında, production UI yok)
 - `SALES-ENGINE-EXPECTED-OUTPUTS.md` - Sales Engine expected output skeletons
+- `REALITY-CHECK-2025-01-28.md` - Dokümantasyon vs gerçek uygulama uyumsuzlukları ve düzeltmeleri
+
+**Documentation Consistency** (2025-01-28):
+- ✅ Kanonik Segment-Priority Matrisi eklendi (SEGMENT-GUIDE.md)
+- ✅ Cross-reference'lar eklendi (tüm sales docs → SEGMENT-GUIDE.md)
+- ✅ v1.0 (MVP) vs v2.0 (Hedef) ayrımı netleştirildi
+- ✅ Tuning Factor durumu açıklandı (tasarım aşamasında)
 
 ### API Documentation
 
@@ -70,7 +77,7 @@ API contract documentation:
 #### Integration Roadmap Documentation (NEW - 2025-01-28)
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
-  - **Phase 2**: 🔄 NEXT - Partner Center Referrals (P1) - 2-3 days
+  - **Phase 2**: 🅿️ Parked - Partner Center Referrals (P1) - MVP-safe mode (feature flag disabled)
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
   - **Key Principle**: UI stability → Data ingestion → CRM integration
 - `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
@@ -83,11 +90,30 @@ API contract documentation:
   - Fixed priority score ranges
   - All 86 scoring tests passing (0 failures)
 
-#### IP Enrichment Documentation
+#### Mini UI Documentation
+- `MINI-UI-POLISH-NOTES.md` (2025-01-28) - Mini UI v1.1 Polish - Dogfooding notes and polish tracking
+  - Sales-friendly UI improvements (7/10 tasks completed)
+  - Search debounce optimization, empty state, error messages, loading indicators
+  - Score breakdown modal header, segment tooltips, location info improvements
+  - Status: ✅ 7/10 tasks completed, remaining tasks pending manual testing
 - `IP-ENRICHMENT-UI-PATCH-PLAN.md` (2025-01-28) - IP enrichment UI integration patch plan
   - Minimal approach: Country + proxy warning in score breakdown modal
   - IP context integration in sales engine for intelligent text generation
   - Status: ✅ Completed (2025-01-28)
+- `IP-ENRICHMENT-STATUS.md` (2025-01-28) - IP Enrichment validation status and test results
+  - Test results summary: IP resolution 100% success (11/11), Enrichment 100% success (11/11)
+  - Domain test results by category (Türkiye hosting, M365, Global big tech)
+  - Error handling and logging validation
+  - MVP decision: ✅ ACCEPTED FOR MVP (country + city data quality acceptable)
+  - Status: ✅ Full validation completed (IP resolution ✅, Enrichment ✅)
+- `IP-ENRICHMENT-VALIDATION-CHECKLIST.md` (2025-01-28) - IP Enrichment validation checklist
+  - Test execution checklist
+  - Full validation completed (enrichment enabled + DB files in Docker)
+  - Status: ✅ Completed
+- `IP-ENRICHMENT-VALIDATION-RESULTS.json` (2025-01-28) - IP Enrichment validation test results
+  - JSON results from validation test (11 domains)
+  - IP resolution results (11/11 success), enrichment results (11/11 success)
+  - Status: ✅ Test completed (full results with enrichment enabled)
 - `2025-01-28-GOLDEN-DATASET-CRITIQUE.md` (2025-01-28) - Critique of current "golden dataset"
   - Analysis: Current dataset is silver-level regression set, not ground truth
   - Action: Renamed to regression dataset, blueprint created for true golden dataset
