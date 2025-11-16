@@ -48,6 +48,11 @@ services:
       API_PORT: ${API_PORT:-8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      # IP Enrichment (for testing - enable in .env for production)
+      HUNTER_ENRICHMENT_ENABLED: ${HUNTER_ENRICHMENT_ENABLED:-true}
+      MAXMIND_CITY_DB: ${MAXMIND_CITY_DB:-app/data/maxmind/GeoLite2-City.mmdb}
+      IP2LOCATION_DB: ${IP2LOCATION_DB:-app/data/ip2location/IP2LOCATION-LITE-DB11.BIN}
+      IP2PROXY_DB: ${IP2PROXY_DB:-app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN}
       # Azure AD (G19) - Microsoft SSO
       HUNTER_AZURE_CLIENT_ID: ${HUNTER_AZURE_CLIENT_ID:-}
       HUNTER_AZURE_CLIENT_SECRET: ${HUNTER_AZURE_CLIENT_SECRET:-}
@@ -60,6 +65,7 @@ services:
       - ./tests:/app/tests
       - ./mini-ui:/app/mini-ui
       - ./alembic:/app/alembic
+      - ./app/data:/app/app/data:ro  # IP enrichment DB files (read-only)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
       interval: 10s

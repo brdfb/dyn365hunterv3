@@ -11,6 +11,29 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 **Target**: ≤2 minute "kahvelik" analysis flow for sales team.
 
+## 🚀 Production Status
+
+**Hunter v1.0 is production-ready** (2025-01-28)
+
+- ✅ **P0 Hardening**: Completed (G19)
+- ✅ **P1 Performance**: Completed (2025-01-28)
+- ✅ **Stabilization Sprint**: Completed (3 days)
+- ✅ **Sales Engine**: Completed (G21 Phase 2)
+- ✅ **Read-Only Mode**: Completed (G21 Phase 3)
+
+**Production Deployment**:
+- 📋 [Production Deployment Guide](docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md)
+- 📋 [Production Deployment Checklist](docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md)
+- 📋 [Smoke Tests Runbook](docs/active/SMOKE-TESTS-RUNBOOK.md)
+- 📋 [Troubleshooting Guide](docs/active/TROUBLESHOOTING-GUIDE.md)
+
+**Post-MVP Roadmap**:
+- 🅿️ **Partner Center Integration** (Phase 2) - Parked (Post-MVP)
+- 🔄 **Dynamics 365 Integration** (Phase 3) - Planned (Post-MVP)
+- 🔄 **G21 Phase 4-6** - Architecture refactor continuation (Post-MVP)
+
+---
+
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
@@ -70,13 +93,15 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 **Unreleased** (2025-01-27):
 - **Test Suite Improvements** - Shared test fixtures with transaction-based isolation, standardized test isolation, conditional test execution for integration tests (Redis/Celery), 497 tests total
 
-**v1.1.0** (2025-01-28):
-- **G21 Phase 2: Sales Engine** - Sales intelligence layer with call scripts, discovery questions, and offer tier recommendations
-- **G21 Phase 3: Read-Only Mode** - CRM-lite features write endpoints disabled for Dynamics 365 migration
-- **Stabilization Sprint** - 3-day enterprise-ready stabilization (UI, monitoring, core stability)
-- **Core Logging Standardization** - Structured logging with PII masking across all modules
+**v1.0.0** (2025-01-28):
+- **Production Release** - First production-ready version
+- **P0 Hardening** - Database pooling, API key security, logging, Sentry, health checks
+- **P1 Performance** - Alembic, distributed rate limiting, caching, bulk operations, API versioning
+- **Stabilization Sprint** - 3-day enterprise-ready stabilization
+- **Sales Engine** - Sales intelligence layer with call scripts and discovery questions
+- **Read-Only Mode** - CRM-lite features write endpoints disabled for Dynamics migration
 
-**v1.0.0** (2025-11-14):
+**v0.5.0** (2025-11-14):
 - **G18: ReScan + Alerts** - Automation and change detection
 - **G17: Notes, Tags, Favorites + PDF** - CRM-lite features and PDF summaries
 - **G16: Webhook + Lead Enrichment** - Webhook ingestion with API key authentication
@@ -736,6 +761,28 @@ MAXMIND_COUNTRY_DB=app/data/maxmind/GeoLite2-Country.mmdb
 IP2LOCATION_DB=app/data/ip2location/IP2LOCATION-LITE-DB11.BIN
 IP2PROXY_DB=app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
 ```
+
+## 🚀 Quick Start (Production)
+
+### Production Deployment
+
+```bash
+# 1. Set environment variables
+export DATABASE_URL="postgresql://user:password@host:port/database"
+export REDIS_URL="redis://host:port/db"
+export ENVIRONMENT="production"
+export HUNTER_SENTRY_DSN="https://..."
+
+# 2. Run deployment script
+bash scripts/deploy_production.sh
+
+# 3. Verify deployment
+curl http://localhost:8000/healthz/ready
+```
+
+**See**: [Production Deployment Guide](docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md) for complete instructions.
+
+---
 
 ## Example Usage
 

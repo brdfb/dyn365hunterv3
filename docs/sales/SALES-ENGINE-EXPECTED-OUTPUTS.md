@@ -246,7 +246,7 @@
 - **Migration + Score >= 80** → `high`
 - **Domain expires < 60 days** → `high`
 - **Priority 2** → `medium`
-- **Migration + Score >= 50** → `medium`
+- **Migration + Score >= 60** → `medium` (Migration threshold 60)
 - **Existing + Score >= 70** → `medium`
 - **Domain expires 60-90 days** → `medium`
 - **Default** → `low`

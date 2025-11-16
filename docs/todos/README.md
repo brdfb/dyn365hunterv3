@@ -15,6 +15,16 @@ This folder contains TODO lists and task tracking documents.
   - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
   - ⏳ Phase 2: Partner Center Referrals (P1) - NEXT
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending
+- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - 🅿️ **PARK EDİLDİ** (MVP-safe mode, 2025-01-28)
+  - ✅ Task 2.1: Partner Center API Client - COMPLETED (2025-01-28)
+  - ✅ Task 2.2: Referral Data Model - COMPLETED (2025-01-28)
+  - ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28) - Scoring pipeline integration PENDING
+  - ⏳ Task 2.4: API Endpoints - PENDING (post-MVP)
+  - ⏳ Task 2.5: UI Integration - PENDING (post-MVP)
+  - ⏳ Task 2.6: Background Sync - PENDING (post-MVP)
+  - **Status**: 🅿️ **PARK EDİLDİ** - MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
+  - **Progress**: 50% (3/6 tasks completed)
+  - **Next Sprint**: Post-MVP (G21-G22) - API endpoints, Celery task, UI integration, Scoring pipeline
 
 **Recently Completed:**
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)

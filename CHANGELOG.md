@@ -7,6 +7,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned (Post-MVP)
+- **Partner Center Integration - Phase 2** (🅿️ Parked) - API endpoints, background sync, UI integration, scoring pipeline integration
+- **Dynamics 365 Integration - Phase 3** - CRM integration with two-way sync
+- **G21 Phase 4-6** - Dynamics migration, monitoring, cleanup
+
+---
+
+## [1.0.0] - 2025-01-28
+
+### 🎉 Production Release
+
+Hunter v1.0 is the first production-ready release. This version includes all core functionality, performance optimizations, and enterprise-grade features required for production deployment.
+
+### Added
+- **Production Deployment Infrastructure**
+  - Production deployment script (`scripts/deploy_production.sh`)
+  - Environment variables checklist (`docs/active/ENVIRONMENT-VARIABLES-CHECKLIST.md`)
+  - Alembic migration plan (`docs/active/ALEMBIC-MIGRATION-PLAN.md`)
+  - Rollback plan (`docs/active/ROLLBACK-PLAN.md`)
+  - Production deployment guide (`docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md`)
+  - Production checklist runbook (`docs/active/PRODUCTION-CHECKLIST-RUNBOOK.md`)
+  - Smoke tests runbook (`docs/active/SMOKE-TESTS-RUNBOOK.md`)
+  - Troubleshooting guide (`docs/active/TROUBLESHOOTING-GUIDE.md`)
+
+### Enhanced
+- **Production Readiness** (G19 - P0 Hardening)
+  - Database connection pooling (20 connections, 10 overflow)
+  - API key security (bcrypt hashing)
+  - Structured logging with PII masking
+  - Error tracking (Sentry integration)
+  - Health checks & probes (liveness/readiness/startup)
+
+- **Performance Optimizations** (P1 - 2025-01-28)
+  - Alembic migration system (collapsed history strategy)
+  - Distributed rate limiting (Redis-based, multi-worker support)
+  - Caching layer (DNS/WHOIS/Provider/Scoring - Redis-based)
+  - Bulk operations optimization (batch processing, deadlock prevention)
+  - API versioning (v1 + legacy backward compatibility)
+
+- **Stabilization Sprint** (3 days - 2025-01-28)
+  - Core stabilization (Alembic drift check, multi-worker rate limiting test)
+  - Monitoring & metrics (cache hit metrics, rate limit metrics, error trend logging)
+  - UI stabilization (table view cleanup, score breakdown modal, export/PDF basic)
+
+- **Sales Engine** (G21 Phase 2 - 2025-01-28)
+  - Sales intelligence layer (`app/core/sales_engine.py`)
+  - Sales summary endpoint (`GET /api/v1/leads/{domain}/sales-summary`)
+  - Features: One-liner, call script, discovery questions, offer tier, opportunity potential, urgency
+  - 45 tests (38 core + 7 API), all passing
+  - Real-world validation completed (3 domains tested)
+
+- **Read-Only Mode** (G21 Phase 3 - 2025-01-28)
+  - Write endpoints disabled (7 endpoints return 410 Gone)
+  - Deprecated endpoint monitoring
+  - Read endpoints verified (3 read endpoints still work)
+  - Metrics integration (`/healthz/metrics`)
+
+### Changed
+- **Authentication**: Removed Microsoft SSO, switched to Internal Access Mode (network-level access control)
+- **API Structure**: Added v1 API versioning (`/api/v1/*`) with backward compatibility
+- **Migration System**: Migrated from manual SQL migrations to Alembic (collapsed history strategy)
+
+### Fixed
+- **Scoring Engine**: Fixed test failures, all 86 tests passing (0 failures)
+- **Test Suite**: Improved test isolation, transaction-based fixtures
+- **UI**: Fixed modal bugs, loading states, filter bar UX
+
+### Security
+- API key authentication with bcrypt hashing
+- PII masking in logs
+- Structured error tracking (Sentry)
+
+### Documentation
+- Production deployment documentation complete
+- Troubleshooting guide added
+- Runbooks for production operations
+- Environment variables checklist
+
+### Testing
+- 86 scoring tests passing (0 failures)
+- 497 total tests in suite
+- Smoke tests runbook prepared
+- Production checklist runbook prepared
+
+### Notes
+- **Partner Center Integration**: Feature flag disabled by default (Post-MVP)
+- **IP Enrichment**: Feature flag disabled by default (optional feature)
+- **G21 Phase 4**: Dynamics Migration paused, will merge with Integration Roadmap Phase 3 (Post-MVP)
+
+---
+
+## [Unreleased] (Pre-v1.0)
+
 ### Added
 - **Partner Center Integration - Phase 2** (2025-01-28) - Partner Center referral ingestion and lifecycle tracking
   - **Config**: Added Partner Center feature flag and OAuth configuration (`app/config.py`)

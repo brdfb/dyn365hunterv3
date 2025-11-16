@@ -1,13 +1,13 @@
 """Business logic constants and thresholds."""
 
 # Priority & Migration Score Thresholds
-MIGRATION_READY_SCORE = 70  # Migration segment + score >= 70
+MIGRATION_READY_SCORE = 60  # Migration segment + score >= 60 (updated: 70 → 60)
 HIGH_PRIORITY_SCORE = 70  # Migration + score >= 70 (for dashboard)
 
 # Priority Score Thresholds
 PRIORITY_1_SCORE = 80  # Migration + score >= 80 → Priority: 1
 PRIORITY_2_SCORE = 70  # Migration + score >= 70 → Priority: 2
-PRIORITY_3_MIGRATION_SCORE = 50  # Migration + score >= 50 → Priority: 3
+PRIORITY_3_MIGRATION_SCORE = 60  # Migration + score >= 60 → Priority: 3 (Migration segment min_score = 60)
 PRIORITY_4_MIGRATION_SCORE = 0  # Migration + score >= 0 → Priority: 4
 PRIORITY_3_EXISTING_SCORE = 70  # Existing + score >= 70 → Priority: 3
 PRIORITY_4_EXISTING_SCORE = 50  # Existing + score >= 50 → Priority: 4

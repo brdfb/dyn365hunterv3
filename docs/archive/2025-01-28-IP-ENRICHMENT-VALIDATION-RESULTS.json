@@ -1,0 +1,293 @@
+[
+  {
+    "domain": "otega.com.tr",
+    "timestamp": "2025-11-16T22:30:50.421803",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "93.89.226.163",
+        "185.33.234.105"
+      ],
+      "error": null,
+      "mx_records": [
+        "mx01.otega.com.tr"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Türkiye hosting / Local",
+    "expected": "TR country, Local provider, hosting ISP"
+  },
+  {
+    "domain": "rollmech.com",
+    "timestamp": "2025-11-16T22:30:58.899390",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "91.209.104.156",
+        "185.132.181.16",
+        "213.159.28.83"
+      ],
+      "error": null,
+      "mx_records": [
+        "mx2-eu1.ppe-hosted.com",
+        "mx1-eu1.ppe-hosted.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Türkiye hosting / Local",
+    "expected": "TR country, Local provider, hosting ISP"
+  },
+  {
+    "domain": "tarimsalkimya.com.tr",
+    "timestamp": "2025-11-16T22:31:10.022043",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "18.185.115.250",
+        "78.142.208.75"
+      ],
+      "error": null,
+      "mx_records": [
+        "d335659.a.ess.de.barracudanetworks.com",
+        "d335659.b.ess.de.barracudanetworks.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Türkiye hosting / Local",
+    "expected": "TR country, Local provider"
+  },
+  {
+    "domain": "unalsan.com",
+    "timestamp": "2025-11-16T22:31:18.390425",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "188.124.14.18",
+        "172.67.148.79"
+      ],
+      "error": null,
+      "mx_records": [
+        "mx.unalsan.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Türkiye hosting / Local",
+    "expected": "TR country, Local provider"
+  },
+  {
+    "domain": "yurektekstil.com.tr",
+    "timestamp": "2025-11-16T22:31:26.702935",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "78.189.75.139",
+        "5.250.254.51",
+        "188.114.96.7"
+      ],
+      "error": null,
+      "mx_records": [
+        "yurek.yurektekstil.com.tr",
+        "mail.yurektekstil.com.tr"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Türkiye hosting / Local",
+    "expected": "TR country, Local provider"
+  },
+  {
+    "domain": "asteknikvana.com",
+    "timestamp": "2025-11-16T22:31:37.774363",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "52.101.68.12",
+        "37.247.119.39"
+      ],
+      "error": null,
+      "mx_records": [
+        "asteknikvana-com.mail.protection.outlook.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "M365 Kurumsal",
+    "expected": "TR/EU country, M365 provider, medium tenant"
+  },
+  {
+    "domain": "baritmaden.com",
+    "timestamp": "2025-11-16T22:31:46.357303",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "52.101.68.16",
+        "94.102.75.131"
+      ],
+      "error": null,
+      "mx_records": [
+        "baritmaden-com.mail.protection.outlook.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "M365 Kurumsal",
+    "expected": "TR/EU country, M365 provider"
+  },
+  {
+    "domain": "batmaztekstil.com.tr",
+    "timestamp": "2025-11-16T22:31:54.705314",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "52.101.68.32",
+        "37.247.119.81"
+      ],
+      "error": null,
+      "mx_records": [
+        "batmaztekstil-com-tr.mail.protection.outlook.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "M365 Kurumsal",
+    "expected": "TR/EU country, M365 provider"
+  },
+  {
+    "domain": "ertugmetal.com",
+    "timestamp": "2025-11-16T22:32:03.042167",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "52.101.68.32",
+        "89.19.30.126"
+      ],
+      "error": null,
+      "mx_records": [
+        "ertugmetal-com.mail.protection.outlook.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "M365 Kurumsal",
+    "expected": "TR/EU country, M365 provider"
+  },
+  {
+    "domain": "microsoft.com",
+    "timestamp": "2025-11-16T22:32:11.426982",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "52.101.42.6",
+        "13.107.213.60"
+      ],
+      "error": null,
+      "mx_records": [
+        "microsoft-com.mail.protection.outlook.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Global big tech",
+    "expected": "US/EU country, M365 provider"
+  },
+  {
+    "domain": "google.com",
+    "timestamp": "2025-11-16T22:32:19.634641",
+    "ip_resolution": {
+      "success": true,
+      "ips": [
+        "74.125.133.26",
+        "216.239.38.120"
+      ],
+      "error": null,
+      "mx_records": [
+        "smtp.google.com"
+      ]
+    },
+    "enrichment": {
+      "success": false,
+      "results": [],
+      "errors": []
+    },
+    "database": {
+      "record_exists": false,
+      "record": null
+    },
+    "category": "Global big tech",
+    "expected": "US/EU country, Google provider"
+  }
+]

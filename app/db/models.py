@@ -415,3 +415,44 @@ class IpEnrichment(Base):
         UniqueConstraint("domain", "ip_address", name="uq_ip_enrichment_domain_ip"),
         Index("idx_ip_enrichment_ip", "ip_address"),  # For querying by IP
     )
+
+
+class PartnerCenterReferral(Base):
+    """Partner Center referral lifecycle tracking."""
+
+    __tablename__ = "partner_center_referrals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    referral_id = Column(
+        String(255), nullable=False, unique=True, index=True
+    )  # Partner Center referral ID (UNIQUE)
+    referral_type = Column(
+        String(50), nullable=True, index=True
+    )  # 'co-sell', 'marketplace', 'solution-provider'
+    company_name = Column(String(255), nullable=True)
+    domain = Column(String(255), nullable=True, index=True)  # Normalized domain
+    azure_tenant_id = Column(
+        String(255), nullable=True, index=True
+    )  # Azure Tenant ID (M365 signal)
+    status = Column(String(50), nullable=True, index=True)  # Referral status
+    raw_data = Column(JSONB, nullable=True)  # Full referral data from Partner Center (for debugging)
+    synced_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False, index=True
+    )  # Last sync timestamp
+    created_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        Index("idx_partner_center_referrals_domain", "domain"),  # For querying by domain
+        Index("idx_partner_center_referrals_status", "status"),  # For filtering by status
+        Index("idx_partner_center_referrals_synced_at", "synced_at"),  # For sync tracking
+        Index("idx_partner_center_referrals_type", "referral_type"),  # For filtering by type
+        Index("idx_partner_center_referrals_tenant_id", "azure_tenant_id"),  # For M365 signal queries
+    )

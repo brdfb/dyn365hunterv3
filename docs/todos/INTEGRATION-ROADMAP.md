@@ -74,70 +74,95 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ---
 
-### Phase 2: Partner Center Referrals Integration (P1) ⏳ **PENDING**
+### Phase 2: Partner Center Referrals Integration (P1) 🅿️ **PARK EDİLDİ**
 
-**Status**: ⏳ **Pending** (after Phase 1)  
-**Duration**: 2-3 days  
+**Status**: 🅿️ **PARK EDİLDİ** (MVP-safe mode, 50% completed)  
+**Duration**: 2-3 days (core components completed, remaining tasks post-MVP)  
 **Risk**: 2/10  
 **Priority**: P1  
 **Branch**: `feature/partner-center-referrals`
 
+**MVP Yaklaşımı**: Minimal API client (50-70 satır), polling (10 min prod, 30s dev), sadece sync endpoint, lead listesine 1 kolon.
+
+**Progress**: 50% (3/6 tasks completed)
+- ✅ Task 2.1: Partner Center API Client - COMPLETED (2025-01-28)
+- ✅ Task 2.2: Referral Data Model - COMPLETED (2025-01-28)
+- ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28) - Scoring pipeline integration PENDING
+- ⏳ Task 2.4: API Endpoints - PENDING (post-MVP)
+- ⏳ Task 2.5: UI Integration - PENDING (post-MVP)
+- ⏳ Task 2.6: Background Sync - PENDING (post-MVP)
+
+**Status Note**: 🅿️ **MVP'ye etkisi YOK** - Feature flag default OFF, kod hazır ama aktif değil. Post-MVP sprint'inde tamamlanacak.
+
 #### Tasks
 
-- [ ] **Task 2.1**: Partner Center API Client
-  - [ ] Create `app/core/partner_center.py` - Partner Center API client
-  - [ ] Implement authentication (OAuth 2.0 or API key)
-  - [ ] Implement `get_referrals()` function
-  - [ ] Handle rate limiting
-  - [ ] Handle token refresh
+- [x] **Task 2.1**: Partner Center API Client (MVP: Minimal) ✅ **COMPLETED** (2025-01-28)
+  - [x] Create `app/core/partner_center.py` - Partner Center API client (50-70 satır, minimal)
+  - [x] Implement minimal OAuth 2.0 authentication (MSAL + Device Code Flow)
+  - [x] Implement `get_referrals()` function
+  - [x] Basic rate limiting: `time.sleep(1)` between requests
+  - [x] Basic retry: 2 deneme (transient failures için)
+  - [x] Token expiry kontrolü (MSAL silent token acquisition)
+  - [x] Error handling (network errors, API errors, token refresh errors)
+  - [x] Structured logging (PII masking ile)
 
-- [ ] **Task 2.2**: Referral Data Model
-  - [ ] Create `app/db/models.py` - `PartnerCenterReferral` model
-  - [ ] Create Alembic migration for `partner_center_referrals` table
-  - [ ] Fields: referral_id, company_name, domain, status, created_at, updated_at
+- [x] **Task 2.2**: Referral Data Model (raw_leads + partner_center_referrals hybrid) ✅ **COMPLETED** (2025-01-28)
+  - [x] `raw_leads` table'ını kullan (source='partnercenter', payload JSONB)
+  - [x] Create `app/db/models.py` - `PartnerCenterReferral` model
+  - [x] Create Alembic migration for `partner_center_referrals` table
+  - [x] Fields: referral_id (unique), referral_type, company_name, domain, azure_tenant_id, status, raw_data, synced_at, created_at, updated_at
+  - [x] Indexes: referral_id, domain, status, synced_at, referral_type, azure_tenant_id
 
-- [ ] **Task 2.3**: Referral Ingestion
-  - [ ] Create `app/core/referral_ingestion.py` - Referral ingestion logic
-  - [ ] Implement referral → domain normalization
-  - [ ] Implement referral → company upsert
-  - [ ] Implement referral → domain scan trigger
-  - [ ] Handle duplicate referrals
+- [x] **Task 2.3**: Referral Ingestion ✅ **COMPLETED** (2025-01-28) - Scoring pipeline integration PENDING
+  - [x] Create `app/core/referral_ingestion.py` - Referral ingestion logic
+  - [x] Lead tipi detection (Co-sell, Marketplace, Solution Provider)
+  - [x] Domain extraction fallback (website → email → skip)
+  - [x] Azure Tenant ID → Company provider override (M365 signal)
+  - [x] Implement referral → domain normalization
+  - [x] Implement referral → company upsert
+  - [x] Implement referral → domain scan trigger (idempotent - domain bazlı)
+  - [ ] Scoring pipeline entegrasyonu (Azure Tenant ID override + Co-sell boost) - ⏳ **PENDING**
+  - [x] Handle duplicate referrals
 
-- [ ] **Task 2.4**: API Endpoints
+- [ ] **Task 2.4**: API Endpoints (MVP: Sadece Sync)
   - [ ] Create `app/api/referrals.py` - Referral endpoints
-  - [ ] `GET /referrals` - List referrals with filters
-  - [ ] `POST /referrals/sync` - Manual sync from Partner Center
-  - [ ] `GET /referrals/{referral_id}` - Get single referral
+  - [ ] **MVP**: `POST /api/referrals/sync` - Manual sync from Partner Center
+  - [ ] ⏳ **Future Enhancement**: `GET /api/referrals` - List referrals with filters (post-MVP)
+  - [ ] ⏳ **Future Enhancement**: `GET /api/referrals/{referral_id}` - Get single referral (post-MVP)
 
-- [ ] **Task 2.5**: UI Integration
-  - [ ] Add referrals section to Mini UI
-  - [ ] Add referral status badges
-  - [ ] Add referral filter to leads table
-  - [ ] Add referral sync button
+- [ ] **Task 2.5**: UI Integration (MVP: Sadece Lead Listesine Kolon)
+  - [ ] Leads API'ye referral bilgisi ekle (`referral_type` field)
+  - [ ] Lead listesine "Referral" kolonu ekle (Co-sell / Marketplace / SP)
+  - [ ] ⏳ **Future Enhancement**: Referrals section to Mini UI (post-MVP)
+  - [ ] ⏳ **Future Enhancement**: Referral status badges (post-MVP)
+  - [ ] ⏳ **Future Enhancement**: Referral filter to leads table (post-MVP)
+  - [ ] Sync button (opsiyonel, admin için)
 
-- [ ] **Task 2.6**: Background Sync
+- [ ] **Task 2.6**: Background Sync (MVP: Polling, Dev Override)
   - [ ] Create Celery task for periodic referral sync
-  - [ ] Configure sync schedule (daily/hourly)
+  - [ ] Configure sync schedule: **Production 10 minutes, Development 30-60 seconds** (test edilebilir)
   - [ ] Handle sync errors gracefully
 
 **Files to Create**:
-- `app/core/partner_center.py`
+- `app/core/partner_center.py` (MVP: 50-70 satır, minimal)
 - `app/core/referral_ingestion.py`
-- `app/api/referrals.py`
+- `app/api/referrals.py` (MVP: sadece sync endpoint)
 - `alembic/versions/XXXX_add_partner_center_referrals.py`
 
 **Files to Modify**:
-- `app/db/models.py`
-- `mini-ui/js/ui-leads.js`
-- `mini-ui/index.html`
-- `app/core/celery_app.py` (add sync task)
+- `app/db/models.py` (PartnerCenterReferral model + hybrid raw_leads)
+- `app/core/scorer.py` (Azure Tenant ID override + Co-sell boost)
+- `app/api/leads.py` (referral_type field ekle)
+- `mini-ui/js/ui-leads.js` (sadece referral kolonu)
+- `app/core/celery_app.py` (add sync task, dev override)
 
 **Success Criteria**:
-- [ ] Partner Center referrals sync working
-- [ ] Referrals visible in UI
-- [ ] Referrals trigger domain scans
+- [ ] Partner Center referrals sync working (polling, 10 min prod, 30s dev)
+- [ ] Referrals visible in UI (lead listesinde referral kolonu)
+- [ ] Referrals trigger domain scans (idempotent, domain bazlı)
 - [ ] Background sync working
 - [ ] Error handling complete
+- [ ] Scoring pipeline entegrasyonu çalışıyor (Azure Tenant ID + Co-sell boost)
 
 ---
 
@@ -224,7 +249,7 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 2 (Partner Center Referrals) 🔄 **NEXT**
+**Current Phase**: Phase 2 (Partner Center Referrals) 🅿️ **PARK EDİLDİ**
 
 **Completed**: 1/3 phases (Phase 1 ✅ Completed 2025-01-28)
 
@@ -233,10 +258,16 @@ Implement correct engineering sequence for Hunter integration with external syst
 - UI stabilization complete
 - Sales team feedback: Positive
 
+**Phase 2 Status**: 🅿️ **PARK EDİLDİ** (MVP-safe mode, 50% completed)
+- Core components completed (Tasks 2.1, 2.2, 2.3 ✅)
+- Remaining tasks: API endpoints, UI integration, Background sync, Scoring pipeline
+- **Status**: MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
+- **Next Sprint**: Post-MVP (G21-G22)
+
 **Next Steps**:
 1. ✅ Phase 1 completed - All tasks done (Task 1.1-1.5 ✅)
-2. Start Phase 2: Partner Center Referrals Integration (P1) - 🔄 **NEXT**
-3. Follow task list: `docs/plans/2025-01-28-INTEGRATION-TASKS.md`
+2. 🅿️ Phase 2: Partner Center Referrals - **PARK EDİLDİ** (post-MVP sprint'inde tamamlanacak)
+3. ⏳ Phase 3: Dynamics 365 Integration - Pending (after Phase 2 completion)
 
 ---
 

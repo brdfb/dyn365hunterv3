@@ -295,13 +295,19 @@ Validate IP Enrichment Minimal UI integration from **"paper complete"** to **"pr
 
 ## 🚀 Next Steps After Validation
 
-Once all tests pass:
+**Current Focus**: IP Enrichment Validation (Priority #1)
 
-1. **Integration Roadmap Phase 2**: Partner Center Referrals Integration (P1)
-2. **Integration Roadmap Phase 3**: Dynamics 365 Integration (P2)
-3. **G21 Phase 4**: Dynamics Migration (can be merged with Phase 3)
+1. **Run validation tests**: `python scripts/test_ip_enrichment_validation.py`
+2. **Review results**: Check `docs/active/IP-ENRICHMENT-VALIDATION-RESULTS.json`
+3. **Update status**: Complete `docs/active/IP-ENRICHMENT-STATUS.md`
+4. **Make MVP decision**: Accept or fix issues
 
-**Key Milestone**: IP Enrichment Minimal UI is **production-ready** and **integration-ready**.
+**After Validation Complete**:
+1. **Integration Roadmap Phase 2**: Partner Center Referrals Integration (P1) - PARKED
+2. **Integration Roadmap Phase 3**: Dynamics 365 Integration (P2) - Pending
+3. **G21 Phase 4**: Dynamics Migration (can be merged with Phase 3) - Pending
+
+**Key Milestone**: IP Enrichment Minimal UI is **production-ready** and **integration-ready** (pending validation).
 
 ---
 

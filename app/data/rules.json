@@ -44,7 +44,7 @@
     {
       "segment": "Migration",
       "condition": {
-        "min_score": 70,
+        "min_score": 60,
         "provider_in": ["Google", "Yandex", "Zoho", "Hosting", "Local"]
       },
       "description": "Cloud kullanıcıları, geçişe hazır"
@@ -52,8 +52,17 @@
     {
       "segment": "Cold",
       "condition": {
+        "min_score": 5,
+        "max_score": 59,
+        "provider_in": ["Local"]
+      },
+      "description": "Self-hosted mail sunucusu kullanıyor, M365'e migration potansiyeli var (düşük öncelik)"
+    },
+    {
+      "segment": "Cold",
+      "condition": {
         "min_score": 40,
-        "max_score": 69
+        "max_score": 59
       },
       "description": "Zayıf sinyaller, daha fazla veri gerek"
     },

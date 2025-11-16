@@ -18,12 +18,12 @@ class TestPriorityScore:
         assert calculate_priority_score("Migration", 70) == 2
 
     def test_priority_migration_low_score(self):
-        """Test Migration segment with low score (<70)."""
-        # Migration 50-69 → Priority 3
-        assert calculate_priority_score("Migration", 65) == 3
-        assert calculate_priority_score("Migration", 50) == 3
-        # Migration 0-49 → Priority 4
-        assert calculate_priority_score("Migration", 49) == 4
+        """Test Migration segment with low score (60-69)."""
+        # Migration 60-69 → Priority 3 (Migration segment min_score = 60)
+        assert calculate_priority_score("Migration", 69) == 3
+        assert calculate_priority_score("Migration", 60) == 3
+        # Migration 0-59 → Priority 4 (theoretical only, Migration segment requires min_score 60)
+        assert calculate_priority_score("Migration", 59) == 4
         assert calculate_priority_score("Migration", 0) == 4
 
     def test_priority_existing_high_score(self):

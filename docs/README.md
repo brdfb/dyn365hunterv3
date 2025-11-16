@@ -77,7 +77,10 @@ API contract documentation:
 #### Integration Roadmap Documentation (NEW - 2025-01-28)
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
-  - **Phase 2**: 🅿️ Parked - Partner Center Referrals (P1) - MVP-safe mode (feature flag disabled)
+  - **Phase 2**: 🅿️ **PARK EDİLDİ** - Partner Center Referrals (P1) - MVP-safe mode (feature flag disabled)
+    - ✅ Core components completed (50% - Tasks 2.1, 2.2, 2.3)
+    - ⏳ Remaining: API endpoints, UI integration, Background sync, Scoring pipeline
+    - **Status**: MVP'ye etkisi YOK (kod hazır ama aktif değil)
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
   - **Key Principle**: UI stability → Data ingestion → CRM integration
 - `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
@@ -91,27 +94,16 @@ API contract documentation:
   - All 86 scoring tests passing (0 failures)
 
 #### Mini UI Documentation
-- `MINI-UI-POLISH-NOTES.md` (2025-01-28) - Mini UI v1.1 Polish - Dogfooding notes and polish tracking
-  - Sales-friendly UI improvements (7/10 tasks completed)
-  - Search debounce optimization, empty state, error messages, loading indicators
-  - Score breakdown modal header, segment tooltips, location info improvements
-  - Status: ✅ 7/10 tasks completed, remaining tasks pending manual testing
+- ✅ **Archived** - `2025-01-28-MINI-UI-POLISH-NOTES.md` - Mini UI v1.1 Polish - Dogfooding notes (7/10 tasks completed) - ✅ Archived (2025-01-28)
+- ✅ **Archived** - `2025-01-28-TODO-MINI-UI-POLISH.md` - Mini UI Polish test results (✅ Passed) - ✅ Archived (2025-01-28)
+- ✅ **Archived** - `2025-01-28-QA-NETWORK-TEST.md` - Network tab duplicate request tests - ✅ Archived (2025-01-28)
 - `IP-ENRICHMENT-UI-PATCH-PLAN.md` (2025-01-28) - IP enrichment UI integration patch plan
   - Minimal approach: Country + proxy warning in score breakdown modal
   - IP context integration in sales engine for intelligent text generation
   - Status: ✅ Completed (2025-01-28)
-- `IP-ENRICHMENT-STATUS.md` (2025-01-28) - IP Enrichment validation status and test results
-  - Test results summary: IP resolution 100% success (11/11), Enrichment 100% success (11/11)
-  - Domain test results by category (Türkiye hosting, M365, Global big tech)
-  - Error handling and logging validation
-  - MVP decision: ✅ ACCEPTED FOR MVP (country + city data quality acceptable)
-  - Status: ✅ Full validation completed (IP resolution ✅, Enrichment ✅)
-- `IP-ENRICHMENT-VALIDATION-CHECKLIST.md` (2025-01-28) - IP Enrichment validation checklist
-  - Test execution checklist
-  - Full validation completed (enrichment enabled + DB files in Docker)
-  - Status: ✅ Completed
-- `IP-ENRICHMENT-VALIDATION-RESULTS.json` (2025-01-28) - IP Enrichment validation test results
-  - JSON results from validation test (11 domains)
+- ✅ **Archived** - `2025-01-28-IP-ENRICHMENT-STATUS.md` - IP Enrichment validation status (ACCEPTED FOR MVP) - ✅ Archived (2025-01-28)
+- ✅ **Archived** - `2025-01-28-IP-ENRICHMENT-VALIDATION-CHECKLIST.md` - IP Enrichment validation checklist - ✅ Archived (2025-01-28)
+- ✅ **Archived** - `2025-01-28-IP-ENRICHMENT-VALIDATION-RESULTS.json` - IP Enrichment validation test results (11 domains) - ✅ Archived (2025-01-28)
   - IP resolution results (11/11 success), enrichment results (11/11 success)
   - Status: ✅ Test completed (full results with enrichment enabled)
 - `2025-01-28-GOLDEN-DATASET-CRITIQUE.md` (2025-01-28) - Critique of current "golden dataset"
@@ -147,7 +139,11 @@ API contract documentation:
 - ✅ **Test Fixes**: Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
 - 🔄 **Integration Roadmap**: In Progress (2025-01-28) - Correct sequence for external integrations
   - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
-  - 🔄 Phase 2: Partner Center Referrals (P1) - NEXT (2-3 days)
+  - 🅿️ Phase 2: Partner Center Referrals (P1) - **PARK EDİLDİ** (MVP-safe mode, 50% completed)
+    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
+    - ⏳ Remaining: API endpoints, UI integration, Background sync, Scoring pipeline
+    - **Status**: MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
+    - **Next Sprint**: Post-MVP (G21-G22)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
   - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
@@ -211,6 +207,12 @@ API contract documentation:
 - `2025-01-27-ACTIVE-DOCS-SUMMARY.md` - Active documentation summary (Archived - 2025-01-27)
 - `2025-01-27-TEST-ANALYSIS.md` - Test suite analysis report (Archived - 2025-01-27)
 - `2025-01-28-APPLICATION-STATUS.md` - Application health status report (Archived - 2025-01-28)
+- `2025-01-28-IP-ENRICHMENT-STATUS.md` - IP Enrichment validation status (ACCEPTED FOR MVP) - ✅ Archived (2025-01-28)
+- `2025-01-28-IP-ENRICHMENT-VALIDATION-CHECKLIST.md` - IP Enrichment validation checklist - ✅ Archived (2025-01-28)
+- `2025-01-28-IP-ENRICHMENT-VALIDATION-RESULTS.json` - IP Enrichment validation test results (11 domains) - ✅ Archived (2025-01-28)
+- `2025-01-28-MINI-UI-POLISH-NOTES.md` - Mini UI v1.1 Polish - Dogfooding notes (7/10 tasks completed) - ✅ Archived (2025-01-28)
+- `2025-01-28-TODO-MINI-UI-POLISH.md` - Mini UI Polish test results (✅ Passed) - ✅ Archived (2025-01-28)
+- `2025-01-28-QA-NETWORK-TEST.md` - Network tab duplicate request tests - ✅ Archived (2025-01-28)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)

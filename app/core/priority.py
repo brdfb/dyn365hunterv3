@@ -22,8 +22,8 @@ def calculate_priority_score(segment: Optional[str], score: Optional[int]) -> in
     Priority Logic (Improved):
     - Migration + Score 80+ → Priority: 1 🔥 (En yüksek)
     - Migration + Score 70-79 → Priority: 2 ⭐
-    - Migration + Score 50-69 → Priority: 3 🟡
-    - Migration + Score 0-49 → Priority: 4 🟠
+    - Migration + Score 60-69 → Priority: 3 🟡
+    - Migration + Score 0-59 → Priority: 4 🟠 (Note: Migration segment requires min_score 60, so 0-59 is theoretical only)
     - Existing + Score 70+ → Priority: 3 🟡
     - Existing + Score 50-69 → Priority: 4 🟠
     - Existing + Score 30-49 → Priority: 5 ⚪

@@ -164,40 +164,51 @@ This roadmap implements the correct engineering sequence for Hunter integration 
 
 #### Tasks
 
-**2.1 Partner Center API Client**
-- [ ] Create `app/core/partner_center.py` - Partner Center API client
-- [ ] Implement authentication (OAuth 2.0 or API key)
+**2.1 Partner Center API Client (MVP: Minimal)**
+- [ ] Create `app/core/partner_center.py` - Partner Center API client (50-70 satır, minimal)
+- [ ] Implement minimal OAuth 2.0 authentication (token al, expiry kontrolü)
 - [ ] Implement `get_referrals()` function
-- [ ] Handle rate limiting
-- [ ] Handle token refresh
+- [ ] Basic rate limiting: `time.sleep(1)` between requests
+- [ ] Basic retry: 2 deneme (transient failures için)
+- [ ] Token expiry kontrolü (refresh sadece gerektiğinde)
+- [ ] Error handling (network errors, API errors)
+- [ ] Structured logging (PII masking ile)
 
-**2.2 Referral Data Model**
+**2.2 Referral Data Model (raw_leads + partner_center_referrals hybrid)**
+- [ ] `raw_leads` table'ını kullan (source='partnercenter', payload JSONB)
 - [ ] Create `app/db/models.py` - `PartnerCenterReferral` model
 - [ ] Create Alembic migration for `partner_center_referrals` table
-- [ ] Fields: referral_id, company_name, domain, status, created_at, updated_at
+- [ ] Fields: referral_id (unique), referral_type, company_name, domain, azure_tenant_id, status, raw_data, synced_at, created_at, updated_at
+- [ ] Indexes: referral_id, domain, status, synced_at, referral_type, azure_tenant_id
 
 **2.3 Referral Ingestion**
 - [ ] Create `app/core/referral_ingestion.py` - Referral ingestion logic
+- [ ] Lead tipi detection (Co-sell, Marketplace, Solution Provider)
+- [ ] Domain extraction fallback (website → email → skip)
+- [ ] Azure Tenant ID → Company provider override (M365 signal)
 - [ ] Implement referral → domain normalization
 - [ ] Implement referral → company upsert
-- [ ] Implement referral → domain scan trigger
+- [ ] Implement referral → domain scan trigger (idempotent - domain bazlı)
+- [ ] Scoring pipeline entegrasyonu (Azure Tenant ID override + Co-sell boost)
 - [ ] Handle duplicate referrals
 
-**2.4 API Endpoints**
+**2.4 API Endpoints (MVP: Sadece Sync)**
 - [ ] Create `app/api/referrals.py` - Referral endpoints
-- [ ] `GET /referrals` - List referrals with filters
-- [ ] `POST /referrals/sync` - Manual sync from Partner Center
-- [ ] `GET /referrals/{referral_id}` - Get single referral
+- [ ] **MVP**: `POST /api/referrals/sync` - Manual sync from Partner Center
+- [ ] ⏳ **Future Enhancement**: `GET /api/referrals` - List referrals with filters (post-MVP)
+- [ ] ⏳ **Future Enhancement**: `GET /api/referrals/{referral_id}` - Get single referral (post-MVP)
 
-**2.5 UI Integration**
-- [ ] Add referrals section to Mini UI
-- [ ] Add referral status badges
-- [ ] Add referral filter to leads table
-- [ ] Add referral sync button
+**2.5 UI Integration (MVP: Sadece Lead Listesine Kolon)**
+- [ ] Leads API'ye referral bilgisi ekle (`referral_type` field)
+- [ ] Lead listesine "Referral" kolonu ekle (Co-sell / Marketplace / SP)
+- [ ] ⏳ **Future Enhancement**: Referrals section to Mini UI (post-MVP)
+- [ ] ⏳ **Future Enhancement**: Referral status badges (post-MVP)
+- [ ] ⏳ **Future Enhancement**: Referral filter to leads table (post-MVP)
+- [ ] Sync button (opsiyonel, admin için)
 
-**2.6 Background Sync**
+**2.6 Background Sync (MVP: Polling, Dev Override)**
 - [ ] Create Celery task for periodic referral sync
-- [ ] Configure sync schedule (daily/hourly)
+- [ ] Configure sync schedule: **Production 10 minutes, Development 30-60 seconds** (test edilebilir)
 - [ ] Handle sync errors gracefully
 
 **Files to Create**:

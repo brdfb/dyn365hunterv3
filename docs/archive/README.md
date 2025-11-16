@@ -20,13 +20,15 @@ Files should be archived with date prefix:
 
 ## Current Archives
 
-**Total:** 74 archived documentation files (as of 2025-01-28)
+**Total:** 80 archived documentation files (as of 2025-01-28)
 
 ### Major Completed Phases
 - **G1-G19**: All MVP and post-MVP sprints completed
 - **P0 Hardening**: Production hardening (G19)
 - **P1 Performance**: Alembic, Rate Limiting, Caching, Bulk Operations, API Versioning
 - **Stabilization Sprint**: 3-day enterprise-ready stabilization (v1.1-stable)
+- **IP Enrichment**: Validation and testing documentation (completed 2025-01-28)
+- **Mini UI Polish**: UI improvements and testing documentation (completed 2025-01-28)
 
 ### Recent Archives (2025-01-27 to 2025-01-28)
 - Documentation cleanup and optimization files
@@ -37,6 +39,14 @@ Files should be archived with date prefix:
 - UI Patch v1.1 (completed 2025-01-28)
 - IP Enrichment UI Patch Plan (completed 2025-01-28)
 - G19 Auth + UI Advanced Plan (SSO removed, UI completed 2025-01-28)
+- **IP Enrichment Validation** (2025-01-28):
+  - `2025-01-28-IP-ENRICHMENT-STATUS.md` - Status report (ACCEPTED FOR MVP)
+  - `2025-01-28-IP-ENRICHMENT-VALIDATION-CHECKLIST.md` - Validation checklist
+  - `2025-01-28-IP-ENRICHMENT-VALIDATION-RESULTS.json` - Test results
+- **Mini UI Polish** (2025-01-28):
+  - `2025-01-28-MINI-UI-POLISH-NOTES.md` - Dogfooding notes (7/10 tasks completed)
+  - `2025-01-28-TODO-MINI-UI-POLISH.md` - Test results (✅ Passed)
+  - `2025-01-28-QA-NETWORK-TEST.md` - Network tab duplicate request tests
 
 ### Historical Archives (2025-11-12 to 2025-11-15)
 - G1-G3: Foundation, Database Schema, Domain Normalization

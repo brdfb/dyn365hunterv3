@@ -2,7 +2,7 @@
 
 **Tarih**: 2025-01-28  
 **Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → ✅ **Test Fixes Tamamlandı (2025-01-28)** → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
-**Son Güncelleme**: 2025-01-28 (Test fixes completed, scoring engine validated)  
+**Son Güncelleme**: 2025-01-28 (Test fixes completed, scoring engine validated, Phase 2 task breakdown added)  
 **Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. **Test Fixes tamamlandı (2025-01-28) - 86 test passing, 0 failures.** **G21: Architecture Refactor başlatıldı (2025-01-28).** P2 backlog olarak kaldı.
 
 ---
@@ -42,12 +42,12 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 - ✅ Cache invalidation simulation
 
 **🟧 Gün 3 - UI Stabilizasyon (5-6 saat) ✅ TAMAMLANDI**
-- [x] Table view cleanup - Column widths, row hover, empty state, loading state, pagination UI
-- [x] Score breakdown modal iyileştirme - Close button, backdrop click, ESC key, scroll optimization, tooltips
-- [x] Header/Footer sadeleştirme - Header cleanup, footer addition
-- [x] Export/PDF basic - CSV/Excel export UI, PDF export button, toast notifications
-- [x] Tooltip + hover behavior - Generic tooltip system, hover effects
-- [x] Favori/Tag UI mini düzenleme - Backend zaten destekliyor, UI iyileştirmeleri tamamlandı
+- ✅ Table view cleanup - Column widths, row hover, empty state, loading state, pagination UI
+- ✅ Score breakdown modal iyileştirme - Close button, backdrop click, ESC key, scroll optimization, tooltips
+- ✅ Header/Footer sadeleştirme - Header cleanup, footer addition
+- ✅ Export/PDF basic - CSV/Excel export UI, PDF export button, toast notifications
+- ✅ Tooltip + hover behavior - Generic tooltip system, hover effects
+- ✅ Favori/Tag UI mini düzenleme - Backend zaten destekliyor, UI iyileştirmeleri tamamlandı
 
 ### Detaylı Plan
 
@@ -59,7 +59,7 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 - ✅ Tüm testler geçiyor mu? (`pytest tests/ -v`) - ✅ Gün 1 ve Gün 2 testleri geçti
 - ✅ Alembic rollback çalışıyor mu? - ✅ Gün 1'de tamamlandı
 - ✅ Multi-worker rate limiting test başarılı mı? - ✅ Gün 1'de tamamlandı
-- [x] UI 2 dakikada kullanılabilir mi? (dogfooding test) - ✅ Gün 3'te tamamlandı
+- ✅ UI 2 dakikada kullanılabilir mi? (dogfooding test) - ✅ Gün 3'te tamamlandı
 - ✅ Metrics endpoint çalışıyor mu? (`/healthz/metrics`) - ✅ Gün 2'de tamamlandı
 - ✅ Sentry error tracking aktif mi? - ✅ Gün 2'de tamamlandı
 
@@ -73,7 +73,7 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 **Priority**: P0.5 → P1 → P2  
 **Estimated Duration**: 9-14 days total  
 **Risk Level**: Low → Medium (with proper execution)  
-**Last Updated**: 2025-01-28 (Test fixes completed, scoring engine validated)
+**Last Updated**: 2025-01-28 (Test fixes completed, scoring engine validated, Phase 2 task breakdown added)
 
 ### Correct Sequence (Non-negotiable)
 
@@ -85,9 +85,24 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
    - **Test Fixes**: ✅ Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
 
 2. **Phase 2: Partner Center Referrals (P1)** - 🔄 **NEXT** (2-3 days)
-   - API client, data model, ingestion, UI integration, background sync
+   - **MVP Yaklaşımı**: Minimal API client (50-70 satır), polling (10 min prod, 30s dev), sadece sync endpoint, lead listesine 1 kolon
    - **Why Second**: One-way sync (PC → Hunter), simpler than Dynamics
    - **Risk**: 2/10 (external API dependency)
+   - **Key Features**:
+     - Hybrid DB model (raw_leads ingestion + partner_center_referrals tracking)
+     - Azure Tenant ID signal → M365 existing customer detection
+     - Lead types (Co-sell, Marketplace, Solution Provider)
+     - Domain scan idempotent (domain bazlı, referral bazlı değil)
+     - Scoring pipeline entegrasyonu (Azure Tenant ID override + Co-sell boost)
+   - **Tasks**:
+     - [ ] **Task 2.1**: Partner Center API Client (MVP: minimal, 50-70 satır)
+     - [ ] **Task 2.2**: Referral Data Model (raw_leads + partner_center_referrals hybrid)
+     - [ ] **Task 2.3**: Referral Ingestion (lead tipi, domain extraction, Azure Tenant ID, idempotent scanning)
+     - [ ] **Task 2.4**: API Endpoint (MVP: sadece POST /api/referrals/sync)
+     - [ ] **Task 2.5**: UI Integration (lead listesine 1 kolon: referral type)
+     - [ ] **Task 2.6**: Background Sync (Celery polling: prod 10 dakika / dev 30-60s)
+   - **Detailed Task List**: `docs/prompts/2025-01-28-partner-center-phase2-task-list.md`
+   - **TODO Tracking**: `docs/todos/PARTNER-CENTER-PHASE2.md`
 
 3. **Phase 3: Dynamics 365 Integration (P2)** - ⏳ Pending (6-10 days)
    - API client, data mapping, pipeline integration, sync mechanisms, UI integration
@@ -133,7 +148,7 @@ Add Sales Engine (sales intelligence layer).
 2. **Phase 1**: Deprecation Annotations (1 day) ✅ **COMPLETED** (2025-11-16)
 3. **Phase 2**: Sales Engine (Additive) (3-5 days) ✅ **COMPLETED** (2025-01-28)
 4. **Phase 3**: Read-Only Mode (1 day) ✅ **COMPLETED** (2025-01-28)
-5. **Phase 4**: Dynamics Migration (1-2 days, SIMPLIFIED) - **No data to migrate** (tables don't exist, documentation only) 🔄 **NEXT**
+5. **Phase 4**: Dynamics Migration (1-2 days, SIMPLIFIED) - **No data to migrate** (tables don't exist, documentation only) 🔄 **PAUSED** (Integration Roadmap Phase 3 overlaps)
 6. **Phase 5**: Monitoring & Stabilization (1 week)
 7. **Phase 6**: Cleanup (1 day)
 
@@ -241,12 +256,14 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
   - [x] Base revision oluştur (current production schema'dan autogenerate) ✅
   - [x] Base revision'ı stamp et (`alembic stamp 08f51db8dce0`) ✅
   - [x] Eski SQL migration'ları legacy olarak işaretle (`app/db/migrations/legacy/`) ✅
-  - [ ] **Schema drift kontrolü**: Alembic migration sonrası canlı DB şeması ile SQLAlchemy modelleri diff kontrolü (`alembic --autogenerate dry-run`)
-  - [ ] `run_migration.py` script'ini Alembic kullanacak şekilde güncelle
-  - [ ] **Test**: Rollback testleri (`alembic downgrade -1` - gelecekteki migration'lar için)
-  - [ ] **Test**: Yeni migration oluşturma testi (`alembic revision --autogenerate`)
-  - [ ] CI/CD'ye migration check ekle (pre-commit hook)
-  - [ ] Dev/prod config ayrımı (env-based migration path)
+  - [x] **Schema drift kontrolü**: Alembic migration sonrası canlı DB şeması ile SQLAlchemy modelleri diff kontrolü ✅ (Stabilization Sprint Gün 1'de doğrulandı)
+  - [x] `run_migration.py` script'ini Alembic kullanacak şekilde güncelle ✅ (Stabilization Sprint Gün 1'de tamamlandı)
+  - [x] **Test**: Rollback testleri (`alembic downgrade -1` - gelecekteki migration'lar için) ✅ (Stabilization Sprint Gün 1'de doğrulandı)
+  - [ ] **Test**: Yeni migration oluşturma testi (`alembic revision --autogenerate`) - Future enhancement
+  - [ ] CI/CD'ye migration check ekle (pre-commit hook) - Future enhancement
+  - [ ] Dev/prod config ayrımı (env-based migration path) - Future enhancement
+  
+**NOT**: Core implementation tamamlandı. Schema drift kontrolü, rollback testleri ve `run_migration.py` güncellemesi Stabilization Sprint Gün 1'de doğrulandı. Kalan task'lar opsiyonel iyileştirmeler (future enhancement).
   
 **NOT**: g16-g20 manuel SQL migration'ları Alembic revision'ına çevrilmedi. Bunun yerine "collapsed history" stratejisi kullanıldı:
 - Base revision (`08f51db8dce0`) tüm geçmiş migration'ların sonucunu temsil ediyor
@@ -277,9 +294,11 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
   - ✅ In-memory limiter fallback olarak bırakıldı (Redis down durumu için)
   - ✅ Degrade mode logging eklendi (WARN level + Sentry tags)
   - ✅ Health check endpoint'te Redis kontrolü zaten var (`/healthz/ready`)
-- **Kalan Testler**:
-  - [ ] **Test**: Multi-worker rate limiting test (2 worker, aynı API key, limit kontrolü)
-  - [ ] **Test**: Redis down durumu (fallback to in-memory, circuit breaker test)
+- **Test Durumu**:
+  - [x] ✅ **Test**: Multi-worker rate limiting test (2 worker, aynı API key, limit kontrolü) - Stabilization Sprint Gün 1'de doğrulandı
+  - [x] ✅ **Test**: Redis down durumu (fallback to in-memory, circuit breaker test) - Stabilization Sprint Gün 1'de doğrulandı
+  
+**NOT**: Core implementation tamamlandı. Tüm testler Stabilization Sprint Gün 1'de doğrulandı.
 - **Lokasyon**: `app/core/rate_limiter.py`, `app/core/api_key_auth.py`, `app/core/distributed_rate_limiter.py`, `app/core/redis_client.py`
 - **Blocker**: ❌ Hayır - Scale için
 - **Bağımlılık**: Alembic (DB stable olmalı) ✅
@@ -605,12 +624,12 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
    - ✅ Cache invalidation simulation
 
 3. **Gün 3 - UI Stabilizasyon** (5-6 saat) ✅ **TAMAMLANDI**
-   - [x] Table view cleanup
-   - [x] Score breakdown modal iyileştirme
-   - [x] Header/Footer sadeleştirme
-   - [x] Export/PDF basic
-   - [x] Tooltip + hover behavior
-   - [x] Favori/Tag UI mini düzenleme
+   - ✅ Table view cleanup
+   - ✅ Score breakdown modal iyileştirme
+   - ✅ Header/Footer sadeleştirme
+   - ✅ Export/PDF basic
+   - ✅ Tooltip + hover behavior
+   - ✅ Favori/Tag UI mini düzenleme
 
 **Detaylı Plan**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md`  
 **UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md`

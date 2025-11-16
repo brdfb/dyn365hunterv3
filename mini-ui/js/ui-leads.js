@@ -37,14 +37,14 @@ export function renderLeadsTable(leads) {
                         : '-'
                     }
                 </td>
-                <td class="leads-table__cell leads-table__cell--tenant-size" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size} (M365/Google için MX pattern'ine göre tahmin edilir)` : lead.provider === 'M365' || lead.provider === 'Google' ? 'Tenant Size: M365/Google provider\'ları için MX pattern\'ine göre tahmin edilir (small/medium/large)' : 'Tenant Size: Sadece M365 ve Google provider\'ları için hesaplanır'}">
+                <td class="leads-table__cell leads-table__cell--tenant-size" title="${lead.tenant_size ? getTenantSizeTooltip(lead.tenant_size, lead.provider, lead.mx_root) : lead.provider === 'M365' || lead.provider === 'Google' ? 'Tenant Size: M365/Google provider\'ları için MX pattern\'ine göre tahmin edilir (small/medium/large)' : 'Tenant Size: Sadece M365 ve Google provider\'ları için hesaplanır'}">
                     ${lead.tenant_size ? `<span class="tenant-size-badge tenant-size-badge--${lead.tenant_size}">${escapeHtml(lead.tenant_size)}</span>` : '-'}
                 </td>
-                <td class="leads-table__cell leads-table__cell--local-provider" title="${lead.local_provider ? `Local Provider: ${lead.local_provider}` : lead.provider === 'Local' ? 'Local Provider: Provider "Local" olduğunda Türk hosting provider\'ı tespit edilir (TürkHost, Natro, vb.)' : 'Local Provider: Sadece provider "Local" olduğunda doldurulur'}">
-                    ${lead.local_provider ? escapeHtml(lead.local_provider) : '-'}
+                <td class="leads-table__cell leads-table__cell--local-provider" title="${lead.local_provider ? `Local Provider: ${lead.local_provider}` : lead.provider === 'Local' && lead.mx_root ? `MX Root: ${lead.mx_root} (Bilinen provider tespit edilemedi)` : lead.provider === 'Local' ? 'Local Provider: Bilinen Türk hosting provider\'ları tespit edilir (TürkHost, Natro, vb.). Bu domain için provider tespit edilemedi.' : 'Local Provider: Sadece provider "Local" olduğunda doldurulur'}">
+                    ${lead.local_provider ? escapeHtml(lead.local_provider) : lead.provider === 'Local' && lead.mx_root ? `<span style="color: #666; font-size: 0.9em;" title="MX Root: ${escapeHtml(lead.mx_root)}">${escapeHtml(lead.mx_root)}</span>` : lead.provider === 'Local' ? '<span style="color: #999; font-style: italic;">Bilinmeyen</span>' : '-'}
                 </td>
                 <td class="leads-table__cell leads-table__cell--segment">
-                    ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}">${escapeHtml(lead.segment)}</span>` : '-'}
+                    ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}" title="${getSegmentTooltip(lead.segment, lead.provider, lead.readiness_score)}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
                 <td class="leads-table__cell leads-table__cell--score ${scoreClass} ${lead.readiness_score !== null && lead.readiness_score !== undefined ? 'score-clickable' : ''}" 
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
@@ -101,6 +101,65 @@ export function renderStats(dashboard) {
     // High priority from legacy endpoint
     const highPriorityEl = document.getElementById('kpi-high-priority');
     if (highPriorityEl) highPriorityEl.textContent = dashboard.high_priority || 0;
+}
+
+/**
+ * Get segment tooltip text (v1.1: Sales-friendly explanations)
+ */
+function getSegmentTooltip(segment, provider = null, score = null) {
+    if (!segment) return '';
+    
+    // Cold segment için provider'a göre özelleştirilmiş açıklama
+    if (segment === 'Cold') {
+        if (provider === 'Google') {
+            return 'Google Workspace kullanıyor ama skor düşük (40-69) → SPF/DKIM/DMARC sinyalleri eksik olabilir. Migration potansiyeli var ama skor 70+ olmalı';
+        } else if (provider === 'Yandex') {
+            return 'Yandex Mail kullanıyor ama skor düşük (40-69) → SPF/DKIM/DMARC sinyalleri eksik olabilir. Migration potansiyeli var ama skor 70+ olmalı';
+        } else if (provider === 'Local') {
+            return 'Local hosting kullanıyor, migration potansiyeli var (skor 40-69) → M365\'e geçiş için uygun aday';
+        } else if (provider === 'Hosting') {
+            return 'Hosting provider kullanıyor, migration potansiyeli var (skor 40-69) → M365\'e geçiş için uygun aday';
+        } else if (provider && provider !== 'Unknown') {
+            return 'Email provider tespit edildi ama skor düşük (40-69) → SPF/DKIM/DMARC sinyalleri eksik olabilir. Daha fazla sinyal gerekli';
+        } else {
+            return 'Email provider tespit edilemedi → yeni müşteri potansiyeli';
+        }
+    }
+    
+    const tooltips = {
+        'Existing': 'M365 kullanıyor → yenileme / ek lisans fırsatı',
+        'Migration': 'Cloud provider kullanıyor (Google/Yandex/Zoho/Hosting/Local) → migration fırsatı (skor 70+)',
+        'Skip': 'Düşük skor / risk → düşük öncelik'
+    };
+    return tooltips[segment] || '';
+}
+
+/**
+ * Get tenant size tooltip text
+ */
+function getTenantSizeTooltip(tenantSize, provider, mxRoot) {
+    if (!tenantSize || !provider) return `Tenant büyüklüğü: ${tenantSize}`;
+    
+    let explanation = '';
+    if (provider === 'M365') {
+        if (tenantSize === 'large') {
+            explanation = 'Enterprise pattern (mail.protection.outlook.com) → 500+ kullanıcı tahmini';
+        } else if (tenantSize === 'small') {
+            explanation = 'Regional/OLC pattern → 1-50 kullanıcı tahmini';
+        } else {
+            explanation = 'Standard pattern → 50-500 kullanıcı tahmini';
+        }
+    } else if (provider === 'Google') {
+        if (tenantSize === 'large') {
+            explanation = 'Enterprise/custom pattern → 500+ kullanıcı tahmini (standart aspmx.l.google.com değil)';
+        } else {
+            explanation = 'Standard Google Workspace pattern (aspmx.l.google.com) → 50-500 kullanıcı tahmini';
+        }
+    } else {
+        explanation = 'MX pattern\'ine göre tahmin edilir';
+    }
+    
+    return `Tenant büyüklüğü: ${tenantSize} - ${explanation}${mxRoot ? ` (MX: ${mxRoot})` : ''}`;
 }
 
 /**
@@ -274,11 +333,48 @@ export function hideLoading() {
 /**
  * Show error message
  */
+/**
+ * Show error message (v1.1: Sales-friendly messages)
+ */
 export function showError(message) {
     const errorEl = document.getElementById('error');
     if (!errorEl) return;
     
-    errorEl.textContent = message;
+    // v1.1: Convert technical errors to sales-friendly messages
+    let friendlyMessage = message;
+    
+    // Network errors
+    if (message.includes('Failed to fetch') || message.includes('NetworkError') || message.includes('fetch')) {
+        friendlyMessage = 'Sunucuya ulaşamadık. Birkaç dakika sonra tekrar dene.';
+    }
+    // Server errors
+    else if (message.includes('500') || message.includes('Internal Server Error')) {
+        friendlyMessage = 'Bir şeyler ters gitti. Lütfen daha sonra tekrar dene.';
+    }
+    // Timeout errors
+    else if (message.includes('timeout') || message.includes('Timeout')) {
+        friendlyMessage = 'İstek zaman aşımına uğradı. Lütfen tekrar dene.';
+    }
+    // Generic API errors
+    else if (message.includes('yüklenemedi') || message.includes('hatası')) {
+        // Keep Turkish error messages as-is but make them friendlier
+        friendlyMessage = message.replace(/yüklenemedi/g, 'yüklenemedi').replace(/hatası/g, 'sorunu');
+    }
+    
+    // Log technical details to console (not shown to user)
+    if (message !== friendlyMessage) {
+        logError('Technical error (hidden from user):', message);
+    }
+    
+    errorEl.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.25rem;">⚠️</span>
+            <div>
+                <strong>Bir şeyler ters gitti</strong>
+                <div style="margin-top: 0.25rem; font-size: 0.9rem;">${escapeHtml(friendlyMessage)}</div>
+            </div>
+        </div>
+    `;
     errorEl.style.display = 'block';
     errorEl.style.position = 'sticky';
     errorEl.style.top = '0';
@@ -381,6 +477,14 @@ export function showScoreBreakdown(breakdown, domain) {
     
     // Build HTML content
     let html = `<div class="score-breakdown">`;
+    
+    // v1.1: Modal header with explanation
+    html += `<div class="score-breakdown__header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0;">
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Neden bu skor?</h2>
+        <p style="margin: 0; color: #666; font-size: 0.9rem; line-height: 1.5;">
+            Bu skor, M365 kullanımı, Google Workspace, DNS ve IP verilerine göre hesaplandı.
+        </p>
+    </div>`;
     
     // Domain info
     html += `<div class="score-breakdown__section">
@@ -532,10 +636,12 @@ export function showScoreBreakdown(breakdown, domain) {
         html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
             <div class="score-breakdown__section-title">Network & Location</div>`;
         
+        // v1.1: Show location info more prominently
         if (breakdown.ip_enrichment.country) {
+            const city = breakdown.ip_enrichment.city ? `, ${escapeHtml(breakdown.ip_enrichment.city)}` : '';
             html += `<div class="score-breakdown__item">
-                <span class="score-breakdown__label">Country</span>
-                <span class="score-breakdown__value">${escapeHtml(breakdown.ip_enrichment.country)}</span>
+                <span class="score-breakdown__label">Konum</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.ip_enrichment.country)}${city} <span style="font-size: 0.85rem; color: #666;">(IP bazlı tahmin)</span></span>
             </div>`;
         }
         

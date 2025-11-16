@@ -25,7 +25,11 @@ window.state = {
         total_pages: 0
     },
     dashboard: null,
-    loading: false
+    loading: false,
+    // Modal cache - cache score breakdowns by domain to avoid duplicate API calls
+    breakdownCache: {},  // { domain: breakdownData }
+    // Pagination cache - prevent duplicate requests for same page/filters
+    lastLeadsRequest: null  // { filters, timestamp } - track last request to prevent duplicates
 };
 
 /**
@@ -62,7 +66,7 @@ async function init() {
                 // Phase 1.4: Save filter state on search
                 saveFilterState();
                 loadLeads();
-            }, 500); // 500ms debounce
+            }, 400); // 400ms debounce (optimized for better UX)
         });
     }
     
@@ -162,6 +166,18 @@ async function init() {
         if (scoreCell) {
             const domain = scoreCell.getAttribute('data-domain');
             if (domain) {
+                // Modal cache: Check if breakdown is already cached
+                const cachedBreakdown = window.state.breakdownCache[domain];
+                if (cachedBreakdown) {
+                    // Use cached data - no API call needed
+                    const modal = document.getElementById('score-breakdown-modal');
+                    if (modal) {
+                        modal.style.display = 'block';
+                        showScoreBreakdown(cachedBreakdown, domain);
+                    }
+                    return;
+                }
+                
                 // Phase 1.2: Open modal first, then show loading state inside modal
                 const modal = document.getElementById('score-breakdown-modal');
                 if (modal) {
@@ -172,6 +188,8 @@ async function init() {
                 
                 try {
                     const breakdown = await fetchScoreBreakdown(domain);
+                    // Cache the breakdown for future use
+                    window.state.breakdownCache[domain] = breakdown;
                     // Phase 1.2: Ensure we're showing the correct domain's breakdown
                     showScoreBreakdown(breakdown, domain);
                 } catch (error) {
@@ -278,8 +296,25 @@ async function loadDashboard() {
 /**
  * Load leads with current filters
  * Phase 1.3: Improved loading states - table spinner, filter states
+ * QA: Prevent duplicate requests for same page/filters
  */
 async function loadLeads() {
+    // Prevent duplicate requests - check if same request is already in progress
+    const currentRequest = {
+        filters: JSON.stringify(window.state.filters),
+        timestamp: Date.now()
+    };
+    
+    // If same request was made within last 500ms, skip it
+    if (window.state.lastLeadsRequest && 
+        window.state.lastLeadsRequest.filters === currentRequest.filters &&
+        (currentRequest.timestamp - window.state.lastLeadsRequest.timestamp) < 500) {
+        log('Skipping duplicate leads request');
+        return;
+    }
+    
+    window.state.lastLeadsRequest = currentRequest;
+    
     // Phase 1.3: Set table and filter loading states
     setTableLoading(true);
     setFiltersLoading(true);
@@ -294,6 +329,10 @@ async function loadLeads() {
             page_size: response.page_size,
             total_pages: response.total_pages
         };
+        
+        // Clear breakdown cache when leads are refreshed (data might have changed)
+        // Note: We keep cache for better UX, but could clear it if needed
+        // window.state.breakdownCache = {};
         
         renderLeadsTable(response.leads);
         renderPagination();  // G19: Render pagination UI

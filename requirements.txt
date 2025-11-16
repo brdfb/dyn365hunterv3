@@ -28,4 +28,10 @@ structlog>=23.0.0
 sentry-sdk[fastapi]>=1.38.0
 # Retry logic for deadlock prevention (P1-4)
 tenacity>=8.2.3
+# Microsoft Authentication Library (MSAL) for Partner Center integration (Phase 2)
+msal>=1.34.0
+# IP Enrichment libraries
+geoip2>=4.7.0
+ip2location>=8.11.0
+IP2Proxy>=3.3.0
 

@@ -190,9 +190,12 @@
             <!-- Empty State -->
             <div id="empty-state" class="empty-state" style="display: none;">
                 <div class="empty-state__icon">📋</div>
-                <div class="empty-state__title">Henüz lead bulunmuyor</div>
-                <p>CSV dosyası yükleyerek lead'leri ekleyebilir veya tek domain tarayarak başlayabilirsiniz.</p>
-                <button type="button" class="empty-state__button" onclick="document.getElementById('csv-file').click()">CSV Yükle</button>
+                <div class="empty-state__title">Henüz sonuç yok</div>
+                <p>Sağ üstten domain ekleyerek veya CSV dosyası yükleyerek başlayabilirsin.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                    <button type="button" class="empty-state__button" onclick="document.getElementById('csv-file').click()">CSV Yükle</button>
+                    <button type="button" class="empty-state__button" onclick="document.getElementById('domain-input').focus()">Domain Tara</button>
+                </div>
             </div>
         </section>
     </main>

@@ -190,7 +190,7 @@ done < yeni-leadler.csv
 #### 3. Öncelikli Lead'leri Görüntüle (G19: UI Upgrade) ✨ YENİ
 ```bash
 # Migration segment'i (yüksek öncelik) - Basit filtre
-curl "http://localhost:8000/leads?segment=Migration&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&min_score=60"
 
 # Migration segment'i + Sorting (skora göre sıralama) - G19
 curl "http://localhost:8000/leads?segment=Migration&min_score=70&sort_by=readiness_score&sort_order=desc"
@@ -239,10 +239,10 @@ curl "http://localhost:8000/dashboard/kpis"
 #### 5. Lead'leri Export Et (CSV/Excel) 📥 YENİ
 ```bash
 # Migration lead'lerini CSV olarak export et
-curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=70" -o migration-leads.csv
+curl "http://localhost:8000/leads/export?format=csv&segment=Migration&min_score=60" -o migration-leads.csv
 
 # Excel formatında export
-curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70" -o migration-leads.xlsx
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=60" -o migration-leads.xlsx
 ```
 
 **Ne İşe Yarar?**
@@ -409,18 +409,19 @@ curl "http://localhost:8000/leads?segment=Migration&min_score=80"
 #### 3. Belirli Provider'a Göre Filtrele
 ```bash
 # M365'ten başka provider'a geçiş fırsatı
-curl "http://localhost:8000/leads?segment=Migration&provider=Google&min_score=70"
+curl "http://localhost:8000/leads?segment=Migration&provider=Google&min_score=60"
 ```
 
 ### Sonuç
 - **Migration + Skor 80+**: En yüksek öncelik
 - **Migration + Skor 70-79**: Yüksek öncelik
+- **Migration + Skor 60-69**: Orta-yüksek öncelik (yeni threshold)
 - **Provider çeşitliliği**: Farklı provider'lara göre strateji
 
 **Export ile Analiz:**
 ```bash
 # Migration lead'lerini Excel'e export et
-curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=70" -o migration-opportunities.xlsx
+curl "http://localhost:8000/leads/export?format=xlsx&segment=Migration&min_score=60" -o migration-opportunities.xlsx
 
 # Excel'de detaylı analiz yapabilirsiniz
 ```
@@ -849,7 +850,7 @@ curl -X DELETE http://localhost:8000/leads/ornek-firma.com/tags/{tag_id}
 **Auto-Tagging:**
 - Sistem otomatik olarak tag'ler ekler:
   - `security-risk`: SPF ve DKIM yok
-  - `migration-ready`: Migration segment + skor >= 70
+  - `migration-ready`: Migration segment + skor >= 60
   - `expire-soon`: Domain 30 gün içinde expire olacak
   - `weak-spf`: SPF var ama DMARC none
   - `google-workspace`: Provider Google
@@ -924,17 +925,17 @@ http://localhost:8000/mini-ui/
 ### 1. Öncelik Sıralaması (Priority Score)
 1. **Priority 1** 🔥: Migration + Skor 80+ → En yüksek öncelik, hemen aksiyon
 2. **Priority 2** ⭐: Migration + Skor 70-79 → Yüksek öncelik, hemen aksiyon
-3. **Priority 3** 🟡: Migration + Skor 50-69, Existing + Skor 70+ → Orta-yüksek öncelik, 1 hafta içinde
-4. **Priority 4** 🟠: Migration + Skor 0-49, Existing + Skor 50-69 → Orta öncelik, takip et
-5. **Priority 5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ → Düşük-orta öncelik, 1-2 ay sonra kontrol
-6. **Priority 6** ⚫: Existing + Skor 0-29, Cold + Skor 20-39 → Düşük öncelik, 2-3 ay sonra kontrol
-7. **Priority 7** 🔴: Cold + Skor 0-19, Skip → En düşük öncelik, 3-6 ay sonra kontrol
+3. **Priority 3** 🟡: Migration + Skor 60-69, Existing + Skor 70+ → Orta-yüksek öncelik, 1 hafta içinde
+4. **Priority 4** 🟠: Migration + Skor 0-59 (artık mümkün değil, Migration için min 60), Existing + Skor 50-69 → Orta öncelik, takip et
+5. **Priority 5** ⚪: Existing + Skor 30-49, Cold + Skor 40+ (Local: 5-39) → Düşük-orta öncelik, 1-2 ay sonra kontrol
+6. **Priority 6** ⚫: Existing + Skor 0-29, Cold + Skor 20-39 (Local: 5-19) → Düşük öncelik, 2-3 ay sonra kontrol
+7. **Priority 7** 🔴: Cold + Skor 0-19 (Local: 5-19), Skip (0-39) → En düşük öncelik, 3-6 ay sonra kontrol
 
-**Eski Segment Bazlı Sıralama:**
-1. **Migration (70+)**: Hemen aksiyon
+**Segment Bazlı Sıralama:**
+1. **Migration (60+)**: Hemen aksiyon
 2. **Existing (50+)**: Takip et
-3. **Cold (20-49)**: 1-2 ay sonra kontrol
-4. **Skip (0-19)**: 3-6 ay sonra kontrol
+3. **Cold (5-59 Local / 40-59 diğer)**: 1-2 ay sonra kontrol
+4. **Skip (0-39)**: 3-6 ay sonra kontrol
 
 ### 2. Toplu Analiz
 - CSV'den ekleme yaparken batch processing kullanın
@@ -1509,7 +1510,7 @@ done < "$CSV_FILE"
 API_URL="http://localhost:8000"
 OUTPUT_FILE="migration-leads-$(date +%Y-%m-%d_%H-%M-%S).csv"
 
-curl -s "${API_URL}/leads/export?format=csv&segment=Migration&min_score=70" -o "$OUTPUT_FILE"
+curl -s "${API_URL}/leads/export?format=csv&segment=Migration&min_score=60" -o "$OUTPUT_FILE"
 echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
 ```
 
@@ -1521,7 +1522,7 @@ echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
 API_URL="http://localhost:8000"
 OUTPUT_FILE="migration-leads-$(date +%Y-%m-%d_%H-%M-%S).xlsx"
 
-curl -s "${API_URL}/leads/export?format=xlsx&segment=Migration&min_score=70" -o "$OUTPUT_FILE"
+curl -s "${API_URL}/leads/export?format=xlsx&segment=Migration&min_score=60" -o "$OUTPUT_FILE"
 echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
 ```
 
@@ -1532,10 +1533,10 @@ echo "Migration lead'leri $OUTPUT_FILE dosyasına kaydedildi"
 ### Senaryo 1 Sonucu
 ```
 100 domain analiz edildi:
-- Migration (70+): 15 domain → Hemen aksiyon
+- Migration (60+): 15 domain → Hemen aksiyon
 - Existing (50-69): 25 domain → Takip et
-- Cold (20-49): 30 domain → 1-2 ay sonra kontrol
-- Skip (0-19): 30 domain → 3-6 ay sonra kontrol
+- Cold (5-59 Local / 40-59 diğer): 30 domain → 1-2 ay sonra kontrol
+- Skip (0-39): 30 domain → 3-6 ay sonra kontrol
 ```
 
 ### Senaryo 2 Sonucu
@@ -1585,7 +1586,7 @@ Domain: ornek-firma.com
 **A:** Domain başına 10-15 saniye. 100 domain için yaklaşık 20-25 dakika (rate limiting ile).
 
 ### Q: Hangi segment'e öncelik vermeliyim?
-**A:** Migration (70+) → Existing (50+) → Cold (20-49) → Skip (0-19)
+**A:** Migration (60+) → Existing (50+) → Cold (5-59 Local / 40-59 diğer) → Skip (0-39)
 
 ### Q: Skor değişir mi?
 **A:** Evet, domain'in DNS/WHOIS bilgileri değiştiğinde skor da değişir. Düzenli kontrol önerilir.

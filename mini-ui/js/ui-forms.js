@@ -43,7 +43,9 @@ export function bindCsvUploadForm(onSuccess) {
             showMessage(messageEl, 'Submit butonu bulunamadı', 'error');
             return;
         }
+        const originalButtonText = button.textContent;
         button.disabled = true;
+        button.textContent = 'Yükleniyor...';
         
         // Create progress container
         const progressContainer = document.createElement('div');
@@ -101,6 +103,7 @@ export function bindCsvUploadForm(onSuccess) {
                             
                             fileInput.value = '';
                             button.disabled = false;
+                            button.textContent = originalButtonText;
                             
                             // Auto-refresh leads if callback provided
                             if (onSuccess) {
@@ -125,6 +128,7 @@ export function bindCsvUploadForm(onSuccess) {
                 }
                 fileInput.value = '';
                 button.disabled = false;
+                button.textContent = originalButtonText;
                 
                 if (onSuccess) {
                     setTimeout(() => onSuccess(), 1000);
@@ -137,6 +141,7 @@ export function bindCsvUploadForm(onSuccess) {
             }
             showMessage(messageEl, `Hata: ${error.message}`, 'error');
             button.disabled = false;
+            button.textContent = originalButtonText;
         }
     });
 }
@@ -163,7 +168,9 @@ export function bindScanDomainForm(onSuccess) {
         }
         
         const button = form.querySelector('button[type="submit"]');
+        const originalButtonText = button.textContent;
         button.disabled = true;
+        button.textContent = 'Yükleniyor...';
         showMessage(messageEl, 'Taranıyor...', 'info');
         resultEl.classList.remove('scan-result--visible');
         
@@ -213,6 +220,7 @@ export function bindScanDomainForm(onSuccess) {
             resultEl.classList.remove('scan-result--visible');
         } finally {
             button.disabled = false;
+            button.textContent = originalButtonText;
         }
     });
 }
