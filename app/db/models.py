@@ -12,6 +12,8 @@ from sqlalchemy import (
     TIMESTAMP,
     ForeignKey,
     JSON,
+    Index,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.sql import func
@@ -401,4 +403,43 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+
+class IpEnrichment(Base):
+    """IP enrichment data for domains (IP geolocation, ASN, proxy detection)."""
+
+    __tablename__ = "ip_enrichment"
+
+    id = Column(Integer, primary_key=True, index=True)
+    domain = Column(
+        String(255),
+        ForeignKey("companies.domain", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    ip_address = Column(String(45), nullable=False)  # IPv4 or IPv6
+    asn = Column(Integer, nullable=True)  # Autonomous System Number
+    asn_org = Column(String(255), nullable=True)  # ASN Organization
+    isp = Column(String(255), nullable=True)  # Internet Service Provider
+    country = Column(String(2), nullable=True)  # ISO 3166-1 alpha-2 country code
+    city = Column(String(255), nullable=True)
+    usage_type = Column(String(32), nullable=True)  # DCH, COM, RES, MOB, etc.
+    is_proxy = Column(Boolean, nullable=True)  # Proxy detection result
+    proxy_type = Column(String(32), nullable=True)  # VPN, TOR, PUB, etc.
+    created_at = Column(
+        TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        # Unique constraint: one enrichment record per domain+IP combination
+        # This enables UPSERT operations (insert or update on conflict)
+        UniqueConstraint("domain", "ip_address", name="uq_ip_enrichment_domain_ip"),
+        Index("idx_ip_enrichment_ip", "ip_address"),  # For querying by IP
     )

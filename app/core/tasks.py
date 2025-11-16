@@ -10,11 +10,12 @@ from app.core.progress_tracker import get_progress_tracker
 from app.core.rate_limiter import wait_for_dns_rate_limit, wait_for_whois_rate_limit
 from app.core.cache import get_cached_scan, set_cached_scan, invalidate_scan_cache
 from app.core.normalizer import normalize_domain
-from app.core.analyzer_dns import analyze_dns
+from app.core.analyzer_dns import analyze_dns, resolve_domain_ip_candidates
 from app.core.analyzer_whois import get_whois_info
 from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
 from app.core.auto_tagging import apply_auto_tags
+from app.core.enrichment_service import spawn_enrichment
 from app.db.session import SessionLocal
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 from app.core.bulk_operations import (
@@ -210,6 +211,16 @@ def scan_single_domain(
             except Exception as e:
                 # Log error but don't fail the scan
                 logger.warning("auto_tagging_failed", domain=normalized_domain, error=str(e))
+
+        # IP Enrichment (fire-and-forget, separate DB session)
+        # Resolve IP addresses from MX records and root domain
+        mx_records = dns_result.get("mx_records", [])
+        ip_candidates = resolve_domain_ip_candidates(normalized_domain, mx_records)
+        ip_address = ip_candidates[0] if ip_candidates else None
+        
+        if ip_address:
+            # Spawn enrichment in background (separate session, won't affect scan)
+            spawn_enrichment(normalized_domain, ip_address)
 
         # Return success result
         return {

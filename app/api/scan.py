@@ -7,7 +7,7 @@ from typing import Optional, List
 from app.db.session import get_db
 from app.db.models import Company, DomainSignal, LeadScore, ProviderChangeHistory
 from app.core.normalizer import normalize_domain
-from app.core.analyzer_dns import analyze_dns
+from app.core.analyzer_dns import analyze_dns, resolve_domain_ip_candidates
 from app.core.analyzer_whois import get_whois_info
 from app.core.provider_map import classify_provider
 from app.core.scorer import score_domain
@@ -16,6 +16,7 @@ from app.core.tasks import bulk_scan_task
 from app.core.auto_tagging import apply_auto_tags
 from app.core.constants import MAX_BULK_SCAN_DOMAINS
 from app.core.logging import logger
+from app.core.enrichment_service import spawn_enrichment
 
 
 router = APIRouter(prefix="/scan", tags=["scan"])
@@ -198,6 +199,16 @@ async def scan_domain(request: ScanDomainRequest, db: Session = Depends(get_db))
         except Exception as e:
             # Log error but don't fail the scan
             logger.warning("auto_tagging_failed", domain=domain, error=str(e))
+
+        # IP Enrichment (fire-and-forget, separate DB session)
+        # Resolve IP addresses from MX records and root domain
+        mx_records = dns_result.get("mx_records", [])
+        ip_candidates = resolve_domain_ip_candidates(domain, mx_records)
+        ip_address = ip_candidates[0] if ip_candidates else None
+        
+        if ip_address:
+            # Spawn enrichment in background (separate session, won't affect scan)
+            spawn_enrichment(domain, ip_address)
 
         # Return response
         return ScanDomainResponse(

@@ -56,6 +56,7 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ **Provider change tracking** - Automatic detection and history logging when domains switch providers
 - ✅ **Duplicate prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
 - ✅ **Domain validation** - Enhanced validation to filter invalid domains (nan, web sitesi, etc.)
+- ✅ **IP Enrichment** - IP geolocation, ASN, ISP, and proxy detection (MaxMind, IP2Location, IP2Proxy) ✨ YENİ
 
 ### API & UI
 - ✅ Lead segmentation API with filtering
@@ -256,6 +257,8 @@ A simple web interface for demo and internal use:
 | **Email** | `/email/generate-and-validate` | POST | Generate and validate emails |
 | **Alerts** | `/alerts` | GET | List alerts with filters |
 | **Alerts** | `/alerts/config` | POST | Configure alert preferences |
+| **Debug** | `/debug/ip-enrichment/{ip}` | GET | Debug IP enrichment (internal/admin use) |
+| **Debug** | `/debug/ip-enrichment/config` | GET | Check IP enrichment configuration status |
 
 > 📖 **Detailed documentation**: See sections below for complete endpoint documentation with request/response examples
 
@@ -500,6 +503,16 @@ A simple web interface for demo and internal use:
   - Revokes refresh token and clears session
   - Returns: 200 OK
 - **Setup**: See [Azure AD Setup Guide](docs/archive/2025-11-15-G19-AZURE-AD-SETUP.md) for configuration instructions
+
+### Debug Endpoints (Internal/Admin Use)
+- `GET /debug/ip-enrichment/{ip}` - Debug IP enrichment for a specific IP address
+  - Query parameters:
+    - `use_cache` (optional, default: true): Whether to use cache for enrichment lookup
+  - Returns: Enrichment result from providers (MaxMind, IP2Location, IP2Proxy), cache status, and database record
+  - Example: `GET /debug/ip-enrichment/8.8.8.8?use_cache=false`
+- `GET /debug/ip-enrichment/config` - Check IP enrichment configuration status
+  - Returns: Current configuration (feature flag, DB paths, availability status)
+  - Useful for troubleshooting enrichment setup
 
 ### Admin (API Key Management)
 - `POST /admin/api-keys` - Create a new API key

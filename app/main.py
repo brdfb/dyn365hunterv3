@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 
 import json
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +11,8 @@ from app.config import settings
 from app.db.session import get_db, engine
 from app.core.middleware import RequestIDMiddleware
 from app.core.error_tracking import *  # Initialize Sentry
+from app.core.analyzer_enrichment import check_enrichment_available
+from app.core.logging import logger
 from app.api import (
     ingest,
     scan,
@@ -27,6 +30,7 @@ from app.api import (
     sales_summary,
     health,
     auth,
+    debug,
 )
 from app.api.v1 import (
     ingest as ingest_v1,
@@ -60,12 +64,51 @@ class UTF8JSONResponse(JSONResponse):
         ).encode("utf-8")
 
 
-# Create FastAPI app with custom JSON encoder
+def validate_enrichment_config():
+    """
+    Validate IP enrichment configuration at startup.
+    
+    Logs warnings if enrichment is enabled but DB files are missing.
+    This helps catch configuration errors early without crashing the app.
+    """
+    if not settings.enrichment_enabled:
+        return  # Enrichment disabled, no validation needed
+    
+    # Check if at least one DB is available
+    if not check_enrichment_available():
+        logger.warning(
+            "ip_enrichment_config_invalid",
+            message="IP enrichment is enabled but no database files are available",
+            hint="Set HUNTER_ENRICHMENT_DB_PATH_* environment variables or disable enrichment",
+            enrichment_enabled=settings.enrichment_enabled,
+            maxmind_asn=settings.enrichment_db_path_maxmind_asn,
+            maxmind_city=settings.enrichment_db_path_maxmind_city,
+            ip2location=settings.enrichment_db_path_ip2location,
+            ip2proxy=settings.enrichment_db_path_ip2proxy,
+        )
+    else:
+        logger.info(
+            "ip_enrichment_config_valid",
+            message="IP enrichment is enabled and at least one database is available"
+        )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager for startup and shutdown events."""
+    # Startup
+    validate_enrichment_config()
+    yield
+    # Shutdown (if needed in future)
+
+
+# Create FastAPI app with custom JSON encoder and lifespan
 app = FastAPI(
     title="Dyn365Hunter MVP",
     description="Lead intelligence engine for domain-based analysis",
     version="1.0.0",
     default_response_class=UTF8JSONResponse,
+    lifespan=lifespan,
 )
 
 # Add request ID middleware
@@ -74,6 +117,7 @@ app.add_middleware(RequestIDMiddleware)
 # Health and auth routers (no versioning - infrastructure endpoints)
 app.include_router(health.router)
 app.include_router(auth.router)  # G19: Microsoft SSO
+app.include_router(debug.router)  # Debug endpoints (internal/admin use)
 
 # API v1 routers (versioned API)
 # Note: v1 routers already have their own prefixes defined in their files

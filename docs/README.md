@@ -84,6 +84,12 @@ API contract documentation:
 - `APPLICATION-STATUS.md` - Application health status report (2025-01-27)
 - `TEST-ANALYSIS.md` - Test suite analysis report (2025-01-27)
 
+#### Feature Documentation
+- `IP-ENRICHMENT-IMPLEMENTATION.md` - IP Enrichment feature documentation (2025-01-28)
+  - Complete implementation guide with configuration, testing checklist, deployment strategy
+  - Feature flag: `HUNTER_ENRICHMENT_ENABLED` (default: `false`)
+  - No-break upgrade design - can be deployed with flag disabled
+
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
 **Current Project Status:**

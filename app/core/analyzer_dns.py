@@ -73,6 +73,65 @@ def get_mx_records(domain: str) -> List[str]:
         return []
 
 
+def resolve_hostname_to_ip(hostname: str) -> Optional[str]:
+    """
+    Resolve hostname to IPv4 address.
+    
+    Args:
+        hostname: Hostname to resolve
+        
+    Returns:
+        First IPv4 address found, or None on error
+        
+    Examples:
+        >>> resolve_hostname_to_ip("google.com")
+        '142.250.185.14'
+    """
+    try:
+        resolver = _get_resolver()
+        a_records = resolver.resolve(hostname, "A")
+        if a_records:
+            return str(a_records[0])
+    except Exception:
+        pass
+    return None
+
+
+def resolve_domain_ip_candidates(domain: str, mx_hosts: List[str]) -> List[str]:
+    """
+    Resolve domain and MX hostnames to IP addresses.
+    
+    Collects IP addresses from:
+    1. MX record hostnames (all MX records)
+    2. Root domain A record
+    
+    Args:
+        domain: Root domain name
+        mx_hosts: List of MX hostnames
+        
+    Returns:
+        List of unique IP addresses (may be empty)
+        
+    Examples:
+        >>> resolve_domain_ip_candidates("example.com", ["mail.example.com"])
+        ['192.0.2.1', '192.0.2.2']
+    """
+    ips = []
+    
+    # 1) MX host IPs
+    for mx in mx_hosts:
+        ip = resolve_hostname_to_ip(mx)
+        if ip and ip not in ips:
+            ips.append(ip)
+    
+    # 2) Root domain IP
+    root_ip = resolve_hostname_to_ip(domain)
+    if root_ip and root_ip not in ips:
+        ips.append(root_ip)
+    
+    return ips
+
+
 def extract_mx_root(mx_hostname: str) -> Optional[str]:
     """
     Extract root domain from MX hostname.

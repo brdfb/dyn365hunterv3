@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **IP Enrichment** (2025-01-28) - IP geolocation, ASN, ISP, and proxy detection
+  - **Feature Flag**: `HUNTER_ENRICHMENT_ENABLED` (default: `false`) - No-break upgrade design
+  - **Data Sources**: MaxMind GeoLite2 (ASN/City), IP2Location LITE, IP2Proxy LITE
+  - **IP Resolution**: Automatic IP resolution from MX records and root domain A records
+  - **Database**: New `ip_enrichment` table with UPSERT support (unique constraint on domain+ip)
+  - **Caching**: 24-hour TTL for IP enrichment results (Redis-based)
+  - **Thread Safety**: Thread-safe lazy loading of enrichment databases
+  - **Fire-and-Forget**: Enrichment runs in separate DB session, doesn't affect scan transaction
+  - **Graceful Degradation**: Missing DB files don't crash the app, enrichment is skipped
+  - **Startup Validation**: Config validation at startup with warning logs for missing DB files
+  - **Debug Endpoints**: 
+    - `GET /debug/ip-enrichment/{ip}` - Debug IP enrichment (cache, providers, DB record)
+    - `GET /debug/ip-enrichment/config` - Check enrichment configuration status
+  - **Implementation Files**:
+    - `app/core/analyzer_enrichment.py` - Core enrichment logic (MaxMind, IP2Location, IP2Proxy)
+    - `app/core/enrichment_service.py` - Service layer with DB session management
+    - `app/core/analyzer_dns.py` - IP resolution functions (`resolve_hostname_to_ip`, `resolve_domain_ip_candidates`)
+    - `app/db/models.py` - `IpEnrichment` SQLAlchemy model
+    - `app/api/debug.py` - Debug endpoints for troubleshooting
+    - `alembic/versions/e7196f7e556b_add_ip_enrichment_table.py` - Database migration
+  - **Documentation**: `docs/active/IP-ENRICHMENT-IMPLEMENTATION.md` - Complete implementation guide
 - **Test Suite Improvements** (2025-01-27)
   - Shared test fixtures (`tests/conftest.py`) with transaction-based isolation
   - Standardized test isolation across all test files

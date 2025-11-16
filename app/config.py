@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     
     # Sales Engine (Phase 2)
     sales_engine_opportunity_factor: float = 1.0  # Tuning factor for opportunity potential (0.0-2.0, default: 1.0)
+    
+    # IP Enrichment (Feature flag: disabled by default)
+    enrichment_enabled: bool = False
+    enrichment_db_path_maxmind_asn: Optional[str] = None  # Path to GeoLite2-ASN.mmdb
+    enrichment_db_path_maxmind_city: Optional[str] = None  # Path to GeoLite2-City.mmdb
+    enrichment_db_path_ip2location: Optional[str] = None  # Path to IP2LOCATION-LITE-DB11.BIN
+    enrichment_db_path_ip2proxy: Optional[str] = None  # Path to IP2PROXY-LITE-PX11.BIN
 
     model_config = SettingsConfigDict(
         env_file=".env",

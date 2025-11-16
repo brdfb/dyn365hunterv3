@@ -21,6 +21,7 @@ WHOIS_CACHE_TTL = 86400  # 24 hours
 PROVIDER_CACHE_TTL = 86400  # 24 hours
 SCORING_CACHE_TTL = 3600  # 1 hour
 SCAN_CACHE_TTL = 3600  # 1 hour
+IP_ENRICHMENT_CACHE_TTL = 86400  # 24 hours (IPs rarely change)
 
 
 def _get_cache_key(prefix: str, key: str) -> str:
@@ -281,4 +282,17 @@ def invalidate_scan_cache(domain: str) -> bool:
     """Invalidate scan cache for a domain (useful for rescan)."""
     key = _get_cache_key("scan", domain)
     return delete_cached_value(key)
+
+
+# IP Enrichment Cache Functions
+def get_cached_ip_enrichment(ip: str) -> Optional[Dict[str, Any]]:
+    """Get cached IP enrichment result."""
+    key = _get_cache_key("ip_enrichment", ip)
+    return get_cached_value(key)
+
+
+def set_cached_ip_enrichment(ip: str, result: Dict[str, Any]) -> bool:
+    """Cache IP enrichment result."""
+    key = _get_cache_key("ip_enrichment", ip)
+    return set_cached_value(key, result, IP_ENRICHMENT_CACHE_TTL)
 
