@@ -9,9 +9,14 @@ from app.db.session import get_db
 router = APIRouter(prefix="/leads", tags=["tags", "v1"])
 
 
-@router.post("/{domain}/tags", response_model=TagResponse, status_code=201)
+@router.post("/{domain}/tags", status_code=410)
 async def create_tag_v1(domain: str, request: TagCreate, db: Session = Depends(get_db)):
-    """V1 endpoint - Add a tag to a domain."""
+    """
+    V1 endpoint - Add a tag to a domain.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Manual tags are now managed in Dynamics 365.
+    """
     return await create_tag(domain=domain, request=request, db=db)
 
 
@@ -21,8 +26,13 @@ async def list_tags_v1(domain: str, db: Session = Depends(get_db)):
     return await list_tags(domain=domain, db=db)
 
 
-@router.delete("/{domain}/tags/{tag_id}", status_code=204)
+@router.delete("/{domain}/tags/{tag_id}", status_code=410)
 async def delete_tag_v1(domain: str, tag_id: int, db: Session = Depends(get_db)):
-    """V1 endpoint - Remove a tag from a domain."""
+    """
+    V1 endpoint - Remove a tag from a domain.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Manual tags are now managed in Dynamics 365.
+    """
     return await delete_tag(domain=domain, tag_id=tag_id, db=db)
 
