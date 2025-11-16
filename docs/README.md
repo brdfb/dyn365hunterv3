@@ -37,6 +37,9 @@ Sales team documentation has been organized into a dedicated folder:
 - `SALES-TRAINING.md` - Satış ekibi eğitim materyali (modüller, pratik egzersizler)
 - `SALES-SCENARIOS.md` - Pratik senaryolar ve en iyi pratikler
 - `SEGMENT-GUIDE.md` - Segment ve skor açıklamaları
+- `SALES-ENGINE-REAL-WORLD-SMOKE-1.md` - Sales Engine real-world smoke test results
+- `PHASE-2-1-SOFT-TUNING.md` - Sales Engine soft tuning mechanism
+- `SALES-ENGINE-EXPECTED-OUTPUTS.md` - Sales Engine expected output skeletons
 
 ### API Documentation
 
@@ -57,18 +60,13 @@ API contract documentation:
 - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
 
 #### P1 Implementation Documentation
-- `P1-ALEMBIC-PREPARATION.md` - Alembic migration preparation analysis
-- `P1-ALEMBIC-STATUS.md` - Alembic migration implementation status
-- `P1-IMPLEMENTATION-PLAYBOOK.md` - P1 implementation guide and workflows
-- `P1-CACHING-PREPARATION.md` - Caching layer preparation
-- `P1-RATE-LIMITING-PREPARATION.md` - Distributed rate limiting preparation
-- `P1-BULK-OPERATIONS-PREPARATION.md` - Bulk operations preparation
-- `P1-API-VERSIONING-PREPARATION.md` - API versioning preparation
-- `KALAN-ISLER-PRIORITY.md` - P1/P2 priority list and dependencies
+- ✅ **P1 Completed** (2025-01-28) - All P1 items completed
+- ✅ **Archived** - `2025-01-28-P1-IMPLEMENTATION-PLAYBOOK.md` - P1 implementation guide (reference guide, archived)
+- `KALAN-ISLER-PRIORITY.md` - P0/P1/P2 priority list and dependencies (✅ P0/P1 completed, P2 backlog)
 
 #### Stabilization Sprint Documentation
-- `STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Gün 1 ✅, Gün 2 ✅, Gün 3 ✅ (TAMAMLANDI)
-- `UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3) - ✅ TAMAMLANDI
+- ✅ **Archived** - `2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Completed (2025-01-28)
+- ✅ **Archived** - `2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3) - ✅ Completed (2025-01-28)
 
 #### Architecture Refactor Documentation
 - `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
@@ -86,7 +84,7 @@ API contract documentation:
 #### Status & Analysis
 - `DOCUMENTATION-STATUS-ANALYSIS.md` - Kapsamlı dokümantasyon durum analizi (2025-01-28)
 
-**Note:** Active documentation contains reference guides, production readiness documentation, P1 implementation documentation (✅ completed, now reference guides), and stabilization sprint documentation (✅ completed). Feature documentation and completed phase documentation have been moved to `archive/`. Planning documentation is in `plans/`.
+**Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
 **Current Project Status:**
 - ✅ P0 Hardening: Completed (G19)
@@ -121,6 +119,9 @@ API contract documentation:
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
+- `2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Completed (2025-01-28)
+- `2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist - ✅ Completed (2025-01-28)
+- `2025-01-28-P1-IMPLEMENTATION-PLAYBOOK.md` - P1 implementation playbook (reference guide) - ✅ Completed (2025-01-28)
 - `2025-01-28-P1-BULK-OPERATIONS-PREPARATION.md` - P1-4: Bulk Operations Optimization preparation (✅ Completed - 2025-01-28)
 - `2025-01-28-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-01-28)
 - `2025-11-15-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-11-15)

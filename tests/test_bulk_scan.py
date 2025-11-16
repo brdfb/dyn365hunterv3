@@ -93,9 +93,8 @@ def sample_domains(db_session):
     for domain in domains:
         company = Company(
             domain=domain,
-            company_name=f"{domain} Inc",
-            email=f"contact@{domain}",
-            website=f"https://{domain}",
+            canonical_name=f"{domain} Inc",
+            provider="M365",
         )
         db_session.add(company)
         companies.append(company)
@@ -265,9 +264,9 @@ class TestBulkScanTask:
         assert "error" in result
         assert "invalid" in result["error"].lower()
 
-    @pytest.mark.skip(reason="Requires Redis and Celery worker running")
-    def test_bulk_scan_task_integration(self, db_session, sample_domains):
-        """Test bulk scan task end-to-end (requires Redis)."""
+    @pytest.mark.requires_integration
+    def test_bulk_scan_task_integration(self, db_session, sample_domains, redis_and_celery_available):
+        """Test bulk scan task end-to-end (requires Redis and Celery)."""
         from app.core.progress_tracker import get_progress_tracker
         from app.core.tasks import bulk_scan_task
 

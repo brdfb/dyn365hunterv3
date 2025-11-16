@@ -298,9 +298,9 @@ class TestBulkLogContext:
 class TestBatchProcessingWithRetry:
     """Test batch processing with retry logic (deadlock prevention)."""
 
-    @pytest.mark.skip(reason="Requires Redis and full scan setup")
-    def test_process_batch_with_retry_success(self, db_session, sample_domains):
-        """Test successful batch processing."""
+    @pytest.mark.requires_integration
+    def test_process_batch_with_retry_success(self, db_session, sample_domains, redis_and_celery_available):
+        """Test successful batch processing (requires Redis and Celery)."""
         from app.core.progress_tracker import get_progress_tracker
         
         batch = sample_domains[:3]  # First 3 domains
@@ -373,9 +373,9 @@ class TestBatchProcessingWithRetry:
 class TestBatchIsolation:
     """Test batch isolation (one batch failure doesn't affect others)."""
 
-    @pytest.mark.skip(reason="Requires full integration setup")
-    def test_batch_isolation(self, db_session, sample_domains):
-        """Test that one batch failure doesn't affect other batches."""
+    @pytest.mark.requires_integration
+    def test_batch_isolation(self, db_session, sample_domains, redis_and_celery_available):
+        """Test that one batch failure doesn't affect other batches (requires Redis and Celery)."""
         # This would test that if batch 1 fails, batch 2 still processes
         # Requires full bulk_scan_task integration test
         pass
