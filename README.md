@@ -13,6 +13,9 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 ## Recent Updates (Last 6 Months)
 
+**Unreleased** (2025-01-27):
+- **Test Suite Improvements** - Shared test fixtures with transaction-based isolation, standardized test isolation, conditional test execution for integration tests (Redis/Celery), 497 tests total
+
 **v1.1.0** (2025-01-28):
 - **G21 Phase 2: Sales Engine** - Sales intelligence layer with call scripts, discovery questions, and offer tier recommendations
 - **G21 Phase 3: Read-Only Mode** - CRM-lite features write endpoints disabled for Dynamics 365 migration
@@ -543,6 +546,8 @@ dyn365hunterv3/
 
 ### Running Tests
 
+**Test Suite:** 497 tests with transaction-based isolation and conditional execution for integration tests.
+
 **Note:** For local testing (outside Docker), activate virtual environment first:
 ```bash
 # Activate venv
@@ -563,7 +568,15 @@ pytest tests/ -v --cov=app --cov-report=term
 
 # Run specific test file
 pytest tests/test_scan_single.py -v
+
+# Run integration tests (requires Redis/Celery)
+pytest tests/ -v -m requires_integration
 ```
+
+**Test Infrastructure:**
+- Shared fixtures (`tests/conftest.py`): Transaction-based database isolation, TestClient with dependency override
+- Conditional execution: Integration tests automatically skip if Redis/Celery unavailable
+- Test isolation: Each test runs in isolated transaction with automatic rollback
 
 ### Code Quality
 
@@ -731,10 +744,10 @@ curl -X POST http://localhost:8000/leads/example.com/enrich \
 #### Development Guides
 - [Development Environment](docs/active/DEVELOPMENT-ENVIRONMENT.md) - Setup guide
 - [WSL Guide](docs/active/WSL-GUIDE.md) - WSL2 setup and troubleshooting
-- [Testing Guide](docs/active/TESTING.md) - How to run tests
+- [Test Analysis](docs/active/TEST-ANALYSIS.md) - Test suite analysis and best practices
+- [Application Status](docs/active/APPLICATION-STATUS.md) - Application health status report
 - [Docker Troubleshooting](docs/active/DOCKER-TROUBLESHOOTING.md) - Common Docker issues and solutions
-- [Logging Guide](docs/active/LOGGING-GOLDEN-SAMPLES.md) - Structured logging format and golden samples
-- [Logging Smoke Test](docs/active/LOGGING-SMOKE-TEST.md) - Logging verification and testing guide
+- [Production Engineering Guide](docs/active/PRODUCTION-ENGINEERING-GUIDE-V1.md) - SRE runbook with health checks, monitoring, deployment strategies
 - [Mini UI README](mini-ui/README-mini-ui.md) - Mini UI usage guide and documentation
 
 ## License
