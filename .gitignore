@@ -128,3 +128,8 @@ Thumbs.db
 # Test export files
 test_export*.csv
 test_export*.xlsx
+
+# IP Enrichment Database Files (too large for git)
+app/data/ip2location/*.BIN
+app/data/ip2proxy/*.BIN
+app/data/maxmind/*.mmdb

@@ -83,6 +83,16 @@ API contract documentation:
   - Fixed priority score ranges
   - All 86 scoring tests passing (0 failures)
   - Status: ✅ Completed
+- `2025-01-28-GOLDEN-DATASET-CRITIQUE.md` (2025-01-28) - Critique of current "golden dataset"
+  - Analysis: Current dataset is silver-level regression set, not ground truth
+  - Action: Renamed to regression dataset, blueprint created for true golden dataset
+  - Status: ✅ Completed
+- `2025-01-28-GOLDEN-DATASET-v1.0-BLUEPRINT.md` (2025-01-28) - Golden Dataset v1.0 Blueprint
+  - JSON schema for real-world validation dataset
+  - Data collection pipeline plan (passive mode)
+  - Human validation process
+  - Versioning strategy
+  - Status: 📋 Blueprint ready, implementation pending
 
 #### Architecture Refactor Documentation
 - `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS

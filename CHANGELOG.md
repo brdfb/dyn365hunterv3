@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Regression Dataset Rename** (2025-01-28) - Renamed "golden dataset" to "silver regression dataset" for clarity
+  - **Renamed**: `test_golden_dataset.py` → `test_regression_dataset.py`
+  - **Renamed**: `GOLDEN_DATASET` → `REGRESSION_DATASET`
+  - **Updated**: Docstrings clarify this is a synthetic regression set, not ground truth
+  - **Expanded**: Regression dataset from 14-15 to 26 test cases for better coverage
+  - **New Cases**: M365+DMARC none, Google+DKIM broken, Hosting+External SPF, Multi-MX, Zoho, Amazon SES, SendGrid, etc.
+  - **Reason**: Current dataset is valuable for regression prevention but not a true golden dataset (ground truth)
+  - **Impact**: Clearer distinction between regression prevention (silver) and real-world validation (golden)
+  - **Documentation**: Added `docs/plans/2025-01-28-GOLDEN-DATASET-CRITIQUE.md` and `docs/plans/2025-01-28-GOLDEN-DATASET-v1.0-BLUEPRINT.md`
+  - **Status**: ✅ Completed
+
 ### Fixed
 - **Scoring Engine Test Fixes** (2025-01-28) - Critical test failures fixed, scoring engine fully validated
   - **Fixed Tests**: 

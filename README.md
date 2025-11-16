@@ -14,6 +14,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
+- **Regression Dataset Rename & Expansion** (✅ Completed) - Renamed "golden dataset" to "silver regression dataset"
+  - Renamed test file and variables for clarity (synthetic regression set, not ground truth)
+  - Expanded regression dataset from 14-15 to 26 test cases
+  - Added new test cases: M365+DMARC none, Google+DKIM broken, Multi-MX, Zoho, Amazon SES, SendGrid, etc.
+  - Created Golden Dataset v1.0 Blueprint for future real-world validation dataset
 - **Scoring Engine Test Fixes** (✅ Completed) - Critical test failures fixed, scoring engine fully validated
   - Fixed `dkim_none` risk penalty (-5) in test expectations
   - Fixed priority score ranges (Skip → 7, Existing → 3-6, Migration → 1-4)
