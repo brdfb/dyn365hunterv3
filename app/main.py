@@ -29,7 +29,6 @@ from app.api import (
     alerts,
     sales_summary,
     health,
-    auth,
     debug,
 )
 from app.api.v1 import (
@@ -115,9 +114,8 @@ app = FastAPI(
 # Add request ID middleware
 app.add_middleware(RequestIDMiddleware)
 
-# Health and auth routers (no versioning - infrastructure endpoints)
+# Health and debug routers (no versioning - infrastructure endpoints)
 app.include_router(health.router)
-app.include_router(auth.router)  # G19: Microsoft SSO
 app.include_router(debug.router)  # Debug endpoints (internal/admin use)
 
 # API v1 routers (versioned API)

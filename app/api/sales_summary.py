@@ -7,7 +7,7 @@ from datetime import date
 from app.db.session import get_db
 from app.core.normalizer import normalize_domain
 from app.core.sales_engine import generate_sales_summary
-from app.db.models import Company, DomainSignal, LeadScore, User
+from app.db.models import Company, DomainSignal, LeadScore
 from app.core.logging import logger
 from app.config import settings
 from pydantic import BaseModel
@@ -113,40 +113,16 @@ async def get_sales_summary(
         tuning_factor=tuning_factor,
     )
 
-    # Get user identifier (try auth first, fallback to session)
+    # Get user identifier (session-based for internal access mode)
     user_id = None
     user_email = None
     
     try:
-        # Try to get authenticated user from Authorization header
-        from fastapi.security import HTTPBearer
-        from app.api.auth import get_current_user
-        
-        security = HTTPBearer(auto_error=False)
-        auth_header = request.headers.get("Authorization")
-        
-        if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.replace("Bearer ", "")
-            from app.core.auth import jwt_manager
-            
-            payload = jwt_manager.verify_token(token, token_type="access")
-            if payload:
-                user_id_from_token = int(payload.get("sub"))
-                user = db.query(User).filter(User.id == user_id_from_token).first()
-                if user:
-                    user_id = user.id
-                    user_email = user.email
+        session_id = request.cookies.get("session_id")
+        if session_id:
+            user_id = f"session:{session_id}"
     except Exception:
         pass
-    
-    # Fallback: try session-based user ID
-    if not user_id:
-        try:
-            session_id = request.cookies.get("session_id")
-            if session_id:
-                user_id = f"session:{session_id}"
-        except Exception:
-            pass
 
     # Log sales summary view event
     logger.info(
