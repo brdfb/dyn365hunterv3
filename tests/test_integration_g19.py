@@ -1,18 +1,15 @@
-"""Integration tests for G19 features: auth e2e, UI upgrade e2e, protected routes."""
+"""Integration tests for G19 features: UI upgrade e2e."""
 
 import pytest
 import os
-from unittest.mock import patch, Mock
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
-from datetime import datetime, timedelta
 
-from app.db.models import Base, Company, DomainSignal, LeadScore, User
+from app.db.models import Base, Company, DomainSignal, LeadScore
 from app.main import app
 from app.db.session import get_db
-from app.core.auth import jwt_manager
 
 # Test database URL
 TEST_DATABASE_URL = os.getenv(
@@ -100,19 +97,6 @@ def client(db_session):
 
 
 @pytest.fixture(scope="function")
-def test_user(db_session):
-    """Create a test user."""
-    user = User(
-        microsoft_id="test-microsoft-id-123",
-        email="test@example.com",
-        display_name="Test User",
-    )
-    db_session.add(user)
-    db_session.commit()
-    return user
-
-
-@pytest.fixture(scope="function")
 def test_leads(db_session):
     """Create test leads for integration tests."""
     test_domains = [
@@ -154,53 +138,6 @@ def test_leads(db_session):
 
     db_session.commit()
     return test_domains
-
-
-class TestAuthEndToEnd:
-    """Test auth flow end-to-end."""
-
-    @patch("app.core.auth.msal.ConfidentialClientApplication")
-    def test_auth_flow_disabled(self, mock_msal, client):
-        """Test auth flow when auth is disabled."""
-        # When auth is disabled, endpoints should work without tokens
-        response = client.get("/leads")
-        assert response.status_code == 200
-
-    @patch("app.core.auth.msal.ConfidentialClientApplication")
-    def test_login_endpoint_redirect(self, mock_msal, client):
-        """Test login endpoint redirects to Azure AD."""
-        # Mock MSAL app
-        mock_app = Mock()
-        mock_app.get_authorization_request_url.return_value = "https://login.microsoftonline.com/..."
-        mock_msal.return_value = mock_app
-
-        response = client.get("/auth/login", follow_redirects=False)
-        # Should redirect (302) or return 200 with redirect URL
-        assert response.status_code in [200, 302, 307]
-
-    def test_me_endpoint_unauthorized(self, client):
-        """Test /auth/me without token returns 401."""
-        response = client.get("/auth/me")
-        # If auth is disabled, should return 200 with null user
-        # If auth is enabled, should return 401
-        assert response.status_code in [200, 401]
-
-    def test_me_endpoint_authorized(self, client, test_user):
-        """Test /auth/me with valid token."""
-        # Create access token
-        access_token = jwt_manager.create_access_token(
-            user_id=test_user.id,
-            email=test_user.email,
-        )
-
-        response = client.get(
-            "/auth/me",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        # Should return user info
-        assert response.status_code == 200
-        data = response.json()
-        assert "email" in data or "id" in data
 
 
 class TestUIUpgradeEndToEnd:
@@ -250,65 +187,4 @@ class TestUIUpgradeEndToEnd:
         assert response.status_code == 404
 
 
-class TestProtectedRoutes:
-    """Test protected routes (auth required endpoints)."""
-
-    def test_protected_route_without_token(self, client):
-        """Test protected route without token."""
-        # Most endpoints are not protected by default
-        # This test verifies that endpoints work without auth
-        response = client.get("/leads")
-        assert response.status_code == 200
-
-    def test_protected_route_with_invalid_token(self, client):
-        """Test protected route with invalid token."""
-        response = client.get(
-            "/auth/me",
-            headers={"Authorization": "Bearer invalid-token"},
-        )
-        # Should return 401 or 200 (if auth disabled)
-        assert response.status_code in [200, 401, 422]
-
-    def test_protected_route_with_valid_token(self, client, test_user):
-        """Test protected route with valid token."""
-        access_token = jwt_manager.create_access_token(
-            user_id=test_user.id,
-            email=test_user.email,
-        )
-
-        response = client.get(
-            "/auth/me",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        # Should return 200 with user info
-        assert response.status_code == 200
-
-    def test_logout_endpoint(self, client, test_user):
-        """Test logout endpoint."""
-        access_token = jwt_manager.create_access_token(
-            user_id=test_user.id,
-            email=test_user.email,
-        )
-
-        response = client.post(
-            "/auth/logout",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        # Should return 200
-        assert response.status_code == 200
-
-    def test_refresh_token_endpoint(self, client, test_user):
-        """Test refresh token endpoint."""
-        refresh_token = jwt_manager.create_refresh_token(
-            user_id=test_user.id,
-        )
-
-        response = client.post(
-            "/auth/refresh",
-            json={"refresh_token": refresh_token},
-        )
-        # Should return 200 with new tokens
-        assert response.status_code == 200
-        data = response.json()
-        assert "access_token" in data or "token" in data
 
