@@ -1,7 +1,7 @@
 // App - Global state, initialization, orchestration
 
 import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown } from './api.js';
-import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError } from './ui-leads.js';
+import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 
 // Global state (single object)
@@ -49,6 +49,7 @@ async function init() {
     }
     
     // G19: Bind search input (debounced)
+    // Phase 1.4: Save filter state on search
     const searchInput = document.getElementById('filter-search');
     if (searchInput) {
         let searchTimeout;
@@ -57,9 +58,17 @@ async function init() {
             searchTimeout = setTimeout(() => {
                 window.state.filters.search = e.target.value.trim();
                 window.state.filters.page = 1; // Reset to first page on search
+                // Phase 1.4: Save filter state on search
+                saveFilterState();
                 loadLeads();
             }, 500); // 500ms debounce
         });
+    }
+    
+    // Phase 1.4: Bind clear filters button
+    const btnClearFilters = document.getElementById('btn-filters-clear');
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', clearFilters);
     }
     
     // G19: Bind table header sorting
@@ -128,9 +137,17 @@ async function init() {
         if (scoreCell) {
             const domain = scoreCell.getAttribute('data-domain');
             if (domain) {
-                showLoading();
+                // Phase 1.2: Open modal first, then show loading state inside modal
+                const modal = document.getElementById('score-breakdown-modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    // Phase 1.2: Show modal-specific loading state
+                    showScoreModalLoading();
+                }
+                
                 try {
                     const breakdown = await fetchScoreBreakdown(domain);
+                    // Phase 1.2: Ensure we're showing the correct domain's breakdown
                     showScoreBreakdown(breakdown, domain);
                 } catch (error) {
                     // Check if domain is not scanned
@@ -138,9 +155,11 @@ async function init() {
                         showScoreBreakdownError(domain, error.message);
                     } else {
                         showError(`Skor detayı yüklenemedi: ${error.message}`);
+                        hideScoreBreakdown();
                     }
                 } finally {
-                    hideLoading();
+                    // Phase 1.2: Hide modal-specific loading state
+                    hideScoreModalLoading();
                 }
             }
         }
@@ -150,6 +169,9 @@ async function init() {
     window.addEventListener('refreshLeads', () => {
         setTimeout(() => loadLeads(), 1000);
     });
+    
+    // Phase 1.4: Restore filter state from localStorage before loading
+    restoreFilterState();
     
     // Load initial data
     await loadKPIs();  // G19: Use new KPIs endpoint
@@ -204,9 +226,12 @@ async function loadDashboard() {
 
 /**
  * Load leads with current filters
+ * Phase 1.3: Improved loading states - table spinner, filter states
  */
 async function loadLeads() {
-    showLoading();
+    // Phase 1.3: Set table and filter loading states
+    setTableLoading(true);
+    setFiltersLoading(true);
     hideError();
     
     try {
@@ -230,12 +255,15 @@ async function loadLeads() {
         showError(`Lead yükleme hatası: ${error.message}`);
         console.error('Leads load error:', error);
     } finally {
-        hideLoading();
+        // Phase 1.3: Hide table and filter loading states
+        setTableLoading(false);
+        setFiltersLoading(false);
     }
 }
 
 /**
  * Apply filters from UI
+ * Phase 1.4: Save filter state to localStorage
  */
 function applyFilters() {
     const segment = document.getElementById('filter-segment').value;
@@ -248,7 +276,95 @@ function applyFilters() {
     window.state.filters.provider = provider || '';
     window.state.filters.page = 1; // Reset to first page on filter change
     
+    // Phase 1.4: Save filter state to localStorage
+    saveFilterState();
+    
     loadLeads();
+}
+
+/**
+ * Clear all filters (Phase 1.4)
+ */
+function clearFilters() {
+    document.getElementById('filter-segment').value = '';
+    document.getElementById('filter-provider').value = '';
+    document.getElementById('filter-min-score').value = '';
+    document.getElementById('filter-search').value = '';
+    
+    // Reset state filters
+    window.state.filters.segment = '';
+    window.state.filters.provider = '';
+    window.state.filters.minScore = null;
+    window.state.filters.search = '';
+    window.state.filters.page = 1;
+    
+    // Phase 1.4: Save cleared state to localStorage
+    saveFilterState();
+    
+    // Reload leads with default filters
+    loadLeads();
+}
+
+/**
+ * Get current filter state from UI (Phase 1.4)
+ */
+function getCurrentFilterState() {
+    return {
+        segment: document.getElementById('filter-segment')?.value || '',
+        provider: document.getElementById('filter-provider')?.value || '',
+        minScore: document.getElementById('filter-min-score')?.value || '',
+        search: document.getElementById('filter-search')?.value || ''
+    };
+}
+
+/**
+ * Save filter state to localStorage (Phase 1.4)
+ */
+function saveFilterState() {
+    const state = getCurrentFilterState();
+    try {
+        localStorage.setItem('hunter:mini-ui:filters', JSON.stringify(state));
+    } catch (error) {
+        // localStorage not available or quota exceeded
+        console.warn('Failed to save filter state:', error);
+    }
+}
+
+/**
+ * Restore filter state from localStorage (Phase 1.4)
+ */
+function restoreFilterState() {
+    try {
+        const raw = localStorage.getItem('hunter:mini-ui:filters');
+        if (!raw) return;
+        
+        const state = JSON.parse(raw);
+        
+        if (state.segment !== undefined) {
+            const segmentEl = document.getElementById('filter-segment');
+            if (segmentEl) segmentEl.value = state.segment;
+        }
+        if (state.provider !== undefined) {
+            const providerEl = document.getElementById('filter-provider');
+            if (providerEl) providerEl.value = state.provider;
+        }
+        if (state.minScore !== undefined) {
+            const minScoreEl = document.getElementById('filter-min-score');
+            if (minScoreEl) minScoreEl.value = state.minScore;
+        }
+        if (state.search !== undefined) {
+            const searchEl = document.getElementById('filter-search');
+            if (searchEl) searchEl.value = state.search;
+        }
+        
+        // Update window.state.filters to match restored UI state
+        window.state.filters.segment = state.segment || '';
+        window.state.filters.provider = state.provider || '';
+        window.state.filters.minScore = state.minScore ? parseInt(state.minScore, 10) : null;
+        window.state.filters.search = state.search || '';
+    } catch (error) {
+        console.warn('Failed to restore filter state:', error);
+    }
 }
 
 /**
@@ -261,44 +377,109 @@ function refreshLeads() {
 /**
  * Handle CSV/Excel export (Gün 3)
  */
+/**
+ * Handle export (CSV/Excel)
+ * Phase 1.3: Improved loading state with setExportLoading
+ */
 async function handleExport(format = 'csv') {
-    const buttonId = format === 'excel' ? 'btn-export-excel' : 'btn-export-csv';
-    const button = document.getElementById(buttonId);
-    if (!button) return;
-    
-    const originalText = button.textContent;
-    
-    button.disabled = true;
-    button.textContent = 'Export ediliyor...';
+    // Phase 1.3: Set export loading state
+    setExportLoading(true);
     
     try {
         const { exportLeads } = await import('./api.js');
         await exportLeads(window.state.filters, format);
         showToast(`Export başarılı! ${format.toUpperCase()} dosyası indirildi.`, 'success');
-        button.textContent = originalText;
     } catch (error) {
         showToast(`Export hatası: ${error.message}`, 'error');
-        button.textContent = originalText;
     } finally {
-        button.disabled = false;
+        // Phase 1.3: Hide export loading state
+        setExportLoading(false);
     }
 }
 
 /**
- * Show toast notification (Gün 3)
+ * Phase 1.5: Enhanced toast notification with icons, better animations, and stacking
  */
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', duration = 4000) {
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
-    toast.textContent = message;
+    
+    // Phase 1.5: Add icon based on type
+    const icons = {
+        'success': '✅',
+        'error': '❌',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    
+    const icon = icons[type] || icons['info'];
+    
+    // Phase 1.5: Structure with icon and message
+    toast.innerHTML = `
+        <span class="toast__icon">${icon}</span>
+        <span class="toast__message">${escapeHtml(message)}</span>
+    `;
+    
     document.body.appendChild(toast);
     
+    // Phase 1.5: Update toast positions for stacking
+    updateToastPositions();
+    
+    // Phase 1.5: Auto-dismiss with smooth animation
+    const dismissTimeout = setTimeout(() => {
+        dismissToast(toast);
+    }, duration);
+    
+    // Phase 1.5: Allow manual dismiss on click
+    toast.addEventListener('click', () => {
+        clearTimeout(dismissTimeout);
+        dismissToast(toast);
+    });
+    
+    // Phase 1.5: Add hover to pause auto-dismiss
+    let pauseTimeout;
+    toast.addEventListener('mouseenter', () => {
+        clearTimeout(dismissTimeout);
+    });
+    
+    toast.addEventListener('mouseleave', () => {
+        pauseTimeout = setTimeout(() => {
+            dismissToast(toast);
+        }, duration);
+    });
+}
+
+/**
+ * Phase 1.5: Dismiss toast with animation
+ */
+function dismissToast(toast) {
+    toast.classList.add('toast--dismissing');
     setTimeout(() => {
-        toast.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => {
+        if (toast.parentNode) {
             document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
+            updateToastPositions();
+        }
+    }, 300);
+}
+
+/**
+ * Phase 1.5: Update toast positions for stacking
+ */
+function updateToastPositions() {
+    const toasts = document.querySelectorAll('.toast:not(.toast--dismissing)');
+    toasts.forEach((toast, index) => {
+        toast.style.top = `${1 + (index * 5.5)}rem`;
+    });
+}
+
+/**
+ * Phase 1.5: Escape HTML helper
+ */
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 /**

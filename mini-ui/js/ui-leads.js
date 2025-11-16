@@ -202,6 +202,46 @@ function escapeHtml(text) {
 /**
  * Show loading indicator
  */
+/**
+ * Set table loading state (Phase 1.3)
+ */
+export function setTableLoading(isLoading) {
+    const wrapper = document.getElementById('leads-table-wrapper');
+    const loading = document.getElementById('leads-table-loading');
+    const table = document.getElementById('leads-table');
+    
+    if (wrapper && loading && table) {
+        if (isLoading) {
+            loading.classList.remove('hidden');
+            table.classList.add('is-loading');
+        } else {
+            loading.classList.add('hidden');
+            table.classList.remove('is-loading');
+        }
+    }
+}
+
+/**
+ * Set filters loading state (Phase 1.3)
+ */
+export function setFiltersLoading(isLoading) {
+    const filterControls = document.querySelectorAll('.js-filter-control');
+    filterControls.forEach(el => {
+        el.disabled = !!isLoading;
+    });
+}
+
+/**
+ * Set export buttons loading state (Phase 1.3)
+ */
+export function setExportLoading(isLoading) {
+    const exportButtons = document.querySelectorAll('.js-export-button');
+    exportButtons.forEach(btn => {
+        btn.disabled = !!isLoading;
+        btn.classList.toggle('is-loading', !!isLoading);
+    });
+}
+
 export function showLoading() {
     const loadingEl = document.getElementById('loading');
     if (loadingEl) {
@@ -310,6 +350,7 @@ function getRiskTooltip(risk) {
 
 /**
  * Show score breakdown modal (G19 - UI Patch v1.1)
+ * Phase 1.2: Improved data flow - clear previous content, ensure correct domain/score
  */
 export function showScoreBreakdown(breakdown, domain) {
     const modal = document.getElementById('score-breakdown-modal');
@@ -318,6 +359,14 @@ export function showScoreBreakdown(breakdown, domain) {
     if (!modal || !content) {
         console.error('Modal or content element not found', { modal, content });
         return;
+    }
+    
+    // Phase 1.2: Clear previous content to prevent stale data
+    content.innerHTML = '';
+    
+    // Phase 1.2: Validate domain matches breakdown data
+    if (breakdown.domain && breakdown.domain !== domain) {
+        console.warn('Domain mismatch:', { expected: domain, received: breakdown.domain });
     }
     
     console.log('Showing score breakdown for domain:', domain, breakdown);
@@ -382,7 +431,8 @@ export function showScoreBreakdown(breakdown, domain) {
         </div>`;
     }
     
-    // Signal points (positive) - Fixed order and filter dmarc_none if 0
+    // Phase 1.2: Signal points (positive) - Fixed order: SPF → DKIM → DMARC
+    // Order: SPF first, then DKIM, then DMARC variants (quarantine, reject)
     const signalOrder = ['spf', 'dkim', 'dmarc_quarantine', 'dmarc_reject'];
     if (breakdown.signal_points && Object.keys(breakdown.signal_points).length > 0) {
         html += `<div class="score-breakdown__section">
@@ -419,8 +469,9 @@ export function showScoreBreakdown(breakdown, domain) {
         html += `</div>`;
     }
     
-    // Risk points (negative) - Merge DKIM risks and fixed order
-    const riskOrder = ['no_spf', 'dkim_missing', 'no_dkim', 'dkim_none', 'dmarc_none', 'hosting_mx_weak', 'spf_multiple_includes'];
+    // Phase 1.2: Risk points (negative) - Fixed order: SPF risks → DKIM risks → DMARC risks → Other risks
+    // Order: SPF-related risks first, then DKIM, then DMARC, then others
+    const riskOrder = ['no_spf', 'spf_multiple_includes', 'dkim_missing', 'no_dkim', 'dkim_none', 'dmarc_none', 'hosting_mx_weak'];
     if (breakdown.risk_points && Object.keys(breakdown.risk_points).length > 0) {
         html += `<div class="score-breakdown__section">
             <div class="score-breakdown__section-title">Risk Faktörleri</div>`;
@@ -500,6 +551,36 @@ export function hideScoreBreakdown() {
     const modal = document.getElementById('score-breakdown-modal');
     if (modal) {
         modal.style.display = 'none';
+    }
+    // Phase 1.2: Hide loading state when modal closes
+    hideScoreModalLoading();
+}
+
+/**
+ * Show score breakdown modal loading state (Phase 1.2)
+ */
+export function showScoreModalLoading() {
+    const loading = document.getElementById('score-modal-loading');
+    const content = document.getElementById('score-breakdown-content');
+    if (loading) {
+        loading.classList.remove('hidden');
+    }
+    if (content) {
+        content.classList.add('hidden');
+    }
+}
+
+/**
+ * Hide score breakdown modal loading state (Phase 1.2)
+ */
+export function hideScoreModalLoading() {
+    const loading = document.getElementById('score-modal-loading');
+    const content = document.getElementById('score-breakdown-content');
+    if (loading) {
+        loading.classList.add('hidden');
+    }
+    if (content) {
+        content.classList.remove('hidden');
     }
 }
 

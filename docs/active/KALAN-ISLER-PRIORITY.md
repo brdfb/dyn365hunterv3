@@ -67,13 +67,46 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 
 ---
 
+## 🔄 Integration Roadmap (NEW - 2025-01-28)
+
+**Durum**: 🔄 **IN PROGRESS** (Phase 1: ✅ Completed, Phase 2: NEXT)  
+**Priority**: P0.5 → P1 → P2  
+**Estimated Duration**: 9-14 days total  
+**Risk Level**: Low → Medium (with proper execution)
+
+### Correct Sequence (Non-negotiable)
+
+1. **Phase 1: Mini UI Stabilization (P0.5)** - ✅ **COMPLETED** (1 day)
+   - Button fixes, modal bugs, loading states, filter bar UX, general polish
+   - **Why First**: UI is most touched point in Partner Center → Hunter → CRM flow
+   - **Risk**: 0/10 (pure cosmetic + stability)
+   - **Status**: All tasks completed (Task 1.1-1.5 ✅)
+
+2. **Phase 2: Partner Center Referrals (P1)** - 🔄 **NEXT** (2-3 days)
+   - API client, data model, ingestion, UI integration, background sync
+   - **Why Second**: One-way sync (PC → Hunter), simpler than Dynamics
+   - **Risk**: 2/10 (external API dependency)
+
+3. **Phase 3: Dynamics 365 Integration (P2)** - ⏳ Pending (6-10 days)
+   - API client, data mapping, pipeline integration, sync mechanisms, UI integration
+   - **Why Last**: Two-way sync (Hunter ↔ CRM), complex pipeline work
+   - **Risk**: 4/10 (complex pipeline integration)
+
+**Key Principle**: 
+> **Hunter CRM değil, CRM'e güç veren motor. Motora önce UI'yi sabitle, sonra dış veri kaynağını ekle, en son CRM'e bağla.**
+
+**Reference**: `docs/plans/2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Detailed roadmap  
+**Tasks**: `docs/plans/2025-01-28-INTEGRATION-TASKS.md` - Exact task list
+
+---
+
 ## 🔄 G21: Architecture Refactor - Hunter Slimming
 
 **Durum**: 🔄 **IN PROGRESS** (2025-01-28 başlatıldı)  
 **Priority**: P0 (Critical)  
 **Estimated Duration**: 3-4 weeks  
 **Risk Level**: 0-5% (with proper execution)  
-**Current Phase**: Phase 4 - Dynamics Migration 🔄 **NEXT**
+**Current Phase**: Phase 4 - Dynamics Migration 🔄 **PAUSED** (Integration Roadmap Phase 3 overlaps)
 
 **Phase 3 Status**: ✅ **COMPLETED** (2025-01-28)
 - Write endpoints disabled: ✅ (7 endpoints return 410 Gone)

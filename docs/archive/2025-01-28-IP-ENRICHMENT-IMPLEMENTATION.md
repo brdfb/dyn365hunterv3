@@ -30,7 +30,7 @@ IP enrichment adds geolocation, ASN, ISP, and proxy detection data to domain sca
 
 ### Quick Start
 
-**🚀 Hızlı Başlangıç**: Detaylı setup rehberi için → [`IP-ENRICHMENT-QUICK-START.md`](./IP-ENRICHMENT-QUICK-START.md)
+**🚀 Hızlı Başlangıç**: Detaylı setup rehberi için → [`IP-ENRICHMENT-QUICK-START.md`](./2025-01-28-IP-ENRICHMENT-QUICK-START.md)
 
 **Özet**:
 1. 3 DB dosyasını indir (MaxMind, IP2Location, IP2Proxy)
@@ -80,7 +80,7 @@ HUNTER_ENRICHMENT_DB_PATH_IP2PROXY=/app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
    - Download from https://lite.ip2proxy.com/
    - Place `IP2PROXY-LITE-PX11.BIN` in `app/data/ip2proxy/`
 
-**📖 Detaylı Setup**: [`IP-ENRICHMENT-QUICK-START.md`](./IP-ENRICHMENT-QUICK-START.md) - Adım adım rehber
+**📖 Detaylı Setup**: [`2025-01-28-IP-ENRICHMENT-QUICK-START.md`](./2025-01-28-IP-ENRICHMENT-QUICK-START.md) - Adım adım rehber
 
 ## Database Schema
 

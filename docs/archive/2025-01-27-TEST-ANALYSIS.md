@@ -364,10 +364,11 @@ def db_session():
 **Önce:**
 ```python
 def test_domain(db: Session):
+    """Create a test domain with scan data."""
     company = Company(canonical_name="Test Company", domain="test.com", ...)
     signal = DomainSignal(domain="test.com", spf=True, ...)
     score = LeadScore(domain="test.com", readiness_score=75, ...)
-    # Her test için tekrar...
+    # Her test için tekrar tekrar...
 ```
 
 **Sonra:**

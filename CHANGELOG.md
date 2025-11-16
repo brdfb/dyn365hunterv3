@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Enhanced
+- **Integration Roadmap - Phase 1: Mini UI Stabilization** (2025-01-28) - UI polish and stability improvements
+  - **Button & Modal Fixes**: Improved button hover states with scale transform and color changes, optimized modal scroll with custom scrollbar styling
+  - **Score Breakdown Improvements**: Fixed data flow (stale data prevention), improved tooltip positioning (centered CSS-only solution), fixed signal/risk display order (SPF → DKIM → DMARC → Risks), added modal-specific loading spinner
+  - **Loading States**: Added table loading spinner with overlay, filter controls disabled during fetch, export buttons with loading state and spinner animation, smooth transitions (0.15s ease-out)
+  - **Filter Bar UX**: Improved layout with row-based structure, enhanced dropdown/input styling with focus states, added "Clear all filters" button, implemented filter state persistence with localStorage
+  - **General UX Polish**: Enhanced table row hover effects (subtle shadow, smooth transitions), improved pagination UX (active state styling, disabled state, smooth transitions), enhanced empty state messages (icon, better visual hierarchy), improved toast notifications (icons, better animations, stacking support, click-to-dismiss, hover pause)
+  - **Files Modified**: `mini-ui/js/ui-leads.js`, `mini-ui/js/app.js`, `mini-ui/styles.css`, `mini-ui/index.html`
+  - **Status**: ✅ Completed
 - **IP Enrichment Configuration** (2025-01-28) - Improved environment variable format and Country DB support
   - **New Env Format**: Simplified environment variable names (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
   - **Country DB Support**: Added optional `GeoLite2-Country.mmdb` as fallback for country-only lookups

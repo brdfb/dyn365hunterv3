@@ -67,41 +67,26 @@ API contract documentation:
 - ✅ **Archived** - `2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Completed (2025-01-28)
 - ✅ **Archived** - `2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3) - ✅ Completed (2025-01-28)
 
+#### Integration Roadmap Documentation (NEW - 2025-01-28)
+- `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
+  - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
+  - **Phase 2**: ⏳ Pending - Partner Center Referrals (P1) - 2-3 days
+  - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
+  - **Key Principle**: UI stability → Data ingestion → CRM integration
+- `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
+
 #### Architecture Refactor Documentation
 - `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
   - **Phase 0**: ✅ Completed (2025-11-16) - Preparation & Snapshot
   - **Phase 1**: ✅ Completed (2025-11-16) - Deprecation Annotations
   - **Phase 2**: ✅ Completed (2025-01-28) - Sales Engine (Additive)
   - **Phase 3**: ✅ Completed (2025-01-28) - Read-Only Mode (Write endpoints disabled - 410 Gone)
-  - **Phase 4**: 🔄 Next - Dynamics Migration
+  - **Phase 4**: 🔄 PAUSED - Dynamics Migration (overlaps with Integration Roadmap Phase 3)
 - `docs/g21-phase0-metrics/` - G21 Phase 0 & Phase 1 metrics and completion reports
   - `PHASE0-COMPLETION.md` - Phase 0 completion report (2025-11-16)
   - `PHASE1-COMPLETION.md` - Phase 1 completion report (2025-11-16)
   - `DEPENDENCY-MAP.md` - Dependency analysis for Notes/Tags/Favorites endpoints
   - `usage_metrics_*.json` - Usage metrics collection data
-
-#### Status & Analysis
-- `APPLICATION-STATUS.md` - Application health status report (2025-01-27)
-- `TEST-ANALYSIS.md` - Test suite analysis report (2025-01-27)
-
-#### Feature Documentation
-- `IP-ENRICHMENT-IMPLEMENTATION.md` - IP Enrichment feature documentation (2025-01-28)
-  - Complete implementation guide with configuration, testing checklist, deployment strategy
-  - Feature flag: `HUNTER_ENRICHMENT_ENABLED` (default: `false`)
-  - No-break upgrade design - can be deployed with flag disabled
-  - **Configuration** (2025-01-28): Simplified env format (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
-  - **Country DB Support** (2025-01-28): Optional `GeoLite2-Country.mmdb` as fallback for country-only lookups
-  - **Backward Compatible**: Legacy format (`HUNTER_ENRICHMENT_DB_PATH_*`) still supported
-  - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
-    - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
-    - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
-    - Backward compatible: Optional field (None if no enrichment data available)
-- `IP-ENRICHMENT-QUICK-START.md` - IP Enrichment quick setup guide (2025-01-28)
-  - Step-by-step guide for downloading DB files and enabling enrichment
-  - 10-minute setup: Download DB files → Place in project → Update .env (new format) → Restart
-  - New env format: `MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`
-  - Country DB setup instructions (optional fallback)
-  - Troubleshooting guide and verification checklist
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
@@ -109,12 +94,16 @@ API contract documentation:
 - ✅ P0 Hardening: Completed (G19)
 - ✅ P1 Performance: Completed (2025-01-28)
 - ✅ Stabilization Sprint: Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)
+- 🔄 **Integration Roadmap**: In Progress (2025-01-28) - Correct sequence for external integrations
+  - 🔄 Phase 1: Mini UI Stabilization (P0.5) - NEXT (1 day)
+  - ⏳ Phase 2: Partner Center Referrals (P1) - Pending (2-3 days)
+  - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
   - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
   - ✅ Phase 1: Deprecation Annotations (2025-11-16)
   - ✅ Phase 2: Sales Engine (2025-01-28)
   - ✅ Phase 3: Read-Only Mode (2025-01-28) - Write endpoints disabled (410 Gone)
-  - 🔄 Phase 4: Dynamics Migration (Next)
+  - 🔄 Phase 4: Dynamics Migration (PAUSED - overlaps with Integration Roadmap Phase 3)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation
@@ -138,6 +127,23 @@ API contract documentation:
 - `2025-01-28-PROVIDER-CHANGE-TRACKING.md` - Provider Change Tracking feature documentation (Completed)
 - `2025-01-28-DOMAIN-VALIDATION.md` - Domain Validation feature documentation (Completed)
 - `2025-01-28-DUPLICATE-PREVENTION.md` - Duplicate Prevention feature documentation (Completed)
+- `2025-01-28-IP-ENRICHMENT-IMPLEMENTATION.md` - IP Enrichment feature documentation (Completed - 2025-01-28)
+  - Complete implementation guide with configuration, testing checklist, deployment strategy
+  - Feature flag: `HUNTER_ENRICHMENT_ENABLED` (default: `false`)
+  - No-break upgrade design - can be deployed with flag disabled
+  - **Configuration** (2025-01-28): Simplified env format (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
+  - **Country DB Support** (2025-01-28): Optional `GeoLite2-Country.mmdb` as fallback for country-only lookups
+  - **Backward Compatible**: Legacy format (`HUNTER_ENRICHMENT_DB_PATH_*`) still supported
+  - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
+    - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
+    - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
+    - Backward compatible: Optional field (None if no enrichment data available)
+- `2025-01-28-IP-ENRICHMENT-QUICK-START.md` - IP Enrichment quick setup guide (Completed - 2025-01-28)
+  - Step-by-step guide for downloading DB files and enabling enrichment
+  - 10-minute setup: Download DB files → Place in project → Update .env (new format) → Restart
+  - New env format: `MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`
+  - Country DB setup instructions (optional fallback)
+  - Troubleshooting guide and verification checklist
 - `2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Completed (2025-01-28)
 - `2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist - ✅ Completed (2025-01-28)
 - `2025-01-28-P1-IMPLEMENTATION-PLAYBOOK.md` - P1 implementation playbook (reference guide) - ✅ Completed (2025-01-28)
@@ -152,6 +158,8 @@ API contract documentation:
 - `2025-01-27-LOGGING-GOLDEN-SAMPLES.md` - Logging golden samples (Archived - 2025-01-27)
 - `2025-01-27-LOGGING-SMOKE-TEST.md` - Logging smoke test (Archived - 2025-01-27)
 - `2025-01-27-ACTIVE-DOCS-SUMMARY.md` - Active documentation summary (Archived - 2025-01-27)
+- `2025-01-27-TEST-ANALYSIS.md` - Test suite analysis report (Archived - 2025-01-27)
+- `2025-01-28-APPLICATION-STATUS.md` - Application health status report (Archived - 2025-01-28)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
@@ -190,6 +198,10 @@ All completed planning documentation has been moved to `docs/archive/`:
 ### TODOs
 
 **Active TODOs:**
+- `INTEGRATION-ROADMAP.md` - Integration Roadmap: UI Stabilization → Partner Center → Dynamics 365 - 🔄 In Progress (2025-01-28)
+  - **Phase 1**: 🔄 Next - Mini UI Stabilization (P0.5) - 1 day
+  - **Phase 2**: ⏳ Pending - Partner Center Referrals (P1) - 2-3 days
+  - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
 - `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
 
 **Archived TODOs:**

@@ -13,6 +13,14 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 ## Recent Updates (Last 6 Months)
 
+**Unreleased** (2025-01-28):
+- **Integration Roadmap - Phase 1: Mini UI Stabilization** (✅ Completed) - UI polish and stability improvements
+  - Button & Modal Fixes (Task 1.1 ✅) - Improved hover states, modal scroll optimization
+  - Score Breakdown Improvements (Task 1.2 ✅) - Data flow fixes, tooltip positioning, signal order, loading states
+  - Loading States (Task 1.3 ✅) - Table spinner, filter states, export button states
+  - Filter Bar UX (Task 1.4 ✅) - Layout improvements, clear button, localStorage persistence
+  - General UX Polish (Task 1.5 ✅) - Table hover effects, pagination UX, empty state, toast improvements
+
 **Unreleased** (2025-01-27):
 - **Test Suite Improvements** - Shared test fixtures with transaction-based isolation, standardized test isolation, conditional test execution for integration tests (Redis/Celery), 497 tests total
 

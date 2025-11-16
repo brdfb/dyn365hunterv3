@@ -80,41 +80,46 @@
             
             <!-- Filters -->
             <div class="filters">
-                <div class="filters__group">
-                    <label for="filter-segment" class="filters__label">Segment</label>
-                    <select id="filter-segment" class="filters__select">
-                        <option value="">Tümü</option>
-                        <option value="Migration">Migration</option>
-                        <option value="Existing">Existing</option>
-                        <option value="Cold">Cold</option>
-                        <option value="Skip">Skip</option>
-                    </select>
+                <div class="filters__row">
+                    <div class="filters__group">
+                        <label for="filter-segment" class="filters__label">Segment</label>
+                        <select id="filter-segment" class="filters__select js-filter-control">
+                            <option value="">Tümü</option>
+                            <option value="Migration">Migration</option>
+                            <option value="Existing">Existing</option>
+                            <option value="Cold">Cold</option>
+                            <option value="Skip">Skip</option>
+                        </select>
+                    </div>
+                    <div class="filters__group">
+                        <label for="filter-provider" class="filters__label">Provider</label>
+                        <select id="filter-provider" class="filters__select js-filter-control">
+                            <option value="">Tümü</option>
+                            <option value="M365">M365</option>
+                            <option value="Google">Google</option>
+                            <option value="Yandex">Yandex</option>
+                            <option value="Zoho">Zoho</option>
+                            <option value="Hosting">Hosting</option>
+                            <option value="Local">Local</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="filters__group">
+                        <label for="filter-min-score" class="filters__label">Min Skor</label>
+                        <input type="number" id="filter-min-score" min="0" max="100" placeholder="0" class="filters__input js-filter-control">
+                    </div>
+                    <div class="filters__group filters__group--search">
+                        <label for="filter-search" class="filters__label">Ara</label>
+                        <input type="text" id="filter-search" placeholder="Domain, şirket veya provider ara..." class="filters__input js-filter-control">
+                    </div>
                 </div>
-                <div class="filters__group">
-                    <label for="filter-min-score" class="filters__label">Min Skor</label>
-                    <input type="number" id="filter-min-score" min="0" max="100" placeholder="0" class="filters__input">
-                </div>
-                <div class="filters__group">
-                    <label for="filter-provider" class="filters__label">Provider</label>
-                    <select id="filter-provider" class="filters__select">
-                        <option value="">Tümü</option>
-                        <option value="M365">M365</option>
-                        <option value="Google">Google</option>
-                        <option value="Yandex">Yandex</option>
-                        <option value="Zoho">Zoho</option>
-                        <option value="Hosting">Hosting</option>
-                        <option value="Local">Local</option>
-                        <option value="Unknown">Unknown</option>
-                    </select>
-                </div>
-                <div class="filters__group filters__group--search">
-                    <label for="filter-search" class="filters__label">Ara</label>
-                    <input type="text" id="filter-search" placeholder="Domain, şirket veya provider ara..." class="filters__input">
-                </div>
-                <button type="button" id="btn-filter" class="filters__button">Filtrele</button>
-                <div class="filters__group filters__group--export">
-                    <button type="button" id="btn-export-csv" class="filters__button filters__button--export">Export CSV</button>
-                    <button type="button" id="btn-export-excel" class="filters__button filters__button--export">Export Excel</button>
+                <div class="filters__row filters__row--actions">
+                    <button type="button" id="btn-filter" class="filters__button js-filter-control">Filtrele</button>
+                    <button type="button" id="btn-filters-clear" class="filters__button filters__button--secondary">Temizle</button>
+                    <div class="filters__group filters__group--export">
+                        <button type="button" id="btn-export-csv" class="filters__button filters__button--export js-export-button">Export CSV</button>
+                        <button type="button" id="btn-export-excel" class="filters__button filters__button--export js-export-button">Export Excel</button>
+                    </div>
                 </div>
             </div>
 
@@ -127,7 +132,11 @@
             <div id="error" class="error" style="display: none;"></div>
 
             <!-- Leads Table -->
-            <div class="table-container">
+            <div class="table-container" id="leads-table-wrapper">
+                <div class="leads-table-loading hidden" id="leads-table-loading">
+                    <div class="leads-table-loading__spinner"></div>
+                    <div class="leads-table-loading__text">Yükleniyor...</div>
+                </div>
                 <table id="leads-table" class="leads-table">
                     <thead class="leads-table__head">
                         <tr class="leads-table__row">
@@ -177,7 +186,9 @@
 
             <!-- Empty State -->
             <div id="empty-state" class="empty-state" style="display: none;">
-                <p>Henüz lead bulunmuyor. CSV yükleyerek başlayın.</p>
+                <div class="empty-state__icon">📋</div>
+                <div class="empty-state__title">Henüz lead bulunmuyor</div>
+                <p>CSV dosyası yükleyerek lead'leri ekleyebilir veya tek domain tarayarak başlayabilirsiniz.</p>
                 <button type="button" class="empty-state__button" onclick="document.getElementById('csv-file').click()">CSV Yükle</button>
             </div>
         </section>
@@ -205,6 +216,10 @@
             </div>
             <div class="modal__body" id="score-breakdown-content">
                 <!-- Dynamic content -->
+            </div>
+            <div class="score-modal__loading hidden" id="score-modal-loading">
+                <div class="score-modal__loading-spinner"></div>
+                <div class="score-modal__loading-text">Yükleniyor...</div>
             </div>
         </div>
     </div>

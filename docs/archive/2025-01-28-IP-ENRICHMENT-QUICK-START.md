@@ -277,7 +277,7 @@ curl http://localhost:8000/leads/example.com | jq '.infrastructure_summary'
 Setup tamamlandıktan sonra:
 
 1. **Stage Environment**: Aynı setup'ı stage'de yap
-2. **Production Rollout**: Rollout planını takip et (`docs/active/IP-ENRICHMENT-IMPLEMENTATION.md` → Deployment Strategy)
+2. **Production Rollout**: Rollout planını takip et (`docs/archive/2025-01-28-IP-ENRICHMENT-IMPLEMENTATION.md` → Deployment Strategy)
 3. **Monitoring**: Sentry'de `hunter_enrichment_error` tag'ini izle
 4. **Verification**: `ip_enrichment` tablosunda data biriktiğini kontrol et
 
@@ -285,8 +285,8 @@ Setup tamamlandıktan sonra:
 
 ## 📚 İlgili Dokümantasyon
 
-- **Implementation Guide**: `docs/active/IP-ENRICHMENT-IMPLEMENTATION.md`
-- **Rollout Plan**: `docs/active/IP-ENRICHMENT-IMPLEMENTATION.md` → Deployment Strategy
+- **Implementation Guide**: `docs/archive/2025-01-28-IP-ENRICHMENT-IMPLEMENTATION.md`
+- **Rollout Plan**: `docs/archive/2025-01-28-IP-ENRICHMENT-IMPLEMENTATION.md` → Deployment Strategy
 - **API Documentation**: `README.md` → API Endpoints → Leads
 
 ---
