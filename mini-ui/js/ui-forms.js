@@ -1,6 +1,7 @@
 // UI Forms - Form binding and behavior
 
 import { uploadCsv, scanDomain, ingestDomain, getJobProgress } from './api.js';
+import { error as logError } from './logger.js';
 
 /**
  * Bind CSV upload form
@@ -10,12 +11,12 @@ export function bindCsvUploadForm(onSuccess) {
     const messageEl = document.getElementById('csv-upload-message');
     
     if (!form) {
-        console.error('CSV upload form not found');
+        logError('CSV upload form not found');
         return;
     }
     
     if (!messageEl) {
-        console.error('CSV upload message element not found');
+        logError('CSV upload message element not found');
         return;
     }
     
@@ -105,7 +106,7 @@ export function bindCsvUploadForm(onSuccess) {
                             }
                         }
                     } catch (error) {
-                        console.error('Progress polling error:', error);
+                        logError('Progress polling error:', error);
                     }
                 }, 1000); // Poll every 1 second
             } else {

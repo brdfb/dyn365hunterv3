@@ -3,6 +3,7 @@
 import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown } from './api.js';
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
+import { log, warn, error as logError } from './logger.js';
 
 // Global state (single object)
 window.state = {
@@ -195,18 +196,18 @@ async function loadKPIs() {
             renderKPIs(kpis);
         } catch (dashboardError) {
             // If dashboard fails, still render KPIs without max_score
-            console.warn('Dashboard load error (non-critical):', dashboardError);
+            warn('Dashboard load error (non-critical):', dashboardError);
             renderKPIs(kpis);
         }
     } catch (error) {
-        console.error('KPIs load error:', error);
+        logError('KPIs load error:', error);
         // Fallback to legacy dashboard endpoint
         try {
             const dashboard = await fetchDashboard();
             window.state.dashboard = dashboard;
             renderStats(dashboard);
         } catch (fallbackError) {
-            console.error('Dashboard fallback error:', fallbackError);
+            logError('Dashboard fallback error:', fallbackError);
         }
     }
 }
@@ -220,7 +221,7 @@ async function loadDashboard() {
         window.state.dashboard = dashboard;
         renderStats(dashboard);
     } catch (error) {
-        console.error('Dashboard load error:', error);
+        logError('Dashboard load error:', error);
     }
 }
 
@@ -253,7 +254,7 @@ async function loadLeads() {
         await loadKPIs();  // G19: Use new KPIs endpoint
     } catch (error) {
         showError(`Lead yükleme hatası: ${error.message}`);
-        console.error('Leads load error:', error);
+        logError('Leads load error:', error);
     } finally {
         // Phase 1.3: Hide table and filter loading states
         setTableLoading(false);
@@ -326,7 +327,7 @@ function saveFilterState() {
         localStorage.setItem('hunter:mini-ui:filters', JSON.stringify(state));
     } catch (error) {
         // localStorage not available or quota exceeded
-        console.warn('Failed to save filter state:', error);
+        warn('Failed to save filter state:', error);
     }
 }
 
@@ -363,7 +364,7 @@ function restoreFilterState() {
         window.state.filters.minScore = state.minScore ? parseInt(state.minScore, 10) : null;
         window.state.filters.search = state.search || '';
     } catch (error) {
-        console.warn('Failed to restore filter state:', error);
+        warn('Failed to restore filter state:', error);
     }
 }
 

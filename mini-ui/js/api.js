@@ -1,6 +1,53 @@
 // API Client - All fetch calls
 // Can be overridden by deployment (e.g., nginx template sets window.HUNTER_API_BASE_URL)
+import { log, error as logError } from './logger.js';
+
 const API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
+
+/**
+ * Get user-friendly error message from API response
+ */
+async function getErrorMessage(response) {
+    try {
+        const errorData = await response.json();
+        // Try to extract user-friendly message
+        if (errorData.detail) {
+            return errorData.detail;
+        }
+        if (errorData.message) {
+            return errorData.message;
+        }
+        if (errorData.error) {
+            return errorData.error;
+        }
+    } catch (e) {
+        // JSON parse failed, use status text
+    }
+    
+    // Fallback to status-based messages
+    switch (response.status) {
+        case 400:
+            return 'Geçersiz istek. Lütfen girdiğiniz bilgileri kontrol edin.';
+        case 401:
+            return 'Yetkilendirme hatası. Lütfen tekrar giriş yapın.';
+        case 403:
+            return 'Bu işlem için yetkiniz bulunmuyor.';
+        case 404:
+            return 'İstenen kaynak bulunamadı.';
+        case 409:
+            return 'Bu kayıt zaten mevcut.';
+        case 422:
+            return 'Girilen veriler geçersiz. Lütfen kontrol edin.';
+        case 429:
+            return 'Çok fazla istek gönderildi. Lütfen bir süre bekleyin.';
+        case 500:
+            return 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.';
+        case 503:
+            return 'Servis şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
+        default:
+            return `Sunucu hatası (${response.status}). Lütfen daha sonra tekrar deneyin.`;
+    }
+}
 
 /**
  * Fetch leads with filters (G19: Updated for paginated response)
@@ -22,10 +69,13 @@ export async function fetchLeads(filters = {}) {
     if (filters.search) params.append('search', filters.search);
 
     const url = `${API_BASE_URL}/leads${params.toString() ? '?' + params.toString() : ''}`;
+    log('Fetching leads:', url);
     const response = await fetch(url);
     
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Failed to fetch leads:', errorMessage);
+        throw new Error(errorMessage);
     }
     
     const data = await response.json();
@@ -80,8 +130,9 @@ export async function ingestDomain(domain, companyName = null) {
     });
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Ingest domain failed:', errorMessage);
+        throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -102,8 +153,9 @@ export async function scanDomain(domain) {
     });
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Scan domain failed:', errorMessage);
+        throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -130,8 +182,9 @@ export async function uploadCsv(file, autoDetect = false) {
     });
 
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Upload CSV failed:', errorMessage);
+        throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -144,7 +197,9 @@ export async function getJobProgress(jobId) {
     const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`);
     
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Get job progress failed:', errorMessage);
+        throw new Error(errorMessage);
     }
     
     return await response.json();
@@ -167,7 +222,9 @@ export async function exportLeads(filters = {}, format = 'csv') {
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Export leads failed:', errorMessage);
+        throw new Error(errorMessage);
     }
 
     const blob = await response.blob();
@@ -207,7 +264,9 @@ export async function fetchDashboard() {
     const response = await fetch(`${API_BASE_URL}/dashboard`);
     
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Fetch dashboard failed:', errorMessage);
+        throw new Error(errorMessage);
     }
     
     return await response.json();
@@ -220,7 +279,9 @@ export async function fetchKPIs() {
     const response = await fetch(`${API_BASE_URL}/dashboard/kpis`);
     
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Fetch KPIs failed:', errorMessage);
+        throw new Error(errorMessage);
     }
     
     return await response.json();
@@ -233,8 +294,9 @@ export async function fetchScoreBreakdown(domain) {
     const response = await fetch(`${API_BASE_URL}/leads/${encodeURIComponent(domain)}/score-breakdown`);
     
     if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+        const errorMessage = await getErrorMessage(response);
+        logError('Fetch score breakdown failed:', errorMessage);
+        throw new Error(errorMessage);
     }
     
     return await response.json();

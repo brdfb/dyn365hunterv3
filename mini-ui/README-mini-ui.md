@@ -116,7 +116,9 @@ mini-ui/
     api.js            # Tüm fetch çağrıları
     ui-leads.js       # Tablo + filtre render
     ui-forms.js       # CSV upload + domain scan form
+    logger.js         # Production-safe logging utility
   README-mini-ui.md   # Bu dosya
+  TEST-CHECKLIST.md   # Test senaryoları
 ```
 
 **Not**: UI tamamen modülerdir; React'e taşımaya hazır component pattern kullanır.
@@ -126,7 +128,7 @@ mini-ui/
 ## ⚠️ Limitler
 
 ### Kod Miktarı
-- **JS toplam kod miktarı**: ~1200 satır (yorumlar dahil), ~900 satır (yorumlar hariç) - Gün 3 ile artış
+- **JS toplam kod miktarı**: ~1856 satır (yorumlar dahil), ~1400-1500 satır (yorumlar hariç) - Gün 3 + iyileştirmeler ile artış
 - **10+ ana özellik**: Upload, Scan, Table, Export (CSV/Excel/PDF), Search, Sorting, Pagination, Score Breakdown Modal, Toast Notifications, Tooltips
 
 ### Özellik Sınırı
@@ -151,6 +153,7 @@ mini-ui/
 - **CSS3**: BEM pattern, responsive design
 - **Vanilla JavaScript (ES6+)**: Module pattern, no framework
 - **FastAPI StaticFiles**: Static file serving
+- **Production-safe logging**: Logger utility with debug mode (set `window.DEBUG = true` for development)
 
 ---
 
@@ -257,5 +260,5 @@ Bu Mini UI ile:
 ---
 
 **Son Güncelleme**: 2025-01-28  
-**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications)
+**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications | İyileştirmeler: Production-safe logging, improved error handling)
 

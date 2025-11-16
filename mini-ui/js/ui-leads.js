@@ -1,5 +1,7 @@
 // UI Leads - Table and filter rendering
 
+import { log, warn, error as logError } from './logger.js';
+
 /**
  * Render leads table
  */
@@ -357,7 +359,7 @@ export function showScoreBreakdown(breakdown, domain) {
     const content = document.getElementById('score-breakdown-content');
     
     if (!modal || !content) {
-        console.error('Modal or content element not found', { modal, content });
+        logError('Modal or content element not found', { modal, content });
         return;
     }
     
@@ -366,10 +368,10 @@ export function showScoreBreakdown(breakdown, domain) {
     
     // Phase 1.2: Validate domain matches breakdown data
     if (breakdown.domain && breakdown.domain !== domain) {
-        console.warn('Domain mismatch:', { expected: domain, received: breakdown.domain });
+        warn('Domain mismatch:', { expected: domain, received: breakdown.domain });
     }
     
-    console.log('Showing score breakdown for domain:', domain, breakdown);
+    log('Showing score breakdown for domain:', domain, breakdown);
     
     // Build HTML content
     let html = `<div class="score-breakdown">`;
@@ -538,7 +540,7 @@ export function showScoreBreakdown(breakdown, domain) {
                 const { exportPDF } = await import('./api.js');
                 await exportPDF(domain);
             } catch (error) {
-                console.error('PDF export error:', error);
+                logError('PDF export error:', error);
             }
         });
     }
