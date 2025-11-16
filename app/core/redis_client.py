@@ -3,9 +3,7 @@
 import redis
 from typing import Optional
 from app.config import settings
-import logging
-
-logger = logging.getLogger(__name__)
+from app.core.logging import logger
 
 # Global Redis connection pool
 _redis_pool: Optional[redis.ConnectionPool] = None
@@ -36,10 +34,11 @@ def get_redis_client() -> Optional[redis.Redis]:
         
         # Test connection
         _redis_client.ping()
-        logger.info("Redis client initialized successfully")
+        logger.info("redis_client_initialized")
         return _redis_client
     except Exception as e:
-        logger.warning(f"Redis client initialization failed: {str(e)}")
+        # Use error level for Redis initialization failure (critical infrastructure)
+        logger.error("redis_client_initialization_failed", error=str(e), reason="connection_failed")
         _redis_pool = None
         _redis_client = None
         return None

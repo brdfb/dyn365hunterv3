@@ -2,11 +2,9 @@
 
 import json
 import hashlib
-import logging
 from typing import Optional, Dict, Any
 from app.core.redis_client import get_redis_client, is_redis_available
-
-logger = logging.getLogger(__name__)
+from app.core.logging import logger, mask_pii
 
 # Cache metrics tracking (in-memory counters)
 _cache_metrics = {
@@ -28,6 +26,42 @@ SCAN_CACHE_TTL = 3600  # 1 hour
 def _get_cache_key(prefix: str, key: str) -> str:
     """Generate cache key with prefix."""
     return f"cache:{prefix}:{key}"
+
+
+def _mask_cache_key(key: str) -> str:
+    """
+    Mask cache key to prevent PII leakage in logs.
+    
+    Extracts prefix and masks the actual key part if it contains domain/PII.
+    Example: "cache:dns:example.com" -> "cache:dns:<masked>"
+    
+    Args:
+        key: Full cache key (e.g., "cache:dns:example.com")
+        
+    Returns:
+        Masked key with PII masked (e.g., "cache:dns:<8char_hash>")
+    """
+    if not key:
+        return ""
+    
+    # If key contains ":", split and mask the domain part
+    if ":" in key:
+        parts = key.split(":", 2)
+        if len(parts) >= 3:
+            # Mask the domain part (last part)
+            prefix = ":".join(parts[:-1])
+            domain_part = parts[-1]
+            masked_domain = mask_pii(domain_part)
+            return f"{prefix}:<{masked_domain}>"
+        elif len(parts) == 2:
+            # Mask the second part
+            prefix = parts[0]
+            domain_part = parts[1]
+            masked_domain = mask_pii(domain_part)
+            return f"{prefix}:<{masked_domain}>"
+    
+    # If no ":" found, mask the entire key
+    return f"<{mask_pii(key)}>"
 
 
 def get_cached_value(key: str) -> Optional[Any]:
@@ -57,7 +91,9 @@ def get_cached_value(key: str) -> Optional[Any]:
         else:
             _cache_metrics["misses"] += 1
     except Exception as e:
-        logger.warning(f"Cache get failed for key {key}: {str(e)}")
+        # Use debug level for cache failures (common, not critical)
+        # Mask key to prevent PII leakage
+        logger.debug("cache_get_failed", key=_mask_cache_key(key), operation="get", error=str(e))
         _cache_metrics["misses"] += 1
     
     return None
@@ -88,7 +124,9 @@ def set_cached_value(key: str, value: Any, ttl: int) -> bool:
         _cache_metrics["sets"] += 1
         return True
     except Exception as e:
-        logger.warning(f"Cache set failed for key {key}: {str(e)}")
+        # Use debug level for cache failures (common, not critical)
+        # Mask key to prevent PII leakage
+        logger.debug("cache_set_failed", key=_mask_cache_key(key), operation="set", error=str(e))
         return False
 
 
@@ -114,7 +152,9 @@ def delete_cached_value(key: str) -> bool:
         _cache_metrics["deletes"] += 1
         return True
     except Exception as e:
-        logger.warning(f"Cache delete failed for key {key}: {str(e)}")
+        # Use debug level for cache failures (common, not critical)
+        # Mask key to prevent PII leakage
+        logger.debug("cache_delete_failed", key=_mask_cache_key(key), operation="delete", error=str(e))
         return False
 
 

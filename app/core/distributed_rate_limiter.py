@@ -1,7 +1,6 @@
 """Distributed rate limiting using Redis with fallback to in-memory limiter."""
 
 import time
-import logging
 import sentry_sdk
 from typing import Optional, Dict, Any, TYPE_CHECKING
 from collections import defaultdict
@@ -10,8 +9,7 @@ if TYPE_CHECKING:
     from app.core.rate_limiter import RateLimiter
 
 from app.core.redis_client import get_redis_client, is_redis_available
-
-logger = logging.getLogger(__name__)
+from app.core.logging import logger
 
 # Rate limit metrics tracking (in-memory counters)
 _rate_limit_metrics = {
@@ -70,8 +68,9 @@ class CircuitBreaker:
         if self.failure_count >= self.failure_threshold:
             self.circuit_open = True
             logger.warning(
-                f"Circuit breaker opened after {self.failure_count} failures. "
-                f"Will attempt recovery after {self.recovery_timeout}s"
+                "circuit_breaker_opened",
+                failure_count=self.failure_count,
+                recovery_timeout=self.recovery_timeout
             )
             # Track circuit breaker opening
             if not was_open:
@@ -92,7 +91,7 @@ class CircuitBreaker:
         
         elapsed = time.time() - self.last_failure_time
         if elapsed >= self.recovery_timeout:
-            logger.info("Circuit breaker attempting recovery")
+            logger.info("circuit_breaker_attempting_recovery")
             self.circuit_open = False
             self.failure_count = 0
             return True
@@ -192,7 +191,14 @@ class DistributedRateLimiter:
                 return False
         
         except Exception as e:
-            logger.warning(f"Redis rate limit operation failed: {str(e)}", exc_info=True)
+            logger.warning(
+                "redis_rate_limit_operation_failed",
+                redis_key=self.redis_key,
+                operation="acquire",
+                error=str(e),
+                reason="redis_operation_failed",
+                exc_info=True
+            )
             self.circuit_breaker.record_failure()
             return None
     
@@ -232,8 +238,10 @@ class DistributedRateLimiter:
         # Fallback to in-memory limiter
         if not self.circuit_breaker.circuit_open:
             logger.warning(
-                f"Rate limiter '{self.redis_key}' falling back to in-memory limiter (Redis unavailable)",
-                extra={"redis_key": self.redis_key, "rate": self.rate}
+                "rate_limiter_fallback",
+                redis_key=self.redis_key,
+                rate=self.rate,
+                reason="redis_unavailable"
             )
             # Tag Sentry event for monitoring
             sentry_sdk.set_tag("rate_limiter_fallback", self.redis_key)
@@ -284,8 +292,10 @@ class DistributedRateLimiter:
         # Fallback to in-memory limiter
         if not self.circuit_breaker.circuit_open:
             logger.warning(
-                f"Rate limiter '{self.redis_key}' falling back to in-memory limiter (Redis unavailable)",
-                extra={"redis_key": self.redis_key, "rate": self.rate}
+                "rate_limiter_fallback",
+                redis_key=self.redis_key,
+                rate=self.rate,
+                reason="redis_unavailable"
             )
             # Tag Sentry event for monitoring
             sentry_sdk.set_tag("rate_limiter_fallback", self.redis_key)
