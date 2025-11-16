@@ -14,6 +14,7 @@ from app.db.session import get_db
 from app.db.models import Note, Company
 from app.core.normalizer import normalize_domain
 from app.core.deprecation import deprecated_endpoint
+from app.core.deprecated_monitoring import track_deprecated_endpoint
 
 
 router = APIRouter(prefix="/leads", tags=["notes"])
@@ -44,14 +45,13 @@ class NoteResponse(BaseModel):
         from_attributes = True
 
 
-@router.post("/{domain}/notes", response_model=NoteResponse, status_code=201)
-@deprecated_endpoint(
-    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
-)
+@router.post("/{domain}/notes", status_code=410)
 async def create_note(domain: str, request: NoteCreate, db: Session = Depends(get_db)):
     """
     Create a note for a domain.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Notes are now managed in Dynamics 365.
 
     Args:
         domain: Domain name (will be normalized)
@@ -59,38 +59,26 @@ async def create_note(domain: str, request: NoteCreate, db: Session = Depends(ge
         db: Database session
 
     Returns:
-        NoteResponse with created note
+        410 Gone - Endpoint disabled
 
     Raises:
-        404: If domain not found
-        400: If domain is invalid
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Check if domain exists
-    company = db.query(Company).filter(Company.domain == normalized_domain).first()
-    if not company:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
-        )
-
-    # Create note
-    note = Note(domain=normalized_domain, note=request.note)
-    db.add(note)
-    db.commit()
-    db.refresh(note)
-
-    return NoteResponse(
-        id=note.id,
-        domain=note.domain,
-        note=note.note,
-        created_at=note.created_at.isoformat(),
-        updated_at=note.updated_at.isoformat(),
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("POST /leads/{domain}/notes", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Notes are now managed in Dynamics 365.",
+            "alternative": "Use Dynamics 365 Timeline/Notes API for note management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
 
 
@@ -144,16 +132,15 @@ async def list_notes(domain: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.put("/{domain}/notes/{note_id}", response_model=NoteResponse)
-@deprecated_endpoint(
-    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
-)
+@router.put("/{domain}/notes/{note_id}", status_code=410)
 async def update_note(
     domain: str, note_id: int, request: NoteUpdate, db: Session = Depends(get_db)
 ):
     """
     Update a note.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Notes are now managed in Dynamics 365.
 
     Args:
         domain: Domain name (will be normalized)
@@ -162,84 +149,61 @@ async def update_note(
         db: Database session
 
     Returns:
-        NoteResponse with updated note
+        410 Gone - Endpoint disabled
 
     Raises:
-        404: If domain or note not found
-        400: If domain is invalid
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Get note
-    note = (
-        db.query(Note)
-        .filter(Note.id == note_id, Note.domain == normalized_domain)
-        .first()
-    )
-
-    if not note:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Note {note_id} not found for domain {normalized_domain}",
-        )
-
-    # Update note
-    note.note = request.note
-    db.commit()
-    db.refresh(note)
-
-    return NoteResponse(
-        id=note.id,
-        domain=note.domain,
-        note=note.note,
-        created_at=note.created_at.isoformat(),
-        updated_at=note.updated_at.isoformat(),
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("PUT /leads/{domain}/notes/{note_id}", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Notes are now managed in Dynamics 365.",
+            "alternative": "Use Dynamics 365 Timeline/Notes API for note management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
 
 
-@router.delete("/{domain}/notes/{note_id}", status_code=204)
-@deprecated_endpoint(
-    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
-)
+@router.delete("/{domain}/notes/{note_id}", status_code=410)
 async def delete_note(domain: str, note_id: int, db: Session = Depends(get_db)):
     """
     Delete a note.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Notes are now managed in Dynamics 365.
 
     Args:
         domain: Domain name (will be normalized)
         note_id: Note ID
         db: Database session
 
+    Returns:
+        410 Gone - Endpoint disabled
+
     Raises:
-        404: If domain or note not found
-        400: If domain is invalid
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Get note
-    note = (
-        db.query(Note)
-        .filter(Note.id == note_id, Note.domain == normalized_domain)
-        .first()
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("DELETE /leads/{domain}/notes/{note_id}", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Notes are now managed in Dynamics 365.",
+            "alternative": "Use Dynamics 365 Timeline/Notes API for note management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
-
-    if not note:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Note {note_id} not found for domain {normalized_domain}",
-        )
-
-    # Delete note
-    db.delete(note)
-    db.commit()
-
-    return None

@@ -176,7 +176,7 @@ Sonuç:
 
 ## Implementation Status
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-01-28
 
 ### Completed Phases
 - ✅ **Phase 0**: Preparation & Snapshot (2025-11-16)
@@ -190,9 +190,24 @@ Sonuç:
   - Response headers added (X-Deprecated, X-Deprecation-Reason, X-Alternative, etc.)
   - Zero breaking changes - all endpoints continue to function
   - Structured logging for deprecated endpoint calls
+- ✅ **Phase 2**: Sales Engine (Additive) (2025-01-28)
+  - Sales intelligence engine created (`app/core/sales_engine.py`)
+  - Sales summary API endpoint (`GET /api/v1/leads/{domain}/sales-summary`)
+  - Core unit tests (38 tests, all passing)
+  - API integration tests (7 tests, all passing)
+  - Real-world smoke test (3 domains validated)
+  - API contract documentation and frontend types
+  - Logging/telemetry (`sales_summary_viewed` event)
+  - Tuning mechanism (Phase 2.1)
+- ✅ **Phase 3**: Read-Only Mode (2025-01-28)
+  - Write endpoints disabled (7 endpoints return 410 Gone)
+  - Deprecated endpoint monitoring implemented (`app/core/deprecated_monitoring.py`)
+  - Metrics integrated into `/healthz/metrics` endpoint
+  - Read endpoints verified (3 read endpoints still work)
+  - Tests updated for Phase 3 behavior
 
 ### In Progress
-- 🔄 **Phase 2**: Sales Engine (Additive) - Next phase
+- 🔄 **Phase 4**: Dynamics Migration - Next phase
 
 ### Related Documents
 

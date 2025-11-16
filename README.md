@@ -70,6 +70,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Frozen API contract (UI-ready, breaking change policy defined)
   - TypeScript and JSDoc type definitions for frontend integration
   - Logging and telemetry (`sales_summary_viewed` event)
+- ✅ **G21 Phase 3: Read-Only Mode** (2025-01-28) - CRM-lite features write endpoints disabled ✨ YENİ
+  - Write endpoints disabled (410 Gone) - Notes/Tags/Favorites write operations now return 410 Gone
+  - Read endpoints remain available - Migration support for Dynamics 365 migration
+  - Deprecated endpoint monitoring - Usage tracking via `GET /healthz/metrics` endpoint
+  - Zero downtime migration support - Read-only mode enables safe migration to Dynamics 365
 
 ## Tech Stack
 
@@ -318,34 +323,31 @@ A simple web interface for demo and internal use:
   - **Type Definitions**: TypeScript (`mini-ui/types/sales.ts`) and JSDoc (`mini-ui/types/sales.js`)
   - **Legacy Endpoint**: `GET /leads/{domain}/sales-summary` (backward compatible)
 
-### Notes (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
-- ⚠️ **Write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
-  - `POST /leads/{domain}/notes` - ⚠️ **Deprecated** - Create a note for a domain
-    - Request body: `{"note": "This is a note"}`
-    - Returns: Created note with id, domain, note, created_at, updated_at
-    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+### Notes (G17: CRM-lite) ❌ **DISABLED** (G21 Phase 3)
+- ❌ **Write endpoints disabled** (2025-01-28) - Returns 410 Gone (Read-Only Mode)
+  - `POST /leads/{domain}/notes` - ❌ **Disabled (410 Gone)** - Create a note for a domain
+    - Returns: 410 Gone with error message
+    - **Reason**: Notes are now managed in Dynamics 365
     - **Alternative**: Use Dynamics 365 Timeline/Notes API
-  - `PUT /leads/{domain}/notes/{note_id}` - ⚠️ **Deprecated** - Update a note
-    - Request body: `{"note": "Updated note"}`
-    - Returns: Updated note
+  - `PUT /leads/{domain}/notes/{note_id}` - ❌ **Disabled (410 Gone)** - Update a note
+    - Returns: 410 Gone with error message
     - **Alternative**: Use Dynamics 365 Timeline/Notes API
-  - `DELETE /leads/{domain}/notes/{note_id}` - ⚠️ **Deprecated** - Delete a note
-    - Returns: 204 No Content
+  - `DELETE /leads/{domain}/notes/{note_id}` - ❌ **Disabled (410 Gone)** - Delete a note
+    - Returns: 410 Gone with error message
     - **Alternative**: Use Dynamics 365 Timeline/Notes API
 - ✅ **Read endpoint remains available** (migration support):
   - `GET /leads/{domain}/notes` - List all notes for a domain
     - Returns: Array of notes (ordered by created_at desc)
     - **Status**: Available for migration support until Phase 6
 
-### Tags (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
-- ⚠️ **Manual tag write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
-  - `POST /leads/{domain}/tags` - ⚠️ **Deprecated** (manual tags only) - Add a tag to a domain
-    - Request body: `{"tag": "important"}`
-    - Returns: Created tag with id, domain, tag, created_at
-    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+### Tags (G17: CRM-lite) ❌ **DISABLED** (G21 Phase 3)
+- ❌ **Manual tag write endpoints disabled** (2025-01-28) - Returns 410 Gone (Read-Only Mode)
+  - `POST /leads/{domain}/tags` - ❌ **Disabled (410 Gone)** (manual tags only) - Add a tag to a domain
+    - Returns: 410 Gone with error message
+    - **Reason**: Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available.
     - **Alternative**: Use Dynamics 365 Tags API for manual tag management
-  - `DELETE /leads/{domain}/tags/{tag_id}` - ⚠️ **Deprecated** (manual tags only) - Remove a tag from a domain
-    - Returns: 204 No Content
+  - `DELETE /leads/{domain}/tags/{tag_id}` - ❌ **Disabled (410 Gone)** (manual tags only) - Remove a tag from a domain
+    - Returns: 410 Gone with error message
     - **Alternative**: Use Dynamics 365 Tags API for manual tag management
 - ✅ **Read endpoint remains available** (auto-tags needed):
   - `GET /leads/{domain}/tags` - List all tags for a domain
@@ -359,15 +361,14 @@ A simple web interface for demo and internal use:
   - `google-workspace`: Provider is Google
   - `local-mx`: Provider is Local
 
-### Favorites (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
-- ⚠️ **Write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
-  - `POST /leads/{domain}/favorite` - ⚠️ **Deprecated** - Add a domain to favorites
-    - Returns: Created favorite with id, domain, user_id, created_at
-    - Session-based (no authentication required yet)
-    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+### Favorites (G17: CRM-lite) ❌ **DISABLED** (G21 Phase 3)
+- ❌ **Write endpoints disabled** (2025-01-28) - Returns 410 Gone (Read-Only Mode)
+  - `POST /leads/{domain}/favorite` - ❌ **Disabled (410 Gone)** - Add a domain to favorites
+    - Returns: 410 Gone with error message
+    - **Reason**: Favorites are now managed in Dynamics 365
     - **Alternative**: Use Dynamics 365 Favorite field for favorite management
-  - `DELETE /leads/{domain}/favorite` - ⚠️ **Deprecated** - Remove a domain from favorites
-    - Returns: 204 No Content
+  - `DELETE /leads/{domain}/favorite` - ❌ **Disabled (410 Gone)** - Remove a domain from favorites
+    - Returns: 410 Gone with error message
     - **Alternative**: Use Dynamics 365 Favorite field for favorite management
 - ✅ **Read endpoint remains available** (migration support):
   - `GET /leads?favorite=true` - List favorite domains

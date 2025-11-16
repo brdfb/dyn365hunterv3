@@ -1,4 +1,7 @@
-"""Tests for Notes, Tags, and Favorites endpoints (G17)."""
+"""Tests for Notes, Tags, and Favorites endpoints (G17).
+
+Phase 3 (Read-Only Mode): Write endpoints return 410 Gone, read endpoints still work.
+"""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -6,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.main import app
 from app.db.models import Company, DomainSignal, LeadScore, Note, Tag, Favorite
 from app.db.session import SessionLocal
+from app.core.deprecated_monitoring import get_deprecated_metrics, reset_deprecated_metrics
 
 
 client = TestClient(app)
@@ -54,17 +58,22 @@ def test_domain(db: Session):
     return domain
 
 
-def test_create_note(db: Session, test_domain: str):
-    """Test creating a note."""
+def test_create_note_phase3_disabled(db: Session, test_domain: str):
+    """Test creating a note - Phase 3: Should return 410 Gone."""
+    reset_deprecated_metrics()
     response = client.post(
         f"/leads/{test_domain}/notes", json={"note": "This is a test note"}
     )
-    assert response.status_code == 201
-    data = response.json()
-    assert data["domain"] == test_domain
-    assert data["note"] == "This is a test note"
-    assert "id" in data
-    assert "created_at" in data
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    assert "alternative" in data
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "POST /leads/{domain}/notes" in metrics["calls_by_endpoint"]
 
 
 def test_list_notes(db: Session, test_domain: str):
@@ -83,47 +92,66 @@ def test_list_notes(db: Session, test_domain: str):
     assert data[0]["note"] == "Test note 2"  # Most recent first
 
 
-def test_update_note(db: Session, test_domain: str):
-    """Test updating a note."""
-    # Create a note first
+def test_update_note_phase3_disabled(db: Session, test_domain: str):
+    """Test updating a note - Phase 3: Should return 410 Gone."""
+    # Create a note first (directly in DB for testing)
     note = Note(domain=test_domain, note="Original note")
     db.add(note)
     db.commit()
     note_id = note.id
 
+    reset_deprecated_metrics()
     response = client.put(
         f"/leads/{test_domain}/notes/{note_id}", json={"note": "Updated note"}
     )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["note"] == "Updated note"
-    assert data["id"] == note_id
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "PUT /leads/{domain}/notes/{note_id}" in metrics["calls_by_endpoint"]
 
 
-def test_delete_note(db: Session, test_domain: str):
-    """Test deleting a note."""
-    # Create a note first
+def test_delete_note_phase3_disabled(db: Session, test_domain: str):
+    """Test deleting a note - Phase 3: Should return 410 Gone."""
+    # Create a note first (directly in DB for testing)
     note = Note(domain=test_domain, note="Note to delete")
     db.add(note)
     db.commit()
     note_id = note.id
 
+    reset_deprecated_metrics()
     response = client.delete(f"/leads/{test_domain}/notes/{note_id}")
-    assert response.status_code == 204
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Verify note is NOT deleted (read-only mode)
+    assert db.query(Note).filter(Note.id == note_id).first() is not None
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "DELETE /leads/{domain}/notes/{note_id}" in metrics["calls_by_endpoint"]
 
-    # Verify note is deleted
-    db.refresh(note)
-    assert db.query(Note).filter(Note.id == note_id).first() is None
 
-
-def test_create_tag(db: Session, test_domain: str):
-    """Test creating a tag."""
+def test_create_tag_phase3_disabled(db: Session, test_domain: str):
+    """Test creating a tag - Phase 3: Should return 410 Gone."""
+    reset_deprecated_metrics()
     response = client.post(f"/leads/{test_domain}/tags", json={"tag": "important"})
-    assert response.status_code == 201
-    data = response.json()
-    assert data["domain"] == test_domain
-    assert data["tag"] == "important"
-    assert "id" in data
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "POST /leads/{domain}/tags" in metrics["calls_by_endpoint"]
 
 
 def test_list_tags(db: Session, test_domain: str):
@@ -142,29 +170,43 @@ def test_list_tags(db: Session, test_domain: str):
     assert {t["tag"] for t in data} == {"tag1", "tag2"}
 
 
-def test_delete_tag(db: Session, test_domain: str):
-    """Test deleting a tag."""
-    # Create a tag first
+def test_delete_tag_phase3_disabled(db: Session, test_domain: str):
+    """Test deleting a tag - Phase 3: Should return 410 Gone."""
+    # Create a tag first (directly in DB for testing)
     tag = Tag(domain=test_domain, tag="tag-to-delete")
     db.add(tag)
     db.commit()
     tag_id = tag.id
 
+    reset_deprecated_metrics()
     response = client.delete(f"/leads/{test_domain}/tags/{tag_id}")
-    assert response.status_code == 204
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Verify tag is NOT deleted (read-only mode)
+    assert db.query(Tag).filter(Tag.id == tag_id).first() is not None
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "DELETE /leads/{domain}/tags/{tag_id}" in metrics["calls_by_endpoint"]
 
-    # Verify tag is deleted
-    assert db.query(Tag).filter(Tag.id == tag_id).first() is None
 
-
-def test_add_favorite(db: Session, test_domain: str):
-    """Test adding a favorite."""
+def test_add_favorite_phase3_disabled(db: Session, test_domain: str):
+    """Test adding a favorite - Phase 3: Should return 410 Gone."""
+    reset_deprecated_metrics()
     response = client.post(f"/leads/{test_domain}/favorite")
-    assert response.status_code == 201
-    data = response.json()
-    assert data["domain"] == test_domain
-    assert "user_id" in data
-    assert "id" in data
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "POST /leads/{domain}/favorite" in metrics["calls_by_endpoint"]
 
 
 def test_list_favorites(db: Session, test_domain: str):
@@ -181,18 +223,28 @@ def test_list_favorites(db: Session, test_domain: str):
     assert response.status_code == 200
 
 
-def test_remove_favorite(db: Session, test_domain: str):
-    """Test removing a favorite."""
-    # Add a favorite first
+def test_remove_favorite_phase3_disabled(db: Session, test_domain: str):
+    """Test removing a favorite - Phase 3: Should return 410 Gone."""
+    # Add a favorite first (directly in DB for testing)
     favorite = Favorite(domain=test_domain, user_id="test-user")
     db.add(favorite)
     db.commit()
     favorite_id = favorite.id
 
+    reset_deprecated_metrics()
     response = client.delete(f"/leads/{test_domain}/favorite")
-    # This will work if the session cookie matches
-    # For now, we'll just check the endpoint exists
-    assert response.status_code in [204, 404]  # 404 if user_id doesn't match
+    assert response.status_code == 410
+    data = response.json()["detail"]
+    assert "error" in data
+    assert "deprecated" in data["error"].lower() or "disabled" in data["error"].lower()
+    
+    # Verify favorite is NOT deleted (read-only mode)
+    assert db.query(Favorite).filter(Favorite.id == favorite_id).first() is not None
+    
+    # Check metrics tracking
+    metrics = get_deprecated_metrics()
+    assert metrics["total_calls"] == 1
+    assert "DELETE /leads/{domain}/favorite" in metrics["calls_by_endpoint"]
 
 
 def test_auto_tagging_security_risk(db: Session, test_domain: str):

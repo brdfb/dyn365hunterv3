@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **G21 Phase 3: Read-Only Mode** (2025-01-28) - Disabled write endpoints for CRM-lite features (Notes/Tags/Favorites)
+  - **Deprecated Endpoint Monitoring** (`app/core/deprecated_monitoring.py`):
+    - Track deprecated endpoint calls (total calls, calls by endpoint, calls by domain)
+    - Daily and weekly call count tracking
+    - Top endpoints and domains metrics
+    - Metrics available via `GET /healthz/metrics` endpoint
+  - **Write Endpoints Disabled** (410 Gone):
+    - `POST /leads/{domain}/notes` - Returns 410 Gone (Notes now managed in Dynamics 365)
+    - `PUT /leads/{domain}/notes/{note_id}` - Returns 410 Gone
+    - `DELETE /leads/{domain}/notes/{note_id}` - Returns 410 Gone
+    - `POST /leads/{domain}/tags` - Returns 410 Gone (Manual tags now managed in Dynamics 365)
+    - `DELETE /leads/{domain}/tags/{tag_id}` - Returns 410 Gone
+    - `POST /leads/{domain}/favorite` - Returns 410 Gone (Favorites now managed in Dynamics 365)
+    - `DELETE /leads/{domain}/favorite` - Returns 410 Gone
+  - **Read Endpoints Still Available** (200 OK):
+    - `GET /leads/{domain}/notes` - Remains available (read-only, migration support)
+    - `GET /leads/{domain}/tags` - Remains available (auto-tags needed)
+    - `GET /leads?favorite=true` - Remains available (read-only, migration support)
+  - **Metrics Integration**:
+    - Deprecated endpoint metrics added to `GET /healthz/metrics` endpoint
+    - Metrics include: total_calls, calls_by_endpoint, calls_by_domain, daily_call_count, weekly_call_count, top_endpoints, top_domains
+  - **Test Coverage**:
+    - Updated tests for Phase 3 behavior (write endpoints return 410, read endpoints return 200)
+    - Metrics tracking tests added
+    - Test file: `tests/test_notes_tags_favorites.py`
+  - **Status**: ✅ Phase 3 completed - Read-only mode active, monitoring in place, all tests passing
+  - **Benefits**: Zero downtime migration support, clear migration path to Dynamics 365, usage tracking for migration planning
 - **G21 Phase 2: Sales Engine** (2025-01-28) - Sales intelligence layer for lead qualification
   - **Sales Engine Core** (`app/core/sales_engine.py`):
     - `generate_one_liner()` - One-sentence sales summary (Turkish)
@@ -40,28 +67,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Benefits**: Sales-ready intelligence, segment-specific call scripts, discovery questions, offer tier recommendations
 
 ### Deprecated
-- **G21 Phase 1: Deprecation Annotations** (2025-11-16) - CRM-lite features (Notes/Tags/Favorites) write endpoints deprecated
-  - **Notes endpoints** (write operations deprecated):
-    - `POST /leads/{domain}/notes` - ⚠️ Deprecated (will be removed in Phase 6)
-    - `PUT /leads/{domain}/notes/{note_id}` - ⚠️ Deprecated (will be removed in Phase 6)
-    - `DELETE /leads/{domain}/notes/{note_id}` - ⚠️ Deprecated (will be removed in Phase 6)
+- **G21 Phase 3: Read-Only Mode** (2025-01-28) - CRM-lite features (Notes/Tags/Favorites) write endpoints disabled (410 Gone)
+  - **Notes endpoints** (write operations disabled):
+    - `POST /leads/{domain}/notes` - ❌ Disabled (410 Gone) - Notes now managed in Dynamics 365
+    - `PUT /leads/{domain}/notes/{note_id}` - ❌ Disabled (410 Gone)
+    - `DELETE /leads/{domain}/notes/{note_id}` - ❌ Disabled (410 Gone)
     - `GET /leads/{domain}/notes` - ✅ Remains available (read-only, migration support)
-  - **Tags endpoints** (manual tag write operations deprecated):
-    - `POST /leads/{domain}/tags` - ⚠️ Deprecated (manual tags only, will be removed in Phase 6)
-    - `DELETE /leads/{domain}/tags/{tag_id}` - ⚠️ Deprecated (manual tags only, will be removed in Phase 6)
+  - **Tags endpoints** (manual tag write operations disabled):
+    - `POST /leads/{domain}/tags` - ❌ Disabled (410 Gone) - Manual tags now managed in Dynamics 365
+    - `DELETE /leads/{domain}/tags/{tag_id}` - ❌ Disabled (410 Gone)
     - `GET /leads/{domain}/tags` - ✅ Remains available (auto-tags needed)
-  - **Favorites endpoints** (write operations deprecated):
-    - `POST /leads/{domain}/favorite` - ⚠️ Deprecated (will be removed in Phase 6)
-    - `DELETE /leads/{domain}/favorite` - ⚠️ Deprecated (will be removed in Phase 6)
+  - **Favorites endpoints** (write operations disabled):
+    - `POST /leads/{domain}/favorite` - ❌ Disabled (410 Gone) - Favorites now managed in Dynamics 365
+    - `DELETE /leads/{domain}/favorite` - ❌ Disabled (410 Gone)
     - `GET /leads?favorite=true` - ✅ Remains available (read-only, migration support)
+  - **Deprecated Endpoint Monitoring**:
+    - All disabled endpoint calls are tracked via `app/core/deprecated_monitoring.py`
+    - Metrics available via `GET /healthz/metrics` endpoint (deprecated_endpoints section)
+    - Usage tracking for migration planning (total calls, calls by endpoint, calls by domain)
+  - **Alternative**: Use Dynamics 365 Timeline/Notes API, Tags API, and Favorite field for CRM-lite features
+  - **Migration**: Read endpoints remain available for migration support until Phase 6
+  - **Status**: Phase 3 completed - Read-only mode active, monitoring in place, zero downtime
+- **G21 Phase 1: Deprecation Annotations** (2025-11-16) - CRM-lite features (Notes/Tags/Favorites) write endpoints deprecated
   - **Deprecation decorator** (`app/core/deprecation.py`):
     - Structured logging for deprecated endpoint calls
     - Response headers: `X-Deprecated`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`, `X-Deprecation-Date`
     - Deprecation date: 2025-11-16
     - Removal date: 2026-02-01 (Phase 6 cleanup)
-  - **Alternative**: Use Dynamics 365 Timeline/Notes API, Tags API, and Favorite field for CRM-lite features
-  - **Migration**: Read endpoints remain available for migration support until Phase 6
-  - **Status**: Phase 1 completed - Deprecation warnings active, zero breaking changes
+  - **Status**: Phase 1 completed - Deprecation warnings active, zero breaking changes (superseded by Phase 3)
 
 ### Fixed
 - **G20: Scan Endpoint Missing Fields** (2025-11-15) - Fixed missing G20 fields in `/scan/domain` endpoint

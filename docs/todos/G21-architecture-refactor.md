@@ -71,20 +71,22 @@ Add Sales Engine (sales intelligence layer).
 - [x] Logging/telemetry (`sales_summary_viewed` event)
 - [x] Tuning factor configuration (Phase 2.1)
 
-### Phase 3: Read-Only Mode
-- [ ] Disable write endpoints (soft - 410 Gone)
-- [ ] Add monitoring for deprecated endpoints
-- [ ] Test read endpoints still work
-- [ ] Test write endpoints return 410
+### Phase 3: Read-Only Mode ✅ **COMPLETED** (2025-01-28)
+- [x] Disable write endpoints (soft - 410 Gone)
+- [x] Add monitoring for deprecated endpoints
+- [x] Test read endpoints still work
+- [x] Test write endpoints return 410
 
-### Phase 4: Dynamics Migration
-- [ ] Create `scripts/migrate_notes_to_dynamics.py`
-- [ ] Migrate Notes → Dynamics Timeline/Notes
-- [ ] Migrate Tags → Dynamics Tags (manual only)
-- [ ] Migrate Favorites → Dynamics Favorite field
-- [ ] Test migration (dry-run)
-- [ ] Execute migration
-- [ ] Verify migration success
+### Phase 4: Dynamics Migration ⚠️ **SIMPLIFIED** (No Data to Migrate)
+- [x] ✅ Phase 0 verified: Notes/Tags/Favorites tables do NOT exist
+- [x] ✅ No usage metrics found - features never used
+- [ ] Final verification: Check production database one more time
+- [ ] Create migration guide document (`docs/migration/notes-to-dynamics.md`)
+  - Document that no migration is needed
+  - Document alternative: Use Dynamics 365 APIs
+- [ ] Update API documentation (deprecation notices already in place)
+- [ ] **Decision**: Skip migration script (no data to migrate)
+- [ ] **Decision**: Proceed to Phase 5 (Monitoring) after documentation
 
 ### Phase 5: Monitoring & Stabilization
 - [ ] Create monitoring dashboard
@@ -107,9 +109,16 @@ Add Sales Engine (sales intelligence layer).
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 3 (Read-Only Mode) 🔄 **NEXT**
+**Current Phase**: Phase 4 (Dynamics Migration) 🔄 **NEXT**
 
-**Completed**: 3/7 phases (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅)
+**Completed**: 4/7 phases (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅, Phase 3 ✅)
+
+**Phase 3 Status**: ✅ **COMPLETED** (2025-01-28)
+- Write endpoints disabled: ✅ (7 endpoints return 410 Gone)
+- Monitoring implemented: ✅ (deprecated endpoint metrics tracking)
+- Read endpoints verified: ✅ (3 read endpoints still work)
+- Tests updated: ✅ (Phase 3 behavior tests added)
+- Metrics integration: ✅ (added to /healthz/metrics endpoint)
 
 **Phase 2 Status**: ✅ **COMPLETED** (2025-01-28)
 - Core implementation: ✅
@@ -120,9 +129,11 @@ Add Sales Engine (sales intelligence layer).
 - Tuning mechanism: ✅ (Phase 2.1)
 
 **Next Steps**: 
-1. Phase 3: Read-Only Mode (disable write endpoints)
-2. UI integration (Sales Intel tab in lead detail page)
-3. Monitor sales feedback for tuning adjustments
+1. Phase 4: Dynamics Migration (SIMPLIFIED - no data to migrate, documentation only)
+2. Phase 5: Monitoring & Stabilization (deprecated endpoint usage monitoring)
+3. Phase 6: Cleanup (remove deprecated endpoints, archive tables)
+4. UI integration (Sales Intel tab in lead detail page)
+5. Monitor sales feedback for tuning adjustments
 
 ---
 

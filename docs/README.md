@@ -74,7 +74,9 @@ API contract documentation:
 - `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
   - **Phase 0**: ✅ Completed (2025-11-16) - Preparation & Snapshot
   - **Phase 1**: ✅ Completed (2025-11-16) - Deprecation Annotations
-  - **Phase 2**: 🔄 Next - Sales Engine (Additive)
+  - **Phase 2**: ✅ Completed (2025-01-28) - Sales Engine (Additive)
+  - **Phase 3**: ✅ Completed (2025-01-28) - Read-Only Mode (Write endpoints disabled - 410 Gone)
+  - **Phase 4**: 🔄 Next - Dynamics Migration
 - `docs/g21-phase0-metrics/` - G21 Phase 0 & Phase 1 metrics and completion reports
   - `PHASE0-COMPLETION.md` - Phase 0 completion report (2025-11-16)
   - `PHASE1-COMPLETION.md` - Phase 1 completion report (2025-11-16)
@@ -93,7 +95,9 @@ API contract documentation:
 - 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
   - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
   - ✅ Phase 1: Deprecation Annotations (2025-11-16)
-  - 🔄 Phase 2: Sales Engine (Next)
+  - ✅ Phase 2: Sales Engine (2025-01-28)
+  - ✅ Phase 3: Read-Only Mode (2025-01-28) - Write endpoints disabled (410 Gone)
+  - 🔄 Phase 4: Dynamics Migration (Next)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation

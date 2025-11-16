@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.db.models import Favorite, Company
 from app.core.normalizer import normalize_domain
 from app.core.deprecation import deprecated_endpoint
+from app.core.deprecated_monitoring import track_deprecated_endpoint
 import uuid
 
 
@@ -49,14 +50,13 @@ class FavoriteResponse(BaseModel):
         from_attributes = True
 
 
-@router.post("/{domain}/favorite", response_model=FavoriteResponse, status_code=201)
-@deprecated_endpoint(
-    reason="Favorites are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Favorite field for favorite management.",
-)
+@router.post("/{domain}/favorite", status_code=410)
 async def add_favorite(domain: str, request: Request, db: Session = Depends(get_db)):
     """
     Add a domain to favorites.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Favorites are now managed in Dynamics 365.
 
     Args:
         domain: Domain name (will be normalized)
@@ -64,53 +64,26 @@ async def add_favorite(domain: str, request: Request, db: Session = Depends(get_
         db: Database session
 
     Returns:
-        FavoriteResponse with created favorite
+        410 Gone - Endpoint disabled
 
     Raises:
-        404: If domain not found
-        400: If domain is invalid or already favorited
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Check if domain exists
-    company = db.query(Company).filter(Company.domain == normalized_domain).first()
-    if not company:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
-        )
-
-    # Get user ID from session
-    user_id = get_user_id(request)
-
-    # Check if already favorited
-    existing_favorite = (
-        db.query(Favorite)
-        .filter(Favorite.domain == normalized_domain, Favorite.user_id == user_id)
-        .first()
-    )
-
-    if existing_favorite:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Domain {normalized_domain} is already in favorites",
-        )
-
-    # Create favorite
-    favorite = Favorite(domain=normalized_domain, user_id=user_id)
-    db.add(favorite)
-    db.commit()
-    db.refresh(favorite)
-
-    return FavoriteResponse(
-        id=favorite.id,
-        domain=favorite.domain,
-        user_id=favorite.user_id,
-        created_at=favorite.created_at.isoformat(),
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("POST /leads/{domain}/favorite", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Favorites are now managed in Dynamics 365.",
+            "alternative": "Use Dynamics 365 Favorite field for favorite management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
 
 
@@ -118,47 +91,38 @@ async def add_favorite(domain: str, request: Request, db: Session = Depends(get_
 # This endpoint is kept for backward compatibility but should use leads endpoint
 
 
-@router.delete("/{domain}/favorite", status_code=204)
-@deprecated_endpoint(
-    reason="Favorites are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Favorite field for favorite management.",
-)
+@router.delete("/{domain}/favorite", status_code=410)
 async def remove_favorite(domain: str, request: Request, db: Session = Depends(get_db)):
     """
     Remove a domain from favorites.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Favorites are now managed in Dynamics 365.
 
     Args:
         domain: Domain name (will be normalized)
         request: FastAPI request (for session)
         db: Database session
 
+    Returns:
+        410 Gone - Endpoint disabled
+
     Raises:
-        404: If domain or favorite not found
-        400: If domain is invalid
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Get user ID from session
-    user_id = get_user_id(request)
-
-    # Get favorite
-    favorite = (
-        db.query(Favorite)
-        .filter(Favorite.domain == normalized_domain, Favorite.user_id == user_id)
-        .first()
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("DELETE /leads/{domain}/favorite", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Favorites are now managed in Dynamics 365.",
+            "alternative": "Use Dynamics 365 Favorite field for favorite management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
-
-    if not favorite:
-        raise HTTPException(
-            status_code=404, detail=f"Domain {normalized_domain} is not in favorites"
-        )
-
-    # Delete favorite
-    db.delete(favorite)
-    db.commit()
-
-    return None

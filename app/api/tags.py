@@ -13,6 +13,7 @@ from app.db.session import get_db
 from app.db.models import Tag, Company
 from app.core.normalizer import normalize_domain
 from app.core.deprecation import deprecated_endpoint
+from app.core.deprecated_monitoring import track_deprecated_endpoint
 
 
 router = APIRouter(prefix="/leads", tags=["tags"])
@@ -36,14 +37,13 @@ class TagResponse(BaseModel):
         from_attributes = True
 
 
-@router.post("/{domain}/tags", response_model=TagResponse, status_code=201)
-@deprecated_endpoint(
-    reason="Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Tags API for manual tag management.",
-)
+@router.post("/{domain}/tags", status_code=410)
 async def create_tag(domain: str, request: TagCreate, db: Session = Depends(get_db)):
     """
     Add a tag to a domain.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available.
 
     Args:
         domain: Domain name (will be normalized)
@@ -51,47 +51,26 @@ async def create_tag(domain: str, request: TagCreate, db: Session = Depends(get_
         db: Database session
 
     Returns:
-        TagResponse with created tag
+        410 Gone - Endpoint disabled
 
     Raises:
-        404: If domain not found
-        400: If domain is invalid or tag already exists
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Check if domain exists
-    company = db.query(Company).filter(Company.domain == normalized_domain).first()
-    if not company:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Domain {normalized_domain} not found. Please ingest the domain first using /ingest/domain",
-        )
-
-    # Check if tag already exists
-    existing_tag = (
-        db.query(Tag)
-        .filter(Tag.domain == normalized_domain, Tag.tag == request.tag)
-        .first()
-    )
-
-    if existing_tag:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Tag '{request.tag}' already exists for domain {normalized_domain}",
-        )
-
-    # Create tag
-    tag = Tag(domain=normalized_domain, tag=request.tag)
-    db.add(tag)
-    db.commit()
-    db.refresh(tag)
-
-    return TagResponse(
-        id=tag.id, domain=tag.domain, tag=tag.tag, created_at=tag.created_at.isoformat()
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("POST /leads/{domain}/tags", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available.",
+            "alternative": "Use Dynamics 365 Tags API for manual tag management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
 
 
@@ -144,43 +123,38 @@ async def list_tags(domain: str, db: Session = Depends(get_db)):
     ]
 
 
-@router.delete("/{domain}/tags/{tag_id}", status_code=204)
-@deprecated_endpoint(
-    reason="Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available. This endpoint will be removed in Phase 6.",
-    alternative="Use Dynamics 365 Tags API for manual tag management.",
-)
+@router.delete("/{domain}/tags/{tag_id}", status_code=410)
 async def delete_tag(domain: str, tag_id: int, db: Session = Depends(get_db)):
     """
     Remove a tag from a domain.
+    
+    ⚠️ DEPRECATED: This endpoint is disabled (410 Gone) as of Phase 3.
+    Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available.
 
     Args:
         domain: Domain name (will be normalized)
         tag_id: Tag ID
         db: Database session
 
+    Returns:
+        410 Gone - Endpoint disabled
+
     Raises:
-        404: If domain or tag not found
-        400: If domain is invalid
+        410: Endpoint disabled (read-only mode)
     """
-    # Normalize domain
-    normalized_domain = normalize_domain(domain)
-
-    if not normalized_domain:
-        raise HTTPException(status_code=400, detail="Invalid domain format")
-
-    # Get tag
-    tag = (
-        db.query(Tag).filter(Tag.id == tag_id, Tag.domain == normalized_domain).first()
+    # Normalize domain for tracking
+    normalized_domain = normalize_domain(domain) or domain
+    
+    # Track deprecated endpoint call
+    track_deprecated_endpoint("DELETE /leads/{domain}/tags/{tag_id}", normalized_domain)
+    
+    # Return 410 Gone
+    raise HTTPException(
+        status_code=410,
+        detail={
+            "error": "This endpoint is deprecated and disabled.",
+            "reason": "Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available.",
+            "alternative": "Use Dynamics 365 Tags API for manual tag management.",
+            "migration_guide": "/docs/migration/notes-to-dynamics",
+        }
     )
-
-    if not tag:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Tag {tag_id} not found for domain {normalized_domain}",
-        )
-
-    # Delete tag
-    db.delete(tag)
-    db.commit()
-
-    return None
