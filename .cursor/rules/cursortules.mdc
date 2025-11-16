@@ -51,6 +51,11 @@ alwaysApply: true
 - Test edge cases: invalid domains, timeouts, malformed CSV, missing MX records
 - Use pytest with pytest-mock for mocking DNS/WHOIS
 - Target: ≥70% code coverage for core modules
+- **Test Suite**: 497 tests with transaction-based isolation
+- **Shared Fixtures**: Use `tests/conftest.py` fixtures (`db_session`, `client`) for consistent test isolation
+- **Test Isolation**: Each test runs in isolated transaction with automatic rollback
+- **Integration Tests**: Use `@pytest.mark.requires_integration` for Redis/Celery-dependent tests
+- **All tests must pass**: 497 tests (CI/CD enforced)
 
 ## MVP Scope Discipline
 
@@ -278,6 +283,50 @@ When a phase is completed (TODO status = "Completed"):
 - Prompt no longer referenced → Archive prompt
 - Keep only active/current documentation visible
 
+## Guardrails & Validation Rules
+
+### Test Suite Guardrails
+- **Test Count**: 497 tests (must maintain or increase)
+- **Test Isolation**: Always use `db_session` fixture from `tests/conftest.py` for transaction-based isolation
+- **Test Client**: Always use `client` fixture from `tests/conftest.py` for API tests
+- **Integration Tests**: Use `@pytest.mark.requires_integration` and `redis_and_celery_available` fixture
+- **Test Coverage**: ≥70% for core modules (`app/core/`)
+- **All tests must pass**: CI/CD enforces all 497 tests passing before merge
+
+### Documentation Guardrails
+- **Active Docs Limit**: Maximum 5-7 files in `docs/active/`
+- **Archive Immediately**: Archive completed phase docs immediately (don't wait)
+- **Date Prefix**: All archived files must have `YYYY-MM-DD-` prefix
+- **Auto-Update**: Always update README.md, CHANGELOG.md, docs/README.md when code changes
+- **Token Efficiency**: Don't repeat archived information, reference when needed
+
+### Code Quality Guardrails
+- **Type Hints**: Required for all functions
+- **Black Formatting**: Enforced in CI (`.github/workflows/lint.yml`)
+- **Flake8 Linting**: Max line length 127, complexity ≤10
+- **Type Checking**: mypy (non-blocking, ignore missing imports)
+- **No Magic Numbers**: Use `app/core/constants.py` for all thresholds
+- **No PII in Logs**: Only log domain, NEVER log email or company_name
+
+### Security Guardrails
+- **API Keys**: Store hashed (SHA-256), never plaintext
+- **PII Protection**: Never log email, company_name, or other PII
+- **Environment Variables**: Always use `HUNTER_` prefix
+- **Rate Limiting**: Always enforce rate limits (DNS: 10 req/s, WHOIS: 5 req/s)
+- **Input Validation**: Validate all user inputs (domains, API keys, etc.)
+
+### Performance Guardrails
+- **Bulk Limits**: Maximum 1000 domains per bulk operation
+- **Timeouts**: DNS (10s), WHOIS (5s), RDAP (3s), SMTP (3s), Celery (900s)
+- **Rate Limiting**: Always use in bulk operations and Celery tasks
+- **Caching**: Use Redis caching for DNS, WHOIS, Provider, Scoring (when available)
+
+### API Contract Guardrails (G21)
+- **Frozen Contracts**: Sales Summary API v1 contract is frozen (no breaking changes)
+- **Read-Only Mode**: Write endpoints return 410 Gone (Phase 3)
+- **Backward Compatibility**: Legacy endpoints remain available during migration
+- **Deprecation Monitoring**: Track deprecated endpoint usage via `/healthz/metrics`
+
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
@@ -287,10 +336,12 @@ When a phase is completed (TODO status = "Completed"):
 5. **Is this a G21 Architecture Refactor task?** (🔄 In Progress - 2025-01-28 - Check `docs/active/NO-BREAK-REFACTOR-PLAN.md`)
 6. Does this require external API calls? (Handle timeouts/errors)
 7. Will this log PII? (Only log domain)
-8. Is this testable? (Write tests)
+8. Is this testable? (Write tests using `db_session` and `client` fixtures)
 9. Does this break Docker setup? (Verify setup_dev.sh still works)
 10. **Did I update documentation?** (CHANGELOG.md, README.md, docs/README.md when phase completes)
 11. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
+12. **Did I use shared test fixtures?** (Use `conftest.py` fixtures for test isolation)
+13. **Did I respect API contract?** (No breaking changes to frozen contracts)
 
 
 ---

@@ -221,12 +221,21 @@
 - **Concurrent tasks**: 5 per worker
 - Always use rate limiting in Celery tasks
 
+### Test Suite Guardrails
+- **Test Count**: 497 tests (must maintain or increase)
+- **Test Isolation**: Always use `db_session` fixture from `tests/conftest.py` for transaction-based isolation
+- **Test Client**: Always use `client` fixture from `tests/conftest.py` for API tests
+- **Integration Tests**: Use `@pytest.mark.requires_integration` and `redis_and_celery_available` fixture
+- **Test Coverage**: ≥70% for core modules (`app/core/`)
+- **Shared Fixtures**: Use `tests/conftest.py` fixtures for consistent test setup
+- **Transaction Isolation**: Each test runs in isolated transaction with automatic rollback
+
 ### CI/CD Guardrails
 - **Black formatting**: Enforced in CI (`.github/workflows/lint.yml`)
 - **Flake8 linting**: Max line length 127, complexity ≤10
 - **Type checking**: mypy (non-blocking, ignore missing imports)
 - **Test coverage**: Codecov integration
-- **All tests must pass**: 214+ tests
+- **All tests must pass**: 497 tests (CI/CD enforced)
 
 ## Code Review Checklist
 
@@ -234,7 +243,7 @@ Before marking code as done, verify:
 - [ ] Type hints added
 - [ ] Error handling implemented (timeouts, invalid input)
 - [ ] No PII in logs (domain only)
-- [ ] Tests written for new functions
+- [ ] Tests written for new functions (using `db_session` and `client` fixtures)
 - [ ] MVP scope respected (Post-MVP features: bulk, webhook, export, rescan, alerts are now in scope)
 - [ ] Docker Compose still works
 - [ ] `/healthz` still responds
@@ -243,7 +252,10 @@ Before marking code as done, verify:
 - [ ] Constants used (no magic numbers)
 - [ ] Environment variables use `HUNTER_` prefix
 - [ ] Black formatting applied
-- [ ] All tests passing
+- [ ] All tests passing (497 tests)
+- [ ] Test isolation maintained (using shared fixtures)
+- [ ] Documentation updated (README.md, CHANGELOG.md, docs/README.md)
+- [ ] API contract respected (no breaking changes to frozen contracts)
 
 ## Common Patterns
 

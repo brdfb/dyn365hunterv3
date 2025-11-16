@@ -120,6 +120,32 @@ scripts/manage_docs.sh list
 8. **Keep active minimal** - archive immediately when done
 9. **Token efficiency** - Don't repeat archived information
 
+## Guardrails & Validation Rules
+
+### Documentation Guardrails
+- **Active Docs Limit**: Maximum 5-7 files in `docs/active/` (enforced)
+- **Archive Immediately**: Archive completed phase docs immediately (don't wait)
+- **Date Prefix**: All archived files must have `YYYY-MM-DD-` prefix (required)
+- **Auto-Update**: Always update README.md, CHANGELOG.md, docs/README.md when code changes
+- **Token Efficiency**: Don't repeat archived information, reference when needed
+- **Feature Docs**: Archive feature documentation when complete
+- **Planning Docs**: Archive completed planning docs to `docs/archive/`
+
+### Validation Rules
+- **Before Archiving**: Verify phase is actually complete (check TODO status)
+- **Before Creating**: Check if similar documentation already exists
+- **Before Updating**: Verify documentation is still active (not archived)
+- **Format Check**: Ensure date prefix format is correct (`YYYY-MM-DD-`)
+- **Link Check**: Update all references when moving files to archive
+- **Test Count**: Maintain test count documentation (currently 497 tests)
+
+### Code Change Guardrails
+- **New API Endpoints**: Must update README.md API Endpoints section
+- **New Test Files**: Must update CHANGELOG.md with test coverage info
+- **New Core Modules**: Must update CHANGELOG.md with module description
+- **Phase Completion**: Must run full phase completion workflow
+- **Breaking Changes**: Must update version and migration guide
+
 ## Examples
 
 ### Example 1: Code Change Auto-Update

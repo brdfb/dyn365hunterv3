@@ -78,6 +78,24 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - Use `docs/prompts/` for important decisions
 - Use `docs/todos/` for task tracking
 
+## Guardrails & Validation Rules
+
+### Documentation Guardrails
+- **Active Docs Limit**: Maximum 5-7 files in `docs/active/` (enforced)
+- **Archive Immediately**: Archive completed phase docs immediately (don't wait)
+- **Date Prefix**: All archived files must have `YYYY-MM-DD-` prefix (required)
+- **Auto-Update**: Always update README.md, CHANGELOG.md, docs/README.md when code changes
+- **Token Efficiency**: Don't repeat archived information, reference when needed
+- **Feature Docs**: Archive feature documentation when complete (e.g., PROVIDER-CHANGE-TRACKING.md)
+- **Planning Docs**: Archive completed planning docs to `docs/archive/`
+
+### Validation Rules
+- **Before Archiving**: Verify phase is actually complete (check TODO status)
+- **Before Creating**: Check if similar documentation already exists
+- **Before Updating**: Verify documentation is still active (not archived)
+- **Format Check**: Ensure date prefix format is correct (`YYYY-MM-DD-`)
+- **Link Check**: Update all references when moving files to archive
+
 ## Commands
 
 ```bash
