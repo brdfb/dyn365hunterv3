@@ -39,6 +39,7 @@ async def debug_ip_enrichment(
         "config": {
             "maxmind_asn": settings.enrichment_db_path_maxmind_asn,
             "maxmind_city": settings.enrichment_db_path_maxmind_city,
+            "maxmind_country": settings.enrichment_db_path_maxmind_country,
             "ip2location": settings.enrichment_db_path_ip2location,
             "ip2proxy": settings.enrichment_db_path_ip2proxy,
         },
@@ -114,6 +115,7 @@ async def debug_enrichment_config():
         "config": {
             "maxmind_asn": settings.enrichment_db_path_maxmind_asn,
             "maxmind_city": settings.enrichment_db_path_maxmind_city,
+            "maxmind_country": settings.enrichment_db_path_maxmind_country,
             "ip2location": settings.enrichment_db_path_ip2location,
             "ip2proxy": settings.enrichment_db_path_ip2proxy,
         },

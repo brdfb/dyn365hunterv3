@@ -44,6 +44,7 @@ class IpEnrichmentResult:
 # These are process-level singletons (each worker process has its own instance)
 _maxmind_asn_reader = None
 _maxmind_city_reader = None
+_maxmind_country_reader = None
 _ip2location_db = None
 _ip2proxy_db = None
 _loader_lock = threading.Lock()  # Thread safety for lazy loading
@@ -120,6 +121,43 @@ def _load_maxmind_city() -> Optional[object]:
             return None
         except Exception as e:
             logger.error("maxmind_city_db_load_failed", path=settings.enrichment_db_path_maxmind_city, error=str(e))
+            return None
+
+
+def _load_maxmind_country() -> Optional[object]:
+    """Load MaxMind GeoLite2 Country database reader (thread-safe lazy loading, optional fallback)."""
+    global _maxmind_country_reader
+    
+    # Fast path: already loaded
+    if _maxmind_country_reader is not None:
+        return _maxmind_country_reader
+    
+    # Thread-safe lazy loading
+    with _loader_lock:
+        # Double-check after acquiring lock
+        if _maxmind_country_reader is not None:
+            return _maxmind_country_reader
+        
+        if not settings.enrichment_db_path_maxmind_country:
+            return None
+        
+        if not os.path.exists(settings.enrichment_db_path_maxmind_country):
+            logger.warning(
+                "maxmind_country_db_not_found",
+                path=settings.enrichment_db_path_maxmind_country
+            )
+            return None
+        
+        try:
+            import geoip2.database
+            _maxmind_country_reader = geoip2.database.Reader(settings.enrichment_db_path_maxmind_country)
+            logger.info("maxmind_country_db_loaded", path=settings.enrichment_db_path_maxmind_country)
+            return _maxmind_country_reader
+        except ImportError:
+            logger.warning("maxmind_geoip2_not_installed", hint="pip install geoip2")
+            return None
+        except Exception as e:
+            logger.error("maxmind_country_db_load_failed", path=settings.enrichment_db_path_maxmind_country, error=str(e))
             return None
 
 
@@ -239,7 +277,7 @@ def enrich_ip(ip: str, use_cache: bool = True) -> Optional[IpEnrichmentResult]:
         # Graceful fail - log but continue
         logger.debug("maxmind_asn_lookup_failed", ip=ip, error=str(e))
     
-    # MaxMind City lookup
+    # MaxMind City lookup (includes country data)
     try:
         city_reader = _load_maxmind_city()
         if city_reader:
@@ -251,6 +289,18 @@ def enrich_ip(ip: str, use_cache: bool = True) -> Optional[IpEnrichmentResult]:
     except Exception as e:
         # Graceful fail - log but continue
         logger.debug("maxmind_city_lookup_failed", ip=ip, error=str(e))
+    
+    # MaxMind Country lookup (fallback if City DB not available or country not set)
+    if not result.country:
+        try:
+            country_reader = _load_maxmind_country()
+            if country_reader:
+                response = country_reader.country(ip)
+                if response.country.iso_code:
+                    result.country = response.country.iso_code
+        except Exception as e:
+            # Graceful fail - log but continue
+            logger.debug("maxmind_country_lookup_failed", ip=ip, error=str(e))
     
     # IP2Location lookup
     try:
@@ -311,6 +361,7 @@ def check_enrichment_available() -> bool:
     has_config = any([
         settings.enrichment_db_path_maxmind_asn,
         settings.enrichment_db_path_maxmind_city,
+        settings.enrichment_db_path_maxmind_country,
         settings.enrichment_db_path_ip2location,
         settings.enrichment_db_path_ip2proxy,
     ])
@@ -322,6 +373,7 @@ def check_enrichment_available() -> bool:
     return any([
         _load_maxmind_asn() is not None,
         _load_maxmind_city() is not None,
+        _load_maxmind_country() is not None,
         _load_ip2location() is not None,
         _load_ip2proxy() is not None,
     ])

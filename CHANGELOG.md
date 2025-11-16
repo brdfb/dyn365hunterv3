@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Enhanced
+- **IP Enrichment Configuration** (2025-01-28) - Improved environment variable format and Country DB support
+  - **New Env Format**: Simplified environment variable names (`MAXMIND_CITY_DB`, `MAXMIND_COUNTRY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`)
+  - **Country DB Support**: Added optional `GeoLite2-Country.mmdb` as fallback for country-only lookups
+  - **Backward Compatible**: Legacy format (`HUNTER_ENRICHMENT_DB_PATH_*`) still supported
+  - **Documentation**: Updated `.env.example` and all IP enrichment documentation with new format
 - **IP Enrichment** (2025-01-28) - Production readiness improvements
   - **Health Check**: Added `enrichment_enabled` flag to `/healthz` endpoint (read-only, no DB connection)
   - **Error Tracking**: Added Sentry tag `hunter_enrichment_error` for enrichment error monitoring

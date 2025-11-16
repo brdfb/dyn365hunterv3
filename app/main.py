@@ -79,10 +79,11 @@ def validate_enrichment_config():
         logger.warning(
             "ip_enrichment_config_invalid",
             message="IP enrichment is enabled but no database files are available",
-            hint="Set HUNTER_ENRICHMENT_DB_PATH_* environment variables or disable enrichment",
+            hint="Set MAXMIND_* or HUNTER_ENRICHMENT_DB_PATH_* environment variables or disable enrichment",
             enrichment_enabled=settings.enrichment_enabled,
             maxmind_asn=settings.enrichment_db_path_maxmind_asn,
             maxmind_city=settings.enrichment_db_path_maxmind_city,
+            maxmind_country=settings.enrichment_db_path_maxmind_country,
             ip2location=settings.enrichment_db_path_ip2location,
             ip2proxy=settings.enrichment_db_path_ip2proxy,
         )

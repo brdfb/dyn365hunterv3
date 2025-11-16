@@ -757,6 +757,7 @@ curl -X POST http://localhost:8000/leads/example.com/enrich \
 - [Duplicate Prevention](docs/active/DUPLICATE-PREVENTION.md) - Automatic cleanup of duplicate records
 - [Domain Validation](docs/active/DOMAIN-VALIDATION.md) - Enhanced domain validation and filtering
 - [IP Enrichment Implementation](docs/active/IP-ENRICHMENT-IMPLEMENTATION.md) - IP geolocation, ASN, ISP, and proxy detection with Level 1 API exposure
+- [IP Enrichment Quick Start](docs/active/IP-ENRICHMENT-QUICK-START.md) - 10-minute setup guide for downloading DB files and enabling enrichment
 
 #### Development Guides
 - [Development Environment](docs/active/DEVELOPMENT-ENVIRONMENT.md) - Setup guide

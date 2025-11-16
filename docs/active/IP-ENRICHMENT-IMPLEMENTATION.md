@@ -28,15 +28,36 @@ IP enrichment adds geolocation, ASN, ISP, and proxy detection data to domain sca
 
 ## Configuration
 
+### Quick Start
+
+**🚀 Hızlı Başlangıç**: Detaylı setup rehberi için → [`IP-ENRICHMENT-QUICK-START.md`](./IP-ENRICHMENT-QUICK-START.md)
+
+**Özet**:
+1. 3 DB dosyasını indir (MaxMind, IP2Location, IP2Proxy)
+2. `app/data/` dizinine koy
+3. `.env`'de `HUNTER_ENRICHMENT_ENABLED=true` yap
+4. Docker'ı yeniden başlat
+
 ### Environment Variables
 
-All enrichment settings use the `HUNTER_` prefix:
-
+**New Format (Recommended)**:
 ```bash
 # Feature flag (required to enable)
 HUNTER_ENRICHMENT_ENABLED=true
 
-# Database paths (at least one required if enabled)
+# MaxMind GeoIP Databases
+MAXMIND_CITY_DB=app/data/maxmind/GeoLite2-City.mmdb
+MAXMIND_COUNTRY_DB=app/data/maxmind/GeoLite2-Country.mmdb
+# MAXMIND_ASN_DB=app/data/maxmind/GeoLite2-ASN.mmdb  # Optional - only add if you use ASN database
+
+# IP2Location & IP2Proxy
+IP2LOCATION_DB=app/data/ip2location/IP2LOCATION-LITE-DB11.BIN
+IP2PROXY_DB=app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
+```
+
+**Legacy Format (Still Supported)**:
+```bash
+# Legacy format (backward compatible)
 HUNTER_ENRICHMENT_DB_PATH_MAXMIND_ASN=/app/data/maxmind/GeoLite2-ASN.mmdb
 HUNTER_ENRICHMENT_DB_PATH_MAXMIND_CITY=/app/data/maxmind/GeoLite2-City.mmdb
 HUNTER_ENRICHMENT_DB_PATH_IP2LOCATION=/app/data/ip2location/IP2LOCATION-LITE-DB11.BIN
@@ -47,7 +68,8 @@ HUNTER_ENRICHMENT_DB_PATH_IP2PROXY=/app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
 
 1. **MaxMind GeoLite2** (free, requires account):
    - Sign up at https://www.maxmind.com/en/geolite2/signup
-   - Download `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb`
+   - Download `GeoLite2-City.mmdb` (required) and `GeoLite2-Country.mmdb` (optional fallback)
+   - Optional: Download `GeoLite2-ASN.mmdb` for ASN data
    - Place in `app/data/maxmind/` (or configure path)
 
 2. **IP2Location LITE** (free, email required):
@@ -57,6 +79,8 @@ HUNTER_ENRICHMENT_DB_PATH_IP2PROXY=/app/data/ip2proxy/IP2PROXY-LITE-PX11.BIN
 3. **IP2Proxy LITE** (free, email required):
    - Download from https://lite.ip2proxy.com/
    - Place `IP2PROXY-LITE-PX11.BIN` in `app/data/ip2proxy/`
+
+**📖 Detaylı Setup**: [`IP-ENRICHMENT-QUICK-START.md`](./IP-ENRICHMENT-QUICK-START.md) - Adım adım rehber
 
 ## Database Schema
 

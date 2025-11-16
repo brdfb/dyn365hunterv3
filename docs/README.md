@@ -93,6 +93,10 @@ API contract documentation:
     - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
     - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
     - Backward compatible: Optional field (None if no enrichment data available)
+- `IP-ENRICHMENT-QUICK-START.md` - IP Enrichment quick setup guide (2025-01-28)
+  - Step-by-step guide for downloading DB files and enabling enrichment
+  - 10-minute setup: Download 3 DB files → Place in project → Update .env → Restart
+  - Troubleshooting guide and verification checklist
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
