@@ -14,6 +14,7 @@ from app.core.normalizer import normalize_domain
 from app.core.priority import calculate_priority_score
 from app.core.enrichment import enrich_company_data
 from app.core.score_breakdown import calculate_score_breakdown
+from app.core.enrichment_service import build_infra_summary
 from app.db.models import Company, Favorite, DomainSignal
 
 
@@ -47,6 +48,7 @@ class LeadResponse(BaseModel):
     segment: Optional[str] = None
     reason: Optional[str] = None
     priority_score: Optional[int] = None
+    infrastructure_summary: Optional[str] = None  # IP enrichment summary (Level 1)
 
 
 class LeadsListResponse(BaseModel):
@@ -376,6 +378,9 @@ async def get_leads(
         for row in rows:
             # Calculate priority score
             priority_score = calculate_priority_score(row.segment, row.readiness_score)
+            
+            # Build infrastructure summary (Level 1 - IP enrichment)
+            infrastructure_summary = build_infra_summary(row.domain, db)
 
             lead = LeadResponse(
                 company_id=row.company_id,
@@ -399,6 +404,7 @@ async def get_leads(
                 segment=row.segment,
                 reason=row.reason,
                 priority_score=priority_score,
+                infrastructure_summary=infrastructure_summary,
             )
             leads.append(lead)
 
@@ -532,6 +538,9 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
 
         # Calculate priority score
         priority_score = calculate_priority_score(row.segment, row.readiness_score)
+        
+        # Build infrastructure summary (Level 1 - IP enrichment)
+        infrastructure_summary = build_infra_summary(normalized_domain, db)
 
         # Convert contact_emails from JSONB to list if present
         contact_emails = None
@@ -569,6 +578,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             segment=row.segment,
             reason=row.reason,
             priority_score=priority_score,
+            infrastructure_summary=infrastructure_summary,
         )
 
     except HTTPException:

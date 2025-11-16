@@ -89,6 +89,10 @@ API contract documentation:
   - Complete implementation guide with configuration, testing checklist, deployment strategy
   - Feature flag: `HUNTER_ENRICHMENT_ENABLED` (default: `false`)
   - No-break upgrade design - can be deployed with flag disabled
+  - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
+    - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
+    - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
+    - Backward compatible: Optional field (None if no enrichment data available)
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 

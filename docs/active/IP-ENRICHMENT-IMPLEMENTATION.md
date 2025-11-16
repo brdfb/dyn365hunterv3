@@ -180,38 +180,163 @@ HUNTER_ENRICHMENT_DB_PATH_MAXMIND_ASN=/app/data/maxmind/GeoLite2-ASN.mmdb
 - Check if IP was resolved (MX records exist)
 - Check if enrichment DBs are loaded (see debug endpoint)
 
-## Deployment Strategy
+## Deployment Strategy & Rollout Plan
 
-### Phase 1: Deploy with Flag OFF (No Risk)
+### Phase 1: Dev Environment (Flag OFF)
 
-1. Deploy code + migration
-2. Run `alembic upgrade head`
-3. Verify all tests pass
-4. **Flag remains `false`** → Hunter works exactly as before
+**Status**: `HUNTER_ENRICHMENT_ENABLED=false` (default)
 
-### Phase 2: Enable in Stage
+**Purpose**: 
+- All existing test scenarios continue to work
+- No behavioral changes, zero risk
 
-1. Set `HUNTER_ENRICHMENT_ENABLED=true` in stage
-2. Place DB files in configured paths
-3. Test enrichment works
-4. Monitor logs for issues
+**Verification**:
+- Run test suite → all tests pass
+- Verify no enrichment logs appear
+- `/healthz` shows `enrichment_enabled: false`
 
-### Phase 3: Enable in Production
+### Phase 2: Stage Environment (Flag ON)
 
-1. Set `HUNTER_ENRICHMENT_ENABLED=true` in production
-2. Place DB files in configured paths
-3. Monitor for 24 hours
-4. Verify enrichment data is being collected
+**Status**: `HUNTER_ENRICHMENT_ENABLED=true`
+
+**Setup**:
+1. Set `HUNTER_ENRICHMENT_ENABLED=true` in stage environment
+2. Place DB files in configured paths (MaxMind, IP2Location, IP2Proxy)
+3. Restart application
+
+**Sanity Checks**:
+```bash
+# Check health endpoint
+curl http://stage-api/healthz | jq '.enrichment_enabled'
+# Expected: true
+
+# Check debug endpoint
+curl http://stage-api/debug/ip-enrichment/config | jq '.availability'
+# Expected: {"at_least_one_db_available": true}
+
+# Test enrichment
+curl http://stage-api/debug/ip-enrichment/8.8.8.8 | jq '.enrichment'
+# Expected: enrichment result with data
+
+# Verify DB record
+psql -c "SELECT COUNT(*) FROM ip_enrichment;"
+# Expected: > 0 after test scans
+```
+
+**Monitoring**:
+- Check logs for `ip_enrichment_saved` / `ip_enrichment_failed` messages
+- Verify no errors in Sentry (if configured)
+
+### Phase 3: Production (First 1-2 Days)
+
+**Status**: `HUNTER_ENRICHMENT_ENABLED=true`
+
+**Monitoring Checklist**:
+
+1. **Sentry Error Tracking**:
+   - Filter by `hunter_enrichment_error=true` tag
+   - Monitor error rate (should be < 1%)
+   - Check for `ip_enrichment_save_failed` / `ip_enrichment_failed` events
+   - **Action if errors spike**: Set flag to `false` immediately (no code change needed)
+
+2. **Database Health**:
+   ```sql
+   -- Check table growth
+   SELECT COUNT(*) FROM ip_enrichment;
+   SELECT COUNT(*) FROM ip_enrichment WHERE created_at > NOW() - INTERVAL '1 hour';
+   ```
+   - Verify row count is increasing (enrichment is working)
+   - Check for reasonable growth rate (not exponential)
+   - **Action if no growth**: Check logs, verify DB files are accessible
+
+3. **Health Check**:
+   ```bash
+   curl http://prod-api/healthz | jq '.enrichment_enabled'
+   # Expected: true
+   ```
+
+### Phase 4: Production (After 1-2 Days)
+
+**If no issues**:
+- ✅ Feature is stable, keep enabled
+- ✅ Monitor weekly for first month
+- ✅ Review retention policy after 6 months
+
+**If issues found**:
+- Set `HUNTER_ENRICHMENT_ENABLED=false` (instant disable, no code change)
+- Investigate issues, fix, re-enable in stage first
+- Re-rollout after fixes verified
+
+## API Exposure (Level 1 - Minimal)
+
+**Status**: ✅ **IMPLEMENTED** (2025-01-28)
+
+### Infrastructure Summary Field
+
+The `infrastructure_summary` field is now available in `/leads` and `/lead/{domain}` API responses.
+
+**Format**: Human-readable single-line summary
+- Example: `"Hosted on DataCenter, ISP: Hetzner, Country: DE"`
+- Example: `"Hosted on Commercial, ISP: Amazon, Country: US"`
+
+**Components**:
+1. **Usage Type** (most important signal):
+   - `DCH` → "DataCenter" (hosting/reseller detection)
+   - `COM` → "Commercial" (business hosting)
+   - `RES` → "Residential" (home/consumer)
+   - `MOB` → "Mobile" (mobile carrier)
+2. **ISP**: Internet Service Provider name
+3. **Country**: ISO 3166-1 alpha-2 country code
+
+**API Response Example**:
+```json
+{
+  "domain": "example.com",
+  "score": 72,
+  "segment": "Migration",
+  "provider": "Local",
+  "infrastructure_summary": "Hosted on DataCenter, ISP: Hetzner, Country: DE"
+}
+```
+
+**Implementation**:
+- `app/core/enrichment_service.py`:
+  - `latest_ip_enrichment()` - Get most recent enrichment record
+  - `build_infra_summary()` - Build human-readable summary
+- `app/api/leads.py`:
+  - `LeadResponse.infrastructure_summary` - Optional field
+  - Automatically populated in `get_leads()` and `get_lead()` endpoints
+
+**Backward Compatibility**:
+- Field is optional (`None` if no enrichment data available)
+- No breaking changes to existing API consumers
+- Graceful degradation: if enrichment is disabled or no data exists, field is `null`
+
+**Performance Note**:
+- Current implementation queries enrichment data per lead (N+1 pattern)
+- For large lead lists, consider batch query optimization in future
+- Single lead endpoint (`/lead/{domain}`) performance is acceptable
 
 ## Future Enhancements
 
+### Level 2 - Detailed Infrastructure Block (Planned)
+- Detailed infrastructure panel in lead detail view
+- Full IP, ASN, proxy detection details
+- UI component for infrastructure insights
+
+### Level 3 - Advanced Analytics (Future)
+- "TR dışı firmalar listesi" (non-TR companies list)
+- "Hosting & Reseller tespit oranı" (hosting detection rate)
+- "Proxy şüphesi olanlar" (proxy suspicion list)
+- Heatmap (country distribution)
+
+### Other Enhancements
 - Background task queue (Celery/RQ) for heavy enrichment
 - **Retention policy for old enrichment records** (TASK: Review after 6 months)
   - Monitor `ip_enrichment` table growth
   - Consider cleanup policy: `DELETE FROM ip_enrichment WHERE created_at < NOW() - INTERVAL '365 days'`
   - Add to maintenance cron job if table size becomes a concern
 - Multiple IP enrichment per domain (MX + web IPs)
-- Enrichment data in `/leads` endpoint response
 - Metrics integration (Prometheus/Sentry):
   - `ip_enrichment_success_count`
   - `ip_enrichment_error_count`

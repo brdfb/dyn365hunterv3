@@ -120,7 +120,8 @@ async def health_check(db: Session = Depends(get_db)):
         "status": "ok",
         "database": db_status,
         "redis": redis_status,
-        "environment": settings.environment
+        "environment": settings.environment,
+        "enrichment_enabled": settings.enrichment_enabled
     }
 
 

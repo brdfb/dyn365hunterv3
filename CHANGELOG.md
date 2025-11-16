@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Enhanced
+- **IP Enrichment** (2025-01-28) - Production readiness improvements
+  - **Health Check**: Added `enrichment_enabled` flag to `/healthz` endpoint (read-only, no DB connection)
+  - **Error Tracking**: Added Sentry tag `hunter_enrichment_error` for enrichment error monitoring
+  - **Backlog**: Added `source` field enhancement to future tasks (for debugging IP origin: "mx-ip" vs "root-ip")
+- **IP Enrichment - Level 1 Exposure** (2025-01-28) - Sales team infrastructure insights
+  - **API Response**: Added `infrastructure_summary` field to `/leads` and `/lead/{domain}` endpoints
+  - **Format**: Human-readable summary (e.g., "Hosted on DataCenter, ISP: Hetzner, Country: DE")
+  - **Helper Functions**: 
+    - `latest_ip_enrichment()` - Get most recent enrichment record for a domain
+    - `build_infra_summary()` - Build human-readable summary from enrichment data
+  - **Usage Type Mapping**: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
+  - **Backward Compatible**: Field is optional (None if no enrichment data available)
+
 ### Added
 - **IP Enrichment** (2025-01-28) - IP geolocation, ASN, ISP, and proxy detection
   - **Feature Flag**: `HUNTER_ENRICHMENT_ENABLED` (default: `false`) - No-break upgrade design

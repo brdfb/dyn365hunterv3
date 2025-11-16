@@ -436,6 +436,10 @@ Bu maddeler code quality ve maintainability için iyi ama acil değil.
   - OR restrict to internal network only
 - [ ] **Enhancement**: Multiple IP enrichment per domain (MX + web IPs)
 - [ ] **Enhancement**: Enrichment data in `/leads` endpoint response (sales team visibility)
+- [ ] **Enhancement**: Add `source` field to `ip_enrichment` table (e.g., "mx-ip", "root-ip") for debugging
+  - Migration: Add `source VARCHAR(32)` column to `ip_enrichment` table
+  - Update `save_ip_enrichment()` to accept and store source
+  - Helps distinguish IP origin (MX record vs root domain A record)
 
 **Documentation**: `docs/active/IP-ENRICHMENT-IMPLEMENTATION.md`
 

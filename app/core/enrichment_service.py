@@ -3,6 +3,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import desc
 from app.db.session import SessionLocal
 from app.db.models import IpEnrichment
 from app.config import settings
@@ -105,6 +106,12 @@ def enrich_domain_if_enabled(domain: str, ip: str, db: Session) -> Optional[IpEn
         logger.info("ip_enrichment_saved", domain=domain, ip=ip)
     except Exception as e:
         logger.error("ip_enrichment_save_failed", domain=domain, ip=ip, error=str(e), exc_info=True)
+        # Tag Sentry event for enrichment errors
+        try:
+            import sentry_sdk
+            sentry_sdk.set_tag("hunter_enrichment_error", "true")
+        except ImportError:
+            pass  # Sentry not available
         raise
     
     return result
@@ -140,7 +147,79 @@ def spawn_enrichment(domain: str, ip: str) -> None:
             error=str(e),
             exc_info=True
         )
+        # Tag Sentry event for enrichment errors
+        try:
+            import sentry_sdk
+            sentry_sdk.set_tag("hunter_enrichment_error", "true")
+        except ImportError:
+            pass  # Sentry not available
         db.rollback()
     finally:
         db.close()
+
+
+def latest_ip_enrichment(domain: str, db: Session) -> Optional[IpEnrichment]:
+    """
+    Get the most recent IP enrichment record for a domain.
+    
+    Args:
+        domain: Domain name
+        db: Database session
+        
+    Returns:
+        Most recent IpEnrichment record, or None if not found
+    """
+    return (
+        db.query(IpEnrichment)
+        .filter(IpEnrichment.domain == domain)
+        .order_by(desc(IpEnrichment.updated_at))
+        .first()
+    )
+
+
+def build_infra_summary(domain: str, db: Session) -> Optional[str]:
+    """
+    Build a human-readable infrastructure summary from IP enrichment data.
+    
+    Format: "Hosted on {UsageType}, ISP: {ISP}, Country: {Country}"
+    
+    Args:
+        domain: Domain name
+        db: Database session
+        
+    Returns:
+        Infrastructure summary string, or None if no enrichment data available
+    """
+    record = latest_ip_enrichment(domain, db)
+    if not record:
+        return None
+    
+    # Map usage type codes to human-readable names
+    usage_type_map = {
+        "DCH": "DataCenter",
+        "COM": "Commercial",
+        "RES": "Residential",
+        "MOB": "Mobile",
+    }
+    
+    parts = []
+    
+    # Usage type (most important signal)
+    if record.usage_type:
+        usage_name = usage_type_map.get(record.usage_type, record.usage_type)
+        parts.append(f"Hosted on {usage_name}")
+    
+    # ISP (if available)
+    if record.isp:
+        parts.append(f"ISP: {record.isp}")
+    
+    # Country (if available)
+    if record.country:
+        parts.append(f"Country: {record.country}")
+    
+    # Return None if no data available
+    if not parts:
+        return None
+    
+    return ", ".join(parts)
 

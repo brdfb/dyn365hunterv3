@@ -57,6 +57,9 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ **Duplicate prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
 - ✅ **Domain validation** - Enhanced validation to filter invalid domains (nan, web sitesi, etc.)
 - ✅ **IP Enrichment** - IP geolocation, ASN, ISP, and proxy detection (MaxMind, IP2Location, IP2Proxy) ✨ YENİ
+  - **Level 1 Exposure** (2025-01-28): `infrastructure_summary` field in `/leads` and `/lead/{domain}` API responses
+  - Human-readable summary: "Hosted on DataCenter, ISP: Hetzner, Country: DE"
+  - Usage type mapping: DCH → DataCenter, COM → Commercial, RES → Residential, MOB → Mobile
 
 ### API & UI
 - ✅ Lead segmentation API with filtering
@@ -326,11 +329,11 @@ A simple web interface for demo and internal use:
     - `page_size` (optional): Number of items per page (default: 50, max: 200)
     - `search` (optional): Full-text search in domain, canonical_name, and provider
   - Returns: Paginated response with `leads`, `total`, `page`, `page_size`, `total_pages`
-  - Each lead includes `priority_score` field (1-7, where 1 is highest priority)
+  - Each lead includes `priority_score` field (1-7, where 1 is highest priority) and `infrastructure_summary` field (IP enrichment summary, e.g., "Hosted on DataCenter, ISP: Hetzner, Country: DE")
 - `GET /leads/{domain}/score-breakdown` - Get detailed score breakdown for a domain (G19)
   - Returns: Score breakdown with base_score, provider points, signal points, risk points, and total_score
 - `GET /leads/{domain}` - Get single lead details
-  - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), **G20 fields (tenant_size, local_provider, dmarc_coverage)**, and metadata
+  - Returns: Complete lead information including signals, scores, priority_score, enrichment data (contact_emails, contact_quality_score, linkedin_pattern), **G20 fields (tenant_size, local_provider, dmarc_coverage)**, **IP enrichment summary (infrastructure_summary)**, and metadata
 - `POST /leads/{domain}/enrich` - Manually enrich a lead with contact emails
   - Request body: `{"contact_emails": ["john@example.com", "jane@example.com"]}`
   - Returns: Enrichment results (contact_emails, contact_quality_score, linkedin_pattern)
@@ -753,6 +756,7 @@ curl -X POST http://localhost:8000/leads/example.com/enrich \
 - [Provider Change Tracking](docs/active/PROVIDER-CHANGE-TRACKING.md) - Automatic detection and logging of provider changes
 - [Duplicate Prevention](docs/active/DUPLICATE-PREVENTION.md) - Automatic cleanup of duplicate records
 - [Domain Validation](docs/active/DOMAIN-VALIDATION.md) - Enhanced domain validation and filtering
+- [IP Enrichment Implementation](docs/active/IP-ENRICHMENT-IMPLEMENTATION.md) - IP geolocation, ASN, ISP, and proxy detection with Level 1 API exposure
 
 #### Development Guides
 - [Development Environment](docs/active/DEVELOPMENT-ENVIRONMENT.md) - Setup guide
