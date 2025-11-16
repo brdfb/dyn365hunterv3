@@ -418,6 +418,27 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
 
 Bu maddeler code quality ve maintainability için iyi ama acil değil.
 
+### IP Enrichment - Future Tasks (2025-01-28)
+
+**Status**: ✅ **IMPLEMENTED** - Feature flag disabled by default, production-ready
+
+**Future Maintenance Tasks**:
+- [ ] **6 ay sonra**: `ip_enrichment` tablosu satır sayısını kontrol et, retention policy ekle
+  - Monitor table growth
+  - Consider cleanup: `DELETE FROM ip_enrichment WHERE created_at < NOW() - INTERVAL '365 days'`
+  - Add to maintenance cron job if needed
+- [ ] **Metrics Integration** (Optional): Prometheus/Sentry metrics
+  - `ip_enrichment_success_count`
+  - `ip_enrichment_error_count`
+  - `ip_enrichment_cache_hit_rate`
+- [ ] **Security**: Debug endpoint authentication (production'da)
+  - Add admin token auth to `/debug/ip-enrichment/*` endpoints
+  - OR restrict to internal network only
+- [ ] **Enhancement**: Multiple IP enrichment per domain (MX + web IPs)
+- [ ] **Enhancement**: Enrichment data in `/leads` endpoint response (sales team visibility)
+
+**Documentation**: `docs/active/IP-ENRICHMENT-IMPLEMENTATION.md`
+
 ### 10. Sync-First Refactor ⏱️ 2 gün
 - **Durum**: ❌ Eksik - Şu an async-first yaklaşım
 - **Etki**: Düşük - Code maintainability

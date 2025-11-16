@@ -145,6 +145,19 @@ HUNTER_ENRICHMENT_DB_PATH_MAXMIND_ASN=/app/data/maxmind/GeoLite2-ASN.mmdb
 - **Thread-safe**: Safe for multi-worker deployments
 - **Non-blocking**: Enrichment doesn't delay scan response
 
+## Security Notes
+
+### Debug Endpoints
+
+⚠️ **Important**: Debug endpoints (`/debug/ip-enrichment/*`) are for **internal/admin use only**.
+
+**Production Recommendations**:
+- Restrict access to internal network only, OR
+- Add authentication (admin token) to debug endpoints, OR
+- Disable debug endpoints in production environment
+
+**Current Status**: Debug endpoints are publicly accessible. Consider adding authentication middleware or network restrictions before enabling in production.
+
 ## Troubleshooting
 
 ### Enrichment Not Working
@@ -193,7 +206,14 @@ HUNTER_ENRICHMENT_DB_PATH_MAXMIND_ASN=/app/data/maxmind/GeoLite2-ASN.mmdb
 ## Future Enhancements
 
 - Background task queue (Celery/RQ) for heavy enrichment
-- Retention policy for old enrichment records
+- **Retention policy for old enrichment records** (TASK: Review after 6 months)
+  - Monitor `ip_enrichment` table growth
+  - Consider cleanup policy: `DELETE FROM ip_enrichment WHERE created_at < NOW() - INTERVAL '365 days'`
+  - Add to maintenance cron job if table size becomes a concern
 - Multiple IP enrichment per domain (MX + web IPs)
 - Enrichment data in `/leads` endpoint response
+- Metrics integration (Prometheus/Sentry):
+  - `ip_enrichment_success_count`
+  - `ip_enrichment_error_count`
+  - `ip_enrichment_cache_hit_rate`
 
