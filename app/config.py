@@ -29,21 +29,6 @@ class Settings(BaseSettings):
     # Error Tracking
     sentry_dsn: Optional[str] = None
     
-    # Microsoft SSO (G19)
-    azure_client_id: Optional[str] = None
-    azure_client_secret: Optional[str] = None
-    azure_tenant_id: Optional[str] = None
-    azure_redirect_uri: Optional[str] = None
-    
-    # JWT (G19)
-    jwt_secret_key: str = "change-me-in-production"
-    jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 60
-    jwt_refresh_token_expire_days: int = 90
-    
-    # Refresh Token Encryption (G19 - Security hardening)
-    refresh_token_encryption_key: Optional[str] = None  # Fernet key (base64 encoded)
-    
     # Sales Engine (Phase 2)
     sales_engine_opportunity_factor: float = 1.0  # Tuning factor for opportunity potential (0.0-2.0, default: 1.0)
     
