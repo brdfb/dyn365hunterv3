@@ -11,6 +11,7 @@ def generate_one_liner(
     readiness_score: Optional[int],
     tenant_size: Optional[str],
     local_provider: Optional[str] = None,
+    ip_context: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Generate a 1-sentence sales summary for a lead.
@@ -29,17 +30,23 @@ def generate_one_liner(
     if not domain:
         return "Domain bilgisi eksik."
 
+    # IP context integration (optional, for intelligent text generation)
+    ip_country = ip_context.get("country") if ip_context else None
+    ip_is_proxy = ip_context.get("is_proxy") if ip_context else None
+
     # Migration segment - highest priority
     if segment == "Migration":
         if readiness_score and readiness_score >= 80:
+            country_note = f" ({ip_country} merkezli)" if ip_country else ""
+            proxy_warning = " ⚠️ Proxy altyapısı tespit edildi, dikkatli değerlendirme gerekli." if ip_is_proxy else ""
             if tenant_size == "large":
-                return f"{domain} - Büyük ölçekli migration fırsatı, yüksek hazırlık skoru ({readiness_score}), Enterprise teklif hazırlanabilir."
+                return f"{domain} - Büyük ölçekli migration fırsatı{country_note}, yüksek hazırlık skoru ({readiness_score}), Enterprise teklif hazırlanabilir.{proxy_warning}"
             elif tenant_size == "medium":
-                return f"{domain} - Orta ölçekli migration fırsatı, yüksek hazırlık skoru ({readiness_score}), Business Standard teklif hazırlanabilir."
+                return f"{domain} - Orta ölçekli migration fırsatı{country_note}, yüksek hazırlık skoru ({readiness_score}), Business Standard teklif hazırlanabilir.{proxy_warning}"
             elif tenant_size == "small":
-                return f"{domain} - Küçük ölçekli migration fırsatı, yüksek hazırlık skoru ({readiness_score}), Business Basic teklif hazırlanabilir."
+                return f"{domain} - Küçük ölçekli migration fırsatı{country_note}, yüksek hazırlık skoru ({readiness_score}), Business Basic teklif hazırlanabilir.{proxy_warning}"
             else:
-                return f"{domain} - Migration fırsatı, yüksek hazırlık skoru ({readiness_score}), hemen aksiyon alınabilir."
+                return f"{domain} - Migration fırsatı{country_note}, yüksek hazırlık skoru ({readiness_score}), hemen aksiyon alınabilir.{proxy_warning}"
         elif readiness_score and readiness_score >= 50:
             if local_provider:
                 return f"{domain} - {local_provider} kullanıyor, migration fırsatı (skor: {readiness_score}), takip edilmeli."
@@ -81,6 +88,7 @@ def generate_call_script(
     dkim: Optional[bool] = None,
     dmarc_policy: Optional[str] = None,
     dmarc_coverage: Optional[int] = None,
+    ip_context: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """
     Generate call script bullets for sales outreach.
@@ -102,15 +110,27 @@ def generate_call_script(
     """
     bullets = []
 
+    # IP context integration (optional, for intelligent text generation)
+    ip_country = ip_context.get("country") if ip_context else None
+    ip_is_proxy = ip_context.get("is_proxy") if ip_context else None
+    ip_city = ip_context.get("city") if ip_context else None
+
     # Opening line based on segment
     if segment == "Migration":
+        country_note = f" ({ip_country} merkezli)" if ip_country else ""
         if local_provider:
             bullets.append(
-                f"Merhaba, {domain} için email altyapınızı inceledik. Şu anda {local_provider} kullanıyorsunuz ve Microsoft 365'e geçiş için uygun bir fırsat görüyoruz."
+                f"Merhaba, {domain} için email altyapınızı inceledik{country_note}. Şu anda {local_provider} kullanıyorsunuz ve Microsoft 365'e geçiş için uygun bir fırsat görüyoruz."
             )
         else:
             bullets.append(
-                f"Merhaba, {domain} için email altyapınızı inceledik ve Microsoft 365'e geçiş için uygun bir fırsat görüyoruz."
+                f"Merhaba, {domain} için email altyapınızı inceledik{country_note} ve Microsoft 365'e geçiş için uygun bir fırsat görüyoruz."
+            )
+        
+        # Proxy warning if detected
+        if ip_is_proxy:
+            bullets.append(
+                "⚠️ Not: E-posta altyapınızın proxy üzerinden yönlendirildiğini tespit ettik. Bu durum geçiş sürecinde dikkate alınmalıdır."
             )
     elif segment == "Existing":
         bullets.append(
@@ -465,7 +485,7 @@ def generate_sales_summary(
     return {
         "domain": domain,
         "one_liner": generate_one_liner(
-            domain, provider, segment, readiness_score, tenant_size, local_provider
+            domain, provider, segment, readiness_score, tenant_size, local_provider, ip_context
         ),
         "call_script": generate_call_script(
             domain,
@@ -478,6 +498,7 @@ def generate_sales_summary(
             dkim,
             dmarc_policy,
             dmarc_coverage,
+            ip_context,
         ),
         "discovery_questions": generate_discovery_questions(
             segment, provider, tenant_size

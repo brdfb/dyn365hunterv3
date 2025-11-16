@@ -50,6 +50,12 @@ export function renderLeadsTable(leads) {
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? lead.readiness_score : '-'}
                 </td>
+                <td class="leads-table__cell leads-table__cell--actions">
+                    ${lead.domain && lead.domain !== '-' 
+                        ? `<button type="button" class="sales-button" data-domain="${escapeHtml(lead.domain)}" title="Sales Summary">📞 Sales</button>`
+                        : '-'
+                    }
+                </td>
             </tr>
         `;
     }).join('');
@@ -521,6 +527,28 @@ export function showScoreBreakdown(breakdown, domain) {
     </div>`;
     
     // Gün 3: PDF Export button
+    // IP Enrichment: Network & Location (Minimal UI)
+    if (breakdown.ip_enrichment) {
+        html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+            <div class="score-breakdown__section-title">Network & Location</div>`;
+        
+        if (breakdown.ip_enrichment.country) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Country</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.ip_enrichment.country)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.ip_enrichment.is_proxy) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">⚠️ Proxy Warning</span>
+                <span class="score-breakdown__value score-breakdown__value--negative">Proxy detected${breakdown.ip_enrichment.proxy_type ? ` (${escapeHtml(breakdown.ip_enrichment.proxy_type)})` : ''}</span>
+            </div>`;
+        }
+        
+        html += `</div>`;
+    }
+
     html += `<div class="score-breakdown__section" style="margin-top: 1rem;">
         <button type="button" id="btn-export-pdf" class="form__button" style="width: 100%;">
             📄 PDF İndir
@@ -584,6 +612,207 @@ export function hideScoreModalLoading() {
     if (content) {
         content.classList.remove('hidden');
     }
+}
+
+/**
+ * Show sales summary modal (G21 Phase 2)
+ */
+export function showSalesSummary(summary, domain) {
+    const modal = document.getElementById('sales-summary-modal');
+    const content = document.getElementById('sales-summary-content');
+    
+    if (!modal || !content) {
+        logError('Sales summary modal or content element not found', { modal, content });
+        return;
+    }
+    
+    content.innerHTML = '';
+    
+    log('Showing sales summary for domain:', domain, summary);
+    
+    // Build HTML content
+    let html = `<div class="sales-summary">`;
+    
+    // One-liner
+    html += `<div class="sales-summary__section">
+        <div class="sales-summary__section-title">Özet</div>
+        <div class="sales-summary__one-liner">${escapeHtml(summary.one_liner || 'N/A')}</div>
+    </div>`;
+    
+    // Call script
+    if (summary.call_script && summary.call_script.length > 0) {
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Call Script</div>
+            <div class="sales-summary__call-script">
+                ${summary.call_script.map((item, idx) => 
+                    `<div class="sales-summary__call-script-item">
+                        <span class="sales-summary__bullet">•</span>
+                        <span class="sales-summary__text">${escapeHtml(item)}</span>
+                    </div>`
+                ).join('')}
+            </div>
+        </div>`;
+    }
+    
+    // Discovery questions
+    if (summary.discovery_questions && summary.discovery_questions.length > 0) {
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Discovery Questions</div>
+            <div class="sales-summary__questions">
+                ${summary.discovery_questions.map((item, idx) => 
+                    `<div class="sales-summary__question-item">
+                        <span class="sales-summary__question-number">${idx + 1}.</span>
+                        <span class="sales-summary__text">${escapeHtml(item)}</span>
+                    </div>`
+                ).join('')}
+            </div>
+        </div>`;
+    }
+    
+    // Offer tier
+    if (summary.offer_tier) {
+        const tier = summary.offer_tier;
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Offer Tier</div>
+            <div class="sales-summary__offer-tier">
+                <div class="sales-summary__offer-tier-name">${escapeHtml(tier.tier || 'N/A')}</div>
+                <div class="sales-summary__offer-tier-details">
+                    <div class="sales-summary__offer-tier-item">
+                        <span class="sales-summary__label">Fiyat (kullanıcı/ay):</span>
+                        <span class="sales-summary__value">€${tier.price_per_user_per_month || 0}</span>
+                    </div>
+                    ${tier.migration_fee ? `
+                    <div class="sales-summary__offer-tier-item">
+                        <span class="sales-summary__label">Migration Ücreti:</span>
+                        <span class="sales-summary__value">€${tier.migration_fee}</span>
+                    </div>
+                    ` : ''}
+                    ${tier.defender_price_per_user_per_month ? `
+                    <div class="sales-summary__offer-tier-item">
+                        <span class="sales-summary__label">Defender (kullanıcı/ay):</span>
+                        <span class="sales-summary__value">€${tier.defender_price_per_user_per_month}</span>
+                    </div>
+                    ` : ''}
+                    ${tier.consulting_fee ? `
+                    <div class="sales-summary__offer-tier-item">
+                        <span class="sales-summary__label">Consulting Ücreti:</span>
+                        <span class="sales-summary__value">€${tier.consulting_fee}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                ${tier.recommendation ? `
+                <div class="sales-summary__offer-tier-recommendation">
+                    ${escapeHtml(tier.recommendation)}
+                </div>
+                ` : ''}
+            </div>
+        </div>`;
+    }
+    
+    // Opportunity potential & urgency
+    html += `<div class="sales-summary__section">
+        <div class="sales-summary__section-title">Fırsat Analizi</div>
+        <div class="sales-summary__metrics">
+            <div class="sales-summary__metric">
+                <span class="sales-summary__label">Opportunity Potential:</span>
+                <span class="sales-summary__value sales-summary__value--${getOpportunityClass(summary.opportunity_potential)}">
+                    ${summary.opportunity_potential || 0}/100
+                </span>
+            </div>
+            <div class="sales-summary__metric">
+                <span class="sales-summary__label">Urgency:</span>
+                <span class="sales-summary__value sales-summary__value--${summary.urgency || 'low'}">
+                    ${escapeHtml((summary.urgency || 'low').toUpperCase())}
+                </span>
+            </div>
+        </div>
+    </div>`;
+    
+    html += `</div>`;
+    
+    content.innerHTML = html;
+    modal.style.display = 'block';
+}
+
+/**
+ * Get opportunity potential CSS class
+ */
+function getOpportunityClass(score) {
+    if (score >= 70) return 'high';
+    if (score >= 50) return 'medium';
+    if (score >= 30) return 'low';
+    return 'very-low';
+}
+
+/**
+ * Show sales summary modal loading state
+ */
+export function showSalesModalLoading() {
+    const loading = document.getElementById('sales-modal-loading');
+    const content = document.getElementById('sales-summary-content');
+    if (loading) {
+        loading.classList.remove('hidden');
+    }
+    if (content) {
+        content.classList.add('hidden');
+    }
+}
+
+/**
+ * Hide sales summary modal loading state
+ */
+export function hideSalesModalLoading() {
+    const loading = document.getElementById('sales-modal-loading');
+    const content = document.getElementById('sales-summary-content');
+    if (loading) {
+        loading.classList.add('hidden');
+    }
+    if (content) {
+        content.classList.remove('hidden');
+    }
+}
+
+/**
+ * Hide sales summary modal (G21 Phase 2)
+ */
+export function hideSalesSummary() {
+    const modal = document.getElementById('sales-summary-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    hideSalesModalLoading();
+}
+
+/**
+ * Show sales summary error in modal (G21 Phase 2)
+ */
+export function showSalesSummaryError(domain, errorMessage) {
+    const modal = document.getElementById('sales-summary-modal');
+    const content = document.getElementById('sales-summary-content');
+    
+    if (!modal || !content) return;
+    
+    const html = `
+        <div class="sales-summary">
+            <div class="sales-summary__section">
+                <div class="sales-summary__item">
+                    <span class="sales-summary__label">Domain</span>
+                    <span class="sales-summary__value">${escapeHtml(domain)}</span>
+                </div>
+            </div>
+            <div class="sales-summary__section" style="text-align: center; padding: 2rem;">
+                <div style="color: #e74c3c; font-size: 1.125rem; margin-bottom: 1rem;">
+                    ⚠️ ${escapeHtml(errorMessage)}
+                </div>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    Sales summary'yi görmek için önce domain'i taramanız gerekiyor.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+    modal.style.display = 'block';
 }
 
 /**

@@ -83,6 +83,12 @@ API contract documentation:
   - Fixed priority score ranges
   - All 86 scoring tests passing (0 failures)
   - Status: ✅ Completed
+
+#### IP Enrichment Documentation
+- `IP-ENRICHMENT-UI-PATCH-PLAN.md` (2025-01-28) - IP enrichment UI integration patch plan
+  - Minimal approach: Country + proxy warning in score breakdown modal
+  - IP context integration in sales engine for intelligent text generation
+  - Status: ✅ Completed (2025-01-28)
 - `2025-01-28-GOLDEN-DATASET-CRITIQUE.md` (2025-01-28) - Critique of current "golden dataset"
   - Analysis: Current dataset is silver-level regression set, not ground truth
   - Action: Renamed to regression dataset, blueprint created for true golden dataset

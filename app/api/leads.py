@@ -676,8 +676,18 @@ async def enrich_lead(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
+class IpEnrichmentSchema(BaseModel):
+    """IP enrichment schema for score breakdown."""
+
+    country: Optional[str] = None
+    city: Optional[str] = None
+    isp: Optional[str] = None
+    is_proxy: Optional[bool] = None
+    proxy_type: Optional[str] = None
+
+
 class ScoreBreakdownResponse(BaseModel):
-    """Response model for score breakdown (G19 + G20)."""
+    """Response model for score breakdown (G19 + G20 + IP Enrichment)."""
 
     base_score: int
     provider: Dict[str, Any]  # {"name": str, "points": int}
@@ -688,6 +698,8 @@ class ScoreBreakdownResponse(BaseModel):
     tenant_size: Optional[str] = None  # G20: Tenant size (small/medium/large)
     local_provider: Optional[str] = None  # G20: Local provider name (e.g., TürkHost)
     dmarc_coverage: Optional[int] = None  # G20: DMARC coverage (0-100)
+    # IP Enrichment (Minimal UI)
+    ip_enrichment: Optional[IpEnrichmentSchema] = None
 
 
 @router.get("/{domain}/score-breakdown", response_model=ScoreBreakdownResponse)
@@ -760,5 +772,20 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
     breakdown_dict["tenant_size"] = company.tenant_size  # G20: Tenant size
     breakdown_dict["local_provider"] = domain_signal.local_provider  # G20: Local provider
     breakdown_dict["dmarc_coverage"] = domain_signal.dmarc_coverage  # G20: DMARC coverage
+
+    # IP Enrichment (Minimal UI)
+    from app.core.enrichment_service import latest_ip_enrichment
+
+    ip_enrichment_record = latest_ip_enrichment(normalized_domain, db)
+    if ip_enrichment_record:
+        breakdown_dict["ip_enrichment"] = {
+            "country": ip_enrichment_record.country,
+            "city": ip_enrichment_record.city,
+            "isp": ip_enrichment_record.isp,
+            "is_proxy": ip_enrichment_record.is_proxy,
+            "proxy_type": ip_enrichment_record.proxy_type,
+        }
+    else:
+        breakdown_dict["ip_enrichment"] = None
 
     return ScoreBreakdownResponse(**breakdown_dict)

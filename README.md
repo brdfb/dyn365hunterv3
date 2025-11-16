@@ -14,6 +14,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
+- **IP Enrichment Minimal UI** (✅ Completed) - Added IP enrichment to score breakdown and sales summary
+  - Backend: IP enrichment integrated into score-breakdown and sales-summary endpoints
+  - UI: Network & Location section added to score breakdown modal (country + proxy warning)
+  - Sales Engine: IP context (country, proxy) integrated into sales intelligence text generation
+  - Impact: Improves score accuracy, enhances sales intelligence, strengthens Hunter's positioning
 - **Regression Dataset Rename & Expansion** (✅ Completed) - Renamed "golden dataset" to "silver regression dataset"
   - Renamed test file and variables for clarity (synthetic regression set, not ground truth)
   - Expanded regression dataset from 14-15 to 26 test cases

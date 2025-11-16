@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Enhanced
+- **IP Enrichment Minimal UI** (2025-01-28) - Added IP enrichment data to score breakdown and sales summary
+  - **Backend**: Added `ip_enrichment` field to `ScoreBreakdownResponse` model
+  - **Backend**: Integrated IP enrichment into `get_score_breakdown` endpoint
+  - **Backend**: Added `ip_context` parameter to `generate_sales_summary` function
+  - **Backend**: Integrated IP enrichment into `get_sales_summary` endpoint
+  - **Sales Engine**: IP context (country, proxy) integrated into `generate_one_liner` and `generate_call_script`
+  - **UI**: Added "Network & Location" section to score breakdown modal (country + proxy warning)
+  - **Impact**: Improves score accuracy, enhances sales intelligence, strengthens Hunter's "what CRM can't do" positioning
+  - **Status**: ✅ Completed
+  - **Files Modified**: `app/api/leads.py`, `app/core/sales_engine.py`, `app/api/sales_summary.py`, `mini-ui/js/ui-leads.js`
+
 ### Changed
 - **Regression Dataset Rename** (2025-01-28) - Renamed "golden dataset" to "silver regression dataset" for clarity
   - **Renamed**: `test_golden_dataset.py` → `test_regression_dataset.py`
