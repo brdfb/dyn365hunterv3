@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- TBD
+
+## [1.1.0] - 2025-01-28
+
+### Highlights
+- **G21 Phase 2: Sales Engine** - Sales intelligence layer with call scripts, discovery questions, and offer tier recommendations
+- **G21 Phase 3: Read-Only Mode** - CRM-lite features write endpoints disabled for Dynamics 365 migration
+- **Stabilization Sprint** - 3-day enterprise-ready stabilization (UI, monitoring, core stability)
+- **Core Logging Standardization** - Structured logging with PII masking across all modules
+
+### Added
 - **G21 Phase 3: Read-Only Mode** (2025-01-28) - Disabled write endpoints for CRM-lite features (Notes/Tags/Favorites)
   - **Deprecated Endpoint Monitoring** (`app/core/deprecated_monitoring.py`):
     - Track deprecated endpoint calls (total calls, calls by endpoint, calls by domain)
@@ -67,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Benefits**: Sales-ready intelligence, segment-specific call scripts, discovery questions, offer tier recommendations
 
 ### Deprecated
-- **G21 Phase 3: Read-Only Mode** (2025-01-28) - CRM-lite features (Notes/Tags/Favorites) write endpoints disabled (410 Gone)
+- **G21 Phase 1: Deprecation Annotations** (2025-11-16) - CRM-lite features (Notes/Tags/Favorites) write endpoints deprecated
   - **Notes endpoints** (write operations disabled):
     - `POST /leads/{domain}/notes` - ❌ Disabled (410 Gone) - Notes now managed in Dynamics 365
     - `PUT /leads/{domain}/notes/{note_id}` - ❌ Disabled (410 Gone)
@@ -88,32 +99,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Alternative**: Use Dynamics 365 Timeline/Notes API, Tags API, and Favorite field for CRM-lite features
   - **Migration**: Read endpoints remain available for migration support until Phase 6
   - **Status**: Phase 3 completed - Read-only mode active, monitoring in place, zero downtime
-- **G21 Phase 1: Deprecation Annotations** (2025-11-16) - CRM-lite features (Notes/Tags/Favorites) write endpoints deprecated
-  - **Deprecation decorator** (`app/core/deprecation.py`):
-    - Structured logging for deprecated endpoint calls
-    - Response headers: `X-Deprecated`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`, `X-Deprecation-Date`
-    - Deprecation date: 2025-11-16
-    - Removal date: 2026-02-01 (Phase 6 cleanup)
-  - **Status**: Phase 1 completed - Deprecation warnings active, zero breaking changes (superseded by Phase 3)
 
 ### Fixed
-- **G20: Scan Endpoint Missing Fields** (2025-11-15) - Fixed missing G20 fields in `/scan/domain` endpoint
-  - Added `tenant_size` calculation and saving for M365/Google providers
-  - Added `local_provider` detection and saving for Local providers
-  - Added `dmarc_coverage` saving from DNS analysis
-  - Response model now includes all G20 fields (tenant_size, local_provider, dmarc_coverage)
-  - Fixes issue where tenant_size and local_provider were not populated during domain scanning
+- **Core Logging Standardization** (2025-01-28) - Fixed logging inconsistencies across core modules
+  - **Standardized logging imports**: All core modules now use `from app.core.logging import logger` instead of `logging.getLogger(__name__)`
+  - **Structured logging format**: Converted all f-string logger calls to structured logging format
+  - **PII masking**: Cache keys and sensitive data are now masked in logs (domain → hash, email → hash)
+  - **Log level optimization**: Cache failures moved to debug level (frequent, non-critical), Redis initialization failures use error level (critical)
+  - **Files updated**:
+    - `app/core/cache.py` - Cache operations now use structured logging with PII masking (`cache_get_failed`, `cache_set_failed`, `cache_delete_failed`)
+    - `app/core/distributed_rate_limiter.py` - Rate limiting operations now use structured logging (`circuit_breaker_opened`, `rate_limiter_fallback`, `redis_rate_limit_operation_failed`)
+    - `app/core/redis_client.py` - Redis client operations now use structured logging (`redis_client_initialized`, `redis_client_initialization_failed`)
+  - **Test coverage**:
+    - `scripts/test_logging_output.py` - Unit tests for PII masking, log format, and structured logging
+    - `scripts/smoke_test_logging.sh` - Integration tests for API-level logging verification
+  - **Documentation**:
+    - `docs/active/LOGGING-GOLDEN-SAMPLES.md` - Golden samples for structured logging format
+    - `docs/active/LOGGING-SMOKE-TEST.md` - Smoke test guide and verification checklist
+  - **Benefits**: Consistent JSON log format in production, better log aggregation, contextual logging with structured fields, PII protection
+  - **Status**: ✅ All core modules now use structured logging consistently with PII masking
 
 ### Added
-- **Support Endpoint** (2025-11-15) - Added `/support` endpoint for support information
-  - Returns support information with API documentation links
-  - Footer link in Mini UI now functional
-- **PDF Turkish Character Support** (2025-11-15) - Fixed Turkish character encoding in PDF generation
-  - Table cells now use Paragraph objects for UTF-8 support
-  - Turkish characters (ı, ş, ğ, ü, ö, ç) now display correctly in PDF
-  - Fixed "Zayıf sinyaller" → "Zay f sinyaller" issue
-  - Applied to all tables: Domain Information, Security Status, Scores, Signals
-  - Analysis section now properly displays Turkish text
 - **Stabilization Sprint - Gün 3: UI Stabilizasyon** (2025-01-28) - Satış ekibi için 2 dakikada kullanılabilir UI
   - Table view cleanup - Column width optimization (domain, provider, score, segment, priority, tenant-size, local-provider), row hover effect with smooth transition, empty state message with CTA button, loading state spinner with animation, pagination UI improvements (page numbers, prev/next, page info) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/index.html`)
   - Score breakdown modal improvements - Close button more prominent (absolute positioning, hover effect), backdrop click to close (fixed to only close on overlay click), ESC key to close modal, modal scroll optimization (max-height: 80vh, overflow-y: auto), score breakdown tooltips for signals and risks (SPF, DKIM, DMARC, risk factors) (`mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/js/app.js`)
@@ -288,57 +294,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Training Material: `docs/active/SALES-TRAINING.md` (eğitim materyali)
     - Sales Guide: `docs/SALES-GUIDE.md` (özet bölüm eklendi)
     - Sales Scenarios: `docs/SALES-SCENARIOS.md` (7 yeni senaryo eklendi)
-- **G20: Domain Intelligence Layer** - Enhanced domain intelligence features
-  - **Local Provider Detail** (P0): Automatic detection of specific local hosting providers
-    - `local_provider` field in `domain_signals` table
-    - Classification for Turkish local providers (TürkHost, Natro, Turhost, Superonline, TTNET, DNS, İsimtescil, etc.)
-    - Implementation: `app/core/provider_map.py` - `classify_local_provider()` function
-    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
-  - **Tenant Size Estimation** (P1): MX pattern-based tenant size estimation for M365 and Google Workspace
-    - `tenant_size` field in `companies` table (values: "small", "medium", "large")
-    - Pattern-based estimation for M365 (OLC, Enterprise, Regional patterns)
-    - Pattern-based estimation for Google Workspace
-    - Implementation: `app/core/provider_map.py` - `estimate_tenant_size()` function
-    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
-  - **DMARC Coverage** (P1): DMARC policy coverage percentage extraction
-    - `dmarc_coverage` field in `domain_signals` table (0-100, pct parameter)
-    - Enhanced `check_dmarc()` function in `app/core/analyzer_dns.py` to parse pct parameter
-    - Default coverage: 100% (if pct not specified)
-    - Database migration: `app/db/migrations/g20_domain_intelligence.sql`
-  - API updates:
-    - `GET /leads` and `GET /leads/{domain}` now return `tenant_size`, `local_provider`, and `dmarc_coverage`
-    - `POST /scan/domain` response includes new fields
-    - `GET /leads/{domain}/score-breakdown` now includes G20 fields in response
-    - Export endpoints include new fields in CSV/Excel exports
-  - Mini UI integration:
-    - Added "Tenant Size" column to leads table with color-coded badges (small/medium/large)
-    - Added "Local Provider" column to leads table
-    - Updated score breakdown modal to display G20 fields (tenant_size, local_provider, dmarc_coverage)
-    - Tenant size badge styling: small (green), medium (orange), large (blue)
-    - Files: `mini-ui/index.html`, `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`
-  - Database schema:
-    - Added `tenant_size` column to `companies` table (VARCHAR(50), indexed)
-    - Added `local_provider` column to `domain_signals` table (VARCHAR(255), indexed)
-    - Added `dmarc_coverage` column to `domain_signals` table (INTEGER, indexed)
-    - Updated `leads_ready` view to include new columns
-  - Documentation:
-    - Updated `docs/SALES-GUIDE.md` with G20 features and examples
-    - Updated `docs/SEGMENT-GUIDE.md` with G20 fields in score examples
-    - Updated `docs/SALES-SCENARIOS.md` with G20 usage scenarios
-    - Added FAQ entries for Tenant Size, Local Provider, and DMARC Coverage
-  - Implementation files:
-    - `app/core/provider_map.py` - Local provider classification and tenant size estimation
-    - `app/core/analyzer_dns.py` - DMARC coverage parsing
-    - `app/core/tasks.py` - Scan task integration
-    - `app/api/leads.py` - API response models updated
-    - `app/db/models.py` - Database models updated
-    - `app/data/providers.json` - Local provider mappings added
-  - Tests: All functions tested and verified
-    - Local provider classification tests
-    - Tenant size estimation tests
-    - DMARC coverage parsing tests
-  - Post-MVP feature (domain intelligence enhancement)
-
 - **UI Patch v1.1** - Skor detay modal ve UX iyileştirmeleri
   - Skor detay modal iyileştirmeleri:
     - DKIM çift gösterimi düzeltildi: `no_dkim` (-10) ve `dkim_none` (-5) tek satırda birleştirildi → "DKIM Eksik: -15"
@@ -361,8 +316,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `mini-ui/styles.css` - Provider badge CSS'leri ve sort icon iyileştirmeleri eklendi
     - `mini-ui/index.html` - Sort column'larına tooltip'ler eklendi
   - Plan: `.cursor/plans/UI-PATCH-PLAN-v1.1.md`
-
-### Added
 - **Priority Score Improvements** - Enhanced priority scoring system
   - Extended priority range from 1-6 to 1-7 for better granularity
   - Migration segment now always gets priority (even with low scores: Priority 3-4)
@@ -383,7 +336,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated API default values (Priority 6 → 7)
   - Updated test suite in `tests/test_priority.py`
   - Updated documentation (SEGMENT-GUIDE.md, SALES-GUIDE.md, SALES-SCENARIOS.md, README.md)
-
 - **G19: Microsoft SSO Authentication + UI Upgrade** - Authentication and enhanced UI features
   - Microsoft SSO Authentication:
     - `GET /auth/login` - Initiate Azure AD OAuth 2.0 login
@@ -430,6 +382,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-11-14
 
 ### Added
+- **Support Endpoint** (2025-11-15) - Added `/support` endpoint for support information
+  - Returns support information with API documentation links
+  - Footer link in Mini UI now functional
 - **G18: ReScan + Alerts + Enhanced Scoring** - Automation and change detection
   - ReScan infrastructure:
     - `POST /scan/{domain}/rescan` - Manual rescan with change detection
@@ -570,44 +525,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `tests/test_bulk_scan.py` - Integration tests for bulk scan API
   - Worker startup script: `scripts/start_celery_worker.sh`
   - Post-MVP Sprint 2 feature (core infrastructure)
-- **Provider Change Tracking** - Automatic detection and logging of provider changes
-  - `ProviderChangeHistory` model in `app/db/models.py` to track provider changes over time
-  - Automatic detection when domain is scanned (via `/scan/domain` or CSV ingestion with `auto_scan=true`)
-  - Provider changes logged to `provider_change_history` table (domain, previous_provider, new_provider, changed_at)
-  - Implementation: Provider change detection in `app/api/scan.py` and `app/api/ingest.py`
-  - Use cases: Migration opportunity detection, customer behavior tracking, sales follow-up
-  - Documentation: `docs/active/PROVIDER-CHANGE-TRACKING.md`
-
-- **Duplicate Prevention** - Automatic cleanup of duplicate LeadScore and DomainSignal records
-  - Delete existing records before creating new ones (prevents duplicates on re-scan)
-  - Implementation: Explicit delete queries in `app/api/scan.py` and `app/api/ingest.py`
-  - Ensures only one current record per domain for both `lead_scores` and `domain_signals` tables
-  - Benefits: Data quality, accurate lead counts, always reflects most recent scan
-  - Documentation: `docs/active/DUPLICATE-PREVENTION.md`
-
-- **Domain Validation** - Enhanced validation to filter invalid domains
-  - `is_valid_domain()` function in `app/core/normalizer.py` to validate domain format
-  - Filters invalid values: nan, n/a, web sitesi, website, http, https, etc.
-  - URL extraction: Automatically extracts domain from URLs (http://example.com/ → example.com)
-  - Validation integrated into CSV ingestion and scan endpoints
-  - Invalid domains are skipped with descriptive error messages
-  - Documentation: `docs/active/DOMAIN-VALIDATION.md`
-
-- **Progress Tracking** - Real-time progress updates for CSV ingestion and scanning operations
-  - In-memory job tracking system (`app/api/jobs.py`) for job status and progress
-  - `GET /jobs/{job_id}` endpoint (`app/api/progress.py`) to query job progress
-  - Progress updates during CSV ingestion and auto-scan operations
-  - Frontend polling mechanism in Mini UI for real-time progress bar
-  - Progress metrics: processed, total, successful, failed, remaining, progress_percent, message
-  - Status: queued, processing, completed, failed
-
-- **Auto-Scan Feature** - Automatic domain scanning after CSV ingestion
-  - `auto_scan=true` query parameter for `/ingest/csv` endpoint (default: true)
-  - Automatically scans all ingested domains (DNS + WHOIS + scoring)
-  - Results automatically added to lead list
-  - Integrated with progress tracking for long-running operations
-  - Frontend: Mini UI automatically enables auto-scan
-
 - **G14: CSV Export** - Lead data export to CSV and Excel formats
   - `GET /leads/export` endpoint for exporting leads to CSV or Excel format
   - Filter parameters: `segment`, `min_score`, `provider` (same as GET /leads)
@@ -617,7 +534,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implementation: Export endpoint added to `app/api/leads.py` router
   - Tests: `tests/test_export.py` - Comprehensive export tests (9 test cases)
   - Post-MVP feature (low-risk, core-independent)
-
 - **G14: Mini UI** - Simple web interface for demo and internal use
   - HTML + Vanilla JavaScript + CSS (no framework)
   - `mini-ui/` directory structure with modular JS (api.js, ui-leads.js, ui-forms.js, app.js)
@@ -634,43 +550,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Documentation: `mini-ui/README-mini-ui.md`, `mini-ui/TEST-CHECKLIST.md`
   - Post-MVP feature (low-risk, core-independent, demo-ready)
 
-- **G11: Importer Module** - Excel/CSV column auto-detection and ingestion enhancement
-  - Excel file support (.xlsx, .xls) for `/ingest/csv` endpoint
-  - `auto_detect_columns` query parameter for automatic column detection
-  - `app/core/importer.py` - Column guessing utilities (`guess_company_column`, `guess_domain_column`)
-  - Heuristic-based column detection for OSB Excel files
-  - Backward compatible: existing CSV ingestion continues to work
-  - Tests: `tests/test_importer_autodetect.py` - Column detection tests
-  - Tests: Updated `tests/test_ingest_csv.py` with Excel support tests
-
-- **G12: Email Generator** - Generic email address generation
-  - `POST /email/generate` endpoint for generating generic email addresses
-  - `app/core/email_generator.py` - Email generation utilities (`generate_generic_emails`)
-  - Generic email list includes Türkçe (iletisim, satis, muhasebe, ik) and International (info, sales, admin, support, hr) local parts
-  - Domain normalization integrated (www prefix removal, lowercase, etc.)
-  - Tests: `tests/test_email_generator.py` - Email generation tests
-
-- **G13: Email Validator** - Email validation with syntax, MX, and optional SMTP checks
-  - `POST /email/generate-and-validate` endpoint for generating and validating emails
-  - `app/core/email_validator.py` - Email validation utilities
-    - Syntax validation (RFC 5322 simplified regex)
-    - MX record validation (DNS lookup using existing `get_mx_records`)
-    - Optional SMTP validation (RCPT TO check, flag-based, default: disabled)
-  - Validation result includes status ("valid", "invalid", "unknown"), confidence level ("high", "medium", "low"), and detailed checks
-  - Light validation by default (syntax + MX, no SMTP) for fast response times
-  - SMTP validation optional and controlled via `use_smtp` parameter
-  - Tests: `tests/test_email_validator.py` - Comprehensive validation tests with mocks (19 test cases)
-
-### Post-MVP (High Priority)
-- ✅ CSV Export - **Completed** (G14) - CSV and Excel export with filters
-- ✅ Mini UI - **Completed** (G14) - Simple web interface for demo and internal use
-- ✅ Bulk Scan - **Completed** (G15) - Async bulk domain scanning with progress tracking
-- ✅ Webhook + Enrichment - **Completed** (G16) - Webhook ingestion with API key authentication
-- ✅ Notes/Tags/Favorites + PDF - **Completed** (G17) - CRM-lite features and PDF summaries
-- ✅ ReScan + Alerts - **Completed** (G18) - Automation and change detection
-
-### Post-MVP (Low Priority)
-- Email Templates, Reminders - Requirements specified
+### Fixed
+- **G20: Scan Endpoint Missing Fields** (2025-11-15) - Fixed missing G20 fields in `/scan/domain` endpoint
+  - Added `tenant_size` calculation and saving for M365/Google providers
+  - Added `local_provider` detection and saving for Local providers
+  - Added `dmarc_coverage` saving from DNS analysis
+  - Response model now includes all G20 fields (tenant_size, local_provider, dmarc_coverage)
+  - Fixes issue where tenant_size and local_provider were not populated during domain scanning
+- **PDF Turkish Character Support** (2025-11-15) - Fixed Turkish character encoding in PDF generation
+  - Table cells now use Paragraph objects for UTF-8 support
+  - Turkish characters (ı, ş, ğ, ü, ö, ç) now display correctly in PDF
+  - Fixed "Zayıf sinyaller" → "Zay f sinyaller" issue
+  - Applied to all tables: Domain Information, Security Status, Scores, Signals
+  - Analysis section now properly displays Turkish text
 
 ## [0.5.0] - 2025-01-27
 

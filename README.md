@@ -11,6 +11,23 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 **Target**: ≤2 minute "kahvelik" analysis flow for sales team.
 
+## Recent Updates (Last 6 Months)
+
+**v1.1.0** (2025-01-28):
+- **G21 Phase 2: Sales Engine** - Sales intelligence layer with call scripts, discovery questions, and offer tier recommendations
+- **G21 Phase 3: Read-Only Mode** - CRM-lite features write endpoints disabled for Dynamics 365 migration
+- **Stabilization Sprint** - 3-day enterprise-ready stabilization (UI, monitoring, core stability)
+- **Core Logging Standardization** - Structured logging with PII masking across all modules
+
+**v1.0.0** (2025-11-14):
+- **G18: ReScan + Alerts** - Automation and change detection
+- **G17: Notes, Tags, Favorites + PDF** - CRM-lite features and PDF summaries
+- **G16: Webhook + Lead Enrichment** - Webhook ingestion with API key authentication
+- **G15: Bulk Scan & Async Queue** - Async bulk domain scanning with progress tracking
+- **G14: CSV Export + Mini UI** - Lead data export and simple web interface
+
+> 📋 **Full changelog**: See [CHANGELOG.md](CHANGELOG.md) for complete release history
+
 ## Features
 
 ### Core Functionality
@@ -85,6 +102,7 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - **Rate Limiting**: Redis-based distributed rate limiting (P1-2) - Multi-worker support with fallback
 - **Caching**: Redis-based distributed caching (P1-3) - DNS, WHOIS, Provider, Scoring, Scan cache
 - **Bulk Operations**: Batch processing optimization (P1-4) - Rate-limit aware batch processing with deadlock prevention
+- **Logging**: Structured logging with PII masking (2025-01-28) - JSON format in production, contextual logging, domain/email masking
 - **DNS Analysis**: dnspython
 - **WHOIS**: python-whois
 - **Deployment**: Docker Compose
@@ -205,6 +223,38 @@ A simple web interface for demo and internal use:
 - **Legacy Endpoints**: Legacy endpoints (e.g., `/leads`, `/scan/domain`) continue to work for backward compatibility
 - **Infrastructure Endpoints**: Health check (`/healthz`) and authentication (`/auth/*`) endpoints are not versioned
 - **Migration**: Clients can gradually migrate to v1 endpoints while legacy endpoints remain active
+
+### Quick Reference
+
+| Category | Endpoint | Method | Description |
+|----------|----------|--------|-------------|
+| **Health** | `/healthz` | GET | Health check and database status |
+| **Health** | `/healthz/metrics` | GET | Metrics (cache, rate limit, bulk operations, errors) |
+| **Ingest** | `/ingest/domain` | POST | Ingest single domain |
+| **Ingest** | `/ingest/csv` | POST | Ingest domains from CSV/Excel file |
+| **Ingest** | `/ingest/webhook` | POST | Webhook ingestion (API key required) |
+| **Scan** | `/scan/domain` | POST | Analyze single domain (DNS + WHOIS + scoring) |
+| **Scan** | `/scan/bulk` | POST | Create bulk scan job (async) |
+| **Scan** | `/scan/bulk/{job_id}` | GET | Get bulk scan progress |
+| **Scan** | `/scan/{domain}/rescan` | POST | Re-scan domain with change detection |
+| **Leads** | `/leads` | GET | Query leads (filters, sorting, pagination, search) |
+| **Leads** | `/leads/{domain}` | GET | Get single lead details |
+| **Leads** | `/leads/{domain}/sales-summary` | GET | Get sales intelligence summary (G21 Phase 2) |
+| **Leads** | `/leads/{domain}/score-breakdown` | GET | Get detailed score breakdown |
+| **Leads** | `/leads/{domain}/enrich` | POST | Manually enrich lead with contact emails |
+| **Leads** | `/leads/export` | GET | Export leads to CSV/Excel |
+| **Leads** | `/leads/{domain}/summary.pdf` | GET | Generate PDF account summary |
+| **Dashboard** | `/dashboard` | GET | Get aggregated dashboard statistics |
+| **Dashboard** | `/dashboard/kpis` | GET | Get dashboard KPIs (lightweight) |
+| **Auth** | `/auth/login` | GET | Initiate Microsoft SSO login |
+| **Auth** | `/auth/me` | GET | Get current user information |
+| **Admin** | `/admin/api-keys` | POST | Create API key |
+| **Email** | `/email/generate` | POST | Generate generic email addresses |
+| **Email** | `/email/generate-and-validate` | POST | Generate and validate emails |
+| **Alerts** | `/alerts` | GET | List alerts with filters |
+| **Alerts** | `/alerts/config` | POST | Configure alert preferences |
+
+> 📖 **Detailed documentation**: See sections below for complete endpoint documentation with request/response examples
 
 **Interactive API Documentation:**
 - Swagger UI: `http://localhost:8000/docs` (interactive API explorer)
@@ -683,6 +733,8 @@ curl -X POST http://localhost:8000/leads/example.com/enrich \
 - [WSL Guide](docs/active/WSL-GUIDE.md) - WSL2 setup and troubleshooting
 - [Testing Guide](docs/active/TESTING.md) - How to run tests
 - [Docker Troubleshooting](docs/active/DOCKER-TROUBLESHOOTING.md) - Common Docker issues and solutions
+- [Logging Guide](docs/active/LOGGING-GOLDEN-SAMPLES.md) - Structured logging format and golden samples
+- [Logging Smoke Test](docs/active/LOGGING-SMOKE-TEST.md) - Logging verification and testing guide
 - [Mini UI README](mini-ui/README-mini-ui.md) - Mini UI usage guide and documentation
 
 ## License
