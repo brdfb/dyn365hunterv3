@@ -91,8 +91,9 @@ async def export_leads(
         CSV or Excel file download with lead data
     """
     # Build query using leads_ready VIEW (same as GET /leads)
+    # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
     query = """
-        SELECT 
+        SELECT DISTINCT ON (domain)
             company_id,
             canonical_name,
             domain,
@@ -135,8 +136,9 @@ async def export_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
 
-    # Note: We'll sort by priority_score in Python after calculating it
-    query += " ORDER BY readiness_score DESC, domain ASC"
+    # Note: DISTINCT ON requires domain to be first in ORDER BY
+    # We'll sort by priority_score in Python after calculating it
+    query += " ORDER BY domain, scanned_at DESC NULLS LAST"
 
     try:
         result = db.execute(text(query), params)
@@ -291,8 +293,9 @@ async def get_leads(
         LeadsListResponse with paginated leads and metadata
     """
     # Build query using leads_ready VIEW
+    # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
     query = """
-        SELECT 
+        SELECT DISTINCT ON (domain)
             company_id,
             canonical_name,
             domain,
@@ -345,10 +348,11 @@ async def get_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
 
-    # Note: We'll sort by priority_score in Python after calculating it
+    # Note: DISTINCT ON requires domain to be first in ORDER BY
+    # We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
     # Default sorting (if sort_by not specified) is by priority_score
-    query += " ORDER BY readiness_score DESC, domain ASC"
+    query += " ORDER BY domain, scanned_at DESC NULLS LAST"
 
     try:
         result = db.execute(text(query), params)

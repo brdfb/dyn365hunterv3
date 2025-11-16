@@ -1,9 +1,9 @@
 # Kalan İşler - Öncelik Sırası (CRITIQUE GÜNCELLEMESİ)
 
 **Tarih**: 2025-01-28  
-**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → P2 Backlog  
-**Son Güncelleme**: 2025-01-28 (Stabilization Sprint tamamlandı)  
-**Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. P2 backlog olarak kaldı.
+**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
+**Son Güncelleme**: 2025-01-28 (G21 Architecture Refactor başlatıldı)  
+**Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. **G21: Architecture Refactor başlatıldı (2025-01-28).** P2 backlog olarak kaldı.
 
 ---
 
@@ -64,6 +64,49 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 - ✅ Sentry error tracking aktif mi? - ✅ Gün 2'de tamamlandı
 
 **Sonuç**: Hunter v1.1 → **v1.1-stable** (Enterprise-Ready / UI-Stable / Integration-Ready) ✅ **TAMAMLANDI**
+
+---
+
+## 🔄 G21: Architecture Refactor - Hunter Slimming
+
+**Durum**: 🔄 **IN PROGRESS** (2025-01-28 başlatıldı)  
+**Priority**: P0 (Critical)  
+**Estimated Duration**: 3-4 weeks  
+**Risk Level**: 0-5% (with proper execution)  
+**Current Phase**: Phase 3 - Read-Only Mode 🔄 **NEXT**
+
+**Phase 2 Status**: ✅ **COMPLETED** (2025-01-28)
+
+### Goal
+
+Refactor Hunter to its core purpose: **"Thin, muscular signal engine that produces expensive signals."**
+
+Remove CRM-lite features (Notes/Tags/Favorites) and move them to Dynamics 365.
+
+Add Sales Engine (sales intelligence layer).
+
+### Phases
+
+1. **Phase 0**: Preparation & Snapshot (1 day) ✅ **COMPLETED** (2025-11-16)
+2. **Phase 1**: Deprecation Annotations (1 day) ✅ **COMPLETED** (2025-11-16)
+3. **Phase 2**: Sales Engine (Additive) (3-5 days) ✅ **COMPLETED** (2025-01-28)
+4. **Phase 3**: Read-Only Mode (1 day)
+5. **Phase 4**: Dynamics Migration (1-2 weeks) - **May be simplified** (no data to migrate)
+6. **Phase 5**: Monitoring & Stabilization (1 week)
+7. **Phase 6**: Cleanup (1 day)
+
+### Key Principles
+
+- Zero-downtime refactoring
+- Additive-first approach (no breaking changes)
+- Read-only migration support
+- Monitoring at every phase
+
+### Related Documents
+
+- `docs/prompts/2025-01-28-hunter-architecture-refactor-decision.md` - Architectural decision
+- `docs/active/NO-BREAK-REFACTOR-PLAN.md` - Detailed implementation plan
+- `docs/todos/G21-architecture-refactor.md` - TODO list
 
 ---
 
@@ -562,10 +605,30 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 
 ---
 
+### ⚠️ Prod v1.2 (G21 Phase 2 - Sales Engine) - Sales Engine Checklist
+
+**Şartlar**: Phase 2 Sales Engine Go/No-Go
+
+**SALES-1 – Sales Engine endpoint çalışıyor** ✅ **COMPLETED** (2025-01-28)
+- [x] ✅ `GET /api/v1/leads/{domain}/sales-summary` 200 OK
+- [x] ✅ `GET /leads/{domain}/sales-summary` (legacy) 200 OK
+- [x] ✅ Response içinde: `domain`, `one_liner`, `call_script`, `discovery_questions`, `offer_tier`, `opportunity_potential`, `urgency`, `metadata`
+- [x] ✅ Migration segment örneklerinde script ve sorular mantıklı (real-world smoke test: dmkimya.com.tr validated)
+- [x] ✅ Existing segment örneklerinde script ve sorular mantıklı (real-world smoke test: asteknikvana.com validated)
+- [x] ✅ `pytest tests/test_sales_engine_core.py` → 38 tests, all passing
+- [x] ✅ `pytest tests/test_sales_summary_api.py` → 7 tests, all passing
+- [x] ✅ Response shape stabil (multiple calls return consistent structure)
+- [x] ✅ Edge cases test edildi (minimal data, not found, etc.)
+
+**Status**: ✅ **Phase 2 completed** - All checklist items verified and passing
+
+---
+
 | Versiyon | Şartlar                                                                                             |
 | -------- | --------------------------------------------------------------------------------------------------- |
 | **v1.0** | P0 checklist yeşil                                                                                  |
 | **v1.1** | P0 + P1 Go/No-Go (Redis health, Alembic rollback tested, DRL tested, cache hit metrics, bulk tests) |
+| **v1.2** | v1.1 + G21 Phase 2 Go/No-Go (SALES-1 checklist yeşil) |
 
 ---
 

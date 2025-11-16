@@ -20,41 +20,56 @@ Add Sales Engine (sales intelligence layer).
 
 ## 📋 Tasks
 
-### Phase 0: Preparation & Snapshot
+### Phase 0: Preparation & Snapshot ✅ **COMPLETED** (2025-11-16)
 - [x] Database backup script created (`scripts/g21_phase0_backup.sh`)
 - [x] Git tag script created (`scripts/g21_phase0_git_tag.sh`)
 - [x] Usage metrics collection script created (`scripts/g21_phase0_metrics.sh`)
 - [x] Dependency map created (`docs/g21-phase0-metrics/DEPENDENCY-MAP.md`)
-- [ ] **Execute**: Database backup (run `bash scripts/g21_phase0_backup.sh`)
-- [ ] **Execute**: Git tag (run `bash scripts/g21_phase0_git_tag.sh`)
-- [ ] **Execute**: Usage metrics collection (run `bash scripts/g21_phase0_metrics.sh`)
-- [ ] **Manual**: Check Power Automate flows for Notes/Tags/Favorites usage
-- [ ] **Manual**: Check external API clients (application logs)
+- [x] **Execute**: Database backup (✅ `backups/backup_pre_refactor_20251116_101321.sql` - 47K)
+- [x] **Execute**: Git tag (✅ `pre-refactor-v1.0.0` - pushed to remote)
+- [x] **Execute**: Usage metrics collection (✅ `docs/g21-phase0-metrics/usage_metrics_20251116_101559.json`)
+- [x] **Analysis**: Notes/Tags/Favorites tables do NOT exist - features never used
+- [x] **Analysis**: Mini UI does not use Notes/Tags/Favorites endpoints
+- [x] **Analysis**: Test suite exists (will be updated in Phase 6)
+- [ ] **Manual**: Check Power Automate flows for Notes/Tags/Favorites usage (non-blocking)
+- [ ] **Manual**: Check external API clients (application logs) (non-blocking)
 
-### Phase 1: Deprecation Annotations
-- [ ] Create `app/core/deprecation.py`
-- [ ] Deprecate `POST /leads/{domain}/notes`
-- [ ] Deprecate `PUT /leads/{domain}/notes/{note_id}`
-- [ ] Deprecate `DELETE /leads/{domain}/notes/{note_id}`
-- [ ] Deprecate `POST /leads/{domain}/tags` (manual tags)
-- [ ] Deprecate `DELETE /leads/{domain}/tags/{tag_id}` (manual tags)
-- [ ] Deprecate `POST /leads/{domain}/favorite`
-- [ ] Deprecate `DELETE /leads/{domain}/favorite`
-- [ ] Test deprecation warnings
+**Completion Report**: `docs/g21-phase0-metrics/PHASE0-COMPLETION.md`
 
-### Phase 2: Sales Engine (Additive)
-- [ ] Create `app/core/sales_engine.py`
-  - [ ] `generate_one_liner()`
-  - [ ] `generate_call_script()`
-  - [ ] `generate_discovery_questions()`
-  - [ ] `recommend_offer_tier()`
-  - [ ] `calculate_opportunity_potential()`
-  - [ ] `calculate_urgency()`
-  - [ ] `generate_sales_summary()`
-- [ ] Create `app/api/sales_summary.py`
-  - [ ] `GET /api/v1/leads/{domain}/sales-summary`
-- [ ] Add to `app/main.py`
-- [ ] Test new endpoint
+### Phase 1: Deprecation Annotations ✅ **COMPLETED** (2025-11-16)
+- [x] Create `app/core/deprecation.py` (✅ decorator with logging and response headers)
+- [x] Deprecate `POST /leads/{domain}/notes` (✅ decorator added)
+- [x] Deprecate `PUT /leads/{domain}/notes/{note_id}` (✅ decorator added)
+- [x] Deprecate `DELETE /leads/{domain}/notes/{note_id}` (✅ decorator added)
+- [x] Deprecate `POST /leads/{domain}/tags` (✅ decorator added - manual tags only)
+- [x] Deprecate `DELETE /leads/{domain}/tags/{tag_id}` (✅ decorator added - manual tags only)
+- [x] Deprecate `POST /leads/{domain}/favorite` (✅ decorator added)
+- [x] Deprecate `DELETE /leads/{domain}/favorite` (✅ decorator added)
+- [x] Test deprecation warnings (✅ decorator tested - note: tables don't exist, so endpoints return 500, but decorator is applied)
+
+**Note**: Notes/Tags/Favorites tables don't exist (Phase 0 finding), so endpoints return 500 errors. Deprecation decorator is correctly applied and will log warnings when endpoints are called.
+
+### Phase 2: Sales Engine (Additive) ✅ **COMPLETED** (2025-01-28)
+- [x] Create `app/core/sales_engine.py`
+  - [x] `generate_one_liner()` - 1-sentence sales summary
+  - [x] `generate_call_script()` - Call script bullets
+  - [x] `generate_discovery_questions()` - Discovery questions
+  - [x] `recommend_offer_tier()` - Basic/Pro/Enterprise recommendation
+  - [x] `calculate_opportunity_potential()` - Opportunity score (0-100)
+  - [x] `calculate_urgency()` - Urgency level (low/medium/high)
+  - [x] `generate_sales_summary()` - Complete sales intelligence summary
+- [x] Create `app/api/sales_summary.py`
+  - [x] `GET /api/v1/leads/{domain}/sales-summary` - Returns complete sales intelligence JSON
+- [x] Create `app/api/v1/sales_summary.py` (v1 router)
+- [x] Add to `app/main.py` (v1 router + legacy router)
+- [x] Test new endpoint (verify existing endpoints still work)
+- [x] Core unit tests (38 tests, all passing)
+- [x] API integration tests (7 tests, all passing)
+- [x] Real-world smoke test (3 domains, all validated)
+- [x] API contract documentation (`docs/api/SALES-SUMMARY-V1-CONTRACT.md`)
+- [x] Frontend type definitions (TypeScript + JSDoc)
+- [x] Logging/telemetry (`sales_summary_viewed` event)
+- [x] Tuning factor configuration (Phase 2.1)
 
 ### Phase 3: Read-Only Mode
 - [ ] Disable write endpoints (soft - 410 Gone)
@@ -92,14 +107,22 @@ Add Sales Engine (sales intelligence layer).
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 0 (Preparation)
+**Current Phase**: Phase 3 (Read-Only Mode) 🔄 **NEXT**
 
-**Completed**: 0/6 phases
+**Completed**: 3/7 phases (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅)
+
+**Phase 2 Status**: ✅ **COMPLETED** (2025-01-28)
+- Core implementation: ✅
+- Tests: ✅ (45 tests, all passing)
+- Real-world validation: ✅ (3 domains tested)
+- API contract: ✅ (frozen, UI-ready)
+- Logging/telemetry: ✅
+- Tuning mechanism: ✅ (Phase 2.1)
 
 **Next Steps**: 
-1. Create database backup
-2. Create git tag
-3. Collect usage metrics
+1. Phase 3: Read-Only Mode (disable write endpoints)
+2. UI integration (Sales Intel tab in lead detail page)
+3. Monitor sales feedback for tuning adjustments
 
 ---
 

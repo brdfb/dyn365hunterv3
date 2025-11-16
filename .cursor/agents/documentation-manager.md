@@ -144,12 +144,12 @@ scripts/manage_docs.sh list
 5. Confirm: "✅ G18 phase completed - TODO archived, documentation updated"
 
 ### Example 3: New Phase
-**User**: "G19 başlıyor"
+**User**: "G19 başlıyor" or "G21 başlıyor"
 **Agent Action**:
-1. Extract phase: "G19"
-2. Extract name from context or use default: "auth-ui-advanced"
-3. `scripts/manage_docs.sh create-todo G19 auth-ui-advanced`
-4. Confirm: "✅ G19 TODO created: docs/todos/G19-auth-ui-advanced.md"
+1. Extract phase: "G19" or "G21"
+2. Extract name from context or use default: "auth-ui-advanced" or "architecture-refactor"
+3. `scripts/manage_docs.sh create-todo G21 architecture-refactor`
+4. Confirm: "✅ G21 TODO created: docs/todos/G21-architecture-refactor.md"
 
 ### Example 6: Stabilization Sprint Complete
 **User**: "Stabilization Sprint tamamlandı" or "Stabilization bitti"
@@ -184,10 +184,11 @@ scripts/manage_docs.sh list
 
 Agent should regularly check:
 - TODO files status changes
-- Active documentation count (should be < 7 files, currently 8 files: 3 reference guides + 2 production guides + 1 P1 playbook + 2 stabilization docs)
+- Active documentation count (should be < 7 files, currently 9 files: 3 reference guides + 2 production guides + 1 P1 playbook + 2 stabilization docs + 1 G21 refactor plan)
 - Feature documentation in `docs/active/` (should be archived when complete)
 - Planning documentation in `docs/plans/` (should be archived when complete)
 - **Stabilization Sprint status** (✅ Completed - 2025-01-28 - v1.1-stable released)
+- **G21 Architecture Refactor status** (🔄 In Progress - 2025-01-28)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -207,9 +208,11 @@ This agent should be **always active** in the AI assistant's context. When you s
 - New core modules created → Auto-update CHANGELOG.md
 - TODO completed → Run full phase completion workflow
 - **Stabilization Sprint completed** → Run stabilization completion workflow
+- **G21 Architecture Refactor phase completed** → Update G21 TODO status
 - User mentions "save this" → Save prompt
-- User mentions "G19 başlıyor" or "Starting G19" → Create TODO
+- User mentions "G19 başlıyor" or "G21 başlıyor" or "Starting G21" → Create TODO
 - User mentions "Stabilization Sprint tamamlandı" → Archive stabilization docs
+- User mentions "G21 tamamlandı" → Run G21 completion workflow
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
 

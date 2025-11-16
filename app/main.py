@@ -24,6 +24,7 @@ from app.api import (
     pdf,
     rescan,
     alerts,
+    sales_summary,
     health,
     auth,
 )
@@ -41,6 +42,7 @@ from app.api.v1 import (
     pdf as pdf_v1,
     rescan as rescan_v1,
     alerts as alerts_v1,
+    sales_summary as sales_summary_v1,
 )
 from fastapi import APIRouter
 
@@ -89,6 +91,7 @@ v1_router.include_router(favorites_v1.router)  # Already has /leads prefix
 v1_router.include_router(pdf_v1.router)  # Already has /leads prefix
 v1_router.include_router(rescan_v1.router)  # Already has /scan prefix
 v1_router.include_router(alerts_v1.router)  # Already has /alerts prefix
+v1_router.include_router(sales_summary_v1.router)  # Already has /leads prefix
 app.include_router(v1_router)
 
 # Legacy routers (backward compatibility - will be deprecated in future)
@@ -106,6 +109,7 @@ app.include_router(favorites.router, tags=["favorites", "legacy"])  # Already ha
 app.include_router(pdf.router, tags=["pdf", "legacy"])  # Already has /leads prefix
 app.include_router(rescan.router, tags=["rescan", "legacy"])  # Already has /scan prefix
 app.include_router(alerts.router, tags=["alerts", "legacy"])  # Already has /alerts prefix
+app.include_router(sales_summary.router, tags=["sales", "legacy"])  # Already has /leads prefix
 
 # Mount static files for Mini UI
 import os

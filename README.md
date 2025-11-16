@@ -61,6 +61,15 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Export/PDF basic - CSV/Excel export buttons, toast notifications, PDF export in modal
   - Tooltip + hover behavior - Generic tooltip system, smooth transitions, hover effects
   - UI %90+ stabil - Entegrasyona hazır
+- ✅ **G21 Phase 2: Sales Engine** (2025-01-28) - Sales intelligence layer for lead qualification ✨ YENİ
+  - Sales intelligence summary endpoint (`GET /api/v1/leads/{domain}/sales-summary`)
+  - Segment-specific call scripts and discovery questions (Turkish)
+  - Offer tier recommendations (Business Basic/Standard/Enterprise)
+  - Opportunity potential scoring (0-100) with tuning factor support
+  - Urgency level calculation (low/medium/high)
+  - Frozen API contract (UI-ready, breaking change policy defined)
+  - TypeScript and JSDoc type definitions for frontend integration
+  - Logging and telemetry (`sales_summary_viewed` event)
 
 ## Tech Stack
 
@@ -274,27 +283,75 @@ A simple web interface for demo and internal use:
   - Returns: CSV or Excel file download with lead data
   - File name format: `leads_YYYY-MM-DD_HH-MM-SS.csv` or `leads_YYYY-MM-DD_HH-MM-SS.xlsx`
 
-### Notes (G17: CRM-lite)
-- `POST /leads/{domain}/notes` - Create a note for a domain
-  - Request body: `{"note": "This is a note"}`
-  - Returns: Created note with id, domain, note, created_at, updated_at
-- `GET /leads/{domain}/notes` - List all notes for a domain
-  - Returns: Array of notes (ordered by created_at desc)
-- `PUT /leads/{domain}/notes/{note_id}` - Update a note
-  - Request body: `{"note": "Updated note"}`
-  - Returns: Updated note
-- `DELETE /leads/{domain}/notes/{note_id}` - Delete a note
-  - Returns: 204 No Content
+### Sales Intelligence (G21 Phase 2) ✨ YENİ
+- `GET /api/v1/leads/{domain}/sales-summary` - Get complete sales intelligence summary for a lead
+  - Returns: Sales intelligence summary with:
+    - `one_liner` - One-sentence sales summary (Turkish)
+    - `call_script` - Call script bullets for sales outreach (Turkish)
+    - `discovery_questions` - Discovery questions for sales qualification (Turkish)
+    - `offer_tier` - Offer tier recommendation (Business Basic/Standard/Enterprise) with pricing details
+    - `opportunity_potential` - Opportunity potential score (0-100)
+    - `urgency` - Urgency level (low/medium/high)
+    - `metadata` - Additional context (segment, provider, tenant_size, readiness_score, priority_score, etc.)
+  - Example response:
+    ```json
+    {
+      "domain": "example.com",
+      "one_liner": "example.com - Migration fırsatı, yüksek hazırlık skoru (85), Enterprise teklif hazırlanabilir.",
+      "call_script": ["Merhaba, example.com için email altyapınızı inceledik...", "..."],
+      "discovery_questions": ["Şu anki email altyapınızdan memnun musunuz?", "..."],
+      "offer_tier": {
+        "tier": "Enterprise",
+        "license": "Enterprise",
+        "price_per_user_per_month": 20,
+        "migration_fee": 10000,
+        "defender_price_per_user_per_month": 10,
+        "consulting_fee": 50000,
+        "recommendation": "Enterprise çözümü önerilir..."
+      },
+      "opportunity_potential": 89,
+      "urgency": "high",
+      "metadata": {...}
+    }
+    ```
+  - **API Contract**: Frozen contract (UI-ready) - See `docs/api/SALES-SUMMARY-V1-CONTRACT.md`
+  - **Type Definitions**: TypeScript (`mini-ui/types/sales.ts`) and JSDoc (`mini-ui/types/sales.js`)
+  - **Legacy Endpoint**: `GET /leads/{domain}/sales-summary` (backward compatible)
 
-### Tags (G17: CRM-lite)
-- `POST /leads/{domain}/tags` - Add a tag to a domain
-  - Request body: `{"tag": "important"}`
-  - Returns: Created tag with id, domain, tag, created_at
-- `GET /leads/{domain}/tags` - List all tags for a domain
-  - Returns: Array of tags
-- `DELETE /leads/{domain}/tags/{tag_id}` - Remove a tag from a domain
-  - Returns: 204 No Content
-- **Auto-tagging**: Automatically applies tags after domain scan:
+### Notes (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
+- ⚠️ **Write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
+  - `POST /leads/{domain}/notes` - ⚠️ **Deprecated** - Create a note for a domain
+    - Request body: `{"note": "This is a note"}`
+    - Returns: Created note with id, domain, note, created_at, updated_at
+    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+    - **Alternative**: Use Dynamics 365 Timeline/Notes API
+  - `PUT /leads/{domain}/notes/{note_id}` - ⚠️ **Deprecated** - Update a note
+    - Request body: `{"note": "Updated note"}`
+    - Returns: Updated note
+    - **Alternative**: Use Dynamics 365 Timeline/Notes API
+  - `DELETE /leads/{domain}/notes/{note_id}` - ⚠️ **Deprecated** - Delete a note
+    - Returns: 204 No Content
+    - **Alternative**: Use Dynamics 365 Timeline/Notes API
+- ✅ **Read endpoint remains available** (migration support):
+  - `GET /leads/{domain}/notes` - List all notes for a domain
+    - Returns: Array of notes (ordered by created_at desc)
+    - **Status**: Available for migration support until Phase 6
+
+### Tags (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
+- ⚠️ **Manual tag write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
+  - `POST /leads/{domain}/tags` - ⚠️ **Deprecated** (manual tags only) - Add a tag to a domain
+    - Request body: `{"tag": "important"}`
+    - Returns: Created tag with id, domain, tag, created_at
+    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+    - **Alternative**: Use Dynamics 365 Tags API for manual tag management
+  - `DELETE /leads/{domain}/tags/{tag_id}` - ⚠️ **Deprecated** (manual tags only) - Remove a tag from a domain
+    - Returns: 204 No Content
+    - **Alternative**: Use Dynamics 365 Tags API for manual tag management
+- ✅ **Read endpoint remains available** (auto-tags needed):
+  - `GET /leads/{domain}/tags` - List all tags for a domain
+    - Returns: Array of tags (includes auto-tags and manual tags)
+    - **Status**: Available for auto-tags (system-generated tags remain functional)
+- **Auto-tagging**: Automatically applies tags after domain scan (✅ **Remains active**):
   - `security-risk`: No SPF + no DKIM
   - `migration-ready`: Migration segment + score >= 70
   - `expire-soon`: Domain expires in < 30 days
@@ -302,14 +359,20 @@ A simple web interface for demo and internal use:
   - `google-workspace`: Provider is Google
   - `local-mx`: Provider is Local
 
-### Favorites (G17: CRM-lite)
-- `POST /leads/{domain}/favorite` - Add a domain to favorites
-  - Returns: Created favorite with id, domain, user_id, created_at
-  - Session-based (no authentication required yet)
-- `GET /leads?favorite=true` - List favorite domains
-  - Returns: Array of leads that are favorited by the current user
-- `DELETE /leads/{domain}/favorite` - Remove a domain from favorites
-  - Returns: 204 No Content
+### Favorites (G17: CRM-lite) ⚠️ **DEPRECATED** (G21 Phase 1)
+- ⚠️ **Write endpoints deprecated** (2025-11-16) - Will be removed in Phase 6 (2026-02-01)
+  - `POST /leads/{domain}/favorite` - ⚠️ **Deprecated** - Add a domain to favorites
+    - Returns: Created favorite with id, domain, user_id, created_at
+    - Session-based (no authentication required yet)
+    - **Response headers**: `X-Deprecated: true`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`
+    - **Alternative**: Use Dynamics 365 Favorite field for favorite management
+  - `DELETE /leads/{domain}/favorite` - ⚠️ **Deprecated** - Remove a domain from favorites
+    - Returns: 204 No Content
+    - **Alternative**: Use Dynamics 365 Favorite field for favorite management
+- ✅ **Read endpoint remains available** (migration support):
+  - `GET /leads?favorite=true` - List favorite domains
+    - Returns: Array of leads that are favorited by the current user
+    - **Status**: Available for migration support until Phase 6
 
 ### PDF Summary (G17)
 - `GET /leads/{domain}/summary.pdf` - Generate PDF account summary

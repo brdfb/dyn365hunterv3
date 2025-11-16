@@ -35,10 +35,10 @@ export function renderLeadsTable(leads) {
                         : '-'
                     }
                 </td>
-                <td class="leads-table__cell leads-table__cell--tenant-size" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size}` : ''}">
+                <td class="leads-table__cell leads-table__cell--tenant-size" title="${lead.tenant_size ? `Tenant büyüklüğü: ${lead.tenant_size} (M365/Google için MX pattern'ine göre tahmin edilir)` : lead.provider === 'M365' || lead.provider === 'Google' ? 'Tenant Size: M365/Google provider\'ları için MX pattern\'ine göre tahmin edilir (small/medium/large)' : 'Tenant Size: Sadece M365 ve Google provider\'ları için hesaplanır'}">
                     ${lead.tenant_size ? `<span class="tenant-size-badge tenant-size-badge--${lead.tenant_size}">${escapeHtml(lead.tenant_size)}</span>` : '-'}
                 </td>
-                <td class="leads-table__cell leads-table__cell--local-provider">
+                <td class="leads-table__cell leads-table__cell--local-provider" title="${lead.local_provider ? `Local Provider: ${lead.local_provider}` : lead.provider === 'Local' ? 'Local Provider: Provider "Local" olduğunda Türk hosting provider\'ı tespit edilir (TürkHost, Natro, vb.)' : 'Local Provider: Sadece provider "Local" olduğunda doldurulur'}">
                     ${lead.local_provider ? escapeHtml(lead.local_provider) : '-'}
                 </td>
                 <td class="leads-table__cell leads-table__cell--segment">

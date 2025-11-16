@@ -136,10 +136,12 @@ Sonuç:
 - "security-risk", "migration-ready", "expire-soon" → analitik veri, CRM datası değil
 - Hunter'da kalacak
 
-### ✅ Manuel Tags / Notes / Favorites → Atılacak
+### ✅ Manuel Tags / Notes / Favorites → Atılacak (✅ Phase 1 Completed - 2025-11-16)
 - Bu veri **ilişki yönetimi** verisi, **analiz verisi değil**
 - Dynamics zaten timeline, aktiviteler, notlar, custom alanlar için optimize edilmiş
 - Hunter'ın CRM'e dönüşmesi sistemin sonu olurdu
+- **Status**: Write endpoints deprecated (Phase 1), will be removed in Phase 6 (2026-02-01)
+- **Alternative**: Use Dynamics 365 Timeline/Notes API, Tags API, and Favorite field
 
 ### ✅ Email Validation → Kalacak, Email Generation → Kalkacak
 - **Kalacak**: MX check, SMTP reachability, domain-based "email quality" sinyali
@@ -172,8 +174,31 @@ Sonuç:
 
 ---
 
-## Related Documents
+## Implementation Status
+
+**Last Updated**: 2025-11-16
+
+### Completed Phases
+- ✅ **Phase 0**: Preparation & Snapshot (2025-11-16)
+  - Database backup created
+  - Git tag `pre-refactor-v1.0.0` created
+  - Usage metrics collected (Notes/Tags/Favorites tables don't exist - features never used)
+  - Dependency map created
+- ✅ **Phase 1**: Deprecation Annotations (2025-11-16)
+  - Deprecation decorator created (`app/core/deprecation.py`)
+  - 7 write endpoints deprecated (Notes: 3, Tags: 2, Favorites: 2)
+  - Response headers added (X-Deprecated, X-Deprecation-Reason, X-Alternative, etc.)
+  - Zero breaking changes - all endpoints continue to function
+  - Structured logging for deprecated endpoint calls
+
+### In Progress
+- 🔄 **Phase 2**: Sales Engine (Additive) - Next phase
+
+### Related Documents
 
 - `docs/active/NO-BREAK-REFACTOR-PLAN.md` - Detaylı uygulama planı
 - `docs/todos/G21-architecture-refactor.md` - TODO listesi
+- `docs/g21-phase0-metrics/PHASE0-COMPLETION.md` - Phase 0 completion report
+- `docs/g21-phase0-metrics/PHASE1-COMPLETION.md` - Phase 1 completion report
+- `docs/g21-phase0-metrics/DEPENDENCY-MAP.md` - Dependency analysis
 

@@ -1,4 +1,9 @@
-"""Notes endpoints for domain notes (G17: CRM-lite)."""
+"""Notes endpoints for domain notes (G17: CRM-lite).
+
+⚠️ DEPRECATED: Write endpoints (POST, PUT, DELETE) are deprecated as of 2025-11-16.
+Read endpoint (GET) remains available for migration support.
+Notes will be managed in Dynamics 365 in the future.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -8,6 +13,7 @@ from datetime import datetime
 from app.db.session import get_db
 from app.db.models import Note, Company
 from app.core.normalizer import normalize_domain
+from app.core.deprecation import deprecated_endpoint
 
 
 router = APIRouter(prefix="/leads", tags=["notes"])
@@ -39,6 +45,10 @@ class NoteResponse(BaseModel):
 
 
 @router.post("/{domain}/notes", response_model=NoteResponse, status_code=201)
+@deprecated_endpoint(
+    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
+)
 async def create_note(domain: str, request: NoteCreate, db: Session = Depends(get_db)):
     """
     Create a note for a domain.
@@ -135,6 +145,10 @@ async def list_notes(domain: str, db: Session = Depends(get_db)):
 
 
 @router.put("/{domain}/notes/{note_id}", response_model=NoteResponse)
+@deprecated_endpoint(
+    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
+)
 async def update_note(
     domain: str, note_id: int, request: NoteUpdate, db: Session = Depends(get_db)
 ):
@@ -188,6 +202,10 @@ async def update_note(
 
 
 @router.delete("/{domain}/notes/{note_id}", status_code=204)
+@deprecated_endpoint(
+    reason="Notes are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Timeline/Notes API for note management.",
+)
 async def delete_note(domain: str, note_id: int, db: Session = Depends(get_db)):
     """
     Delete a note.

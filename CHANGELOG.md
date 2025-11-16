@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **G21 Phase 2: Sales Engine** (2025-01-28) - Sales intelligence layer for lead qualification
+  - **Sales Engine Core** (`app/core/sales_engine.py`):
+    - `generate_one_liner()` - One-sentence sales summary (Turkish)
+    - `generate_call_script()` - Call script bullets for sales outreach (Turkish)
+    - `generate_discovery_questions()` - Discovery questions for sales qualification (Turkish)
+    - `recommend_offer_tier()` - Offer tier recommendation (Business Basic/Standard/Enterprise)
+    - `calculate_opportunity_potential()` - Opportunity potential score (0-100) with tuning factor support
+    - `calculate_urgency()` - Urgency level calculation (low/medium/high)
+    - `generate_sales_summary()` - Complete sales intelligence summary generator
+  - **Sales Summary API Endpoints**:
+    - `GET /api/v1/leads/{domain}/sales-summary` - V1 endpoint for sales intelligence summary
+    - `GET /leads/{domain}/sales-summary` - Legacy endpoint (backward compatible)
+    - Response includes: domain, one_liner, call_script, discovery_questions, offer_tier, opportunity_potential, urgency, metadata
+  - **API Contract Documentation** (`docs/api/SALES-SUMMARY-V1-CONTRACT.md`):
+    - Frozen API contract (UI-ready, breaking change policy defined)
+    - TypeScript and JSDoc type definitions (`mini-ui/types/sales.ts`, `mini-ui/types/sales.js`)
+    - Field names and types frozen for UI compatibility
+  - **Logging & Telemetry**:
+    - `sales_summary_viewed` event logging with user tracking (auth + session fallback)
+    - Structured logging: domain, segment, offer_tier, opportunity_potential, urgency, tenant_size, provider
+  - **Tuning Mechanism** (Phase 2.1):
+    - `HUNTER_SALES_ENGINE_OPPORTUNITY_FACTOR` config (default: 1.0, range: 0.0-2.0)
+    - Fine-tuning capability for opportunity potential scores based on sales feedback
+    - Documentation: `docs/active/PHASE-2-1-SOFT-TUNING.md`
+  - **Test Coverage**:
+    - Core unit tests: `tests/test_sales_engine_core.py` (38 tests, all passing)
+    - API integration tests: `tests/test_sales_summary_api.py` (7 tests, all passing)
+    - Real-world smoke test: 3 domains validated (Migration, Existing, Cold segments)
+  - **Status**: ✅ Phase 2 completed - Production-ready, UI contract frozen, all tests passing
+  - **Benefits**: Sales-ready intelligence, segment-specific call scripts, discovery questions, offer tier recommendations
+
+### Deprecated
+- **G21 Phase 1: Deprecation Annotations** (2025-11-16) - CRM-lite features (Notes/Tags/Favorites) write endpoints deprecated
+  - **Notes endpoints** (write operations deprecated):
+    - `POST /leads/{domain}/notes` - ⚠️ Deprecated (will be removed in Phase 6)
+    - `PUT /leads/{domain}/notes/{note_id}` - ⚠️ Deprecated (will be removed in Phase 6)
+    - `DELETE /leads/{domain}/notes/{note_id}` - ⚠️ Deprecated (will be removed in Phase 6)
+    - `GET /leads/{domain}/notes` - ✅ Remains available (read-only, migration support)
+  - **Tags endpoints** (manual tag write operations deprecated):
+    - `POST /leads/{domain}/tags` - ⚠️ Deprecated (manual tags only, will be removed in Phase 6)
+    - `DELETE /leads/{domain}/tags/{tag_id}` - ⚠️ Deprecated (manual tags only, will be removed in Phase 6)
+    - `GET /leads/{domain}/tags` - ✅ Remains available (auto-tags needed)
+  - **Favorites endpoints** (write operations deprecated):
+    - `POST /leads/{domain}/favorite` - ⚠️ Deprecated (will be removed in Phase 6)
+    - `DELETE /leads/{domain}/favorite` - ⚠️ Deprecated (will be removed in Phase 6)
+    - `GET /leads?favorite=true` - ✅ Remains available (read-only, migration support)
+  - **Deprecation decorator** (`app/core/deprecation.py`):
+    - Structured logging for deprecated endpoint calls
+    - Response headers: `X-Deprecated`, `X-Deprecation-Reason`, `X-Alternative`, `X-Removal-Date`, `X-Deprecation-Date`
+    - Deprecation date: 2025-11-16
+    - Removal date: 2026-02-01 (Phase 6 cleanup)
+  - **Alternative**: Use Dynamics 365 Timeline/Notes API, Tags API, and Favorite field for CRM-lite features
+  - **Migration**: Read endpoints remain available for migration support until Phase 6
+  - **Status**: Phase 1 completed - Deprecation warnings active, zero breaking changes
+
 ### Fixed
 - **G20: Scan Endpoint Missing Fields** (2025-11-15) - Fixed missing G20 fields in `/scan/domain` endpoint
   - Added `tenant_size` calculation and saving for M365/Google providers

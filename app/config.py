@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     
     # Refresh Token Encryption (G19 - Security hardening)
     refresh_token_encryption_key: Optional[str] = None  # Fernet key (base64 encoded)
+    
+    # Sales Engine (Phase 2)
+    sales_engine_opportunity_factor: float = 1.0  # Tuning factor for opportunity potential (0.0-2.0, default: 1.0)
 
     model_config = SettingsConfigDict(
         env_file=".env",

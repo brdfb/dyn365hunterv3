@@ -14,6 +14,7 @@ from app.api.v1 import (
     pdf,
     rescan,
     alerts,
+    sales_summary,
 )
 
 __all__ = [
@@ -30,5 +31,6 @@ __all__ = [
     "pdf",
     "rescan",
     "alerts",
+    "sales_summary",
 ]
 

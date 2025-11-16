@@ -1,4 +1,9 @@
-"""Tags endpoints for domain tags (G17: CRM-lite)."""
+"""Tags endpoints for domain tags (G17: CRM-lite).
+
+⚠️ DEPRECATED: Manual tag write endpoints (POST, DELETE) are deprecated as of 2025-11-16.
+Read endpoint (GET) remains available for auto-tags (system-generated tags).
+Manual tags will be managed in Dynamics 365 in the future.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,6 +12,7 @@ from pydantic import BaseModel, Field
 from app.db.session import get_db
 from app.db.models import Tag, Company
 from app.core.normalizer import normalize_domain
+from app.core.deprecation import deprecated_endpoint
 
 
 router = APIRouter(prefix="/leads", tags=["tags"])
@@ -31,6 +37,10 @@ class TagResponse(BaseModel):
 
 
 @router.post("/{domain}/tags", response_model=TagResponse, status_code=201)
+@deprecated_endpoint(
+    reason="Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Tags API for manual tag management.",
+)
 async def create_tag(domain: str, request: TagCreate, db: Session = Depends(get_db)):
     """
     Add a tag to a domain.
@@ -135,6 +145,10 @@ async def list_tags(domain: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/{domain}/tags/{tag_id}", status_code=204)
+@deprecated_endpoint(
+    reason="Manual tags are now managed in Dynamics 365. Auto-tags (system-generated) remain available. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Tags API for manual tag management.",
+)
 async def delete_tag(domain: str, tag_id: int, db: Session = Depends(get_db)):
     """
     Remove a tag from a domain.

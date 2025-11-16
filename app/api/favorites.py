@@ -1,4 +1,9 @@
-"""Favorites endpoints for domain favorites (G17: CRM-lite)."""
+"""Favorites endpoints for domain favorites (G17: CRM-lite).
+
+⚠️ DEPRECATED: Write endpoints (POST, DELETE) are deprecated as of 2025-11-16.
+Read endpoint (GET /leads?favorite=true) remains available for migration support.
+Favorites will be managed in Dynamics 365 in the future.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -7,6 +12,7 @@ from pydantic import BaseModel
 from app.db.session import get_db
 from app.db.models import Favorite, Company
 from app.core.normalizer import normalize_domain
+from app.core.deprecation import deprecated_endpoint
 import uuid
 
 
@@ -44,6 +50,10 @@ class FavoriteResponse(BaseModel):
 
 
 @router.post("/{domain}/favorite", response_model=FavoriteResponse, status_code=201)
+@deprecated_endpoint(
+    reason="Favorites are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Favorite field for favorite management.",
+)
 async def add_favorite(domain: str, request: Request, db: Session = Depends(get_db)):
     """
     Add a domain to favorites.
@@ -109,6 +119,10 @@ async def add_favorite(domain: str, request: Request, db: Session = Depends(get_
 
 
 @router.delete("/{domain}/favorite", status_code=204)
+@deprecated_endpoint(
+    reason="Favorites are now managed in Dynamics 365. This endpoint will be removed in Phase 6.",
+    alternative="Use Dynamics 365 Favorite field for favorite management.",
+)
 async def remove_favorite(domain: str, request: Request, db: Session = Depends(get_db)):
     """
     Remove a domain from favorites.

@@ -38,6 +38,13 @@ Sales team documentation has been organized into a dedicated folder:
 - `SALES-SCENARIOS.md` - Pratik senaryolar ve en iyi pratikler
 - `SEGMENT-GUIDE.md` - Segment ve skor açıklamaları
 
+### API Documentation
+
+**Location:** `docs/api/`
+
+API contract documentation:
+- `SALES-SUMMARY-V1-CONTRACT.md` - Sales Summary API v1 contract (stable, UI contract)
+
 ### Active Documentation
 
 #### Reference Guides
@@ -63,6 +70,17 @@ Sales team documentation has been organized into a dedicated folder:
 - `STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Gün 1 ✅, Gün 2 ✅, Gün 3 ✅ (TAMAMLANDI)
 - `UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3) - ✅ TAMAMLANDI
 
+#### Architecture Refactor Documentation
+- `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
+  - **Phase 0**: ✅ Completed (2025-11-16) - Preparation & Snapshot
+  - **Phase 1**: ✅ Completed (2025-11-16) - Deprecation Annotations
+  - **Phase 2**: 🔄 Next - Sales Engine (Additive)
+- `docs/g21-phase0-metrics/` - G21 Phase 0 & Phase 1 metrics and completion reports
+  - `PHASE0-COMPLETION.md` - Phase 0 completion report (2025-11-16)
+  - `PHASE1-COMPLETION.md` - Phase 1 completion report (2025-11-16)
+  - `DEPENDENCY-MAP.md` - Dependency analysis for Notes/Tags/Favorites endpoints
+  - `usage_metrics_*.json` - Usage metrics collection data
+
 #### Status & Analysis
 - `DOCUMENTATION-STATUS-ANALYSIS.md` - Kapsamlı dokümantasyon durum analizi (2025-01-28)
 
@@ -72,6 +90,10 @@ Sales team documentation has been organized into a dedicated folder:
 - ✅ P0 Hardening: Completed (G19)
 - ✅ P1 Performance: Completed (2025-01-28)
 - ✅ Stabilization Sprint: Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)
+- 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
+  - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
+  - ✅ Phase 1: Deprecation Annotations (2025-11-16)
+  - 🔄 Phase 2: Sales Engine (Next)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation
@@ -115,6 +137,7 @@ Sales team documentation has been organized into a dedicated folder:
 - `2025-11-12-initial-setup.md` - Initial project setup
 - `2025-11-12-alembic-decision.md` - [DECISION] Alembic migration approach
 - `2025-11-12-phase-completion-workflow.md` - Phase completion workflow enhancement
+- `2025-01-28-hunter-architecture-refactor-decision.md` - [DECISION] Hunter Architecture Refactor - Slimming to core signal engine
 
 ### Project Plans
 
@@ -137,7 +160,7 @@ All completed planning documentation has been moved to `docs/archive/`:
 ### TODOs
 
 **Active TODOs:**
-- `P1-PREPARATION.md` - P1 Preparation (Pre-Implementation) - ✅ Completed
+- `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:

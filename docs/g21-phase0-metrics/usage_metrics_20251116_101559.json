@@ -1,0 +1,58 @@
+{
+  "collection_date": "2025-11-16T10:15:59Z",
+  "status": "success",
+  "note": "Notes/Tags/Favorites tables do not exist - features have never been used",
+  "endpoints": {
+    "note": "API endpoint call counts require application logs or APM. Manual collection needed.",
+    "endpoints_to_monitor": [
+      "POST /leads/{domain}/notes",
+      "GET /leads/{domain}/notes",
+      "PUT /leads/{domain}/notes/{note_id}",
+      "DELETE /leads/{domain}/notes/{note_id}",
+      "POST /leads/{domain}/tags",
+      "GET /leads/{domain}/tags",
+      "DELETE /leads/{domain}/tags/{tag_id}",
+      "POST /leads/{domain}/favorite",
+      "GET /leads?favorite=true",
+      "DELETE /leads/{domain}/favorite"
+    ]
+  },
+  "database_counts": {
+    "total_companies": "unknown",
+    "notes_table_exists": false,
+    "tags_table_exists": false,
+    "favorites_table_exists": false,
+    "conclusion": "Notes/Tags/Favorites features have never been used - safe to deprecate"
+  },
+  "notes": {
+    "total_notes": 0,
+    "domains_with_notes": 0,
+    "avg_notes_per_domain": 0.0,
+    "recent_notes_7d": 0,
+    "recent_notes_30d": 0,
+    "table_exists": false
+  },
+  "tags": {
+    "total_tags": 0,
+    "domains_with_tags": 0,
+    "avg_tags_per_domain": 0.0,
+    "manual_tags": 0,
+    "auto_tags": 0,
+    "recent_tags_7d": 0,
+    "recent_tags_30d": 0,
+    "table_exists": false
+  },
+  "favorites": {
+    "total_favorites": 0,
+    "unique_users": 0,
+    "domains_favorited": 0,
+    "recent_favorites_7d": 0,
+    "recent_favorites_30d": 0,
+    "table_exists": false
+  },
+  "risk_assessment": {
+    "migration_risk": "VERY_LOW",
+    "reason": "Features have never been used - no data to migrate",
+    "recommendation": "Safe to proceed with deprecation immediately"
+  }
+}
