@@ -169,12 +169,12 @@ GET /api/v2/leads/{domain} → Yeni format
 
 ## 🎯 HYBRID YAKLAŞIM (Öneri)
 
-### Faz 1: Critical Test Fixes (1 gün) - **ZORUNLU**
+### Faz 1: Critical Test Fixes (1 gün) - ✅ **COMPLETED** (2025-01-28)
 
 **Yapılacaklar:**
-- [ ] Fail eden testleri düzelt (test_risk_scoring_no_dkim, test_risk_scoring_hosting_with_spf)
-- [ ] Golden dataset testlerini düzelt
-- [ ] Edge case testlerini genişlet (1-2 saat)
+- [x] ✅ Fail eden testleri düzelt (test_risk_scoring_no_dkim, test_risk_scoring_hosting_with_spf) - Completed
+- [x] ✅ Golden dataset testlerini düzelt - Completed (renamed to regression dataset)
+- [x] ✅ Edge case testlerini genişlet - Completed (86 tests passing, 0 failures)
 
 **Neden:**
 - Test suite'in **%100 geçmesi** kritik
@@ -273,7 +273,7 @@ GET /api/v2/leads/{domain} → Yeni format
 
 ### Önerilen Yaklaşım: **HYBRID**
 
-1. **Faz 1**: Critical test fixes (1 gün) - **ZORUNLU**
+1. **Faz 1**: Critical test fixes (1 gün) - ✅ **COMPLETED** (2025-01-28)
 2. **Faz 2**: Partner Center entegrasyonu (2-3 gün) - **FEATURE FLAG İLE**
 3. **Faz 3**: Internal validation (1 hafta) - **PARALEL**
 4. **Faz 4**: Production rollout (1 gün) - **GRADUAL**
@@ -290,12 +290,12 @@ GET /api/v2/leads/{domain} → Yeni format
 
 ## 📝 Aksiyon Planı
 
-### Hemen Yapılacaklar (Bugün)
+### Hemen Yapılacaklar (Bugün) ✅ **COMPLETED** (2025-01-28)
 
-1. [ ] **Fail eden testleri düzelt** (1-2 saat)
-   - `test_risk_scoring_no_dkim`
-   - `test_risk_scoring_hosting_with_spf`
-   - Golden dataset testleri
+1. [x] ✅ **Fail eden testleri düzelt** (1-2 saat) - Completed
+   - ✅ `test_risk_scoring_no_dkim` - Fixed
+   - ✅ `test_risk_scoring_hosting_with_spf` - Fixed
+   - ✅ Golden dataset testleri - Fixed (renamed to regression dataset)
 
 2. [ ] **Test coverage raporu** (30 dakika)
    - Hangi edge case'ler test edilmiş?

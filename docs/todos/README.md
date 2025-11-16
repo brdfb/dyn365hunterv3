@@ -10,7 +10,11 @@ This folder contains TODO lists and task tracking documents.
   - ✅ Phase 1: Deprecation Annotations (2025-11-16)
   - ✅ Phase 2: Sales Engine (2025-01-28)
   - ✅ Phase 3: Read-Only Mode (2025-01-28)
-  - 🔄 Phase 4: Dynamics Migration (Next)
+  - 🔄 Phase 4: Dynamics Migration (PAUSED - Integration Roadmap Phase 3 overlaps)
+- `INTEGRATION-ROADMAP.md` - Integration Roadmap - 🔄 In Progress (2025-01-28)
+  - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
+  - ⏳ Phase 2: Partner Center Referrals (P1) - NEXT
+  - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending
 
 **Recently Completed:**
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)

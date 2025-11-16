@@ -92,7 +92,9 @@ export function bindCsvUploadForm(onSuccess) {
                             progressContainer.remove();
                             
                             if (progress.status === 'completed') {
-                                showMessage(messageEl, `Başarılı! ${progress.successful} domain işlendi ve lead listesine eklendi.`, 'success');
+                                // progress.successful is the number of scanned domains (leads)
+                                const leadCount = progress.successful || 0;
+                                showMessage(messageEl, `Başarılı! ${leadCount} domain scan edildi ve lead listesine eklendi.`, 'success');
                             } else {
                                 showMessage(messageEl, `Hata: İşlem başarısız oldu.`, 'error');
                             }

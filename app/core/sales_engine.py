@@ -460,6 +460,7 @@ def generate_sales_summary(
     contact_quality_score: Optional[int] = None,
     expires_at: Optional[date] = None,
     tuning_factor: float = 1.0,
+    ip_context: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Generate complete sales intelligence summary.
@@ -478,6 +479,10 @@ def generate_sales_summary(
         dmarc_coverage: DMARC coverage percentage (0-100)
         contact_quality_score: Contact quality score (0-100)
         expires_at: Domain expiration date
+        ip_context: Optional IP enrichment context dict with:
+            - country: Optional[str] - ISO 3166-1 alpha-2 country code
+            - is_proxy: Optional[bool] - Proxy detection result
+            - proxy_type: Optional[str] - Proxy type (VPN, TOR, PUB, etc.)
 
     Returns:
         Complete sales intelligence summary dictionary

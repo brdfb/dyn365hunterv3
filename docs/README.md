@@ -78,11 +78,10 @@ API contract documentation:
 - `IP-ENRICHMENT-UI-PATCH-PLAN.md` - IP enrichment UI integration patch plan (minimal approach)
 
 #### Test & Validation Documentation
-- `TEST-FIXES-COMPLETED.md` (2025-01-28) - Test fixes completion report
+- ✅ **Archived** - `2025-01-28-TEST-FIXES-COMPLETED.md` - Test fixes completion report (✅ Completed - 2025-01-28)
   - Fixed `dkim_none` risk penalty in test expectations
   - Fixed priority score ranges
   - All 86 scoring tests passing (0 failures)
-  - Status: ✅ Completed
 
 #### IP Enrichment Documentation
 - `IP-ENRICHMENT-UI-PATCH-PLAN.md` (2025-01-28) - IP enrichment UI integration patch plan

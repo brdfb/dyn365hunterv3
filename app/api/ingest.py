@@ -239,6 +239,7 @@ async def ingest_csv(
         scanned_count = 0
         errors: List[str] = []
         scanned_domains: List[str] = []
+        unique_domains: set = set()  # Track unique domains to prevent duplicate counting
 
         for idx, row in df.iterrows():
             try:
@@ -305,15 +306,21 @@ async def ingest_csv(
                     },
                 )
                 db.add(raw_lead)
-                ingested_count += 1
-                scanned_domains.append(final_domain)
+                
+                # Only count unique domains (prevent duplicate counting)
+                is_new_domain = final_domain not in unique_domains
+                if is_new_domain:
+                    unique_domains.add(final_domain)
+                    ingested_count += 1
+                    scanned_domains.append(final_domain)
 
                 # Update progress
+                # Note: successful will be updated during scanning phase (only scanned domains become leads)
                 update_job_progress(
                     job_id,
                     processed=ingested_count,
-                    successful=ingested_count,
-                    message=f"İşleniyor: {ingested_count}/{len(df)} domain yüklendi",
+                    successful=0,  # Will be updated during scanning
+                    message=f"İşleniyor: {ingested_count} unique domain yüklendi",
                 )
 
             except Exception as e:
@@ -332,7 +339,8 @@ async def ingest_csv(
         update_job_progress(
             job_id,
             processed=ingested_count,
-            message=f"Yükleme tamamlandı: {ingested_count} domain. Scan başlıyor...",
+            successful=0,  # Will be updated during scanning
+            message=f"Yükleme tamamlandı: {ingested_count} unique domain yüklendi. Scan başlıyor...",
         )
 
         # Auto-scan domains if requested
@@ -355,6 +363,12 @@ async def ingest_csv(
                     # Classify provider based on MX root
                     mx_root = dns_result.get("mx_root")
                     provider = classify_provider(mx_root)
+
+                    # Classify local provider (G20: Domain Intelligence)
+                    local_provider = None
+                    if provider == "Local":
+                        from app.core.provider_map import classify_local_provider
+                        local_provider = classify_local_provider(mx_root)
 
                     # Update company provider if we have new information
                     company = db.query(Company).filter(Company.domain == domain).first()
@@ -392,7 +406,9 @@ async def ingest_csv(
                         spf=dns_result.get("spf", False),
                         dkim=dns_result.get("dkim", False),
                         dmarc_policy=dns_result.get("dmarc_policy"),
+                        dmarc_coverage=dns_result.get("dmarc_coverage"),  # G20: DMARC coverage
                         mx_root=mx_root,
+                        local_provider=local_provider,  # G20: Local provider name
                         registrar=(
                             whois_result.get("registrar") if whois_result else None
                         ),
@@ -434,7 +450,7 @@ async def ingest_csv(
                     update_job_progress(
                         job_id,
                         processed=total_processed,
-                        successful=ingested_count + scanned_count,
+                        successful=scanned_count,  # Only count scanned domains (these become leads)
                         message=f"Taranıyor: {scan_index}/{len(scanned_domains)} domain scan edildi",
                     )
 
@@ -457,7 +473,8 @@ async def ingest_csv(
         complete_job(job_id, success=True)
         update_job_progress(
             job_id,
-            message=f"Tamamlandı! {ingested_count} domain yüklendi, {scanned_count} domain scan edildi.",
+            successful=scanned_count,  # Final count: only scanned domains become leads
+            message=f"Tamamlandı! {ingested_count} unique domain yüklendi, {scanned_count} domain scan edildi ve lead listesine eklendi.",
         )
 
         return {

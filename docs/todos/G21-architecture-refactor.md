@@ -109,7 +109,7 @@ Add Sales Engine (sales intelligence layer).
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 4 (Dynamics Migration) 🔄 **NEXT**
+**Current Phase**: Phase 4 (Dynamics Migration) 🔄 **PAUSED** (Integration Roadmap Phase 3 overlaps)
 
 **Completed**: 4/7 phases (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅, Phase 3 ✅)
 
@@ -129,10 +129,10 @@ Add Sales Engine (sales intelligence layer).
 - Tuning mechanism: ✅ (Phase 2.1)
 
 **Next Steps**: 
-1. Phase 4: Dynamics Migration (SIMPLIFIED - no data to migrate, documentation only)
+1. Phase 4: Dynamics Migration (SIMPLIFIED - no data to migrate, documentation only) - 🔄 **PAUSED** (Integration Roadmap Phase 3 overlaps)
 2. Phase 5: Monitoring & Stabilization (deprecated endpoint usage monitoring)
 3. Phase 6: Cleanup (remove deprecated endpoints, archive tables)
-4. UI integration (Sales Intel tab in lead detail page)
+4. UI integration (Sales Intel tab in lead detail page) - ✅ **COMPLETED** (Sales Summary modal in Mini UI)
 5. Monitor sales feedback for tuning adjustments
 
 ---

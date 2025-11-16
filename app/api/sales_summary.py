@@ -95,6 +95,18 @@ async def get_sales_summary(
     # Get tuning factor from config
     tuning_factor = settings.sales_engine_opportunity_factor
 
+    # Get IP enrichment (optional)
+    from app.core.enrichment_service import latest_ip_enrichment
+    
+    ip_enrichment_record = latest_ip_enrichment(normalized_domain, db)
+    ip_context = None
+    if ip_enrichment_record:
+        ip_context = {
+            "country": ip_enrichment_record.country,
+            "is_proxy": ip_enrichment_record.is_proxy,
+            "proxy_type": ip_enrichment_record.proxy_type,
+        }
+
     # Generate sales summary
     summary = generate_sales_summary(
         domain=normalized_domain,
@@ -111,6 +123,7 @@ async def get_sales_summary(
         contact_quality_score=contact_quality_score,
         expires_at=expires_at,
         tuning_factor=tuning_factor,
+        ip_context=ip_context,
     )
 
     # Get user identifier (session-based for internal access mode)

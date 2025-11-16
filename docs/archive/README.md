@@ -20,7 +20,7 @@ Files should be archived with date prefix:
 
 ## Current Archives
 
-**Total:** 66+ archived documentation files
+**Total:** 74 archived documentation files (as of 2025-01-28)
 
 ### Major Completed Phases
 - **G1-G19**: All MVP and post-MVP sprints completed
@@ -34,6 +34,9 @@ Files should be archived with date prefix:
 - Logging guides and samples
 - P1 implementation documentation
 - Stabilization sprint plans
+- UI Patch v1.1 (completed 2025-01-28)
+- IP Enrichment UI Patch Plan (completed 2025-01-28)
+- G19 Auth + UI Advanced Plan (SSO removed, UI completed 2025-01-28)
 
 ### Historical Archives (2025-11-12 to 2025-11-15)
 - G1-G3: Foundation, Database Schema, Domain Normalization

@@ -164,6 +164,9 @@
                             <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--score" data-sort="readiness_score" title="Skora göre sırala">
                                 Skor <span class="sort-icon"></span>
                             </th>
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--actions">
+                                İşlemler
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="leads-table-body" class="leads-table__body">
@@ -218,6 +221,24 @@
                 <!-- Dynamic content -->
             </div>
             <div class="score-modal__loading hidden" id="score-modal-loading">
+                <div class="score-modal__loading-spinner"></div>
+                <div class="score-modal__loading-text">Yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Summary Modal (G21 Phase 2) -->
+    <div id="sales-summary-modal" class="modal" style="display: none;">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h2 class="modal__title">Sales Summary</h2>
+                <button type="button" class="modal__close" id="sales-modal-close">&times;</button>
+            </div>
+            <div class="modal__body" id="sales-summary-content">
+                <!-- Dynamic content -->
+            </div>
+            <div class="score-modal__loading hidden" id="sales-modal-loading">
                 <div class="score-modal__loading-spinner"></div>
                 <div class="score-modal__loading-text">Yükleniyor...</div>
             </div>

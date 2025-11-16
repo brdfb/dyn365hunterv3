@@ -302,3 +302,18 @@ export async function fetchScoreBreakdown(domain) {
     return await response.json();
 }
 
+/**
+ * Fetch sales summary for a domain (G21 Phase 2)
+ */
+export async function fetchSalesSummary(domain) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/leads/${encodeURIComponent(domain)}/sales-summary`);
+    
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Fetch sales summary failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    
+    return await response.json();
+}
+

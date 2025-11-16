@@ -218,7 +218,7 @@ COLD_DOMAIN="atilimyem.com.tr" \
 3. ✅ Compare expected vs actual
 4. ✅ Document anomalies
 5. ⏳ **Review tuning recommendations with sales team** (future)
-6. ⏳ **Decide on UI integration model** (where will Sales Summary appear?) - Next phase
+6. ✅ **UI integration** - ✅ Completed (2025-01-28) - Sales Summary modal in Mini UI, "📞 Sales" button in leads table
 7. ✅ **Add logging/telemetry** (track Sales Summary usage) - ✅ Completed (`sales_summary_viewed` event)
 8. ⏳ **Create SALES-2 Tuning plan** (if adjustments needed) - Optional, Phase 2.1 mechanism ready
 

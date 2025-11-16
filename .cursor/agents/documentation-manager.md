@@ -210,7 +210,7 @@ scripts/manage_docs.sh list
 
 Agent should regularly check:
 - TODO files status changes
-- Active documentation count (should be < 7 files, currently 9 files: 3 reference guides + 2 production guides + 1 P1 playbook + 2 stabilization docs + 1 G21 refactor plan)
+- Active documentation count (should be < 7 files, currently 7 files: 3 reference guides + 2 production guides + 1 priority doc + 1 G21 refactor plan)
 - Feature documentation in `docs/active/` (should be archived when complete)
 - Planning documentation in `docs/plans/` (should be archived when complete)
 - **Stabilization Sprint status** (✅ Completed - 2025-01-28 - v1.1-stable released)

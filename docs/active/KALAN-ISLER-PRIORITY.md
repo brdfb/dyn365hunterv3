@@ -390,20 +390,20 @@ Bu maddeler **production blocker** idi - G19'da tamamlandı.
   - ✅ API v1 router structure (`/api/v1/...`) - All API endpoints now available under `/api/v1/` prefix
   - ✅ Backward compatibility - Legacy endpoints (`/...`) continue to work for zero downtime migration
   - ✅ Dual-path routing - Both v1 and legacy endpoints active simultaneously
-  - ✅ 13 versioned routers: ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts
+  - ✅ 14 versioned routers: ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts, sales_summary
   - ✅ Health and auth endpoints excluded from versioning (infrastructure endpoints)
   - ✅ Proxy pattern - V1 routers proxy to legacy handlers (no code duplication)
   - ✅ Test coverage - 10 tests (backward compatibility, dual-path routing)
 - **Implementation Files**:
   - `app/api/v1/` - V1 router directory with proxy pattern handlers
   - `app/api/v1/__init__.py` - V1 router exports
-  - `app/api/v1/*.py` - Individual v1 router files (13 routers)
+  - `app/api/v1/*.py` - Individual v1 router files (14 routers)
   - `app/main.py` - Updated to register v1 routers and maintain legacy routers
   - `tests/test_api_versioning.py` - API versioning tests
 - **Lokasyon**: `app/api/v1/` (yeni dizin yapısı), `app/main.py` (router registration)
 - **Zero Downtime Geçiş Planı**:
   - [x] ✅ API versioning yapısı oluştur (`/api/v1/`)
-  - [x] ✅ Tüm router'ları `/api/v1/` altına taşı (13 router: ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts)
+  - [x] ✅ Tüm router'ları `/api/v1/` altına taşı (14 router: ingest, scan, leads, dashboard, email_tools, progress, admin, notes, tags, favorites, pdf, rescan, alerts, sales_summary)
   - [x] ✅ **Backward compatibility**: Eski endpoint'leri `/...` altında bırak (proxy pattern)
   - [ ] OpenAPI docs'u güncelle (version bilgisi) - Future enhancement
   - [ ] Version deprecation strategy belirle (örn: v1 6 ay desteklenir) - Future enhancement
@@ -722,7 +722,7 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 - ✅ API versioning tamamlandı (P1-5)
 - ✅ V1 router structure (`/api/v1/...`) aktif
 - ✅ Backward compatibility korundu (legacy endpoints çalışıyor)
-- ✅ 13 versioned router aktif
+- ✅ 14 versioned router aktif
 
 **Bulk Operations:**
 - ✅ Batch processing optimization tamamlandı (P1-4)

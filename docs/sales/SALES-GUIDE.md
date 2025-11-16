@@ -544,6 +544,65 @@ curl "http://localhost:8000/leads/ornek-firma.com/score-breakdown"
 - Risk puanlarını değerlendirme
 - Migration hazırlık seviyesini anlama
 
+### Sales Summary (G21 Phase 2) ✨ YENİ
+
+Bir domain için satış zekası özeti:
+
+```bash
+# API v1 endpoint (önerilen)
+curl "http://localhost:8000/api/v1/leads/ornek-firma.com/sales-summary"
+
+# Legacy endpoint (backward compatible)
+curl "http://localhost:8000/leads/ornek-firma.com/sales-summary"
+```
+
+**Ne Döner?**
+```json
+{
+  "domain": "ornek-firma.com",
+  "one_liner": "ornek-firma.com - Migration fırsatı, yüksek hazırlık skoru (85), Enterprise teklif hazırlanabilir.",
+  "call_script": [
+    "Merhaba, ornek-firma.com için email altyapınızı inceledik...",
+    "..."
+  ],
+  "discovery_questions": [
+    "Şu anki email altyapınızdan memnun musunuz?",
+    "..."
+  ],
+  "offer_tier": {
+    "tier": "Enterprise",
+    "license": "Enterprise",
+    "price_per_user_per_month": 20,
+    "migration_fee": 10000,
+    "defender_price_per_user_per_month": 10,
+    "consulting_fee": 50000,
+    "recommendation": "Enterprise çözümü önerilir..."
+  },
+  "opportunity_potential": 88,
+  "urgency": "high",
+  "metadata": {
+    "domain": "ornek-firma.com",
+    "provider": "M365",
+    "segment": "Migration",
+    "readiness_score": 85,
+    "priority_score": 1,
+    "tenant_size": "large",
+    "local_provider": null,
+    "generated_at": "2025-01-28T..."
+  }
+}
+```
+
+**Mini UI'de Kullanım:**
+- Lead tablosunda "📞 Sales" butonuna tıklayarak sales summary modal'ı açılır
+- One-liner, call script, discovery questions, offer tier, opportunity potential ve urgency bilgileri görüntülenir
+
+**Ne İşe Yarar?**
+- Satış ekibi için hazır call script ve discovery questions
+- Offer tier önerisi (tenant size'a göre)
+- Opportunity potential skoru (0-100)
+- Urgency seviyesi (low/medium/high)
+
 ### Lead Enrichment (G16) ✨ YENİ
 
 Lead'leri contact email'leri ile zenginleştirme:
@@ -910,6 +969,15 @@ curl "http://localhost:8000/dashboard/kpis"
 ### Score Breakdown (G19) ✨ YENİ
 ```bash
 curl "http://localhost:8000/leads/DOMAIN-BURAYA/score-breakdown"
+```
+
+### Sales Summary (G21 Phase 2) ✨ YENİ
+```bash
+# API v1 endpoint (önerilen)
+curl "http://localhost:8000/api/v1/leads/DOMAIN-BURAYA/sales-summary"
+
+# Legacy endpoint (backward compatible)
+curl "http://localhost:8000/leads/DOMAIN-BURAYA/sales-summary"
 ```
 
 ### UI Upgrade: Sorting, Pagination, Search (G19) ✨ YENİ

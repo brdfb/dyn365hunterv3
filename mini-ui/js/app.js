@@ -1,7 +1,7 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown } from './api.js';
-import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading } from './ui-leads.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary } from './api.js';
+import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading, showSalesSummary, hideSalesSummary, showSalesSummaryError, showSalesModalLoading, hideSalesModalLoading } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 import { log, warn, error as logError } from './logger.js';
 
@@ -120,6 +120,30 @@ async function init() {
         });
     }
     
+    // G21 Phase 2: Bind sales summary modal
+    const salesModalClose = document.getElementById('sales-modal-close');
+    const salesModal = document.getElementById('sales-summary-modal');
+    if (salesModalClose) {
+        salesModalClose.addEventListener('click', hideSalesSummary);
+    }
+    if (salesModal) {
+        const salesOverlay = salesModal.querySelector('.modal__overlay');
+        if (salesOverlay) {
+            salesOverlay.addEventListener('click', (e) => {
+                if (e.target === salesOverlay) {
+                    hideSalesSummary();
+                }
+            });
+        }
+        
+        // ESC key to close sales modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && salesModal.style.display === 'block') {
+                hideSalesSummary();
+            }
+        });
+    }
+    
     // G19: Bind score click handlers (delegated event listener)
     document.addEventListener('click', async (e) => {
         // Handle domain click - open website in new tab
@@ -162,6 +186,32 @@ async function init() {
                     // Phase 1.2: Hide modal-specific loading state
                     hideScoreModalLoading();
                 }
+                return;
+            }
+        }
+        
+        // G21 Phase 2: Handle Sales button click - show sales summary
+        const salesButton = e.target.closest('.sales-button');
+        if (salesButton) {
+            const domain = salesButton.getAttribute('data-domain');
+            if (domain) {
+                // Open modal first, then show loading state
+                const modal = document.getElementById('sales-summary-modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    showSalesModalLoading();
+                }
+                
+                try {
+                    const summary = await fetchSalesSummary(domain);
+                    showSalesSummary(summary, domain);
+                } catch (error) {
+                    logError('Failed to fetch sales summary:', error);
+                    showSalesSummaryError(domain, error.message);
+                } finally {
+                    hideSalesModalLoading();
+                }
+                return;
             }
         }
     });
