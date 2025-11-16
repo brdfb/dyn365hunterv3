@@ -8,7 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- TBD
+- **Test Suite Improvements** (2025-01-27)
+  - Shared test fixtures (`tests/conftest.py`) with transaction-based isolation
+  - Standardized test isolation across all test files
+  - Conditional test execution for integration tests (Redis/Celery availability checks)
+  - Test analysis and application status reports
+  - **Test Infrastructure**:
+    - `db_session` fixture: Transaction-based isolated database session with automatic rollback
+    - `client` fixture: TestClient with database dependency override
+    - `redis_available`, `celery_available`, `redis_and_celery_available` fixtures for conditional execution
+    - Pytest markers: `@pytest.mark.requires_redis`, `@pytest.mark.requires_celery`, `@pytest.mark.requires_integration`
+  - **Test Fixes**:
+    - Fixed test isolation in `test_notes_tags_favorites.py` and `test_rescan_alerts.py`
+    - Activated skipped tests with conditional execution
+    - Fixed Company model parameter usage (`company_name` → `canonical_name`)
+    - Fixed note ordering test assertions
+  - **Documentation**:
+    - `docs/active/TEST-ANALYSIS.md` - Comprehensive test suite analysis
+    - `docs/active/APPLICATION-STATUS.md` - Application health status report
 
 ## [1.1.0] - 2025-01-28
 

@@ -56,7 +56,6 @@ API contract documentation:
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
 
 #### Production Readiness Documentation
-- `PRODUCTION-READINESS-CRITIQUE-V2.md` - P0/P1/P2 hardening checklist with code examples
 - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
 
 #### P1 Implementation Documentation
@@ -82,7 +81,8 @@ API contract documentation:
   - `usage_metrics_*.json` - Usage metrics collection data
 
 #### Status & Analysis
-- `DOCUMENTATION-STATUS-ANALYSIS.md` - Kapsamlı dokümantasyon durum analizi (2025-01-28)
+- `APPLICATION-STATUS.md` - Application health status report (2025-01-27)
+- `TEST-ANALYSIS.md` - Test suite analysis report (2025-01-27)
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
@@ -127,6 +127,12 @@ API contract documentation:
 - `2025-11-15-G19-PRE-FLIGHT-CHECKLIST.md` - G19 Pre-Flight Checklist: Production Hardening (✅ Completed - 2025-11-15)
 - `2025-01-28-TEST-COVERAGE-ANALYSIS.md` - Test coverage analysis report (Archived)
 - `2025-01-28-TESTING.md` - Testing guide and troubleshooting (Archived)
+- `2025-01-27-DOCUMENTATION-RULES-UPDATE-SUMMARY.md` - Documentation rules update summary (Archived - 2025-01-27)
+- `2025-01-27-DOCUMENTATION-STATUS-ANALYSIS.md` - Kapsamlı dokümantasyon durum analizi (Archived - 2025-01-27)
+- `2025-01-27-DOCUMENTATION-READINESS-REPORT.md` - Documentation readiness report (Archived - 2025-01-27)
+- `2025-01-27-LOGGING-GOLDEN-SAMPLES.md` - Logging golden samples (Archived - 2025-01-27)
+- `2025-01-27-LOGGING-SMOKE-TEST.md` - Logging smoke test (Archived - 2025-01-27)
+- `2025-01-27-ACTIVE-DOCS-SUMMARY.md` - Active documentation summary (Archived - 2025-01-27)
 - `2025-11-12-PATCH-SUGGESTIONS.diff` - Plan patch suggestions (archived)
 - `2025-11-12-ACTIONS.json` - Implementation action items (all completed, archived)
 - `2025-11-12-test-google-domain.sh` - Temporary test script (archived)
