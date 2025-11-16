@@ -5,7 +5,12 @@ This folder contains TODO lists and task tracking documents.
 ## Current Status
 
 **Active TODOs:**
-- (No active TODOs - All completed TODOs have been archived)
+- `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
+  - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
+  - ✅ Phase 1: Deprecation Annotations (2025-11-16)
+  - ✅ Phase 2: Sales Engine (2025-01-28)
+  - ✅ Phase 3: Read-Only Mode (2025-01-28)
+  - 🔄 Phase 4: Dynamics Migration (Next)
 
 **Recently Completed:**
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
