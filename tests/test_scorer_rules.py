@@ -286,15 +286,16 @@ class TestRiskScoring:
         """Test risk scoring when DKIM is missing."""
         # Provider: Local (10 points)
         # SPF present: +10
-        # No DKIM: -10 risk
-        # Expected: 10 + 10 - 10 = 10
+        # No DKIM: -10 risk (no_dkim)
+        # DKIM none: -5 risk (dkim_none) - Additional penalty (G18: Enhanced scoring)
+        # Expected: 10 + 10 - 10 - 5 = 5
         result = score_domain(
             domain="example.com",
             provider="Local",
             signals={"spf": True, "dkim": False, "dmarc_policy": None},
             mx_records=["mail.example.com"],
         )
-        assert result["score"] == 10  # 10 (Local) + 10 (SPF) - 10 (no_dkim) = 10
+        assert result["score"] == 5  # 10 (Local) + 10 (SPF) - 10 (no_dkim) - 5 (dkim_none) = 5
 
     def test_risk_scoring_dmarc_none(self):
         """Test risk scoring when DMARC policy is 'none'."""
@@ -330,16 +331,17 @@ class TestRiskScoring:
         """Test that hosting_mx_weak risk doesn't apply if SPF exists."""
         # Provider: Hosting (20 points)
         # SPF present: +10
-        # No DKIM: -10 risk
+        # No DKIM: -10 risk (no_dkim)
+        # DKIM none: -5 risk (dkim_none) - Additional penalty (G18: Enhanced scoring)
         # Hosting MX weak: NOT applied (SPF exists)
-        # Expected: 20 + 10 - 10 = 20
+        # Expected: 20 + 10 - 10 - 5 = 15
         result = score_domain(
             domain="example.com",
             provider="Hosting",
             signals={"spf": True, "dkim": False, "dmarc_policy": None},
             mx_records=["mail.hosting.com"],
         )
-        assert result["score"] == 20  # 20 + 10 - 10 = 20
+        assert result["score"] == 15  # 20 + 10 - 10 (no_dkim) - 5 (dkim_none) = 15
 
 
 class TestProviderPointsUpdate:

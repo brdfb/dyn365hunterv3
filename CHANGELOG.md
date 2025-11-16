@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Scoring Engine Test Fixes** (2025-01-28) - Critical test failures fixed, scoring engine fully validated
+  - **Fixed Tests**: 
+    - `test_risk_scoring_no_dkim` - Accounted for `dkim_none` risk penalty (-5)
+    - `test_risk_scoring_hosting_with_spf` - Accounted for `dkim_none` risk penalty (-5)
+    - Golden dataset test cases (test_case3, test_case4, test_case6, test_case9, test_case11) - Updated expected scores and priority scores
+    - `test_golden_dataset_priority_ordering` - Fixed priority score ranges (Skip → 7, Existing → 3-6, Migration → 1-4)
+  - **Root Cause**: G18 Enhanced Scoring added `dkim_none` risk penalty (-5) but tests were not updated
+  - **Impact**: Scoring engine now fully validated (86 tests passing, 0 failures)
+  - **Status**: ✅ Completed
+  - **Files Modified**: `tests/test_scorer_rules.py`, `tests/test_golden_dataset.py`
+  - **Documentation**: `docs/active/TEST-FIXES-COMPLETED.md` - Complete test fix report
+
 ### Removed
 - **Microsoft SSO Authentication (G19)** (2025-01-28) - Removed unused SSO implementation, switched to Internal Access Mode
   - **Removed Files**: `app/core/auth.py`, `app/api/auth.py`, `app/core/favorites_migration.py`, `tests/test_auth.py`

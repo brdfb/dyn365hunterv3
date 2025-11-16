@@ -70,10 +70,19 @@ API contract documentation:
 #### Integration Roadmap Documentation (NEW - 2025-01-28)
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
-  - **Phase 2**: ⏳ Pending - Partner Center Referrals (P1) - 2-3 days
+  - **Phase 2**: 🔄 NEXT - Partner Center Referrals (P1) - 2-3 days
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
   - **Key Principle**: UI stability → Data ingestion → CRM integration
 - `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
+- `2025-01-28-INTEGRATION-VS-STABILIZATION-CRITIQUE.md` - Critique of integration vs stabilization approach
+- `IP-ENRICHMENT-UI-PATCH-PLAN.md` - IP enrichment UI integration patch plan (minimal approach)
+
+#### Test & Validation Documentation
+- `TEST-FIXES-COMPLETED.md` (2025-01-28) - Test fixes completion report
+  - Fixed `dkim_none` risk penalty in test expectations
+  - Fixed priority score ranges
+  - All 86 scoring tests passing (0 failures)
+  - Status: ✅ Completed
 
 #### Architecture Refactor Documentation
 - `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
@@ -94,9 +103,10 @@ API contract documentation:
 - ✅ P0 Hardening: Completed (G19)
 - ✅ P1 Performance: Completed (2025-01-28)
 - ✅ Stabilization Sprint: Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)
+- ✅ **Test Fixes**: Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
 - 🔄 **Integration Roadmap**: In Progress (2025-01-28) - Correct sequence for external integrations
-  - 🔄 Phase 1: Mini UI Stabilization (P0.5) - NEXT (1 day)
-  - ⏳ Phase 2: Partner Center Referrals (P1) - Pending (2-3 days)
+  - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
+  - 🔄 Phase 2: Partner Center Referrals (P1) - NEXT (2-3 days)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
   - ✅ Phase 0: Preparation & Snapshot (2025-11-16)

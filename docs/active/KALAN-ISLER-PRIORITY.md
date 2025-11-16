@@ -1,9 +1,9 @@
 # Kalan İşler - Öncelik Sırası (CRITIQUE GÜNCELLEMESİ)
 
 **Tarih**: 2025-01-28  
-**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
-**Son Güncelleme**: 2025-01-28 (G21 Architecture Refactor başlatıldı)  
-**Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. **G21: Architecture Refactor başlatıldı (2025-01-28).** P2 backlog olarak kaldı.
+**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → ✅ **Test Fixes Tamamlandı (2025-01-28)** → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
+**Son Güncelleme**: 2025-01-28 (Test fixes completed, scoring engine validated)  
+**Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. **Test Fixes tamamlandı (2025-01-28) - 86 test passing, 0 failures.** **G21: Architecture Refactor başlatıldı (2025-01-28).** P2 backlog olarak kaldı.
 
 ---
 
@@ -69,18 +69,20 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 
 ## 🔄 Integration Roadmap (NEW - 2025-01-28)
 
-**Durum**: 🔄 **IN PROGRESS** (Phase 1: ✅ Completed, Phase 2: NEXT)  
+**Durum**: 🔄 **IN PROGRESS** (Phase 1: ✅ Completed 2025-01-28, Phase 2: NEXT)  
 **Priority**: P0.5 → P1 → P2  
 **Estimated Duration**: 9-14 days total  
-**Risk Level**: Low → Medium (with proper execution)
+**Risk Level**: Low → Medium (with proper execution)  
+**Last Updated**: 2025-01-28 (Test fixes completed, scoring engine validated)
 
 ### Correct Sequence (Non-negotiable)
 
-1. **Phase 1: Mini UI Stabilization (P0.5)** - ✅ **COMPLETED** (1 day)
+1. **Phase 1: Mini UI Stabilization (P0.5)** - ✅ **COMPLETED** (2025-01-28, 1 day)
    - Button fixes, modal bugs, loading states, filter bar UX, general polish
    - **Why First**: UI is most touched point in Partner Center → Hunter → CRM flow
    - **Risk**: 0/10 (pure cosmetic + stability)
    - **Status**: All tasks completed (Task 1.1-1.5 ✅)
+   - **Test Fixes**: ✅ Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
 
 2. **Phase 2: Partner Center Referrals (P1)** - 🔄 **NEXT** (2-3 days)
    - API client, data model, ingestion, UI integration, background sync

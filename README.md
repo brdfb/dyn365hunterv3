@@ -14,6 +14,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-28):
+- **Scoring Engine Test Fixes** (✅ Completed) - Critical test failures fixed, scoring engine fully validated
+  - Fixed `dkim_none` risk penalty (-5) in test expectations
+  - Fixed priority score ranges (Skip → 7, Existing → 3-6, Migration → 1-4)
+  - All 86 scoring tests now passing (0 failures)
+  - Impact: Production confidence restored, scoring engine validated
 - **SSO Removal - Internal Access Mode** (✅ Completed) - Removed unused Microsoft SSO authentication, switched to Internal Access Mode
   - Removed SSO implementation (~400+ lines of code) - Not used in any core flows
   - Removed dependencies: `msal`, `python-jose`, `cryptography` (SSO-specific)

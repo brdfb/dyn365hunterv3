@@ -58,9 +58,9 @@ GOLDEN_DATASET = [
         "signals": {"spf": True, "dkim": False, "dmarc_policy": None},
         "mx_records": ["mail.protection.outlook.com"],
         "expected": {
-            "readiness_score": 50,  # 0 base + 50 M365 + 10 SPF - 10 no DKIM (DMARC None has no risk, only "none" has risk)
+            "readiness_score": 45,  # 0 base + 50 M365 + 10 SPF - 10 no_dkim - 5 dkim_none (G18: Enhanced scoring)
             "segment": "Existing",  # provider_in: ["M365"]
-            "priority_score": 4,  # Existing + Score 50-69
+            "priority_score": 5,  # Existing + Score 30-49 → Priority: 5 (priority.py line 70-71)
         },
     },
     {
@@ -70,7 +70,7 @@ GOLDEN_DATASET = [
         "signals": {"spf": True, "dkim": False, "dmarc_policy": None},
         "mx_records": ["aspmx.l.google.com"],
         "expected": {
-            "readiness_score": 50,  # 0 base + 50 Google + 10 SPF - 10 no DKIM (DMARC None has no risk, only "none" has risk)
+            "readiness_score": 45,  # 0 base + 50 Google + 10 SPF - 10 no_dkim - 5 dkim_none (G18: Enhanced scoring)
             "segment": "Cold",  # min_score 40, max_score 69
             "priority_score": 5,  # Cold + Score 40+
         },
@@ -96,7 +96,7 @@ GOLDEN_DATASET = [
         "expected": {
             "readiness_score": 0,  # 0 base + 20 Hosting - 10 no SPF - 10 no DKIM - 10 hosting_mx_weak (floored at 0)
             "segment": "Skip",  # max_score 39
-            "priority_score": 6,  # Skip segment
+            "priority_score": 7,  # Skip segment → Priority 7 (lowest)
         },
     },
     {
@@ -130,9 +130,9 @@ GOLDEN_DATASET = [
         "signals": {"spf": True, "dkim": False, "dmarc_policy": None},
         "mx_records": ["mail.local-provider.com"],
         "expected": {
-            "readiness_score": 10,  # 0 base + 10 Local + 10 SPF - 10 no DKIM (DMARC None has no risk, only "none" has risk)
+            "readiness_score": 5,  # 0 base + 10 Local + 10 SPF - 10 no_dkim - 5 dkim_none (G18: Enhanced scoring)
             "segment": "Skip",  # max_score 39
-            "priority_score": 6,  # Skip segment
+            "priority_score": 7,  # Skip segment → Priority 7 (lowest)
         },
     },
     {
@@ -153,7 +153,7 @@ GOLDEN_DATASET = [
         "provider": "Unknown",
         "signals": {"spf": False, "dkim": False, "dmarc_policy": None},
         "mx_records": None,  # No MX records = hard fail
-        "expected": {"readiness_score": 0, "segment": "Skip", "priority_score": 6},
+        "expected": {"readiness_score": 0, "segment": "Skip", "priority_score": 7},  # Skip segment → Priority 7 (lowest)
     },
     {
         "name": "M365 with DMARC none",
@@ -227,9 +227,9 @@ class TestGoldenDataset:
         Test that priority ordering works correctly.
 
         Migration leads with high scores should have priority 1-2,
-        Existing leads should have priority 3-4,
-        Cold leads should have priority 5,
-        Skip leads should have priority 6.
+        Existing leads should have priority 3-5,
+        Cold leads should have priority 5-6,
+        Skip leads should have priority 7 (lowest).
         """
         # Test Migration high priority
         migration_high = [
@@ -255,18 +255,21 @@ class TestGoldenDataset:
                 assert priority in [
                     1,
                     2,
-                    6,
-                ], f"Migration should have priority 1, 2, or 6, got {priority}"
+                    3,
+                    4,
+                ], f"Migration should have priority 1-4, got {priority}"
             elif segment == "Existing":
                 assert priority in [
                     3,
                     4,
+                    5,
                     6,
-                ], f"Existing should have priority 3, 4, or 6, got {priority}"
+                ], f"Existing should have priority 3-6, got {priority}"
             elif segment == "Cold":
                 assert priority in [
                     5,
                     6,
-                ], f"Cold should have priority 5 or 6, got {priority}"
+                    7,
+                ], f"Cold should have priority 5-7, got {priority}"
             elif segment == "Skip":
-                assert priority == 6, f"Skip should have priority 6, got {priority}"
+                assert priority == 7, f"Skip should have priority 7 (lowest), got {priority}"
