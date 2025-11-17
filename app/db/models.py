@@ -146,6 +146,22 @@ class LeadScore(Base):
         String(50), nullable=False, index=True
     )  # 'Migration', 'Existing', 'Cold', 'Skip'
     reason = Column(Text, nullable=True)  # Human-readable explanation of score/segment
+    # CSP P-Model fields (Phase 2)
+    technical_heat = Column(
+        String(20), nullable=True, index=True
+    )  # 'Hot', 'Warm', 'Cold'
+    commercial_segment = Column(
+        String(50), nullable=True, index=True
+    )  # 'GREENFIELD', 'COMPETITIVE', 'WEAK_PARTNER', 'RENEWAL', 'LOW_INTENT', 'NO_GO'
+    commercial_heat = Column(
+        String(20), nullable=True, index=True
+    )  # 'HIGH', 'MEDIUM', 'LOW'
+    priority_category = Column(
+        String(10), nullable=True, index=True
+    )  # 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'
+    priority_label = Column(
+        String(100), nullable=True
+    )  # Human-readable label (e.g., 'High Potential Greenfield')
     updated_at = Column(
         TIMESTAMP(timezone=True),
         server_default=func.now(),

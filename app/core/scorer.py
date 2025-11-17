@@ -263,6 +263,31 @@ def score_domain(
     if use_cache:
         cached_result = get_cached_scoring(domain, provider, signals)
         if cached_result is not None:
+            # If cached result exists but missing CSP P-model fields, calculate and add them
+            if "technical_heat" not in cached_result:
+                from app.core.technical_heat import calculate_technical_heat
+                from app.core.commercial import calculate_commercial_segment, calculate_commercial_heat
+                from app.core.priority_category import calculate_priority_category
+                
+                segment = cached_result.get("segment", "Skip")
+                score = cached_result.get("score", 0)
+                
+                technical_heat = calculate_technical_heat(segment, provider, score)
+                commercial_segment = calculate_commercial_segment(segment, provider, score)
+                commercial_heat = calculate_commercial_heat(commercial_segment, score)
+                priority_category, priority_label = calculate_priority_category(
+                    technical_heat, commercial_heat, commercial_segment, score
+                )
+                
+                cached_result["technical_heat"] = technical_heat
+                cached_result["commercial_segment"] = commercial_segment
+                cached_result["commercial_heat"] = commercial_heat
+                cached_result["priority_category"] = priority_category
+                cached_result["priority_label"] = priority_label
+                
+                # Update cache with new fields
+                set_cached_scoring(domain, provider, signals, cached_result)
+            
             return cached_result
 
     # Calculate score (includes risk scoring)
@@ -272,6 +297,30 @@ def score_domain(
     segment, reason = determine_segment(score, provider)
 
     result = {"score": score, "segment": segment, "reason": reason}
+    
+    # Calculate CSP P-model fields
+    from app.core.technical_heat import calculate_technical_heat
+    from app.core.commercial import calculate_commercial_segment, calculate_commercial_heat
+    from app.core.priority_category import calculate_priority_category
+    
+    # Technical heat
+    technical_heat = calculate_technical_heat(segment, provider, score)
+    result["technical_heat"] = technical_heat
+    
+    # Commercial segment
+    commercial_segment = calculate_commercial_segment(segment, provider, score)
+    result["commercial_segment"] = commercial_segment
+    
+    # Commercial heat
+    commercial_heat = calculate_commercial_heat(commercial_segment, score)
+    result["commercial_heat"] = commercial_heat
+    
+    # Priority category (P1-P6)
+    priority_category, priority_label = calculate_priority_category(
+        technical_heat, commercial_heat, commercial_segment, score
+    )
+    result["priority_category"] = priority_category
+    result["priority_label"] = priority_label
     
     # Cache result
     if use_cache:

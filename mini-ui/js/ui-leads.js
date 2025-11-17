@@ -20,8 +20,9 @@ export function renderLeadsTable(leads) {
     tbody.innerHTML = leads.map(lead => {
         const segmentClass = getSegmentClass(lead.segment);
         const scoreClass = getScoreClass(lead.readiness_score);
-        const priorityBadge = getPriorityBadge(lead.priority_score);
-        const priorityTooltip = getPriorityTooltip(lead.priority_score, lead.segment, lead.readiness_score);
+        // Phase 3: Use P-model priority_category and priority_label
+        const priorityBadge = getPriorityBadge(lead.priority_category || lead.priority_score);
+        const priorityTooltip = getPriorityTooltip(lead.priority_category, lead.priority_label, lead.priority_score, lead.segment, lead.readiness_score);
         
         return `
             <tr class="leads-table__row">
@@ -195,18 +196,21 @@ function getScoreClass(score) {
 }
 
 /**
- * Get priority badge (visual indicator)
- * Priority 1 = 🔥 (highest)
- * Priority 2 = ⭐ (high)
- * Priority 3 = 🟡 (medium-high)
- * Priority 4 = 🟠 (medium)
- * Priority 5 = ⚪ (low-medium)
- * Priority 6 = ⚫ (low)
- * Priority 7 = 🔴 (lowest)
+ * Get priority badge (P-model: P1-P6 with colored badges)
+ * Phase 3: Updated to use priority_category (P1-P6) from P-model
+ * Falls back to old priority_score (1-7) for backward compatibility
  */
-function getPriorityBadge(priority_score) {
-    if (priority_score === null || priority_score === undefined) return '-';
+function getPriorityBadge(priority_category_or_score) {
+    if (priority_category_or_score === null || priority_category_or_score === undefined) return '-';
     
+    // Phase 3: P-model priority_category (P1-P6)
+    if (typeof priority_category_or_score === 'string' && priority_category_or_score.startsWith('P')) {
+        const category = priority_category_or_score.toUpperCase();
+        return `<span class="priority-badge priority-badge--${category.toLowerCase()}">${category}</span>`;
+    }
+    
+    // Backward compatibility: Old priority_score (1-7)
+    const priority_score = priority_category_or_score;
     switch (priority_score) {
         case 1:
             return '🔥'; // Highest priority (Migration 80+)
@@ -223,14 +227,22 @@ function getPriorityBadge(priority_score) {
         case 7:
             return '🔴'; // Lowest priority (Cold 0-19, Skip)
         default:
-            return '•'; // Unknown
+            return '-'; // Unknown
     }
 }
 
 /**
  * Get priority tooltip text
+ * Phase 3: Updated to use priority_label from P-model
+ * Falls back to old priority_score-based tooltip for backward compatibility
  */
-function getPriorityTooltip(priority_score, segment, score) {
+function getPriorityTooltip(priority_category, priority_label, priority_score, segment, score) {
+    // Phase 3: P-model priority_label (preferred)
+    if (priority_category && priority_label) {
+        return priority_label;
+    }
+    
+    // Backward compatibility: Old priority_score-based tooltip
     if (priority_score === null || priority_score === undefined) return '';
     
     const segmentText = segment || 'Bilinmeyen';
@@ -417,7 +429,7 @@ function getRiskLabel(risk) {
         'dkim_missing': 'DKIM Eksik',
         'no_dkim': 'DKIM Eksik',  // Fallback
         'dkim_none': 'DKIM Eksik',  // Fallback
-        'dmarc_none': 'DMARC Yok (Risk)',
+        'dmarc_none': 'DMARC Policy: None (Risk)',  // v1.1: More descriptive - DMARC record exists but policy is "none"
         'hosting_mx_weak': 'Hosting MX Zayıf',
         'spf_multiple_includes': 'SPF Çoklu Include'
     };
@@ -478,11 +490,24 @@ export function showScoreBreakdown(breakdown, domain) {
     // Build HTML content
     let html = `<div class="score-breakdown">`;
     
-    // v1.1: Modal header with explanation
+    // v1.1: Modal header with explanation - Provider-specific description
+    const provider = breakdown.provider?.name || null;
+    let descriptionText = "Bu skor, DNS ve IP verilerine göre hesaplandı.";
+    
+    if (provider === "M365") {
+        descriptionText = "Bu skor, M365 kullanımı, DNS ve IP verilerine göre hesaplandı.";
+    } else if (provider === "Google") {
+        descriptionText = "Bu skor, Google Workspace kullanımı, DNS ve IP verilerine göre hesaplandı.";
+    } else if (provider === "Local" || provider === "Hosting") {
+        descriptionText = "Bu skor, mevcut email sağlayıcınız, DNS ve IP verilerine göre hesaplandı.";
+    } else if (provider && provider !== "Unknown") {
+        descriptionText = `Bu skor, ${escapeHtml(provider)} kullanımı, DNS ve IP verilerine göre hesaplandı.`;
+    }
+    
     html += `<div class="score-breakdown__header" style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e0e0e0;">
         <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Neden bu skor?</h2>
         <p style="margin: 0; color: #666; font-size: 0.9rem; line-height: 1.5;">
-            Bu skor, M365 kullanımı, Google Workspace, DNS ve IP verilerine göre hesaplandı.
+            ${descriptionText}
         </p>
     </div>`;
     
@@ -513,10 +538,37 @@ export function showScoreBreakdown(breakdown, domain) {
             </div>`;
         }
         
+        // v1.1: Show DMARC Coverage or Policy based on policy value
+        // If dmarc_policy is "none", show policy instead of coverage (coverage is misleading)
         if (breakdown.dmarc_coverage !== undefined && breakdown.dmarc_coverage !== null) {
+            // Check if DMARC policy is "none" - if so, show policy instead of coverage
+            const dmarcPolicy = breakdown.dmarc_policy;
+            if (dmarcPolicy && dmarcPolicy.toLowerCase() === 'none') {
+                // DMARC exists but policy is "none" - show policy instead of coverage
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">DMARC Policy</span>
+                    <span class="score-breakdown__value score-breakdown__value--negative">None (Risk)</span>
+                </div>`;
+            } else if (dmarcPolicy && (dmarcPolicy.toLowerCase() === 'quarantine' || dmarcPolicy.toLowerCase() === 'reject')) {
+                // DMARC policy is quarantine or reject - show coverage
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">DMARC Coverage</span>
+                    <span class="score-breakdown__value">${breakdown.dmarc_coverage}%</span>
+                </div>`;
+            } else {
+                // DMARC policy is unknown or null - show coverage as fallback
+                html += `<div class="score-breakdown__item">
+                    <span class="score-breakdown__label">DMARC Coverage</span>
+                    <span class="score-breakdown__value">${breakdown.dmarc_coverage}%</span>
+                </div>`;
+            }
+        } else if (breakdown.dmarc_policy) {
+            // No coverage but policy exists - show policy
+            const dmarcPolicy = breakdown.dmarc_policy;
+            const policyClass = dmarcPolicy.toLowerCase() === 'none' ? 'score-breakdown__value--negative' : '';
             html += `<div class="score-breakdown__item">
-                <span class="score-breakdown__label">DMARC Coverage</span>
-                <span class="score-breakdown__value">${breakdown.dmarc_coverage}%</span>
+                <span class="score-breakdown__label">DMARC Policy</span>
+                <span class="score-breakdown__value ${policyClass}">${escapeHtml(dmarcPolicy)}${dmarcPolicy.toLowerCase() === 'none' ? ' (Risk)' : ''}</span>
             </div>`;
         }
         
@@ -630,6 +682,50 @@ export function showScoreBreakdown(breakdown, domain) {
         <span class="score-breakdown__total-value">${breakdown.total_score || 0}</span>
     </div>`;
     
+    // Phase 3: P-Model Fields (CSP P-Model)
+    if (breakdown.technical_heat || breakdown.commercial_segment || breakdown.commercial_heat || breakdown.priority_category || breakdown.priority_label) {
+        html += `<div class="score-breakdown__section" style="margin-top: 1.5rem; border-top: 2px solid #e0e0e0; padding-top: 1rem;">
+            <div class="score-breakdown__section-title">CSP P-Model (Phase 3)</div>`;
+        
+        if (breakdown.technical_heat) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Technical Heat</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.technical_heat)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.commercial_segment) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Commercial Segment</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.commercial_segment)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.commercial_heat) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Commercial Heat</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.commercial_heat)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.priority_category) {
+            const priorityBadge = getPriorityBadge(breakdown.priority_category);
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Priority Category</span>
+                <span class="score-breakdown__value">${priorityBadge}</span>
+            </div>`;
+        }
+        
+        if (breakdown.priority_label) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Priority Label</span>
+                <span class="score-breakdown__value">${escapeHtml(breakdown.priority_label)}</span>
+            </div>`;
+        }
+        
+        html += `</div>`;
+    }
+    
     // Gün 3: PDF Export button
     // IP Enrichment: Network & Location (Minimal UI)
     if (breakdown.ip_enrichment) {
@@ -721,7 +817,10 @@ export function hideScoreModalLoading() {
 }
 
 /**
- * Show sales summary modal (G21 Phase 2)
+ * Show sales summary modal (G21 Phase 2 + v1.1 Intelligence Layer)
+ * 
+ * @param {import('../types/sales.js').SalesSummary} summary - Sales summary response from API
+ * @param {string} domain - Domain name
  */
 export function showSalesSummary(summary, domain) {
     const modal = document.getElementById('sales-summary-modal');
@@ -744,6 +843,61 @@ export function showSalesSummary(summary, domain) {
         <div class="sales-summary__section-title">Özet</div>
         <div class="sales-summary__one-liner">${escapeHtml(summary.one_liner || 'N/A')}</div>
     </div>`;
+    
+    // Segment Explanation (v1.1)
+    if (summary.segment_explanation) {
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Segment Açıklaması</div>
+            <div class="sales-summary__explanation">
+                ${escapeHtml(summary.segment_explanation)}
+            </div>
+        </div>`;
+    }
+    
+    // Provider Reasoning (v1.1)
+    if (summary.provider_reasoning) {
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Mevcut Sağlayıcı Değerlendirmesi</div>
+            <div class="sales-summary__explanation">
+                ${escapeHtml(summary.provider_reasoning)}
+            </div>
+        </div>`;
+    }
+    
+    // Security Reasoning (v1.1)
+    if (summary.security_reasoning) {
+        const security = summary.security_reasoning;
+        const riskClass = security.risk_level === 'high' ? 'high' : security.risk_level === 'medium' ? 'medium' : 'low';
+        const riskLabel = security.risk_level === 'high' ? 'YÜKSEK RİSK' : security.risk_level === 'medium' ? 'ORTA RİSK' : 'DÜŞÜK RİSK';
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Güvenlik Değerlendirmesi</div>
+            <div class="sales-summary__security-reasoning sales-summary__security-reasoning--${riskClass}">
+                <div class="sales-summary__security-header">
+                    <span class="sales-summary__security-risk-badge sales-summary__security-risk-badge--${riskClass}">
+                        ${escapeHtml(riskLabel)}
+                    </span>
+                </div>
+                <div class="sales-summary__security-summary-block">
+                    <div class="sales-summary__security-summary-label">Risk Özeti:</div>
+                    <div class="sales-summary__security-summary">${escapeHtml(security.summary)}</div>
+                </div>
+                <div class="sales-summary__security-details">
+                    <div class="sales-summary__security-details-title">Teknik Durum:</div>
+                    <ul class="sales-summary__security-details-list">
+                        ${security.details.map(detail => `<li>${escapeHtml(detail)}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="sales-summary__security-sales-angle">
+                    <div class="sales-summary__security-sales-angle-label"><strong>Satış Açısı:</strong></div>
+                    <div class="sales-summary__security-sales-angle-text">${escapeHtml(security.sales_angle)}</div>
+                </div>
+                <div class="sales-summary__security-action">
+                    <div class="sales-summary__security-action-label"><strong>Önerilen Aksiyon:</strong></div>
+                    <div class="sales-summary__security-action-text">${escapeHtml(security.recommended_action)}</div>
+                </div>
+            </div>
+        </div>`;
+    }
     
     // Call script
     if (summary.call_script && summary.call_script.length > 0) {
@@ -831,8 +985,64 @@ export function showSalesSummary(summary, domain) {
                     ${escapeHtml((summary.urgency || 'low').toUpperCase())}
                 </span>
             </div>
-        </div>
-    </div>`;
+        </div>`;
+    
+    // Opportunity Rationale (v1.1) - Breakdown
+    if (summary.opportunity_rationale) {
+        const rationale = summary.opportunity_rationale;
+        html += `<div class="sales-summary__opportunity-rationale">
+            <div class="sales-summary__opportunity-rationale-title">Neden ${rationale.total} puan?</div>
+            <div class="sales-summary__opportunity-rationale-summary">${escapeHtml(rationale.summary)}</div>
+            <div class="sales-summary__opportunity-factors">
+                ${rationale.factors.map(factor => `
+                    <div class="sales-summary__opportunity-factor">
+                        <div class="sales-summary__opportunity-factor-header">
+                            <span class="sales-summary__opportunity-factor-name">${escapeHtml(factor.name)}</span>
+                            <span class="sales-summary__opportunity-factor-score">${factor.score} puan</span>
+                        </div>
+                        <div class="sales-summary__opportunity-factor-details">
+                            <span class="sales-summary__opportunity-factor-raw">Değer: ${escapeHtml(String(factor.raw))}</span>
+                            <span class="sales-summary__opportunity-factor-comment">${escapeHtml(factor.comment)}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }
+    
+    html += `</div>`;
+    
+    // Next Step CTA (v1.1)
+    if (summary.next_step) {
+        const nextStep = summary.next_step;
+        const actionClass = nextStep.action === 'call' ? 'call' : nextStep.action === 'email' ? 'email' : nextStep.action === 'nurture' ? 'nurture' : 'wait';
+        const priorityClass = nextStep.priority === 'high' ? 'high' : nextStep.priority === 'medium' ? 'medium' : 'low';
+        const actionLabel = nextStep.action === 'call' ? 'ARAMA' : nextStep.action === 'email' ? 'E-POSTA' : nextStep.action === 'nurture' ? 'NURTURE' : 'BEKLE';
+        const timelineLabel = nextStep.timeline === '24_saat' ? '24 saat içinde' : nextStep.timeline === '3_gün' ? '3 gün içinde' : nextStep.timeline === '1_hafta' ? '1 hafta içinde' : '1 ay içinde';
+        const priorityLabel = nextStep.priority === 'high' ? 'Yüksek Öncelik' : nextStep.priority === 'medium' ? 'Orta Öncelik' : 'Düşük Öncelik';
+        html += `<div class="sales-summary__section">
+            <div class="sales-summary__section-title">Sonraki Adım</div>
+            <div class="sales-summary__next-step sales-summary__next-step--${actionClass}">
+                <div class="sales-summary__next-step-header">
+                    <span class="sales-summary__next-step-action-badge sales-summary__next-step-action-badge--${actionClass}">
+                        ${escapeHtml(actionLabel)}
+                    </span>
+                    <span class="sales-summary__next-step-timeline-badge">
+                        ${escapeHtml(timelineLabel)}
+                    </span>
+                    <span class="sales-summary__next-step-priority-badge sales-summary__next-step-priority-badge--${priorityClass}">
+                        ${escapeHtml(priorityLabel)}
+                    </span>
+                </div>
+                <div class="sales-summary__next-step-message">
+                    <strong>Müşteriye Mesaj:</strong> ${escapeHtml(nextStep.message)}
+                </div>
+                <div class="sales-summary__next-step-internal">
+                    <strong>CRM Notu:</strong> ${escapeHtml(nextStep.internal_note)}
+                </div>
+            </div>
+        </div>`;
+    }
     
     html += `</div>`;
     

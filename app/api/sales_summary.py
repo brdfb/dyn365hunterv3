@@ -20,11 +20,16 @@ class SalesSummaryResponse(BaseModel):
 
     domain: str
     one_liner: str
+    segment_explanation: str
+    provider_reasoning: str
+    security_reasoning: Optional[dict]
     call_script: list[str]
     discovery_questions: list[str]
     offer_tier: dict
     opportunity_potential: int
+    opportunity_rationale: Optional[dict]
     urgency: str
+    next_step: Optional[dict]
     metadata: dict
 
 
@@ -79,12 +84,17 @@ async def get_sales_summary(
     priority_score = None  # Will be calculated if needed
     tenant_size = company.tenant_size
     local_provider = domain_signal.local_provider if domain_signal else None
+    mx_root = domain_signal.mx_root if domain_signal else None
     spf = domain_signal.spf if domain_signal else None
     dkim = domain_signal.dkim if domain_signal else None
     dmarc_policy = domain_signal.dmarc_policy if domain_signal else None
     dmarc_coverage = domain_signal.dmarc_coverage if domain_signal else None
     contact_quality_score = company.contact_quality_score
     expires_at = domain_signal.expires_at if domain_signal else None
+    
+    # Get infrastructure summary (IP enrichment)
+    from app.core.enrichment_service import build_infra_summary
+    infrastructure_summary = build_infra_summary(normalized_domain, db)
 
     # Calculate priority score if needed (import from priority module)
     if segment and readiness_score is not None:
@@ -124,6 +134,8 @@ async def get_sales_summary(
         expires_at=expires_at,
         tuning_factor=tuning_factor,
         ip_context=ip_context,
+        mx_root=mx_root,
+        infrastructure_summary=infrastructure_summary,
     )
 
     # Get user identifier (session-based for internal access mode)

@@ -41,7 +41,10 @@ async function init() {
     bindScanDomainForm(refreshLeads);
     
     // Bind filter button
-    document.getElementById('btn-filter').addEventListener('click', applyFilters);
+    const btnFilter = document.getElementById('btn-filter');
+    if (btnFilter) {
+        btnFilter.addEventListener('click', applyFilters);
+    }
     
     // Bind export buttons (Gün 3)
     const btnExportCsv = document.getElementById('btn-export-csv');

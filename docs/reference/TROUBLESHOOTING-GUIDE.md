@@ -297,6 +297,78 @@ docker-compose exec api alembic stamp head
 
 ---
 
+### Database Reset Issues
+
+**Symptom**: Missing columns (`tenant_size`, `local_provider`, `dmarc_coverage`), view errors (`leads_ready`), schema mismatches, API errors about undefined columns.
+
+**Root Cause**: Using deprecated `schema.sql` or legacy SQL migrations instead of Alembic for database reset.
+
+**Diagnosis**:
+```bash
+# Check if G20 columns exist
+docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -c "
+  SELECT column_name FROM information_schema.columns 
+  WHERE table_name = 'companies' AND column_name = 'tenant_size';
+  SELECT column_name FROM information_schema.columns 
+  WHERE table_name = 'domain_signals' AND column_name IN ('local_provider', 'dmarc_coverage');
+"
+
+# Check leads_ready view
+docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -c "\d+ leads_ready"
+
+# Check for view errors in API logs
+docker-compose logs api | grep -i "undefinedcolumn\|does not exist"
+```
+
+**Resolution**:
+```bash
+# ⚠️ DO NOT use schema.sql or legacy migrations
+# ✅ Use official reset script
+./scripts/reset_db_with_alembic.sh
+
+# Or manually:
+# 1. Drop schema
+docker-compose exec -T api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    conn.execute(text('DROP SCHEMA IF EXISTS public CASCADE;'))
+    conn.execute(text('CREATE SCHEMA public;'))
+    conn.execute(text('GRANT ALL ON SCHEMA public TO dyn365hunter;'))
+    conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+    conn.commit()
+print('✅ Schema dropped')
+"
+
+# 2. Run Alembic migrations (official way)
+docker-compose exec api alembic upgrade head
+
+# 3. Verify schema
+docker-compose exec api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    result = conn.execute(text('SELECT column_name FROM information_schema.columns WHERE table_name = \\'companies\\' AND column_name = \\'tenant_size\\';'))
+    print('✅ tenant_size exists' if result.fetchone() else '❌ tenant_size missing')
+    result = conn.execute(text('SELECT column_name FROM information_schema.columns WHERE table_name = \\'domain_signals\\' AND column_name IN (\\'local_provider\\', \\'dmarc_coverage\\');'))
+    cols = [row[0] for row in result]
+    print(f'✅ domain_signals columns: {cols}')
+"
+```
+
+**Prevention**: 
+- ❌ **DO NOT**: Use `schema.sql` or legacy SQL migrations for database reset (outdated, missing G20 columns)
+- ❌ **DO NOT**: Combine `schema.sql` with legacy migrations (transaction-unsafe, causes schema mismatches)
+- ✅ **DO**: Always use Alembic migrations (`alembic upgrade head`)
+- ✅ **DO**: Use `./scripts/reset_db_with_alembic.sh` for database reset
+- ✅ **DO**: Verify critical columns after reset (tenant_size, local_provider, dmarc_coverage)
+
+**See**: 
+- `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section
+- `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
+
+---
+
 ### Database Lock/Deadlock
 
 **Symptom**: Queries hanging, deadlock errors in logs.

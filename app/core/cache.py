@@ -208,6 +208,12 @@ def set_cached_dns(domain: str, result: Dict[str, Any]) -> bool:
     return set_cached_value(key, result, DNS_CACHE_TTL)
 
 
+def invalidate_dns_cache(domain: str) -> bool:
+    """Invalidate DNS cache for a domain (useful for rescan)."""
+    key = _get_cache_key("dns", domain)
+    return delete_cached_value(key)
+
+
 # WHOIS Cache Functions
 def get_cached_whois(domain: str) -> Optional[Dict[str, Any]]:
     """Get cached WHOIS result."""
@@ -263,6 +269,50 @@ def set_cached_scoring(domain: str, provider: str, signals: Dict[str, Any], resu
     signals_hash = _generate_signals_hash(signals)
     key = _get_cache_key("scoring", f"{domain}:{provider}:{signals_hash}")
     return set_cached_value(key, result, SCORING_CACHE_TTL)
+
+
+def invalidate_scoring_cache(domain: str) -> int:
+    """
+    Invalidate all scoring cache entries for a specific domain.
+    
+    Since scoring cache keys include provider and signals_hash,
+    we need to pattern match and delete all keys for the domain.
+    
+    Args:
+        domain: Domain name to invalidate cache for
+        
+    Returns:
+        Number of cache keys deleted
+    """
+    if not is_redis_available():
+        return 0
+    
+    redis_client = get_redis_client()
+    if redis_client is None:
+        return 0
+    
+    # Pattern match for all scoring cache keys for this domain
+    pattern = _get_cache_key("scoring", f"{domain}:*")
+    
+    try:
+        # Find all matching keys using scan_iter (safe for large key sets)
+        keys = list(redis_client.scan_iter(match=pattern))
+        
+        if not keys:
+            return 0
+        
+        # Delete all matching keys
+        deleted_count = 0
+        for key in keys:
+            if redis_client.delete(key):
+                deleted_count += 1
+        
+        logger.info("scoring_cache_invalidated", domain=domain, keys_deleted=deleted_count)
+        return deleted_count
+        
+    except Exception as e:
+        logger.debug("scoring_cache_invalidation_failed", domain=domain, error=str(e))
+        return 0
 
 
 # Full Scan Cache Functions

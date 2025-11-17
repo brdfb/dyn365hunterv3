@@ -11,7 +11,7 @@ from app.core.change_detection import (
 )
 from app.core.auto_tagging import apply_auto_tags
 from app.core.logging import logger
-from app.core.cache import invalidate_scan_cache
+from app.core.cache import invalidate_scan_cache, invalidate_scoring_cache, invalidate_dns_cache
 import copy
 
 
@@ -30,6 +30,8 @@ def rescan_domain(domain: str, db: Session) -> Dict:
     """
     # Invalidate cache before rescan (force fresh scan)
     invalidate_scan_cache(domain)
+    invalidate_scoring_cache(domain)  # Also invalidate scoring cache (fixes DMARC coverage bug)
+    invalidate_dns_cache(domain)  # Also invalidate DNS cache (ensures fresh DMARC data)
     
     # Get old signal and score for comparison (before scan)
     old_signal = db.query(DomainSignal).filter(DomainSignal.domain == domain).first()
@@ -54,8 +56,8 @@ def rescan_domain(domain: str, db: Session) -> Dict:
             segment=old_score.segment,
         )
 
-    # Perform scan
-    scan_result = scan_single_domain(domain, db)
+    # Perform scan (use_cache=False to ensure fresh DNS data after cache invalidation)
+    scan_result = scan_single_domain(domain, db, use_cache=False)
 
     if not scan_result.get("success"):
         return scan_result

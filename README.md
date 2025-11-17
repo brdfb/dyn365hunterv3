@@ -13,20 +13,22 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 ## 🚀 Production Status
 
-**Hunter v1.0 is production-ready** (2025-01-28)
+**Hunter v1.1 is production-ready** (2025-01-29) - ✅ **DONE & PROD-READY**
 
 - ✅ **P0 Hardening**: Completed (G19)
 - ✅ **P1 Performance**: Completed (2025-01-28)
 - ✅ **Stabilization Sprint**: Completed (3 days)
-- ✅ **Sales Engine**: Completed (G21 Phase 2) + **v1.1 Intelligence Layer** (2025-01-28)
+- ✅ **Sales Engine**: Completed (G21 Phase 2) + **v1.1 Intelligence Layer** (2025-01-29) - ✅ DONE & PROD-READY
+- ✅ **CSP P-Model Integration**: Completed (2025-01-29) - ✅ DONE & PROD-READY
+- ✅ **Production Bug Fixes**: Completed (2025-01-29) - ✅ DONE & PROD-READY
 - ✅ **Read-Only Mode**: Completed (G21 Phase 3)
 
 **Production Deployment**:
-- 📋 [Production Go/No-Go Checklist v1.0](docs/active/GO-NO-GO-CHECKLIST-v1.0.md) - **Hunter v1.0 Production Go/No-Go Checklist**
-- 📋 [Production Deployment Guide](docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md)
-- 📋 [Production Deployment Checklist](docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md)
-- 📋 [Smoke Tests Runbook](docs/active/SMOKE-TESTS-RUNBOOK.md)
-- 📋 [Troubleshooting Guide](docs/active/TROUBLESHOOTING-GUIDE.md)
+- 📋 [Production Readiness Checklist](docs/active/PRODUCTION-READINESS-CHECKLIST-2025-01-29.md) - **CSP P-Model + Sales Summary v1.1 Pre-Production Checklist**
+- 📋 [Production Deployment Guide](docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md)
+- 📋 [Production Deployment Checklist](docs/reference/PRODUCTION-DEPLOYMENT-CHECKLIST.md)
+- 📋 [Smoke Tests Runbook](docs/reference/SMOKE-TESTS-RUNBOOK.md)
+- 📋 [Troubleshooting Guide](docs/reference/TROUBLESHOOTING-GUIDE.md)
 
 **Post-MVP Roadmap**:
 - 🅿️ **Partner Center Integration** (Phase 2) - Parked (Post-MVP)
@@ -38,7 +40,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ## Recent Updates (Last 6 Months)
 
 **Unreleased** (2025-01-29):
-- **CSP P-Model Integration** (✅ FINAL & CLOSED - Production v1.1 Core Feature) - Global CSP Priority Model (P1-P6) implementation
+- **CSP P-Model Integration + Sales Summary v1.1** (✅ **DONE & PROD-READY** - Production v1.1 Core Feature)
+  - **CSP P-Model Integration**: Global CSP Priority Model (P1-P6) implementation
   - Commercial Segment & Heat: 6 commercial segments (GREENFIELD, COMPETITIVE, WEAK_PARTNER, RENEWAL, LOW_INTENT, NO_GO)
   - Technical Heat: Hot/Warm/Cold classification based on technical segment and provider
   - Priority Category (P1-P6): CSP-standard priority categories with human-readable labels

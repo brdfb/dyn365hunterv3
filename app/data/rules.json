@@ -73,6 +73,216 @@
       },
       "description": "Yetersiz veri, analiz dışı"
     }
+  ],
+  "commercial_segment_rules": [
+    {
+      "segment": "GREENFIELD",
+      "condition": {
+        "technical_segment": "Migration",
+        "provider_in": ["Local", "Hosting"]
+      },
+      "description": "Self-hosted → M365 migration fırsatı (High Potential Greenfield)"
+    },
+    {
+      "segment": "GREENFIELD",
+      "condition": {
+        "technical_segment": "Cold",
+        "provider_in": ["Local"],
+        "min_score": 5,
+        "max_score": 59
+      },
+      "description": "Self-hosted mail server, greenfield potansiyeli"
+    },
+    {
+      "segment": "COMPETITIVE",
+      "condition": {
+        "technical_segment": "Migration",
+        "provider_in": ["Google", "Zoho", "Yandex"]
+      },
+      "description": "Cloud-to-cloud migration fırsatı (Competitive Takeover)"
+    },
+    {
+      "segment": "WEAK_PARTNER",
+      "condition": {
+        "technical_segment": "Existing",
+        "provider_in": ["M365"],
+        "max_score": 69
+      },
+      "description": "M365 var ama partner zayıf, memnuniyetsizlik sinyalleri (Existing Microsoft but Weak Partner)"
+    },
+    {
+      "segment": "RENEWAL",
+      "condition": {
+        "technical_segment": "Existing",
+        "provider_in": ["M365"],
+        "min_score": 70
+      },
+      "description": "M365 var, partner güçlü, renewal/upsell fırsatı (Renewal Pressure)"
+    },
+    {
+      "segment": "LOW_INTENT",
+      "condition": {
+        "technical_segment": "Cold",
+        "min_score": 20,
+        "max_score": 59
+      },
+      "description": "Düşük sinyal, uzun nurturing gerekiyor (Low Intent / Long Nurturing)"
+    },
+    {
+      "segment": "NO_GO",
+      "condition": {
+        "technical_segment": "Skip"
+      },
+      "description": "Yetersiz veri, analiz dışı (No-Go / Archive)"
+    },
+    {
+      "segment": "NO_GO",
+      "condition": {
+        "technical_segment": "Cold",
+        "max_score": 19
+      },
+      "description": "Çok düşük sinyal, no-go"
+    }
+  ],
+  "commercial_heat_rules": [
+    {
+      "heat": "HIGH",
+      "condition": {
+        "commercial_segment_in": ["GREENFIELD", "COMPETITIVE"]
+      },
+      "description": "Yüksek commercial heat - hemen aksiyon (48 saat - 3 gün)"
+    },
+    {
+      "heat": "HIGH",
+      "condition": {
+        "commercial_segment": "WEAK_PARTNER",
+        "min_score": 50
+      },
+      "description": "Yüksek skorlu weak partner - yüksek heat"
+    },
+    {
+      "heat": "MEDIUM",
+      "condition": {
+        "commercial_segment": "RENEWAL"
+      },
+      "description": "Renewal pressure - orta heat, soft nurturing"
+    },
+    {
+      "heat": "MEDIUM",
+      "condition": {
+        "commercial_segment": "WEAK_PARTNER",
+        "max_score": 49
+      },
+      "description": "Düşük skorlu weak partner - orta heat"
+    },
+    {
+      "heat": "LOW",
+      "condition": {
+        "commercial_segment_in": ["LOW_INTENT", "NO_GO"]
+      },
+      "description": "Düşük commercial heat - uzun nurturing veya arşiv"
+    }
+  ],
+  "technical_heat_rules": [
+    {
+      "heat": "Hot",
+      "condition": {
+        "technical_segment": "Existing"
+      },
+      "description": "Zaten M365 kullanıyor, değişime açık"
+    },
+    {
+      "heat": "Warm",
+      "condition": {
+        "technical_segment": "Migration",
+        "provider_in": ["Google", "Zoho", "Yandex"]
+      },
+      "description": "Cloud-to-cloud migration, warm lead"
+    },
+    {
+      "heat": "Cold",
+      "condition": {
+        "technical_segment": "Migration",
+        "provider_in": ["Local", "Hosting"]
+      },
+      "description": "Self-hosted → cloud migration, cold lead"
+    },
+    {
+      "heat": "Cold",
+      "condition": {
+        "technical_segment": "Cold"
+      },
+      "description": "Düşük sinyal, cold lead"
+    },
+    {
+      "heat": "Cold",
+      "condition": {
+        "technical_segment": "Skip"
+      },
+      "description": "Skip segment, cold lead"
+    }
+  ],
+  "priority_category_rules": [
+    {
+      "category": "P1",
+      "label": "High Potential Greenfield",
+      "condition": {
+        "technical_heat": "Cold",
+        "commercial_heat": "HIGH",
+        "commercial_segment": "GREENFIELD"
+      },
+      "description": "Self-hosted → M365 migration, en yüksek öncelik, hemen aksiyon (48 saat)"
+    },
+    {
+      "category": "P2",
+      "label": "Competitive Takeover",
+      "condition": {
+        "technical_heat": "Warm",
+        "commercial_heat": "HIGH",
+        "commercial_segment": "COMPETITIVE"
+      },
+      "description": "Google/Zoho/Yandex → EXO geçiş, yüksek öncelik, 3 gün içinde keşif"
+    },
+    {
+      "category": "P3",
+      "label": "Existing Microsoft but Weak Partner",
+      "condition": {
+        "technical_heat": "Hot",
+        "commercial_heat_in": ["MEDIUM", "HIGH"],
+        "commercial_segment": "WEAK_PARTNER"
+      },
+      "description": "M365 var ama partner zayıf, orta-yüksek öncelik, 5 günlük nurturing"
+    },
+    {
+      "category": "P4",
+      "label": "Renewal Pressure",
+      "condition": {
+        "technical_heat": "Hot",
+        "commercial_heat": "MEDIUM",
+        "commercial_segment": "RENEWAL"
+      },
+      "description": "M365 var, partner güçlü, renewal/upsell fırsatı, soft nurturing"
+    },
+    {
+      "category": "P5",
+      "label": "Low Intent / Long Nurturing",
+      "condition": {
+        "technical_heat": "Cold",
+        "commercial_heat": "LOW",
+        "commercial_segment": "LOW_INTENT"
+      },
+      "description": "Düşük intent, uzun nurturing, aylık e-mail"
+    },
+    {
+      "category": "P6",
+      "label": "No-Go / Archive",
+      "condition": {
+        "technical_heat": "Cold",
+        "commercial_heat": "LOW",
+        "commercial_segment": "NO_GO"
+      },
+      "description": "No-go, arşiv, arama yok"
+    }
   ]
 }
 
