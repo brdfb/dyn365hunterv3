@@ -1,7 +1,7 @@
 # Mini UI Test Checklist
 
-**Tarih**: 2025-01-28  
-**Durum**: Test Edilecek
+**Tarih**: 2025-01-29  
+**Durum**: Test Edilecek (Phase 3: CSP P-Model Integration eklendi)
 
 ---
 
@@ -102,7 +102,9 @@
 - [ ] Row hover effect çalışıyor mu? (smooth transition)
 - [ ] Segment badge'leri doğru renkte mi? (Migration: green, Existing: blue, Cold: yellow, Skip: red)
 - [ ] Skor renklendirmesi doğru mu? (≥70: green, ≥50: yellow, <50: red)
-- [ ] Öncelik badge'leri görüntüleniyor mu? (🔥, ⭐, 🟡, 🟠, ⚪, ⚫, 🔴)
+- [ ] Öncelik badge'leri görüntüleniyor mu? (P1-P6 renkli badge'ler veya fallback emoji badge'ler)
+- [ ] P-Model priority_category badge'leri doğru renkte mi? (P1: green, P2: red, P3: blue, P4: orange, P5: yellow, P6: gray)
+- [ ] Priority tooltip'leri görüntüleniyor mu? (priority_label veya fallback tooltip)
 - [ ] Empty state gösteriliyor mu? (lead yoksa + CTA button)
 - [ ] Loading state spinner görüntüleniyor mu? (lead'ler yüklenirken)
 
@@ -148,7 +150,7 @@
 - [ ] PDF export butonu score breakdown modal'da görüntüleniyor mu?
 - [ ] PDF export çalışıyor mu? (new tab'de açılıyor mu?)
 
-### Test 7.1: Score Breakdown Modal (G19 + Gün 3)
+### Test 7.1: Score Breakdown Modal (G19 + Gün 3 + Phase 3)
 - [ ] Skor'a tıklayınca modal açılıyor mu?
 - [ ] Modal close button (X) çalışıyor mu?
 - [ ] ESC key ile modal kapanıyor mu?
@@ -157,6 +159,11 @@
 - [ ] Score breakdown tooltip'leri görüntüleniyor mu? (signal/risk hover'da)
 - [ ] PDF export butonu modal'da görüntüleniyor mu?
 - [ ] Domain taranmamışsa hata mesajı gösteriliyor mu?
+- [ ] **Provider-specific açıklama cümlesi** doğru mu? (M365 → "M365 kullanımı...", Google → "Google Workspace kullanımı...", Local/Hosting → "mevcut email sağlayıcınız...", Unknown → "DNS ve IP verilerine göre...")
+- [ ] **DMARC Coverage** null/undefined durumunda gösterilmiyor mu? (DMARC yoksa gösterilmemeli)
+- [ ] **CSP P-Model Panel** görüntüleniyor mu? (technical_heat, commercial_segment, commercial_heat, priority_category, priority_label)
+- [ ] **Priority Category badge** score breakdown panel'de doğru renkte mi? (P1-P6)
+- [ ] **Eski lead'lerde** P-Model alanları yoksa gracefully handle ediliyor mu? (panel gösterilmiyor veya "-" gösteriliyor)
 
 ### Test 8: Error Handling
 - [ ] Network hatası durumunda error mesajı gösteriliyor mu?
@@ -217,14 +224,18 @@
 - [ ] Pagination çalışıyor (page numbers, prev/next, page info)
 - [ ] Export butonları çalışıyor (CSV, Excel, PDF)
 - [ ] Score breakdown modal çalışıyor (ESC key, backdrop click, tooltips)
+- [ ] **P-Model badges** görüntüleniyor (P1-P6 renkli badge'ler, tooltip'ler)
+- [ ] **CSP P-Model panel** score breakdown modal'da görüntüleniyor
+- [ ] **Provider-specific description** score breakdown modal'da doğru
+- [ ] **DMARC coverage** null/undefined durumunda gracefully handle ediliyor
 - [ ] Toast notifications çalışıyor (export başarı/hata)
 - [ ] Dashboard summary görüntüleniyor
 - [ ] Responsive design (mobile-friendly)
 - [ ] Error handling çalışıyor
 
 ### Technical
-- [x] JS toplam kod miktarı ~900 satır (yorumlar hariç) - **G19 + Gün 3 ile artış: ~500 satır**
-- [x] 10+ ana özellik (upload, scan, table, export CSV/Excel/PDF, search, sorting, pagination, score breakdown modal, toast notifications, tooltips)
+- [x] JS toplam kod miktarı ~1400-1500 satır (yorumlar hariç) - **G19 + Gün 3 + Phase 3 ile artış: ~900 satır**
+- [x] 12+ ana özellik (upload, scan, table, export CSV/Excel/PDF, search, sorting, pagination, score breakdown modal, toast notifications, tooltips, P-Model badges, CSP P-Model panel)
 - [x] API-first yaklaşım (iş mantığı backend'de)
 - [x] BEM CSS pattern
 - [x] Modüler JS yapısı (api.js, ui-leads.js, ui-forms.js, app.js)
@@ -233,11 +244,11 @@
 - [x] Toast notification system
 
 ### Documentation
-- [x] `README-mini-ui.md` - Kullanım kılavuzu (G19 + Gün 3 özellikleri eklendi)
+- [x] `README-mini-ui.md` - Kullanım kılavuzu (G19 + Gün 3 + Phase 3 özellikleri eklendi)
 - [x] Endpoint'ler dokümante edilmiş (G19 query params + Gün 3 PDF export eklendi)
-- [x] Limitler belirtilmiş (10+ feature, ~900 satır)
+- [x] Limitler belirtilmiş (12+ feature, ~1400-1500 satır)
 
 ---
 
-**Son Güncelleme**: 2025-01-28 (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon test senaryoları eklendi | İyileştirmeler: Production-safe logging, improved error handling)
+**Son Güncelleme**: 2025-01-29 (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon test senaryoları eklendi | Phase 3: CSP P-Model Integration test senaryoları eklendi - P-badges, tooltips, score breakdown panel, provider-specific descriptions, DMARC coverage handling | İyileştirmeler: Production-safe logging, improved error handling)
 

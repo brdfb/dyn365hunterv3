@@ -18,10 +18,11 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ **P0 Hardening**: Completed (G19)
 - ✅ **P1 Performance**: Completed (2025-01-28)
 - ✅ **Stabilization Sprint**: Completed (3 days)
-- ✅ **Sales Engine**: Completed (G21 Phase 2)
+- ✅ **Sales Engine**: Completed (G21 Phase 2) + **v1.1 Intelligence Layer** (2025-01-28)
 - ✅ **Read-Only Mode**: Completed (G21 Phase 3)
 
 **Production Deployment**:
+- 📋 [Production Go/No-Go Checklist v1.0](docs/active/GO-NO-GO-CHECKLIST-v1.0.md) - **Hunter v1.0 Production Go/No-Go Checklist**
 - 📋 [Production Deployment Guide](docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md)
 - 📋 [Production Deployment Checklist](docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md)
 - 📋 [Smoke Tests Runbook](docs/active/SMOKE-TESTS-RUNBOOK.md)
@@ -35,6 +36,25 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 ---
 
 ## Recent Updates (Last 6 Months)
+
+**Unreleased** (2025-01-29):
+- **CSP P-Model Integration** (✅ FINAL & CLOSED - Production v1.1 Core Feature) - Global CSP Priority Model (P1-P6) implementation
+  - Commercial Segment & Heat: 6 commercial segments (GREENFIELD, COMPETITIVE, WEAK_PARTNER, RENEWAL, LOW_INTENT, NO_GO)
+  - Technical Heat: Hot/Warm/Cold classification based on technical segment and provider
+  - Priority Category (P1-P6): CSP-standard priority categories with human-readable labels
+  - Rule-based architecture: All rules in `app/data/rules.json` (maintainable, configurable)
+  - Database: New columns in `lead_scores` table, Alembic migration completed
+  - API: New fields in `LeadResponse` and `ScoreBreakdownResponse` models (backward compatible)
+  - UI: P1-P6 badge'leri (renk kodlu), priority_label tooltip'leri, score breakdown modalında P-model paneli
+  - Status: ✅ **Phase 1 (Core Logic) + Phase 2 (DB + API) + Phase 3 (UI) completed** - Production v1.1 Core Feature
+  - Post-MVP: Filtering & sorting (priority_category, commercial_segment) - İleride eklenecek
+- **Bug Fixes** (2025-01-29) - Fixed 3 critical bugs for data consistency and accuracy
+  - **DMARC Coverage Bug**: Fixed DMARC coverage inconsistency (was showing 100% when no DMARC record exists, now correctly returns `null`)
+  - **Risk Summary Text**: Fixed contradictory risk summary text (now correctly states "SPF ve DKIM mevcut" when both are present)
+  - **Score Modal Description**: Made score breakdown modal description provider-specific (M365, Google, Local/Hosting)
+  - Files: `app/core/analyzer_dns.py`, `app/core/sales_engine.py`, `app/core/rescan.py`, `mini-ui/js/ui-leads.js`
+  - Status: ✅ **All bugs fixed and verified** - All tests passing, data consistency verified
+  - Documentation: `docs/active/CSP-COMMERCIAL-SEGMENT-DESIGN.md`, `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md`
 
 **Unreleased** (2025-01-28):
 - **Sales Documentation Consistency** (✅ Completed) - Documentation cleanup and standardization
@@ -148,6 +168,8 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - ✅ Dashboard endpoint with aggregated statistics
 - ✅ CSV/Excel export endpoint (`GET /leads/export`) - Export leads with filters
 - ✅ Mini UI (HTML + Vanilla JS) - Simple web interface for demo and internal use
+  - **Phase 3 (2025-01-29)**: CSP P-Model Integration - P1-P6 badges, tooltips, score breakdown panel, provider-specific descriptions
+  - **12+ features**: Upload, Scan, Table, Export, Search, Sorting, Pagination, Score Breakdown, Toast Notifications, Tooltips, P-Model Badges, CSP P-Model Panel
 - ✅ **Progress tracking** - Real-time progress updates for CSV ingestion and scanning operations
 - ✅ **Bulk Scan** - Async bulk domain scanning with progress tracking (G15)
 - ✅ **G19: UI Upgrade** - Sorting, pagination, and full-text search for leads table
@@ -168,6 +190,21 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - UI %90+ stabil - Entegrasyona hazır
 - ✅ **G21 Phase 2: Sales Engine** (2025-01-28) - Sales intelligence layer for lead qualification ✨ YENİ
   - Sales intelligence summary endpoint (`GET /api/v1/leads/{domain}/sales-summary`)
+- ✅ **Sales Engine v1.1 - Intelligence Layer** (2025-01-28) - Reasoning capabilities for sales intelligence ✨ YENİ + UX POLISHED
+  - **Segment Explanation Engine** - Explains why a lead belongs to a segment
+  - **Provider Reasoning Layer** - Explains why a provider is classified as such
+  - **Security Signals Reasoning** - Risk assessment with sales angle and recommended action
+  - **Cold Segment Call Script v1.1** - Soft, discovery-focused script for Cold leads
+  - **Opportunity Rationale** - Explains why opportunity_potential is X (calculation breakdown)
+  - **Next-step CTA** - Clear, actionable next step recommendation
+  - API fields: `segment_explanation`, `provider_reasoning`, `security_reasoning`, `opportunity_rationale`, `next_step`
+  - Documentation: `docs/active/SALES-ENGINE-V1.1.md`
+  - **UX Polish (P1.5)** - Sales-ready UI improvements:
+    - Security risk badges: "YÜKSEK RİSK" / "ORTA RİSK" / "DÜŞÜK RİSK" (Turkish labels)
+    - Security section: 3-block layout (Risk Özeti, Teknik Durum, Satış Açısı + Aksiyon)
+    - Provider section: "Mevcut Sağlayıcı Değerlendirmesi" (more professional title)
+    - Next Step CTA: Pill-style badges ([ARAMA] [3 gün içinde] [Orta Öncelik])
+    - Improved visual hierarchy and readability
   - Segment-specific call scripts and discovery questions (Turkish)
   - Offer tier recommendations (Business Basic/Standard/Enterprise)
   - Opportunity potential scoring (0-100) with tuning factor support
@@ -297,8 +334,12 @@ A simple web interface for demo and internal use:
 - CSV/Excel file upload
 - Single domain scan (with auto-ingest)
 - Leads table with filters (segment, min score, provider)
-- CSV export
+- **Search, Sorting, Pagination** (G19) - Full-text search, sortable columns, page-based pagination
+- **P-Model Priority Badges** (Phase 3 - 2025-01-29) - P1-P6 renkli badge'ler, priority_label tooltip'leri
+- **Score Breakdown Modal** (G19 + Phase 3) - Detaylı skor analizi, CSP P-Model paneli, provider-specific açıklamalar
+- CSV/Excel/PDF export
 - Dashboard statistics (KPI)
+- **12+ ana özellik** - Upload, Scan, Table, Export, Search, Sorting, Pagination, Score Breakdown, Toast Notifications, Tooltips, P-Model Badges, CSP P-Model Panel
 
 **Documentation**: See [mini-ui/README-mini-ui.md](mini-ui/README-mini-ui.md)
 
@@ -327,7 +368,7 @@ A simple web interface for demo and internal use:
 | **Scan** | `/scan/{domain}/rescan` | POST | Re-scan domain with change detection |
 | **Leads** | `/leads` | GET | Query leads (filters, sorting, pagination, search) |
 | **Leads** | `/leads/{domain}` | GET | Get single lead details |
-| **Leads** | `/leads/{domain}/sales-summary` | GET | Get sales intelligence summary (G21 Phase 2) |
+| **Leads** | `/leads/{domain}/sales-summary` | GET | Get sales intelligence summary (G21 Phase 2 + v1.1 Intelligence Layer) |
 | **Leads** | `/leads/{domain}/score-breakdown` | GET | Get detailed score breakdown |
 | **Leads** | `/leads/{domain}/enrich` | POST | Manually enrich lead with contact emails |
 | **Leads** | `/leads/export` | GET | Export leads to CSV/Excel |
@@ -426,10 +467,15 @@ A simple web interface for demo and internal use:
   - Returns: CSV or Excel file download with lead data
   - File name format: `leads_YYYY-MM-DD_HH-MM-SS.csv` or `leads_YYYY-MM-DD_HH-MM-SS.xlsx`
 
-### Sales Intelligence (G21 Phase 2) ✨ YENİ
-- `GET /api/v1/leads/{domain}/sales-summary` - Get complete sales intelligence summary for a lead
+### Sales Intelligence (G21 Phase 2 + v1.1 Intelligence Layer) ✨ YENİ
+- `GET /api/v1/leads/{domain}/sales-summary` - Get complete sales intelligence summary for a lead (v1.1 with reasoning capabilities)
   - Returns: Sales intelligence summary with:
     - `one_liner` - One-sentence sales summary (Turkish)
+    - `segment_explanation` - Explains why a lead belongs to a segment (v1.1)
+    - `provider_reasoning` - Explains why a provider is classified as such (v1.1)
+    - `security_reasoning` - Risk assessment with sales angle and recommended action (v1.1)
+    - `opportunity_rationale` - Explains why opportunity_potential is X (calculation breakdown) (v1.1)
+    - `next_step` - Clear, actionable next step recommendation (v1.1)
     - `call_script` - Call script bullets for sales outreach (Turkish)
     - `discovery_questions` - Discovery questions for sales qualification (Turkish)
     - `offer_tier` - Offer tier recommendation (Business Basic/Standard/Enterprise) with pricing details

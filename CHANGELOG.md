@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **DMARC Coverage Bug Fix** (2025-01-29) - Fixed DMARC coverage inconsistency between Score Breakdown and Sales Summary
+  - Fixed `analyzer_dns.py` to return `None` for `dmarc_coverage` when no DMARC record exists (was incorrectly defaulting to 100)
+  - Added cache invalidation in rescan pipeline (`use_cache=False` for fresh DNS data)
+  - Fixed `domain_signals` table persistence during rescan
+  - Files: `app/core/analyzer_dns.py`, `app/core/rescan.py`, `app/core/cache.py`
+  - Script: `scripts/invalidate_scoring_cache.py` for manual cache invalidation
+  - Status: ✅ **Fixed and verified** - All tests passing, DMARC coverage now consistent across all endpoints
+- **Risk Summary Text Fix** (2025-01-29) - Fixed contradictory risk summary text in Sales Summary
+  - Updated `explain_security_signals()` to accurately reflect SPF/DKIM status when DMARC is missing
+  - Now correctly states "SPF ve DKIM mevcut" when both are present (was incorrectly saying "eksik")
+  - Added 3-branch logic: SPF+DKIM present, one present, or none present
+  - File: `app/core/sales_engine.py`
+  - Status: ✅ **Fixed and verified** - Risk summary now accurate and consistent
+- **Score Modal Description Fix** (2025-01-29) - Made score breakdown modal description provider-specific
+  - Updated `showScoreBreakdown()` to dynamically generate description based on detected provider
+  - M365 → "M365 kullanımı, DNS ve IP verilerine göre hesaplandı"
+  - Google → "Google Workspace kullanımı, DNS ve IP verilerine göre hesaplandı"
+  - Local/Hosting → "mevcut email sağlayıcınız, DNS ve IP verilerine göre hesaplandı"
+  - File: `mini-ui/js/ui-leads.js`
+  - Status: ✅ **Fixed and verified** - Description now accurate for each provider type
+
+### Added
+- **CSP P-Model Integration** (2025-01-29) - Global CSP Priority Model (P1-P6) implementation ✅ **FINAL & CLOSED (Production v1.1 Core Feature)**
+  - Commercial Segment & Heat calculation - 6 commercial segments (GREENFIELD, COMPETITIVE, WEAK_PARTNER, RENEWAL, LOW_INTENT, NO_GO)
+  - Technical Heat calculation - Hot/Warm/Cold classification based on technical segment and provider
+  - Priority Category (P1-P6) - CSP-standard priority categories with human-readable labels
+  - Rule-based architecture - All rules in `app/data/rules.json` (maintainable, configurable)
+  - Database migration - New columns in `lead_scores` table: `technical_heat`, `commercial_segment`, `commercial_heat`, `priority_category`, `priority_label`
+  - API response updates - New fields in `LeadResponse` and `ScoreBreakdownResponse` models (backward compatible, optional fields)
+  - Core modules: `app/core/commercial.py`, `app/core/technical_heat.py`, `app/core/priority_category.py`
+  - Integration: `app/core/scorer.py` updated to calculate CSP P-Model fields
+  - Database: Alembic migration `f786f93501ea_add_csp_p_model_fields.py`
+  - View update: `leads_ready` view updated to include new CSP P-Model fields
+  - UI updates (Phase 3 - 2025-01-29): P1-P6 badge'leri (renk kodlu), priority_label tooltip'leri, score breakdown modalında P-model paneli
+    - Lead listesinde P-Model priority badges (P1-P6 renkli badge'ler, priority_label tooltip'leri)
+    - Score breakdown modal'da CSP P-Model paneli (technical_heat, commercial_segment, commercial_heat, priority_category, priority_label)
+    - Provider-specific açıklama cümlesi (M365, Google, Local/Hosting için dinamik)
+    - DMARC coverage null/undefined handling (DMARC yoksa gösterilmiyor)
+  - CSS: P-badge stilleri eklendi (P1-P6 için renk kodları: P1=green, P2=red, P3=blue, P4=orange, P5=yellow, P6=gray)
+  - Files: `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `mini-ui/README-mini-ui.md`, `mini-ui/TEST-CHECKLIST.md`
+  - Tested: Migration successful, API response verified, DB columns populated correctly, UI tested, all bug fixes verified
+  - Documentation: `docs/active/CSP-COMMERCIAL-SEGMENT-DESIGN.md`, `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md`
+  - Status: ✅ **Phase 1 (Core Logic) + Phase 2 (DB + API) + Phase 3 (UI) completed** - Production v1.1 Core Feature
+  - Post-MVP: Filtering & sorting (priority_category, commercial_segment) - İleride eklenecek
+- **Sales Engine v1.1 - Intelligence Layer** (2025-01-28) - Reasoning capabilities for sales intelligence ✅ **COMPLETED + UX POLISHED**
+  - Segment Explanation Engine - Explains why a lead belongs to a segment (Migration, Existing, Cold, Skip)
+  - Provider Reasoning Layer - Explains why a provider is classified as M365/Google/Hosting/Local/Unknown
+  - Security Signals Reasoning - Risk assessment (high/medium/low) with sales angle and recommended action
+  - Cold Segment Call Script v1.1 - Soft, discovery-focused script for Cold leads
+  - Opportunity Rationale - Explains why opportunity_potential is X (calculation breakdown with factors)
+  - Next-step CTA - Clear, actionable next step recommendation (action, timeline, priority, message, internal_note)
+  - API fields added: `segment_explanation`, `provider_reasoning`, `security_reasoning`, `opportunity_rationale`, `next_step` (all optional, backward-compatible)
+  - 50+ new unit tests added, all passing
+  - Documentation: `docs/active/SALES-ENGINE-V1.1.md`
+  - API Contract: `docs/api/SALES-SUMMARY-V1-CONTRACT.md` (updated to v1.1.0)
+  - **UX Polish (P1.5)** - Sales-ready UI improvements:
+    - Security risk badges: "YÜKSEK RİSK" / "ORTA RİSK" / "DÜŞÜK RİSK" (Turkish labels)
+    - Security section: 3-block layout (Risk Özeti, Teknik Durum, Satış Açısı + Aksiyon)
+    - Provider section: "Mevcut Sağlayıcı Değerlendirmesi" (more professional title)
+    - Next Step CTA: Pill-style badges ([ARAMA] [3 gün içinde] [Orta Öncelik])
+    - Improved visual hierarchy and readability
+  - Status: ✅ **6/6 features completed + UX polished** - Sales Engine v1.1 production-ready
+- **IP Enrichment Production Activation** (2025-01-28) - G20 IP Enrichment feature activated in production
+  - Feature flag enabled: `HUNTER_ENRICHMENT_ENABLED=true`
+  - All DB files configured and validated (MaxMind, IP2Location, IP2Proxy)
+  - API validation complete: `infrastructure_summary` field working in `/leads` endpoints
+  - Debug endpoints validated: `/debug/ip-enrichment/config` and `/debug/ip-enrichment/{ip}`
+  - Basic monitoring in place (health checks, Sentry, structured logging)
+  - Documentation updated: Environment variables checklist, Hunter state, Post-MVP strategy
+
 ### Planned (Post-MVP)
 - **Partner Center Integration - Phase 2** (🅿️ Parked) - API endpoints, background sync, UI integration, scoring pipeline integration
 - **Dynamics 365 Integration - Phase 3** - CRM integration with two-way sync

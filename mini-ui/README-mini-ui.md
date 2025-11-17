@@ -60,7 +60,10 @@ http://localhost:8000/mini-ui/
 - **Pagination** (Sayfa numaraları, önceki/sonraki butonları, sayfa bilgisi) - G19
 - Tablo görüntüleme (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Segment, Skor)
 - **Table view improvements** (Gün 3) - Column width optimization, row hover effects, empty state with CTA, loading spinner
+- **P-Model Priority Badges** (Phase 3 - 2025-01-29) - P1-P6 renkli badge'ler, priority_label tooltip'leri
 - **Score breakdown modal** (G19 + Gün 3) - Click skor'a tıklayarak detaylı skor analizi, tooltips for signals/risks, ESC key support, backdrop click to close
+- **CSP P-Model Panel** (Phase 3 - 2025-01-29) - Score breakdown modal'da technical_heat, commercial_segment, commercial_heat, priority_category, priority_label
+- **Provider-specific description** (v1.1 - 2025-01-29) - Score breakdown modal açıklama cümlesi provider'a göre dinamik
 
 **Endpoint**: `GET /leads`
 
@@ -128,15 +131,16 @@ mini-ui/
 ## ⚠️ Limitler
 
 ### Kod Miktarı
-- **JS toplam kod miktarı**: ~1856 satır (yorumlar dahil), ~1400-1500 satır (yorumlar hariç) - Gün 3 + iyileştirmeler ile artış
-- **10+ ana özellik**: Upload, Scan, Table, Export (CSV/Excel/PDF), Search, Sorting, Pagination, Score Breakdown Modal, Toast Notifications, Tooltips
+- **JS toplam kod miktarı**: ~1856 satır (yorumlar dahil), ~1400-1500 satır (yorumlar hariç) - Gün 3 + Phase 3 (P-Model) + iyileştirmeler ile artış
+- **12+ ana özellik**: Upload, Scan, Table, Export (CSV/Excel/PDF), Search, Sorting, Pagination, Score Breakdown Modal, Toast Notifications, Tooltips, P-Model Badges, CSP P-Model Panel
 
 ### Özellik Sınırı
-- **Mini UI şu anda 10+ özellikte, framework sınırına yaklaşmıştır**
-- **12+ özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
+- **Mini UI şu anda 12+ özellikte, framework sınırına yaklaşmıştır**
+- **15+ özellik ihtiyacı doğarsa → "Framework zamanı" sinyali**
 - Kod içinde TODO ile not bırakılmalı
 - **Not**: G19 ile Search, Sorting, Pagination eklendi (3 yeni özellik)
 - **Not**: Gün 3 ile Export/PDF, Toast Notifications, Tooltips, Modal improvements eklendi (4+ yeni özellik)
+- **Not**: Phase 3 (2025-01-29) ile P-Model Badges ve CSP P-Model Panel eklendi (2 yeni özellik)
 
 ### İş Mantığı
 - **Tüm iş mantığı backend'de kalır**
@@ -259,6 +263,6 @@ Bu Mini UI ile:
 
 ---
 
-**Son Güncelleme**: 2025-01-28  
-**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications | İyileştirmeler: Production-safe logging, improved error handling)
+**Son Güncelleme**: 2025-01-29  
+**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications | Phase 3: CSP P-Model Integration - P-badges, tooltips, score breakdown panel, provider-specific descriptions | İyileştirmeler: Production-safe logging, improved error handling, DMARC coverage bug fix, risk summary text fix)
 

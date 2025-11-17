@@ -11,6 +11,8 @@ alwaysApply: true
 - **P0 Hardening (G19)**: ✅ Completed - DB Connection Pooling, API Key Security, Structured Logging, Error Tracking, Health Checks
 - **P1 Performance**: ✅ Completed (2025-01-28) - Alembic Migration, Distributed Rate Limiting, Caching Layer, Bulk Operations, API Versioning
 - **✅ Stabilization Sprint**: ✅ Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)
+- **✅ CSP P-Model Integration**: ✅ Completed (2025-01-29) - Production v1.1 Core Feature - Global CSP Priority Model (P1-P6), Commercial Segment & Heat, Technical Heat, Priority Category & Label, UI integration (P-badges, tooltips, score breakdown panel)
+- **✅ Production Bug Fixes**: ✅ Completed (2025-01-29) - DMARC Coverage bug fix, Risk Summary text fix, Score Modal provider-specific description
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
 - **Out of Scope**: D365 adapter, `scripts/demo_run.sh`
 
@@ -78,6 +80,8 @@ alwaysApply: true
 - Email generation (`POST /email/generate`) - Generic email addresses for domains
 - Email validation (`POST /email/generate-and-validate`) - Syntax, MX, optional SMTP validation
 - **Mini UI** (`/mini-ui/`) - Simple web interface for demo and internal use (API_BASE_URL configurable via `window.HUNTER_API_BASE_URL`)
+  - **Phase 3 (2025-01-29)**: CSP P-Model Integration - P1-P6 badges, tooltips, score breakdown panel, provider-specific descriptions
+  - **12+ features**: Upload, Scan, Table, Export, Search, Sorting, Pagination, Score Breakdown, Toast Notifications, Tooltips, P-Model Badges, CSP P-Model Panel
 - **CSV/Excel export** (`GET /leads/export`) - Export leads with filters
 - **Provider change tracking** - Automatic detection and history logging
 - **Duplicate prevention** - Automatic cleanup of duplicate records
