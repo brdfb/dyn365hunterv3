@@ -15,7 +15,7 @@ from app.core.priority import calculate_priority_score
 from app.core.enrichment import enrich_company_data
 from app.core.score_breakdown import calculate_score_breakdown
 from app.core.enrichment_service import build_infra_summary
-from app.db.models import Company, Favorite, DomainSignal
+from app.db.models import Company, Favorite, DomainSignal, LeadScore
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -48,6 +48,12 @@ class LeadResponse(BaseModel):
     segment: Optional[str] = None
     reason: Optional[str] = None
     priority_score: Optional[int] = None
+    # CSP P-Model fields (Phase 2)
+    technical_heat: Optional[str] = None  # 'Hot', 'Warm', 'Cold'
+    commercial_segment: Optional[str] = None  # 'GREENFIELD', 'COMPETITIVE', 'WEAK_PARTNER', 'RENEWAL', 'LOW_INTENT', 'NO_GO'
+    commercial_heat: Optional[str] = None  # 'HIGH', 'MEDIUM', 'LOW'
+    priority_category: Optional[str] = None  # 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'
+    priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
     infrastructure_summary: Optional[str] = None  # IP enrichment summary (Level 1)
 
 
@@ -115,7 +121,12 @@ async def export_leads(
             scanned_at,
             readiness_score,
             segment,
-            reason
+            reason,
+            technical_heat,
+            commercial_segment,
+            commercial_heat,
+            priority_category,
+            priority_label
         FROM leads_ready
         WHERE 1=1
     """
@@ -296,6 +307,7 @@ async def get_leads(
     """
     # Build query using leads_ready VIEW
     # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
+    # View includes G20 columns (tenant_size, local_provider, dmarc_coverage) and CSP P-Model columns
     query = """
         SELECT DISTINCT ON (domain)
             company_id,
@@ -317,7 +329,12 @@ async def get_leads(
             scanned_at,
             readiness_score,
             segment,
-            reason
+            reason,
+            technical_heat,
+            commercial_segment,
+            commercial_heat,
+            priority_category,
+            priority_label
         FROM leads_ready
         WHERE 1=1
     """
@@ -387,13 +404,13 @@ async def get_leads(
                 canonical_name=row.canonical_name,
                 domain=row.domain,
                 provider=row.provider,
-                tenant_size=getattr(row, "tenant_size", None),  # G20: Tenant size
-                local_provider=getattr(row, "local_provider", None),  # G20: Local provider
+                tenant_size=row.tenant_size,  # G20: Tenant size (now in view)
+                local_provider=row.local_provider,  # G20: Local provider (now in view)
                 country=row.country,
                 spf=row.spf,
                 dkim=row.dkim,
                 dmarc_policy=row.dmarc_policy,
-                dmarc_coverage=getattr(row, "dmarc_coverage", None),  # G20: DMARC coverage
+                dmarc_coverage=row.dmarc_coverage,  # G20: DMARC coverage (now in view)
                 mx_root=row.mx_root,
                 registrar=row.registrar,
                 expires_at=str(row.expires_at) if row.expires_at else None,
@@ -404,6 +421,12 @@ async def get_leads(
                 segment=row.segment,
                 reason=row.reason,
                 priority_score=priority_score,
+                # CSP P-Model fields (Phase 2)
+                technical_heat=getattr(row, "technical_heat", None),
+                commercial_segment=getattr(row, "commercial_segment", None),
+                commercial_heat=getattr(row, "commercial_heat", None),
+                priority_category=getattr(row, "priority_category", None),
+                priority_label=getattr(row, "priority_label", None),
                 infrastructure_summary=infrastructure_summary,
             )
             leads.append(lead)
@@ -512,7 +535,12 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             ds.scanned_at,
             ls.readiness_score,
             ls.segment,
-            ls.reason
+            ls.reason,
+            ls.technical_heat,
+            ls.commercial_segment,
+            ls.commercial_heat,
+            ls.priority_category,
+            ls.priority_label
         FROM companies c
         LEFT JOIN domain_signals ds ON c.domain = ds.domain
         LEFT JOIN lead_scores ls ON c.domain = ls.domain
@@ -578,6 +606,12 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             segment=row.segment,
             reason=row.reason,
             priority_score=priority_score,
+            # CSP P-Model fields (Phase 2)
+            technical_heat=getattr(row, "technical_heat", None),
+            commercial_segment=getattr(row, "commercial_segment", None),
+            commercial_heat=getattr(row, "commercial_heat", None),
+            priority_category=getattr(row, "priority_category", None),
+            priority_label=getattr(row, "priority_label", None),
             infrastructure_summary=infrastructure_summary,
         )
 
@@ -687,7 +721,7 @@ class IpEnrichmentSchema(BaseModel):
 
 
 class ScoreBreakdownResponse(BaseModel):
-    """Response model for score breakdown (G19 + G20 + IP Enrichment)."""
+    """Response model for score breakdown (G19 + G20 + IP Enrichment + Phase 3 P-Model)."""
 
     base_score: int
     provider: Dict[str, Any]  # {"name": str, "points": int}
@@ -700,6 +734,12 @@ class ScoreBreakdownResponse(BaseModel):
     dmarc_coverage: Optional[int] = None  # G20: DMARC coverage (0-100)
     # IP Enrichment (Minimal UI)
     ip_enrichment: Optional[IpEnrichmentSchema] = None
+    # Phase 3: CSP P-Model fields
+    technical_heat: Optional[str] = None  # 'Hot', 'Warm', 'Cold'
+    commercial_segment: Optional[str] = None  # 'GREENFIELD', 'COMPETITIVE', 'WEAK_PARTNER', 'RENEWAL', 'LOW_INTENT', 'NO_GO'
+    commercial_heat: Optional[str] = None  # 'HIGH', 'MEDIUM', 'LOW'
+    priority_category: Optional[str] = None  # 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'
+    priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
 
 
 @router.get("/{domain}/score-breakdown", response_model=ScoreBreakdownResponse)
@@ -787,5 +827,33 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
         }
     else:
         breakdown_dict["ip_enrichment"] = None
+
+    # Phase 3: Add CSP P-Model fields from lead_scores
+    lead_score = (
+        db.query(LeadScore)
+        .filter(LeadScore.domain == normalized_domain)
+        .first()
+    )
+    if lead_score:
+        breakdown_dict["technical_heat"] = lead_score.technical_heat
+        breakdown_dict["commercial_segment"] = lead_score.commercial_segment
+        breakdown_dict["commercial_heat"] = lead_score.commercial_heat
+        breakdown_dict["priority_category"] = lead_score.priority_category
+        breakdown_dict["priority_label"] = lead_score.priority_label
+    else:
+        # Fallback: Calculate P-model fields on the fly if not in DB
+        from app.core.scorer import score_domain
+        scoring_result = score_domain(
+            domain=normalized_domain,
+            provider=company.provider or "Unknown",
+            signals=signals,
+            mx_records=mx_records,
+            use_cache=False,  # Don't cache here, just calculate
+        )
+        breakdown_dict["technical_heat"] = scoring_result.get("technical_heat")
+        breakdown_dict["commercial_segment"] = scoring_result.get("commercial_segment")
+        breakdown_dict["commercial_heat"] = scoring_result.get("commercial_heat")
+        breakdown_dict["priority_category"] = scoring_result.get("priority_category")
+        breakdown_dict["priority_label"] = scoring_result.get("priority_label")
 
     return ScoreBreakdownResponse(**breakdown_dict)

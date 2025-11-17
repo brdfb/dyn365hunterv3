@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Production Ready
+- **CSP P-Model Integration + Sales Summary v1.1** (2025-01-29) - ✅ **DONE & PROD-READY**
+  - **Core Engine**: ✅ Domain analysis, scoring, provider classification, segment determination
+  - **CSP P-Model**: ✅ Phase 1-3 completed (Core Logic → DB + API → UI)
+  - **DMARC/DNS/Cache**: ✅ All side-effects fixed (DMARC coverage, cache invalidation, rescan pipeline)
+  - **Sales Summary v1.1**: ✅ Intelligence Layer with reasoning capabilities, UX polished
+  - **Feature Flags**: No feature flags needed - Core features (always enabled)
+  - **Pre-Production Checklist**: See `docs/active/PRODUCTION-READINESS-CHECKLIST-2025-01-29.md`
+    - Feature flag verification (no flags needed - core features)
+    - Golden-domain UAT (4 domains: gibibyte.com.tr, dmkimya.com.tr, P1 local/hosting, P3 weak-partner M365)
+    - Monitoring verification (score_domain, sales_summary events, P-Model field logging)
+  - **Status**: Ready for production UAT and deployment
+
 ### Fixed
+- **leads_ready View Missing G20 Columns** (2025-01-29) - Fixed `leads_ready` view missing `tenant_size`, `local_provider`, and `dmarc_coverage` columns
+  - Updated `leads_ready` view to include all G20 columns (`tenant_size`, `local_provider`, `dmarc_coverage`) and CSP P-Model columns
+  - Updated API query to SELECT G20 columns from view (removed `getattr()` workaround)
+  - Updated database reset script (`scripts/reset_db_with_alembic.sh`) to create view with all G20 columns
+  - **Impact**: UI now correctly displays tenant size, local provider, and DMARC coverage in lead list
+  - **Root Cause**: View was created without G20 columns during database reset
+  - **Solution**: View now includes all G20 columns and CSP P-Model columns
+  - Files: `app/api/leads.py`, `scripts/reset_db_with_alembic.sh`
+  - Status: ✅ **Fixed and verified** - Tenant size now visible in UI lead list
 - **DMARC Coverage Bug Fix** (2025-01-29) - Fixed DMARC coverage inconsistency between Score Breakdown and Sales Summary
   - Fixed `analyzer_dns.py` to return `None` for `dmarc_coverage` when no DMARC record exists (was incorrectly defaulting to 100)
   - Added cache invalidation in rescan pipeline (`use_cache=False` for fresh DNS data)
