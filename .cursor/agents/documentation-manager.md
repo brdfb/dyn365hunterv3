@@ -23,10 +23,11 @@ Comprehensive documentation management agent that automatically updates document
 
 ### 4. Regular Maintenance
 - **Weekly Cleanup**: Check for outdated prompts (not referenced in 7+ days)
-- **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files, currently only reference guides)
+- **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files, reference guides moved to `docs/reference/`)
 - **Feature Documentation**: Archive feature docs when complete (e.g., PROVIDER-CHANGE-TRACKING.md, DUPLICATE-PREVENTION.md)
 - **Planning Docs**: Archive completed planning docs to `docs/archive/`
 - **Token Efficiency**: Archive immediately when work is complete
+- **Reference Guides**: Reference guides are in `docs/reference/` (not in `docs/active/`)
 
 ## Triggers
 
@@ -124,6 +125,7 @@ scripts/manage_docs.sh list
 
 ### Documentation Guardrails
 - **Active Docs Limit**: Maximum 5-7 files in `docs/active/` (enforced)
+- **Reference Guides**: Reference guides (development, setup, troubleshooting) are in `docs/reference/` (not in `docs/active/`)
 - **Archive Immediately**: Archive completed phase docs immediately (don't wait)
 - **Date Prefix**: All archived files must have `YYYY-MM-DD-` prefix (required)
 - **Auto-Update**: Always update README.md, CHANGELOG.md, docs/README.md when code changes
@@ -210,7 +212,7 @@ scripts/manage_docs.sh list
 
 Agent should regularly check:
 - TODO files status changes
-- Active documentation count (should be < 7 files, currently 7 files: 3 reference guides + 2 production guides + 1 priority doc + 1 G21 refactor plan)
+- Active documentation count (should be < 7 files, reference guides are in `docs/reference/`)
 - Feature documentation in `docs/active/` (should be archived when complete)
 - Planning documentation in `docs/plans/` (should be archived when complete)
 - **Stabilization Sprint status** (✅ Completed - 2025-01-28 - v1.1-stable released)

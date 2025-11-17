@@ -551,7 +551,7 @@ docker-compose logs api | grep -i "rate.*limit\|429"
 
 - `docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md` - Deployment guide
 - `docs/active/PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook
-- `docs/active/DOCKER-TROUBLESHOOTING.md` - Docker-specific issues
+- `docs/reference/DOCKER-TROUBLESHOOTING.md` - Docker-specific issues
 - `docs/active/ROLLBACK-PLAN.md` - Rollback procedures
 
 ---

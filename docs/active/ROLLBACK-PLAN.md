@@ -329,7 +329,7 @@ Document the following:
 ## 🔗 Related Documents
 
 - `docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Deployment checklist
-- `docs/active/ALEMBIC-MIGRATION-PLAN.md` - Migration procedures
+- `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Migration procedures (archived - reference only)
 - `scripts/deploy_production.sh` - Deployment script (includes backup)
 - `docs/active/PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook
 

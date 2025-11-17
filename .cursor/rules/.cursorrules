@@ -340,6 +340,7 @@ When a phase is completed (TODO status = "Completed"):
 ### Documentation Structure
 - `docs/active/` - Current phase documentation (keep minimal, max 5-7 files)
 - `docs/archive/` - Completed phase documentation (date-prefixed)
+- `docs/reference/` - Reference guides (development, setup, troubleshooting) - NOT in `docs/active/`
 - `docs/prompts/` - Important prompts (date-prefixed, archive when done)
 - `docs/todos/` - TODO lists (archive when phase complete)
 - `docs/plans/` - Project plans

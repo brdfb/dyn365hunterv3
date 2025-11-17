@@ -5,7 +5,7 @@
 **Durum**: Active (Production Operations Guide)  
 **İlgili Dokümanlar**: 
 - [Production Readiness Critique v2](./PRODUCTION-READINESS-CRITIQUE-V2.md)
-- [Development Environment Guide](./DEVELOPMENT-ENVIRONMENT.md)
+- [Development Environment Guide](../reference/DEVELOPMENT-ENVIRONMENT.md)
 
 ---
 
@@ -802,8 +802,24 @@ kubectl autoscale deployment dyn365hunter-api --min=3 --max=10 --cpu-percent=70
 
 ---
 
-## 📚 References
+## 📚 Related Documents
 
+### Production Deployment
+- `PRODUCTION-DEPLOYMENT-GUIDE.md` - Step-by-step deployment guide
+- `PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Pre-deployment checklist
+- `PRODUCTION-CHECKLIST-RUNBOOK.md` - Operational runbook (2-hour checklist)
+- `ROLLBACK-PLAN.md` - Rollback procedures
+- `SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
+
+### Reference Guides
+- `ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables checklist
+- `TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
+- `docs/reference/DEVELOPMENT-ENVIRONMENT.md` - Development setup
+- `docs/reference/WSL-GUIDE.md` - WSL2 setup guide
+- `docs/reference/DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting
+- `docs/reference/IP-ENRICHMENT-DOCKER-SETUP.md` - IP enrichment setup
+
+### External References
 - [Kubernetes Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 - [Prometheus Best Practices](https://prometheus.io/docs/practices/)
 - [SRE Book](https://sre.google/sre-book/table-of-contents/)

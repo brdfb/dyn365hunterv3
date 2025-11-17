@@ -51,8 +51,8 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
 
 ### Detaylı Plan
 
-**Referans**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md` (tam detaylı plan)  
-**UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md` (UI detayları)
+**Referans**: `docs/archive/2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` (tam detaylı plan - archived)  
+**UI Checklist**: `docs/archive/2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` (UI detayları - archived)
 
 ### Success Criteria
 
@@ -631,8 +631,8 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
    - ✅ Tooltip + hover behavior
    - ✅ Favori/Tag UI mini düzenleme
 
-**Detaylı Plan**: `docs/active/STABILIZATION-SPRINT-PLAN-v1.0.md`  
-**UI Checklist**: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md`
+**Detaylı Plan**: `docs/archive/2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` (archived)  
+**UI Checklist**: `docs/archive/2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` (archived)
 
 **Toplam**: ✅ **~18 saat (3 gün)** - **TAMAMLANDI** ✅
 

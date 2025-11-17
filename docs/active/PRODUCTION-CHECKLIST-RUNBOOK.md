@@ -524,7 +524,7 @@ echo "Check Sentry dashboard manually for test event"
 
 - `docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Full deployment checklist
 - `docs/active/ROLLBACK-PLAN.md` - Rollback procedures
-- `docs/active/ALEMBIC-MIGRATION-PLAN.md` - Migration procedures
+- `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Migration procedures (archived - reference only)
 - `scripts/deploy_production.sh` - Deployment script
 
 ---

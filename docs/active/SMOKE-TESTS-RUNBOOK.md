@@ -496,7 +496,7 @@ bash scripts/smoke_tests.sh
 - `docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Full deployment checklist
 - `docs/active/PRODUCTION-CHECKLIST-RUNBOOK.md` - Production checklist runbook
 - `docs/active/PRODUCTION-DEPLOYMENT-GUIDE.md` - Production deployment guide
-- `docs/active/DEPLOYMENT-READY-SUMMARY.md` - Deployment ready summary
+- `docs/archive/2025-01-28-DEPLOYMENT-READY-SUMMARY.md` - Deployment ready summary (archived)
 - `scripts/deploy_production.sh` - Deployment script
 - `scripts/smoke_tests.sh` - Standalone smoke tests script
 

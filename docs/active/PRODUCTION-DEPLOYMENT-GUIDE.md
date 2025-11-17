@@ -51,7 +51,7 @@ pg_dump -h <db-host> -U <user> -d <database> \
 ls -lh backups/backup_pre_v1.0_*.sql
 ```
 
-**See**: `docs/active/ALEMBIC-MIGRATION-PLAN.md` for detailed backup procedures.
+**See**: `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` for detailed backup procedures (archived - reference only).
 
 ### 3. Current Migration Status
 
@@ -245,7 +245,7 @@ docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -c "\dt"
 docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -c "SELECT COUNT(*) FROM companies;"
 ```
 
-**See**: `docs/active/ALEMBIC-MIGRATION-PLAN.md` for detailed migration procedures.
+**See**: `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` for detailed migration procedures (archived - reference only).
 
 ---
 
@@ -361,7 +361,7 @@ docker-compose logs -f api | grep -i error
 - `docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Full deployment checklist
 - `docs/active/PRODUCTION-CHECKLIST-RUNBOOK.md` - Production checklist runbook
 - `docs/active/SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
-- `docs/active/ALEMBIC-MIGRATION-PLAN.md` - Migration procedures
+- `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Migration procedures (archived - reference only)
 - `docs/active/ROLLBACK-PLAN.md` - Rollback procedures
 - `docs/active/ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables
 - `docs/active/TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide

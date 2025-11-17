@@ -1,11 +1,29 @@
 # Documentation Structure
 
+## 🗺️ Documentation Map (Quick Reference)
+
+**"Hangi dokümana bakmalıyım?"** sorusuna hızlı cevap:
+
+| Soru | Doküman |
+|------|---------|
+| **"Production'a çıkabilir miyim?"** | `docs/active/GO-NO-GO-CHECKLIST-v1.0.md` |
+| **"Hunter'ın şu anki durumu ne?"** | `docs/active/HUNTER-STATE-v1.0.md` |
+| **"G21 refactor'ın durumu ne?"** | `docs/active/G21-ROADMAP-CURRENT.md` |
+| **"Post-MVP'de ne yapacağız?"** | `docs/active/POST-MVP-STRATEGY.md` |
+| **"Sales Engine nasıl kullanılır?"** | `docs/sales/SALES-GUIDE.md` |
+| **"Segment ve priority nedir?"** | `docs/sales/SEGMENT-GUIDE.md` |
+| **"Development environment nasıl kurulur?"** | `docs/reference/DEVELOPMENT-ENVIRONMENT.md` |
+| **"Production deployment nasıl yapılır?"** | `docs/active/PRODUCTION-ENGINEERING-GUIDE-V1.md` |
+
+---
+
 ## 📁 Folder Organization
 
 ```
 docs/
 ├── active/          # Active documentation (current phase)
 ├── archive/         # Archived documentation (completed phases)
+├── reference/       # Reference guides (development, setup, troubleshooting)
 ├── sales/           # Sales team documentation (guides, personas, training)
 ├── prompts/         # Important prompts, conversations, and architectural decisions
 ├── todos/           # TODO lists and task tracking
@@ -57,13 +75,28 @@ API contract documentation:
 
 ### Active Documentation
 
+#### Core Status & Strategy Documents (v1.0)
+- `GO-NO-GO-CHECKLIST-v1.0.md` - **Production Go/No-Go Checklist** - "Çıkabilir miyim?" sorusuna tek dosyadan cevap
+- `HUNTER-STATE-v1.0.md` - **Sistem Durum Özeti** - Hunter v1.0'ın tek resmi durum dokümanı
+- `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap** - Mimari refactor ve entegrasyon yol haritası (güncel durum)
+- `POST-MVP-STRATEGY.md` - **Post-MVP Strategy** - v1.0 sonrası 3 ana iş paketi (IP Enrichment, Partner Center, Dynamics 365)
+
 #### Reference Guides
+**Location:** `docs/reference/`
 - `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
 - `WSL-GUIDE.md` - WSL2 setup and configuration guide
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
+- `IP-ENRICHMENT-DOCKER-SETUP.md` - IP enrichment Docker setup guide
 
 #### Production Readiness Documentation
-- `PRODUCTION-ENGINEERING-GUIDE-V1.md` - SRE runbook with health checks, monitoring, deployment strategies
+- `PRODUCTION-ENGINEERING-GUIDE-V1.md` - **Main SRE runbook** - Health checks, monitoring, deployment strategies (see Related Documents section for deployment guides)
+- `PRODUCTION-DEPLOYMENT-GUIDE.md` - Step-by-step deployment guide
+- `PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Pre-deployment checklist
+- `PRODUCTION-CHECKLIST-RUNBOOK.md` - Operational runbook (2-hour checklist)
+- `ROLLBACK-PLAN.md` - Rollback procedures
+- `SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
+- `TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
+- `ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables checklist
 
 #### P1 Implementation Documentation
 - ✅ **P1 Completed** (2025-01-28) - All P1 items completed
@@ -118,7 +151,11 @@ API contract documentation:
   - Status: 📋 Blueprint ready, implementation pending
 
 #### Architecture Refactor Documentation
-- `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - 🔄 IN PROGRESS
+- `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap (Current State)** - Tek güncel referans noktası
+  - Phase 0-3: ✅ Completed
+  - Phase 4: ⏸ Paused (Dynamics Migration)
+  - Phase 5-6: ◻ Pending
+- `NO-BREAK-REFACTOR-PLAN.md` - No-Break Refactor Plan: Hunter Architecture Slimming (G21) - Detaylı uygulama planı
   - **Phase 0**: ✅ Completed (2025-11-16) - Preparation & Snapshot
   - **Phase 1**: ✅ Completed (2025-11-16) - Deprecation Annotations
   - **Phase 2**: ✅ Completed (2025-01-28) - Sales Engine (Additive)
@@ -133,27 +170,39 @@ API contract documentation:
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
 
 **Current Project Status:**
+- ✅ **v1.0.0 Production-Ready**: Core engine production-ready (2025-01-28)
+  - **Status Document**: `HUNTER-STATE-v1.0.md` - Tek resmi durum özeti
+  - **Go/No-Go Checklist**: `GO-NO-GO-CHECKLIST-v1.0.md` - Tüm Must-Have maddeler ✅
 - ✅ P0 Hardening: Completed (G19)
 - ✅ P1 Performance: Completed (2025-01-28)
 - ✅ Stabilization Sprint: Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)
 - ✅ **Test Fixes**: Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
+- 🔄 **G21 Architecture Refactor**: Phase 0-3 Completed, Phase 4-6 Pending
+  - **Roadmap**: `G21-ROADMAP-CURRENT.md` - Tek güncel referans noktası
+  - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
+  - ✅ Phase 1: Deprecation Annotations (2025-11-16)
+  - ✅ Phase 2: Sales Engine (2025-01-28)
+  - ✅ Phase 3: Read-Only Mode (2025-01-28) - Write endpoints disabled (410 Gone)
+  - ⏸ Phase 4: Dynamics Migration (PAUSED - overlaps with Integration Roadmap Phase 3)
+  - ◻ Phase 5-6: Monitoring & Cleanup (Pending)
+- 📋 **Post-MVP Strategy**: `POST-MVP-STRATEGY.md` - 3 ana iş paketi
+  1. IP Enrichment (G20) - Derinlik
+  2. Partner Center Referrals Sync - Kaynak
+  3. Dynamics 365 Sales Integration - Pipeline
 - 🔄 **Integration Roadmap**: In Progress (2025-01-28) - Correct sequence for external integrations
   - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
   - 🅿️ Phase 2: Partner Center Referrals (P1) - **PARK EDİLDİ** (MVP-safe mode, 50% completed)
     - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
     - ⏳ Remaining: API endpoints, UI integration, Background sync, Scoring pipeline
     - **Status**: MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
-    - **Next Sprint**: Post-MVP (G21-G22)
+    - **Next Sprint**: Post-MVP (see `POST-MVP-STRATEGY.md`)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
-- 🔄 G21: Architecture Refactor: In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
-  - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
-  - ✅ Phase 1: Deprecation Annotations (2025-11-16)
-  - ✅ Phase 2: Sales Engine (2025-01-28)
-  - ✅ Phase 3: Read-Only Mode (2025-01-28) - Write endpoints disabled (410 Gone)
-  - 🔄 Phase 4: Dynamics Migration (PAUSED - overlaps with Integration Roadmap Phase 3)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation
+- `2025-01-28-DEPLOYMENT-READY-SUMMARY.md` - Deployment ready summary (Completed - 2025-01-28)
+- `2025-01-28-24-SAATLIK-YOL-HARITASI.md` - 24-hour roadmap analysis (Completed - 2025-01-28)
+- `2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Alembic migration plan (P1 completed - 2025-01-28)
 - `2025-01-27-MVP-TRIMMED-ROADMAP.md` - 10-day implementation roadmap (Completed)
 - `2025-11-12-G1-foundation.md` - G1: Foundation & Docker Setup (Completed)
 - `2025-11-12-G2-database-schema.md` - G2: Database Schema & Models (Completed)
