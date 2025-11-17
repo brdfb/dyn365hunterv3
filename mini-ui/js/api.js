@@ -216,7 +216,9 @@ export async function exportLeads(filters = {}, format = 'csv') {
     }
     if (filters.provider) params.append('provider', filters.provider);
     if (filters.search) params.append('search', filters.search);
-    params.append('format', format);
+    // v1.1: Convert 'excel' to 'xlsx' for API compatibility
+    const apiFormat = format === 'excel' ? 'xlsx' : format;
+    params.append('format', apiFormat);
 
     const url = `${API_BASE_URL}/leads/export${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url);

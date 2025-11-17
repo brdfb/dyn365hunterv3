@@ -78,6 +78,9 @@ async def export_leads(
     provider: Optional[str] = Query(
         None, description="Filter by provider (M365, Google, etc.)"
     ),
+    search: Optional[str] = Query(
+        None, description="Full-text search in domain, canonical_name, and provider"
+    ),
     format: str = Query(
         "csv", pattern="^(csv|xlsx)$", description="Export format (csv or xlsx)"
     ),
@@ -145,6 +148,16 @@ async def export_leads(
     if provider:
         query += " AND provider = :provider"
         params["provider"] = provider
+
+    # G19: Add search filter (full-text search in domain, canonical_name, provider)
+    if search:
+        search_pattern = f"%{search.lower()}%"
+        query += """ AND (
+            LOWER(domain) LIKE :search 
+            OR LOWER(canonical_name) LIKE :search 
+            OR LOWER(provider) LIKE :search
+        )"""
+        params["search"] = search_pattern
 
     # Only return leads that have been scanned (have a score)
     query += " AND readiness_score IS NOT NULL"
@@ -732,6 +745,7 @@ class ScoreBreakdownResponse(BaseModel):
     tenant_size: Optional[str] = None  # G20: Tenant size (small/medium/large)
     local_provider: Optional[str] = None  # G20: Local provider name (e.g., TürkHost)
     dmarc_coverage: Optional[int] = None  # G20: DMARC coverage (0-100)
+    dmarc_policy: Optional[str] = None  # v1.1: DMARC policy (none/quarantine/reject) - for UI logic
     # IP Enrichment (Minimal UI)
     ip_enrichment: Optional[IpEnrichmentSchema] = None
     # Phase 3: CSP P-Model fields
@@ -812,6 +826,7 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
     breakdown_dict["tenant_size"] = company.tenant_size  # G20: Tenant size
     breakdown_dict["local_provider"] = domain_signal.local_provider  # G20: Local provider
     breakdown_dict["dmarc_coverage"] = domain_signal.dmarc_coverage  # G20: DMARC coverage
+    breakdown_dict["dmarc_policy"] = domain_signal.dmarc_policy  # v1.1: DMARC policy (for UI logic - show policy vs coverage)
 
     # IP Enrichment (Minimal UI)
     from app.core.enrichment_service import latest_ip_enrichment

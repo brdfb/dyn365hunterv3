@@ -21,6 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: Ready for production UAT and deployment
 
 ### Fixed
+- **Export Excel Button Fix** (2025-01-29) - Fixed export Excel button not working due to format mismatch
+  - Frontend was sending `format='excel'` but API expects `format='xlsx'`
+  - Added format conversion in frontend: `excel` → `xlsx` for API compatibility
+  - Added `search` parameter support to export endpoint (was missing, causing search filter to not work in exports)
+  - Files: `mini-ui/js/api.js`, `app/api/leads.py`
+  - Status: ✅ **Fixed and verified** - Export Excel button now works correctly, search filter works in exports
+- **Sales Summary Risk Text Specificity** (2025-01-29) - Made risk summary text more specific and accurate
+  - Updated `explain_security_signals()` to provide specific messages for SPF/DKIM combinations
+  - SPF present + DKIM missing → "DMARC yok. SPF mevcut ancak DKIM eksik, yapı eksik ve spoofing riski yüksek."
+  - SPF missing + DKIM present → "DMARC yok. DKIM mevcut ancak SPF eksik, yapı eksik ve spoofing riski yüksek."
+  - Both present → "DMARC yok. SPF ve DKIM mevcut, ancak DMARC eksik olduğu için spoofing riski hâlâ yüksek."
+  - File: `app/core/sales_engine.py`
+  - Status: ✅ **Fixed and verified** - Risk summary now accurately reflects specific SPF/DKIM status
 - **leads_ready View Missing G20 Columns** (2025-01-29) - Fixed `leads_ready` view missing `tenant_size`, `local_provider`, and `dmarc_coverage` columns
   - Updated `leads_ready` view to include all G20 columns (`tenant_size`, `local_provider`, `dmarc_coverage`) and CSP P-Model columns
   - Updated API query to SELECT G20 columns from view (removed `getattr()` workaround)
