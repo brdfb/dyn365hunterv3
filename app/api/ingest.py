@@ -431,6 +431,12 @@ async def ingest_csv(
                         readiness_score=scoring_result["score"],
                         segment=scoring_result["segment"],
                         reason=scoring_result["reason"],
+                        # CSP P-Model fields (Phase 2)
+                        technical_heat=scoring_result.get("technical_heat"),
+                        commercial_segment=scoring_result.get("commercial_segment"),
+                        commercial_heat=scoring_result.get("commercial_heat"),
+                        priority_category=scoring_result.get("priority_category"),
+                        priority_label=scoring_result.get("priority_label"),
                     )
                     db.add(lead_score)
 

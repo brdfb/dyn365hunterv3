@@ -148,6 +148,45 @@ scripts/manage_docs.sh list
 - **Phase Completion**: Must run full phase completion workflow
 - **Breaking Changes**: Must update version and migration guide
 
+### Database Migration & Reset Guardrails (CRITICAL - Lessons Learned 2025-01-29)
+- **⚠️ schema.sql DEPRECATED**: `app/db/schema.sql` is **OUTDATED** and **MUST NOT** be used for database reset
+  - **Reason**: Missing G20 columns (`tenant_size`, `local_provider`, `dmarc_coverage`) and CSP P-Model columns
+  - **Impact**: Causes schema mismatches, missing columns, view errors, API failures
+  - **Official Way**: Use `./scripts/reset_db_with_alembic.sh` or `Base.metadata.create_all()` + Alembic stamp
+- **⚠️ Legacy SQL Migrations DEPRECATED**: `app/db/migrations/legacy/*.sql` files are **ARCHIVED** and **MUST NOT** be used
+  - **Reason**: Transaction-unsafe, can fail mid-execution, out of sync with Alembic migrations
+  - **Location**: Moved to `docs/archive/legacy-migrations/` (historical reference only)
+  - **Official Way**: All schema changes must use Alembic migrations (`alembic/versions/`)
+- **Database Reset Policy** (MANDATORY):
+  - ❌ **DO NOT**: Use `schema.sql` or legacy SQL migrations for database reset
+  - ❌ **DO NOT**: Combine `schema.sql` with legacy migrations (causes schema mismatches)
+  - ✅ **DO**: Use `./scripts/reset_db_with_alembic.sh` for database reset (official script)
+  - ✅ **DO**: Use `Base.metadata.create_all()` + Alembic stamp for fresh database setup
+  - ✅ **DO**: Always use Alembic migrations (`alembic upgrade head`) for schema changes
+  - ✅ **DO**: Verify critical columns after reset (`tenant_size`, `local_provider`, `dmarc_coverage`, P-Model columns)
+- **Base Revision Migration Issues**:
+  - Base revision (`08f51db8dce0_base_revision.py`) assumes tables exist (ALTER operations)
+  - **Fix**: Use `Base.metadata.create_all()` first, then stamp base revision as applied
+  - **Pattern**: Create tables from models → Stamp migrations → Run remaining migrations
+- **API SQL Query Guardrails**:
+  - ❌ **DO NOT**: SELECT columns that may not exist in view (`tenant_size`, `local_provider`, `dmarc_coverage`)
+  - ✅ **DO**: Use dynamic column checking or `getattr()` when reading from view
+  - ✅ **DO**: Verify view columns exist before using in SQL queries
+  - **Example**: `leads_ready` view may not have all columns depending on migration state
+- **leads_ready View Maintenance**:
+  - View must include P-Model columns (`technical_heat`, `commercial_segment`, `commercial_heat`, `priority_category`, `priority_label`)
+  - View must be updated when new columns are added to `lead_scores` table
+  - CSP P-Model migration (`f786f93501ea`) handles view update dynamically
+- **Migration Verification** (After Reset):
+  - Verify `companies.tenant_size` exists (G20 column)
+  - Verify `domain_signals.local_provider` and `domain_signals.dmarc_coverage` exist (G20 columns)
+  - Verify `lead_scores` P-Model columns exist (`technical_heat`, `commercial_segment`, `commercial_heat`, `priority_category`, `priority_label`)
+  - Verify `leads_ready` view has all expected columns
+- **Reference Documentation**:
+  - `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section (reset policy)
+  - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
+  - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
+
 ## Examples
 
 ### Example 1: Code Change Auto-Update
@@ -216,6 +255,9 @@ Agent should regularly check:
 - Feature documentation in `docs/active/` (should be archived when complete)
 - Planning documentation in `docs/plans/` (should be archived when complete)
 - **Stabilization Sprint status** (✅ Completed - 2025-01-28 - v1.1-stable released)
+- **CSP P-Model Integration status** (✅ DONE & PROD-READY - 2025-01-29 - Production v1.1 Core Feature)
+- **Production Bug Fixes status** (✅ DONE & PROD-READY - 2025-01-29 - DMARC coverage, risk summary, score modal)
+- **Sales Summary v1.1 status** (✅ DONE & PROD-READY - 2025-01-29 - Intelligence Layer, UX polished)
 - **G21 Architecture Refactor status** (🔄 In Progress - 2025-01-28)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
@@ -236,10 +278,13 @@ This agent should be **always active** in the AI assistant's context. When you s
 - New core modules created → Auto-update CHANGELOG.md
 - TODO completed → Run full phase completion workflow
 - **Stabilization Sprint completed** → Run stabilization completion workflow
+- **CSP P-Model completed** → Archive CSP P-Model docs (already archived - 2025-01-29)
+- **Production bug fixes completed** → Update CHANGELOG.md with bug fixes
 - **G21 Architecture Refactor phase completed** → Update G21 TODO status
 - User mentions "save this" → Save prompt
 - User mentions "G19 başlıyor" or "G21 başlıyor" or "Starting G21" → Create TODO
 - User mentions "Stabilization Sprint tamamlandı" → Archive stabilization docs
+- User mentions "CSP P-Model tamamlandı" → Archive CSP P-Model docs
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.

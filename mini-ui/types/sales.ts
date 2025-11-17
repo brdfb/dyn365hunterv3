@@ -5,7 +5,7 @@
  * For JavaScript projects, use JSDoc comments with these types.
  * 
  * API Contract: docs/api/SALES-SUMMARY-V1-CONTRACT.md
- * Version: 1.0.0
+ * Version: 1.1.0
  * Date: 2025-01-28
  */
 
@@ -25,6 +25,15 @@ export interface SalesSummary {
   /** One-sentence sales summary (Turkish) */
   one_liner: string;
   
+  /** Human-readable explanation for segment classification (Turkish) */
+  segment_explanation: string;
+  
+  /** Human-readable explanation for provider classification (Turkish) */
+  provider_reasoning: string;
+  
+  /** Security risk assessment with sales angle and recommended action */
+  security_reasoning: SecurityReasoning | null;
+  
   /** Call script bullets for sales outreach (Turkish) */
   call_script: string[];
   
@@ -42,6 +51,27 @@ export interface SalesSummary {
   
   /** Additional metadata for debugging and context */
   metadata: SalesSummaryMetadata;
+}
+
+/**
+ * Security risk assessment with sales angle and recommended action
+ * Returns null if all security signals are unknown/None
+ */
+export interface SecurityReasoning {
+  /** Risk level: high, medium, or low */
+  risk_level: 'high' | 'medium' | 'low';
+  
+  /** Short summary in Turkish */
+  summary: string;
+  
+  /** List of security issues found */
+  details: string[];
+  
+  /** Sales conversation angle */
+  sales_angle: string;
+  
+  /** Recommended action for sales rep */
+  recommended_action: string;
 }
 
 /**

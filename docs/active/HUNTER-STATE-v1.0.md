@@ -94,7 +94,7 @@ sorularına cevap verebilmesi.
 
 - Invalid domain filtering
 
-- IP enrichment (Level 1 exposure):
+- IP enrichment (Level 1 exposure): ✅ **PRODUCTION ACTIVE** (2025-01-28)
 
   - MaxMind
 
@@ -103,6 +103,8 @@ sorularına cevap verebilmesi.
   - IP2Proxy
 
   - Çıktı: `infrastructure_summary` alanı
+
+  - Feature flag: `HUNTER_ENRICHMENT_ENABLED=true`
 
 - G20 Feature Set:
 

@@ -27,10 +27,12 @@ This folder contains TODO lists and task tracking documents.
   - **Next Sprint**: Post-MVP (G21-G22) - API endpoints, Celery task, UI integration, Scoring pipeline
 
 **Recently Completed:**
+- `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
+- `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
 - `2025-01-28-P1-PREPARATION.md` - P1 Preparation: Alembic, Rate Limiting, Caching, Bulk Operations, API Versioning (✅ Completed)
 - `2025-01-27-G11-importer-email.md` - G11-G13: Importer + Email Module Implementation (✅ Completed)

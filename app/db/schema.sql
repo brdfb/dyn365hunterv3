@@ -1,6 +1,19 @@
 -- Dyn365Hunter MVP - Database Schema
 -- Created: 2025-11-12
 -- Phase: G2
+--
+-- ⚠️  DEPRECATED - DO NOT USE FOR DATABASE RESET ⚠️
+--
+-- This file is kept for historical reference only.
+-- It does NOT include G20 columns (tenant_size, local_provider, dmarc_coverage)
+-- and will cause schema mismatches if used for database reset.
+--
+-- OFFICIAL WAY TO RESET DATABASE (v1.0+):
+--   1. Drop database: DROP SCHEMA public CASCADE; CREATE SCHEMA public;
+--   2. Run Alembic: alembic upgrade head
+--   3. Or use script: ./scripts/reset_db_with_alembic.sh
+--
+-- See: docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md
 
 -- Drop existing tables and views if they exist (for clean migration)
 DROP VIEW IF EXISTS leads_ready CASCADE;

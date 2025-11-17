@@ -369,9 +369,34 @@ class TestSalesSummaryAPI:
         assert data1["offer_tier"]["tier"] == data2["offer_tier"]["tier"]
         assert data1["urgency"] == data2["urgency"]
         
-        # One-liner, call script, and questions may vary slightly, but structure should be same
+        # One-liner, segment explanation, provider reasoning, call script, and questions may vary slightly, but structure should be same
         assert isinstance(data1["one_liner"], str)
         assert isinstance(data2["one_liner"], str)
+        assert isinstance(data1["segment_explanation"], str)
+        assert isinstance(data2["segment_explanation"], str)
+        assert len(data1["segment_explanation"]) > 0
+        assert isinstance(data1["provider_reasoning"], str)
+        assert isinstance(data2["provider_reasoning"], str)
+        assert len(data1["provider_reasoning"]) > 0
+        # security_reasoning can be None or dict
+        if data1["security_reasoning"] is not None:
+            assert isinstance(data1["security_reasoning"], dict)
+            assert "risk_level" in data1["security_reasoning"]
+        # opportunity_rationale should be present
+        assert "opportunity_rationale" in data1
+        assert isinstance(data1["opportunity_rationale"], dict)
+        assert "total" in data1["opportunity_rationale"]
+        assert "factors" in data1["opportunity_rationale"]
+        # Verify opportunity_rationale["total"] matches opportunity_potential
+        assert data1["opportunity_rationale"]["total"] == data1["opportunity_potential"]
+        # Verify next_step is present
+        assert "next_step" in data1
+        assert isinstance(data1["next_step"], dict)
+        assert "action" in data1["next_step"]
+        assert "timeline" in data1["next_step"]
+        assert "priority" in data1["next_step"]
+        assert "message" in data1["next_step"]
+        assert "internal_note" in data1["next_step"]
         assert isinstance(data1["call_script"], list)
         assert isinstance(data2["call_script"], list)
         assert isinstance(data1["discovery_questions"], list)

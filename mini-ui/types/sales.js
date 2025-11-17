@@ -5,7 +5,7 @@
  * Use these types in JSDoc comments for better IDE support.
  * 
  * API Contract: docs/api/SALES-SUMMARY-V1-CONTRACT.md
- * Version: 1.0.0
+ * Version: 1.1.0
  * Date: 2025-01-28
  */
 
@@ -13,11 +13,16 @@
  * @typedef {Object} SalesSummary
  * @property {string} domain - Domain name (normalized)
  * @property {string} one_liner - One-sentence sales summary (Turkish)
+ * @property {string} segment_explanation - Explains why a lead belongs to a segment (v1.1)
+ * @property {string} provider_reasoning - Explains why a provider is classified as such (v1.1)
+ * @property {SecurityReasoning|null} security_reasoning - Security risk assessment (v1.1)
  * @property {string[]} call_script - Call script bullets for sales outreach (Turkish)
  * @property {string[]} discovery_questions - Discovery questions for sales qualification (Turkish)
  * @property {OfferTier} offer_tier - Offer tier recommendation
  * @property {number} opportunity_potential - Opportunity potential score (0-100)
+ * @property {OpportunityRationale} opportunity_rationale - Explains why opportunity_potential is X (v1.1)
  * @property {'low'|'medium'|'high'} urgency - Urgency level
+ * @property {NextStepCTA} next_step - Clear, actionable next step recommendation (v1.1)
  * @property {SalesSummaryMetadata} metadata - Additional metadata
  */
 
@@ -30,6 +35,41 @@
  * @property {number|null} defender_price_per_user_per_month - Defender price per user per month in EUR (null if not applicable)
  * @property {number|null} consulting_fee - One-time consulting fee in EUR (null if not applicable)
  * @property {string} recommendation - Human-readable recommendation (Turkish)
+ */
+
+/**
+ * @typedef {Object} SecurityReasoning
+ * @property {'high'|'medium'|'low'} risk_level - Risk level
+ * @property {string} summary - Short summary in Turkish
+ * @property {string[]} details - List of security issues found
+ * @property {string} sales_angle - Sales conversation angle
+ * @property {string} recommended_action - Recommended action for sales rep
+ */
+
+/**
+ * @typedef {Object} OpportunityFactor
+ * @property {string} name - Factor name (segment, readiness_score, priority_score, tenant_size, contact_quality)
+ * @property {number} weight - Factor weight (0.0-1.0)
+ * @property {string|number} raw - Raw value
+ * @property {number} score - Contribution score
+ * @property {string} comment - Human-readable comment
+ */
+
+/**
+ * @typedef {Object} OpportunityRationale
+ * @property {number} total - Total opportunity potential score
+ * @property {OpportunityFactor[]} factors - Breakdown of contributing factors
+ * @property {number} tuning_factor - Tuning factor applied
+ * @property {string} summary - Human-readable summary
+ */
+
+/**
+ * @typedef {Object} NextStepCTA
+ * @property {'call'|'email'|'nurture'|'wait'} action - Recommended action
+ * @property {'24_saat'|'3_gün'|'1_hafta'|'1_ay'} timeline - Timeline for action
+ * @property {'high'|'medium'|'low'} priority - Priority level
+ * @property {string} message - Message for customer
+ * @property {string} internal_note - Internal note for CRM
  */
 
 /**

@@ -1,6 +1,6 @@
 # Sales Summary API – v1 Contract
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Date**: 2025-01-28  
 **Status**: Stable (UI Contract)  
 **Breaking Change Policy**: Field names and types are frozen. New fields must be optional and backward-compatible.
@@ -34,6 +34,15 @@ GET /leads/{domain}/sales-summary  # Legacy endpoint (backward compatible)
 {
   "domain": "string",
   "one_liner": "string",
+  "segment_explanation": "string",
+  "provider_reasoning": "string",
+  "security_reasoning": {
+    "risk_level": "string",
+    "summary": "string",
+    "details": "string[]",
+    "sales_angle": "string",
+    "recommended_action": "string"
+  } | null,
   "call_script": "string[]",
   "discovery_questions": "string[]",
   "offer_tier": {
@@ -70,6 +79,38 @@ GET /leads/{domain}/sales-summary  # Legacy endpoint (backward compatible)
 - One-sentence sales summary
 - Language: Turkish
 - Example: `"example.com - Migration fırsatı, yüksek hazırlık skoru (85), Enterprise teklif hazırlanabilir."`
+
+#### `segment_explanation` (string, required)
+- Human-readable explanation for segment classification
+- Language: Turkish
+- Explains why a lead belongs to Migration, Existing, Cold, or Skip segment
+- Example: `"Bu lead **Migration** segmentinde çünkü: Şu anda TürkHost gibi yerel bir hosting sağlayıcısı kullanıyor..."`
+
+#### `provider_reasoning` (string, required)
+- Human-readable explanation for provider classification
+- Language: Turkish
+- Explains why an email provider is classified as M365, Google, Hosting, Local, or Unknown
+- Example: `"Bu lead **Microsoft 365 (M365)** kullanıyor çünkü: MX kayıtları outlook.com adresine işaret ediyor..."`
+
+#### `security_reasoning` (object | null, required)
+- Security risk assessment with sales angle and recommended action
+- Returns `null` if all security signals are unknown/None
+- **Fields**:
+  - `risk_level` (string, required): `"high" | "medium" | "low"`
+  - `summary` (string, required): Short summary in Turkish
+  - `details` (array of strings, required): List of security issues found
+  - `sales_angle` (string, required): Sales conversation angle
+  - `recommended_action` (string, required): Recommended action for sales rep
+- **Example**:
+  ```json
+  {
+    "risk_level": "high",
+    "summary": "DMARC yok, SPF ve DKIM eksik. Spoofing ve phishing riski yüksek.",
+    "details": ["SPF kaydı eksik", "DKIM kaydı eksik", "DMARC politikası yok"],
+    "sales_angle": "Güvenlik açığı üzerinden konuşma aç: phishing, sahte fatura, iç yazışma taklidi.",
+    "recommended_action": "Microsoft 365 + Defender ile DMARC/SPF/DKIM tam koruma öner."
+  }
+  ```
 
 #### `call_script` (array of strings, required)
 - Call script bullets for sales outreach
@@ -458,6 +499,14 @@ Use the smoke test script:
 ---
 
 ## Changelog
+
+### v1.1.0 (2025-01-28) - Intelligence Layer
+- **Added**: `segment_explanation` field - Explains why a lead belongs to a segment
+- **Added**: `provider_reasoning` field - Explains why a provider is classified as such
+- **Added**: `security_reasoning` field - Risk assessment with sales angle and recommended action
+- **Enhanced**: `call_script` - Cold segment now gets soft, discovery-focused script (v1.1)
+- All new fields are optional and backward-compatible
+- See `docs/active/SALES-ENGINE-V1.1.md` for detailed feature documentation
 
 ### v1.0.0 (2025-01-28)
 - Initial stable release
