@@ -80,7 +80,7 @@ Implement correct engineering sequence for Hunter integration with external syst
 **Duration**: 2-3 days (core components completed, remaining tasks post-MVP)  
 **Risk**: 2/10  
 **Priority**: P1  
-**Branch**: `feature/partner-center-referrals`
+**Branch**: `feature/partner-center-phase1` (opened 2025-01-29, active)
 
 **MVP Yaklaşımı**: Minimal API client (50-70 satır), polling (10 min prod, 30s dev), sadece sync endpoint, lead listesine 1 kolon.
 

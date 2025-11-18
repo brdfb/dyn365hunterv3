@@ -133,3 +133,4 @@ test_export*.xlsx
 app/data/ip2location/*.BIN
 app/data/ip2proxy/*.BIN
 app/data/maxmind/*.mmdb
+backups/*.sql
