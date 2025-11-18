@@ -139,6 +139,7 @@ API contract documentation:
   - All 86 scoring tests passing (0 failures)
 
 #### Mini UI Documentation
+- ✅ **Archived** - `2025-01-30-MINI-UI-REFACTOR-PACKAGE-1.md` - Mini UI Refactor Package 1 (Code quality improvements: escapeHtml refactor, constants extraction, domain validation) - ✅ Completed & Tested (2025-01-30)
 - ✅ **Archived** - `2025-01-28-MINI-UI-POLISH-NOTES.md` - Mini UI v1.1 Polish - Dogfooding notes (7/10 tasks completed) - ✅ Archived (2025-01-28)
 - ✅ **Archived** - `2025-01-28-TODO-MINI-UI-POLISH.md` - Mini UI Polish test results (✅ Passed) - ✅ Archived (2025-01-28)
 - ✅ **Archived** - `2025-01-28-QA-NETWORK-TEST.md` - Network tab duplicate request tests - ✅ Archived (2025-01-28)
