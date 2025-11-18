@@ -18,6 +18,7 @@
 | **"Development environment nasıl kurulur?"** | `docs/reference/DEVELOPMENT-ENVIRONMENT.md` |
 | **"Production deployment nasıl yapılır?"** | `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` |
 | **"Production monitoring nasıl yapılır?"** | `docs/reference/PRODUCTION-MONITORING-WATCH.md` |
+| **"Hangi branch'i kullanmalıyım?"** | `docs/reference/BRANCH-MANAGEMENT.md` |
 
 ---
 
