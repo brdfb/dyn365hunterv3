@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: ✅ **Implemented** - All safety guards are non-breaking and only add protection layers
 
 ### Improved
+- **Mini UI Code Quality Improvements** (2025-01-30) - Refactored Mini UI codebase for better maintainability
+  - **Duplicate Code Elimination**: Extracted `escapeHtml` function to shared `utils.js` module (removed 3 duplicate implementations)
+  - **Constants Extraction**: Moved magic numbers to `constants.js` (DEBOUNCE_DELAY, TOAST_DURATION, DUPLICATE_REQUEST_WINDOW, REFRESH_DELAY)
+  - **Domain Validation**: Added client-side domain format validation to prevent invalid input
+  - **Files**: `mini-ui/js/utils.js` (new), `mini-ui/js/constants.js` (new), `mini-ui/js/app.js`, `mini-ui/js/ui-forms.js`, `mini-ui/js/ui-leads.js`
+  - **Status**: ✅ **Tested and verified** - All tests passed, no behavior changes (pure refactor)
 - **DNS Analyzer Enhancements** (2025-01-29) - Enhanced DNS analysis module with better error handling, metrics tracking, and performance optimizations
   - **Error Logging**: Added debug-level logging for all DNS operations (MX, SPF, DKIM, DMARC, A records) with error type and domain information
   - **Code Quality**: Reduced code duplication by introducing `_parse_txt_record()` helper function for TXT record parsing
