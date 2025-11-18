@@ -209,11 +209,11 @@ Hunter'daki lead intelligence verisini:
 
 ---
 
-## 4. DNS Analyzer Advanced Features — "Reliability"
+## 4. DNS Analyzer Advanced Features — "Reliability" (Optional/Post-MVP)
 
 ### 4.1. Amaç
 
-DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak:
+DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak (opsiyonel iyileştirmeler):
 
 - Geçici DNS hatalarında otomatik retry
 - Daha robust DMARC parsing
@@ -221,25 +221,28 @@ DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak:
 
 ### 4.2. Scope
 
-**Faz 3 İyileştirmeleri** (Post-MVP - 2025-01-29'da planlandı):
+**Faz 3 İyileştirmeleri** (Opsiyonel - Post-MVP - 2025-01-29'da planlandı):
 
-- **Retry Mekanizması** (Configurable):
+- **7. Retry Mekanizması** (Configurable):
   - Geçici DNS timeout'larında otomatik retry (3 deneme, exponential backoff)
   - Sadece geçici hatalar için (Timeout, NoNameservers)
   - Configurable max timeout limiti (default: 30 saniye)
   - `tenacity` library ile implementasyon
+  - **Not:** Yavaş domain'lerde gecikme yaratabilir, dikkatli implement edilmeli
 
-- **DMARC Parsing İyileştirmesi** (Test Coverage ile):
+- **8. DMARC Parsing İyileştirmesi** (Test Coverage ile):
   - Daha robust regex-based parsing
   - Edge case handling (malformed records, multiple policies)
   - Comprehensive test coverage
   - Mevcut davranışı koruyarak iyileştirme
+  - **Not:** Edge case'lerde farklı sonuç verebilir, test coverage kritik
 
-- **DNS Server Rotation** (Fallback olarak):
+- **9. DNS Server Rotation** (Fallback olarak):
   - Deterministic rotation veya fallback pattern
   - Public DNS server'lar arasında otomatik geçiş
   - Cache farklılıklarını minimize etme
   - Sadece fallback olarak kullanım (primary DNS başarısız olursa)
+  - **Not:** Bazı domain'lerde farklı sonuç verebilir (cache farkları)
 
 ### 4.3. Out of Scope
 
@@ -268,12 +271,12 @@ DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak:
   - Code quality improvements ✅
   - Resolver caching ✅
   - Cache invalidation ✅
-- ⏳ **Faz 3 Post-MVP'ye Bırakıldı**:
-  - Retry mekanizması
-  - DMARC parsing iyileştirmesi
-  - DNS server rotation
+- ⏳ **Faz 3 Opsiyonel - Post-MVP'ye Bırakıldı**:
+  - 7. Retry mekanizması (configurable)
+  - 8. DMARC parsing iyileştirmesi (test coverage ile)
+  - 9. DNS server rotation (fallback olarak)
 
-**Not:** Faz 1 ve Faz 2 iyileştirmeleri production-ready ve backward-compatible. Faz 3 özellikleri post-MVP sprint'inde implement edilecek.
+**Not:** Faz 1 ve Faz 2 iyileştirmeleri production-ready ve backward-compatible. Faz 3 özellikleri **opsiyonel** olarak post-MVP sprint'inde değerlendirilecek. İhtiyaç duyulursa implement edilecek.
 
 ---
 
@@ -298,11 +301,12 @@ DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak:
 
    - Doğrudan ticari değer
 
-4. **DNS Analyzer Advanced Features** — S/M
+4. **DNS Analyzer Advanced Features** — S/M (Optional)
 
    - Güvenilirlik ve dayanıklılık artışı
    - Geçici hatalarda otomatik recovery
    - Daha robust parsing ve fallback mekanizmaları
+   - **Not:** Opsiyonel - İhtiyaç duyulursa implement edilecek
 
 ---
 
