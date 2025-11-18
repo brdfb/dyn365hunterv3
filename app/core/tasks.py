@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import event, Engine, text
 from app.core.celery_app import celery_app
+from app.config import settings
 from app.core.progress_tracker import get_progress_tracker
 from app.core.rate_limiter import wait_for_dns_rate_limit, wait_for_whois_rate_limit
 from app.core.cache import get_cached_scan, set_cached_scan, invalidate_scan_cache
@@ -684,6 +685,115 @@ def daily_rescan_task(self):
     except Exception as e:
         logger.error("daily_rescan_error", error=str(e), exc_info=True)
         raise
+
+    finally:
+        db.close()
+
+
+@celery_app.task(bind=True)
+def sync_partner_center_referrals_task(self):
+    """
+    Celery task to sync referrals from Partner Center (Phase 2: Task 2.6).
+
+    This task:
+    - Checks feature flag (skip if disabled)
+    - Calls sync_referrals_from_partner_center() to fetch and process referrals
+    - Logs sync results (success/failure counts) with structured logging
+    - Handles errors gracefully (log, don't crash)
+
+    Returns:
+        Dictionary with sync statistics:
+        - status: "completed", "skipped", or "failed"
+        - success_count: Number of successfully processed referrals
+        - failure_count: Number of failed referrals
+        - skipped_count: Number of skipped referrals (no domain, duplicates)
+    """
+    import time
+    from app.core.referral_ingestion import sync_referrals_from_partner_center
+
+    start_time = time.time()
+    task_id = self.request.id if hasattr(self.request, "id") else None
+
+    # Feature flag check (skip if disabled)
+    if not settings.partner_center_enabled:
+        logger.info(
+            "partner_center_sync_skipped",
+            source="partner_center",
+            task_id=task_id,
+            reason="feature_flag_disabled",
+            feature_flag_state=False,
+            env=settings.environment,
+        )
+        return {
+            "status": "skipped",
+            "reason": "Feature flag disabled",
+            "success_count": 0,
+            "failure_count": 0,
+            "skipped_count": 0,
+        }
+
+    logger.info(
+        "partner_center_sync_task_started",
+        source="partner_center",
+        task_id=task_id,
+        feature_flag_state=True,
+        env=settings.environment,
+    )
+
+    db = SessionLocal()
+
+    try:
+        # Sync referrals from Partner Center
+        result = sync_referrals_from_partner_center(db)
+
+        duration_sec = time.time() - start_time
+        success_count = result.get("success_count", 0)
+        failure_count = result.get("failure_count", 0)
+        skipped_count = result.get("skipped_count", 0)
+
+        logger.info(
+            "partner_center_sync_task_completed",
+            source="partner_center",
+            task_id=task_id,
+            success_count=success_count,
+            failure_count=failure_count,
+            skipped_count=skipped_count,
+            synced_count=success_count,  # Alias for clarity
+            error_count=failure_count,  # Alias for clarity
+            duration_sec=round(duration_sec, 2),
+            duration_ms=round(duration_sec * 1000, 2),
+            feature_flag_state=True,
+            env=settings.environment,
+        )
+
+        return {
+            "status": "completed",
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "skipped_count": skipped_count,
+        }
+
+    except Exception as e:
+        duration_sec = time.time() - start_time
+        logger.error(
+            "partner_center_sync_task_error",
+            source="partner_center",
+            task_id=task_id,
+            error=str(e),
+            duration_sec=round(duration_sec, 2),
+            duration_ms=round(duration_sec * 1000, 2),
+            feature_flag_state=True,
+            env=settings.environment,
+            exc_info=True,
+        )
+        # Don't crash - return error status
+        return {
+            "status": "failed",
+            "error": str(e),
+            "success_count": 0,
+            "failure_count": 0,
+            "skipped_count": 0,
+        }
 
     finally:
         db.close()

@@ -122,12 +122,16 @@ API contract documentation:
 #### Integration Roadmap Documentation (NEW - 2025-01-28)
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
-  - **Phase 2**: 🅿️ **PARK EDİLDİ** - Partner Center Referrals (P1) - MVP-safe mode (feature flag disabled)
-    - ✅ Core components completed (50% - Tasks 2.1, 2.2, 2.3)
-    - ⏳ Remaining: API endpoints, UI integration, Background sync, Scoring pipeline
-    - **Status**: MVP'ye etkisi YOK (kod hazır ama aktif değil)
+  - **Phase 2**: 🔄 **IN PROGRESS** - Partner Center Referrals (P1) - 67% completed
+    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
+    - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync`
+    - ✅ **Backend tests completed** (Task 2.4 - 2025-01-30) - 7/7 tests passing (endpoint + Celery task tests)
+    - ✅ **Preparation guide created** (2025-01-30) - `docs/active/PARTNER-CENTER-PREPARATION.md`
+    - ⏳ Remaining: UI integration (Task 2.5), Background sync (Task 2.6), Scoring pipeline
+    - **Status**: MVP'ye etkisi YOK (kod hazır ama aktif değil, feature flag OFF)
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
   - **Key Principle**: UI stability → Data ingestion → CRM integration
+- `PARTNER-CENTER-PREPARATION.md` - **Partner Center Integration Preparation Guide** (2025-01-30) - Comprehensive preparation checklist for Tasks 2.4, 2.5, 2.6
 - `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
 - `2025-01-28-INTEGRATION-VS-STABILIZATION-CRITIQUE.md` - Critique of integration vs stabilization approach
 - `IP-ENRICHMENT-UI-PATCH-PLAN.md` - IP enrichment UI integration patch plan (minimal approach)
@@ -206,9 +210,11 @@ API contract documentation:
   - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
   - 🔄 Phase 2: Partner Center Referrals (P1) - **In Progress** (Branch: feature/partner-center-phase1, opened 2025-01-29)
     - ✅ Core components completed (Tasks 2.1, 2.2, 2.3 - 50% progress)
-    - ⏳ Remaining: API endpoints (Task 2.4), UI integration (Task 2.5), Background sync (Task 2.6)
+    - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync` + Celery task
+    - ✅ **Backend tests completed** (Task 2.4 - 2025-01-30) - 7/7 tests passing
+    - ⏳ Remaining: UI integration (Task 2.5), Background sync (Task 2.6), Scoring pipeline
     - **Status**: MVP-safe (feature flag default OFF, kod hazır ama aktif değil)
-    - **Next**: Task 2.4 - API Endpoints (POST /api/referrals/sync)
+    - **Next**: Task 2.5 - UI Integration (Add referral column to lead list)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 

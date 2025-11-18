@@ -191,13 +191,16 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 - `app/main.py` (modify - router register)
 
 #### 2.4.1: MVP Endpoint (Sadece Bu)
-- [ ] `POST /api/referrals/sync` - Manual Sync (MVP Primary)
-  - [ ] Request body: `SyncReferralsRequest` (optional: `force` flag)
-  - [ ] Response model: `SyncReferralsResponse` (success count, failure count, errors)
-  - [ ] Feature flag check: `partner_center_enabled` kontrolü
-  - [ ] Async execution: Celery task olarak çalıştır (long-running operation)
-  - [ ] Error handling: 400 (feature disabled), 500
-  - [ ] **Sync Strategy**: Scheduled polling (10 minutes, configurable) - MVP primary method
+- [x] `POST /api/referrals/sync` - Manual Sync (MVP Primary) ✅ **COMPLETED** (2025-01-30)
+  - [x] Request body: `SyncReferralsRequest` (optional: `force` flag)
+  - [x] Response model: `SyncReferralsResponse` (success count, failure count, errors, task_id, enqueued)
+  - [x] Feature flag check: `partner_center_enabled` kontrolü (400 if disabled)
+  - [x] Async execution: Celery task olarak çalıştır (long-running operation)
+  - [x] Error handling: 400 (feature disabled), 500
+  - [x] Task ID tracking: Response includes `task_id` for monitoring
+  - [x] Admin-only endpoint: Documented as internal/admin-only
+  - [x] Structured logging: Enhanced task logs with source, duration, env, feature_flag_state
+  - [ ] **Sync Strategy**: Scheduled polling (10 minutes, configurable) - Task 2.6'da implement edilecek
 
 **Future Enhancement** (Post-MVP - Şimdilik YOK):
 - ⏳ `GET /api/referrals` - List referrals (nice-to-have, MVP'de gerek yok)
@@ -206,12 +209,16 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 - ⏳ v1 API versioning (nice-to-have, MVP'de gerek yok)
 
 **Acceptance Criteria**:
-- [ ] MVP endpoint çalışıyor (`POST /api/referrals/sync`)
-- [ ] Response model validate ediliyor
-- [ ] Error handling complete
-- [ ] Endpoint main app'e register edilmiş
-- [ ] Feature flag kontrolü yapılıyor
-- [ ] Polling sync çalışıyor (10 minutes interval)
+- [x] MVP endpoint çalışıyor (`POST /api/referrals/sync`) ✅
+- [x] Response model validate ediliyor ✅
+- [x] Error handling complete ✅
+- [x] Endpoint main app'e register edilmiş ✅
+- [x] Feature flag kontrolü yapılıyor ✅
+- [x] Task ID tracking implemented ✅
+- [x] Admin-only endpoint documented ✅
+- [x] Structured logging enhanced ✅
+- [x] **Backend tests complete** ✅ (2025-01-30) - 7/7 tests passing (endpoint + task tests)
+- [ ] Polling sync çalışıyor (10 minutes interval) - Task 2.6'da implement edilecek
 
 ---
 
@@ -286,28 +293,51 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 
 ## 📊 Progress Tracking
 
-**Current Status**: 🔄 **In Progress** (Tasks 2.1, 2.2, 2.3 completed)
+**Current Status**: 🔄 **In Progress** (Tasks 2.1, 2.2, 2.3, 2.4 completed + backend tests)
 
-**Completed Tasks**: 3/6 (50%)
+**Completed Tasks**: 4/6 (67%) - **Backend Complete** (API + Celery Task + Tests)
 
 **Task Status**:
 - [x] Task 2.1: Partner Center API Client ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.2: Referral Data Model ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.3: Referral Ingestion ✅ **COMPLETED** (2025-01-28)
-- [ ] Task 2.4: API Endpoints
+- [x] Task 2.4: API Endpoints ✅ **COMPLETED** (2025-01-30) - **Backend tests: 7/7 PASSED** ✅
 - [ ] Task 2.5: UI Integration
 - [ ] Task 2.6: Background Sync
 
 **Next Steps**:
-1. Task 2.4: Create API endpoints (`app/api/referrals.py`) - `POST /api/referrals/sync`
-2. Task 2.5: UI Integration - Add referral column to lead list
-3. Task 2.6: Background Sync - Celery task and beat schedule
-4. Scoring Pipeline Integration - Azure Tenant ID override and Co-sell boost
+1. ✅ **Preparation Complete** - See `docs/active/PARTNER-CENTER-PREPARATION.md` for comprehensive preparation guide
+2. ✅ **Task 2.4 Complete** - API endpoints created (`app/api/referrals.py`) - `POST /api/referrals/sync` ✅
+3. ✅ **Task 2.4 Backend Tests Complete** - All tests passing (7/7) - Endpoint + Celery task tests ✅ (2025-01-30)
+4. Task 2.5: UI Integration - Add referral column to lead list
+5. Task 2.6: Background Sync - Celery task and beat schedule
+6. Scoring Pipeline Integration - Azure Tenant ID override and Co-sell boost
+
+---
+
+## 📚 Preparation Guide
+
+**Status**: ✅ **Preparation Complete** (2025-01-30)
+
+Comprehensive preparation guide created: `docs/active/PARTNER-CENTER-PREPARATION.md`
+
+**Preparation Checklist**:
+- [x] Pre-flight checklist (Environment setup, Database migration, Dependencies)
+- [x] Task 2.4 preparation (API Endpoints - patterns, models, error handling)
+- [x] Task 2.5 preparation (UI Integration - API response, SQL query, badge styling)
+- [x] Task 2.6 preparation (Background Sync - Celery task, schedule, error handling)
+- [x] Scoring Pipeline Integration preparation (Azure Tenant ID override, Co-sell boost)
+- [x] Testing preparation (Unit tests, Integration tests, E2E tests)
+- [x] Documentation updates checklist (Code docs, User docs, README, CHANGELOG)
+- [x] Deployment preparation (Feature flag strategy, Database migration, Monitoring)
+
+**Ready for Implementation**: All preparation steps documented. Ready to proceed with Tasks 2.4, 2.5, 2.6.
 
 ---
 
 ## 🔗 Related Documents
 
+- `docs/active/PARTNER-CENTER-PREPARATION.md` - **Comprehensive preparation guide** (2025-01-30) - ✅ **READ THIS FIRST**
 - `docs/prompts/2025-01-28-partner-center-phase2-task-list.md` - Detailed task list with acceptance criteria
 - `docs/plans/2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration roadmap
 - `docs/active/KALAN-ISLER-PRIORITY.md` - Priority list (Phase 2: Partner Center Referrals)
@@ -385,8 +415,8 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 
 ---
 
-**Last Updated**: 2025-01-28  
-**Status**: ✅ **DECISION MADE** - Feature Flag OFF (Post-MVP)
+**Last Updated**: 2025-01-30  
+**Status**: 🔄 **TASK 2.4 COMPLETE** - API endpoints + Celery task + backend tests (7/7 PASSED) ✅
 
 **MVP Status**: ✅ **MVP'ye etkisi YOK** - Feature flag default OFF, kod hazır ama aktif değil
 

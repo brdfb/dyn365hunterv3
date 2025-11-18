@@ -28,6 +28,7 @@ from app.api import (
     rescan,
     alerts,
     sales_summary,
+    referrals,
     health,
     debug,
 )
@@ -135,6 +136,7 @@ v1_router.include_router(pdf_v1.router)  # Already has /leads prefix
 v1_router.include_router(rescan_v1.router)  # Already has /scan prefix
 v1_router.include_router(alerts_v1.router)  # Already has /alerts prefix
 v1_router.include_router(sales_summary_v1.router)  # Already has /leads prefix
+# Note: referrals router will be added to v1 when v1 version is created
 app.include_router(v1_router)
 
 # Legacy routers (backward compatibility - will be deprecated in future)
@@ -153,6 +155,7 @@ app.include_router(pdf.router, tags=["pdf", "legacy"])  # Already has /leads pre
 app.include_router(rescan.router, tags=["rescan", "legacy"])  # Already has /scan prefix
 app.include_router(alerts.router, tags=["alerts", "legacy"])  # Already has /alerts prefix
 app.include_router(sales_summary.router, tags=["sales", "legacy"])  # Already has /leads prefix
+app.include_router(referrals.router, tags=["referrals", "legacy"])  # Already has /referrals prefix
 
 # Mount static files for Mini UI
 import os
