@@ -45,6 +45,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Files**: `app/core/analyzer_dns.py`, `tests/test_scan_single.py`
   - **Status**: ✅ **Tested and verified** - 19/19 tests passing, no impact on existing functionality
 
+### Added
+- **Partner Center Integration - Phase 2** (2025-01-30) - Backend API endpoints and testing
+  - **API Endpoints**: Created `POST /api/referrals/sync` endpoint for manual Partner Center referral synchronization
+    - Feature flag check (`partner_center_enabled`) - returns 400 if disabled
+    - Async execution via Celery task (`sync_partner_center_referrals_task`)
+    - Task ID tracking in response for monitoring
+    - Admin-only endpoint (documented as internal/admin use)
+    - Files: `app/api/referrals.py` (new), `app/main.py` (router registration)
+  - **Celery Task**: Implemented `sync_partner_center_referrals_task` for background sync
+    - Feature flag check (skips execution if disabled)
+    - Calls `sync_referrals_from_partner_center()` for referral processing
+    - Structured logging with source, duration, env, feature_flag_state, sync statistics
+    - Graceful error handling (logs errors, doesn't crash)
+    - Files: `app/core/tasks.py`
+  - **Backend Testing**: Comprehensive test suite for API endpoints and Celery task
+    - Endpoint tests: Feature flag disabled (400), feature flag enabled (200 + task enqueued), error handling (500)
+    - Task tests: Feature flag skip, sync function call, error handling, structured logging
+    - All tests passing (7/7) - Uses Celery `apply()` method for `bind=True` task testing
+    - Files: `tests/test_referrals_sync.py` (new)
+  - **Status**: ✅ **Backend Complete** - API endpoints and Celery task fully tested and ready
+  - **Next Steps**: UI Integration (Task 2.5), Background Sync Schedule (Task 2.6)
+
 ### Production Ready
 - **CSP P-Model Integration + Sales Summary v1.1** (2025-01-29) - ✅ **DONE & PROD-READY**
   - **Core Engine**: ✅ Domain analysis, scoring, provider classification, segment determination
@@ -275,10 +297,24 @@ Hunter v1.0 is the first production-ready release. This version includes all cor
     - Idempotent domain scan trigger (domain-based, not referral-based)
     - Independent referral processing (one error doesn't affect others)
     - `sync_referrals_from_partner_center()` main sync function
-  - **Status**: ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
-  - **Next Steps**: API endpoints, background sync, UI integration, scoring pipeline integration
-  - **Files Created**: `app/core/partner_center.py`, `app/core/referral_ingestion.py`
-  - **Files Modified**: `app/config.py`, `app/db/models.py`
+  - **API Endpoints**: Partner Center referral sync endpoint (`app/api/referrals.py`) - ✅ **COMPLETED** (2025-01-30)
+    - `POST /api/referrals/sync` - Manual sync endpoint (internal/admin-only)
+    - Request model: `SyncReferralsRequest` (optional `force` flag)
+    - Response model: `SyncReferralsResponse` (success, message, enqueued, task_id, counts, errors)
+    - Feature flag check: Returns 400 if `partner_center_enabled` is False
+    - Async execution: Triggers Celery task `sync_partner_center_referrals_task` for long-running operation
+    - Task ID tracking: Response includes `task_id` for monitoring/debugging
+    - Error handling: 400 (feature disabled), 500 (sync failure)
+    - Structured logging: Enhanced task logs with source, duration, env, feature_flag_state
+  - **Celery Task**: `sync_partner_center_referrals_task` (`app/core/tasks.py`) - ✅ **COMPLETED** (2025-01-30)
+    - Feature flag check (skip if disabled)
+    - Calls `sync_referrals_from_partner_center()` to fetch and process referrals
+    - Structured logging with task_id, duration, success/failure counts
+    - Graceful error handling (log, don't crash)
+  - **Status**: ✅ Core components + API endpoints completed (Tasks 2.1, 2.2, 2.3, 2.4 - 67% progress)
+  - **Next Steps**: UI integration, background sync, scoring pipeline integration
+  - **Files Created**: `app/core/partner_center.py`, `app/core/referral_ingestion.py`, `app/api/referrals.py`
+  - **Files Modified**: `app/config.py`, `app/db/models.py`, `app/core/tasks.py`, `app/main.py`
   - **Documentation**: `docs/todos/PARTNER-CENTER-PHASE2.md` - Complete task list and progress tracking
 
 ### Enhanced
