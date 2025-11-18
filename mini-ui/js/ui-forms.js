@@ -2,6 +2,8 @@
 
 import { uploadCsv, scanDomain, ingestDomain, getJobProgress } from './api.js';
 import { error as logError } from './logger.js';
+import { escapeHtml, validateDomain } from './utils.js';
+import { REFRESH_DELAY } from './constants.js';
 
 /**
  * Bind CSV upload form
@@ -107,7 +109,7 @@ export function bindCsvUploadForm(onSuccess) {
                             
                             // Auto-refresh leads if callback provided
                             if (onSuccess) {
-                                setTimeout(() => onSuccess(), 1000);
+                                setTimeout(() => onSuccess(), REFRESH_DELAY);
                             }
                         }
                     } catch (error) {
@@ -131,7 +133,7 @@ export function bindCsvUploadForm(onSuccess) {
                 button.textContent = originalButtonText;
                 
                 if (onSuccess) {
-                    setTimeout(() => onSuccess(), 1000);
+                    setTimeout(() => onSuccess(), REFRESH_DELAY);
                 }
             }
         } catch (error) {
@@ -162,8 +164,10 @@ export function bindScanDomainForm(onSuccess) {
         const domain = domainInput.value.trim();
         const companyName = companyInput.value.trim() || null;
         
-        if (!domain) {
-            showMessage(messageEl, 'Lütfen bir domain girin', 'error');
+        // Validate domain format
+        const validation = validateDomain(domain);
+        if (!validation.valid) {
+            showMessage(messageEl, validation.error, 'error');
             return;
         }
         
@@ -213,7 +217,7 @@ export function bindScanDomainForm(onSuccess) {
             
             // Auto-refresh leads if callback provided
             if (onSuccess) {
-                setTimeout(() => onSuccess(), 1000);
+                setTimeout(() => onSuccess(), REFRESH_DELAY);
             }
         } catch (error) {
             showMessage(messageEl, `Hata: ${error.message}`, 'error');
@@ -248,13 +252,4 @@ function showMessage(element, message, type) {
     }
 }
 
-/**
- * Escape HTML to prevent XSS
- */
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 

@@ -308,6 +308,16 @@ DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak (op
    - Daha robust parsing ve fallback mekanizmaları
    - **Not:** Opsiyonel - İhtiyaç duyulursa implement edilecek
 
+5. **Mini UI Advanced Improvements** — S/M (Optional)
+
+   - Skeleton loading (HTML + CSS + JS)
+   - Keyboard navigation (event handling, focus management)
+   - LRU cache (breakdown cache optimization)
+   - Toast queue management
+   - ARIA + focus trap (accessibility improvements)
+   - **Not:** Detaylar için `docs/active/MINI-UI-REFACTOR-PACKAGE-1.md` (Paket 2) - Post-MVP'ye ertelendi
+   - **Not:** Paket 1 (escapeHtml refactor, constants extraction, domain validation) ✅ tamamlandı (2025-01-30)
+
 ---
 
 ## 6. Özet

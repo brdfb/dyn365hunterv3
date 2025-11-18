@@ -4,6 +4,8 @@ import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesS
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading, showSalesSummary, hideSalesSummary, showSalesSummaryError, showSalesModalLoading, hideSalesModalLoading } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 import { log, warn, error as logError } from './logger.js';
+import { escapeHtml } from './utils.js';
+import { DEBOUNCE_DELAY, TOAST_DURATION, DUPLICATE_REQUEST_WINDOW, REFRESH_DELAY } from './constants.js';
 
 // Global state (single object)
 window.state = {
@@ -69,7 +71,7 @@ async function init() {
                 // Phase 1.4: Save filter state on search
                 saveFilterState();
                 loadLeads();
-            }, 400); // 400ms debounce (optimized for better UX)
+            }, DEBOUNCE_DELAY); // Debounce delay (optimized for better UX)
         });
     }
     
@@ -239,7 +241,7 @@ async function init() {
     
     // Listen for refresh events
     window.addEventListener('refreshLeads', () => {
-        setTimeout(() => loadLeads(), 1000);
+        setTimeout(() => loadLeads(), REFRESH_DELAY);
     });
     
     // Phase 1.4: Restore filter state from localStorage before loading
@@ -308,10 +310,10 @@ async function loadLeads() {
         timestamp: Date.now()
     };
     
-    // If same request was made within last 500ms, skip it
+    // If same request was made within duplicate request window, skip it
     if (window.state.lastLeadsRequest && 
         window.state.lastLeadsRequest.filters === currentRequest.filters &&
-        (currentRequest.timestamp - window.state.lastLeadsRequest.timestamp) < 500) {
+        (currentRequest.timestamp - window.state.lastLeadsRequest.timestamp) < DUPLICATE_REQUEST_WINDOW) {
         log('Skipping duplicate leads request');
         return;
     }
@@ -493,7 +495,7 @@ async function handleExport(format = 'csv') {
 /**
  * Phase 1.5: Enhanced toast notification with icons, better animations, and stacking
  */
-function showToast(message, type = 'info', duration = 4000) {
+function showToast(message, type = 'info', duration = TOAST_DURATION) {
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
     
@@ -565,15 +567,6 @@ function updateToastPositions() {
     });
 }
 
-/**
- * Phase 1.5: Escape HTML helper
- */
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 /**
  * G19: Render pagination UI

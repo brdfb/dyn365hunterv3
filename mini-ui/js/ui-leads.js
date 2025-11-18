@@ -1,6 +1,7 @@
 // UI Leads - Table and filter rendering
 
 import { log, warn, error as logError } from './logger.js';
+import { escapeHtml } from './utils.js';
 
 /**
  * Render leads table
@@ -268,15 +269,6 @@ function getPriorityTooltip(priority_category, priority_label, priority_score, s
     }
 }
 
-/**
- * Escape HTML to prevent XSS
- */
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 /**
  * Show loading indicator
