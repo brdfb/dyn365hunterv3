@@ -28,7 +28,7 @@ celery_app.conf.update(
     task_default_retry_delay=60,  # 1 minute delay before retry
     task_max_retries=2,  # Max 2 retries for transient failures
     result_expires=3600,  # Results expire after 1 hour
-    # Celery Beat schedule (G18: Daily rescan + Alert processing)
+    # Celery Beat schedule (G18: Daily rescan + Alert processing, Task 2.6: Partner Center sync)
     beat_schedule={
         "daily-rescan": {
             "task": "app.core.tasks.daily_rescan_task",
@@ -39,6 +39,15 @@ celery_app.conf.update(
             "task": "app.core.tasks.process_pending_alerts_task",
             "schedule": 300.0,  # Run every 5 minutes
             "options": {"expires": 60},  # Task expires after 1 minute if not picked up
+        },
+        "sync-partner-center-referrals": {
+            "task": "app.core.tasks.sync_partner_center_referrals_task",
+            # Production: 600s (10 min), Development: 30s (auto-override for testing)
+            "schedule": (
+                30.0 if settings.environment == "development" 
+                else float(settings.partner_center_sync_interval)
+            ),
+            "options": {"expires": 3600},  # Task expires after 1 hour if not picked up
         },
     },
 )
