@@ -45,6 +45,9 @@ export function renderLeadsTable(leads) {
                 <td class="leads-table__cell leads-table__cell--local-provider" title="${lead.local_provider ? `Local Provider: ${lead.local_provider}` : lead.provider === 'Local' && lead.mx_root ? `MX Root: ${lead.mx_root} (Bilinen provider tespit edilemedi)` : lead.provider === 'Local' ? 'Local Provider: Bilinen Türk hosting provider\'ları tespit edilir (TürkHost, Natro, vb.). Bu domain için provider tespit edilemedi.' : 'Local Provider: Sadece provider "Local" olduğunda doldurulur'}">
                     ${lead.local_provider ? escapeHtml(lead.local_provider) : lead.provider === 'Local' && lead.mx_root ? `<span style="color: #666; font-size: 0.9em;" title="MX Root: ${escapeHtml(lead.mx_root)}">${escapeHtml(lead.mx_root)}</span>` : lead.provider === 'Local' ? '<span style="color: #999; font-style: italic;">Bilinmeyen</span>' : '-'}
                 </td>
+                <td class="leads-table__cell leads-table__cell--referral">
+                    ${getReferralBadge(lead.referral_type)}
+                </td>
                 <td class="leads-table__cell leads-table__cell--segment">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}" title="${getSegmentTooltip(lead.segment, lead.provider, lead.readiness_score)}">${escapeHtml(lead.segment)}</span>` : '-'}
                 </td>
@@ -230,6 +233,28 @@ function getPriorityBadge(priority_category_or_score) {
         default:
             return '-'; // Unknown
     }
+}
+
+/**
+ * Get referral badge (Task 2.5: Partner Center referral type)
+ * Badge colors: co-sell (blue), marketplace (green), solution-provider (orange)
+ */
+function getReferralBadge(referral_type) {
+    if (!referral_type) return '-';
+    
+    const type = referral_type.toLowerCase();
+    const labels = {
+        'co-sell': 'Co-sell',
+        'marketplace': 'Marketplace',
+        'solution-provider': 'SP'
+    };
+    
+    const label = labels[type] || referral_type;
+    // Replace hyphens with single hyphen for CSS class (co-sell -> co-sell, solution-provider -> solution-provider)
+    const cssType = type.replace(/-/g, '-');
+    const badgeClass = `referral-badge referral-badge--${cssType}`;
+    
+    return `<span class="${badgeClass}">${escapeHtml(label)}</span>`;
 }
 
 /**

@@ -923,6 +923,38 @@ body {
     cursor: default;
 }
 
+/* Task 2.5: Referral Badges (Partner Center) */
+.referral-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: white;
+}
+
+.referral-badge--co-sell {
+    background-color: #3498db;  /* Blue */
+    color: white;
+}
+
+.referral-badge--marketplace {
+    background-color: #27ae60;  /* Green */
+    color: white;
+}
+
+.referral-badge--solution-provider {
+    background-color: #f39c12;  /* Orange */
+    color: white;
+}
+
+.referral-badge:hover {
+    opacity: 0.9;
+    transition: opacity 0.2s;
+    cursor: default;
+}
+
 /* G20: Tenant Size Badge */
 .tenant-size-badge {
     display: inline-block;

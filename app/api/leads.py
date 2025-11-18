@@ -55,6 +55,7 @@ class LeadResponse(BaseModel):
     priority_category: Optional[str] = None  # 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'
     priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
     infrastructure_summary: Optional[str] = None  # IP enrichment summary (Level 1)
+    referral_type: Optional[str] = None  # Partner Center referral type ('co-sell', 'marketplace', 'solution-provider')
 
 
 class LeadsListResponse(BaseModel):
@@ -101,36 +102,39 @@ async def export_leads(
     Returns:
         CSV or Excel file download with lead data
     """
-    # Build query using leads_ready VIEW (same as GET /leads)
+    # Build query using leads_ready VIEW with LEFT JOIN to partner_center_referrals (same as GET /leads)
     # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
+    # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
     query = """
-        SELECT DISTINCT ON (domain)
-            company_id,
-            canonical_name,
-            domain,
-            provider,
-            tenant_size,
-            local_provider,
-            country,
-            spf,
-            dkim,
-            dmarc_policy,
-            dmarc_coverage,
-            mx_root,
-            registrar,
-            expires_at,
-            nameservers,
-            scan_status,
-            scanned_at,
-            readiness_score,
-            segment,
-            reason,
-            technical_heat,
-            commercial_segment,
-            commercial_heat,
-            priority_category,
-            priority_label
-        FROM leads_ready
+        SELECT DISTINCT ON (lr.domain)
+            lr.company_id,
+            lr.canonical_name,
+            lr.domain,
+            lr.provider,
+            lr.tenant_size,
+            lr.local_provider,
+            lr.country,
+            lr.spf,
+            lr.dkim,
+            lr.dmarc_policy,
+            lr.dmarc_coverage,
+            lr.mx_root,
+            lr.registrar,
+            lr.expires_at,
+            lr.nameservers,
+            lr.scan_status,
+            lr.scanned_at,
+            lr.readiness_score,
+            lr.segment,
+            lr.reason,
+            lr.technical_heat,
+            lr.commercial_segment,
+            lr.commercial_heat,
+            lr.priority_category,
+            lr.priority_label,
+            pcr.referral_type
+        FROM leads_ready lr
+        LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
     """
 
@@ -138,33 +142,33 @@ async def export_leads(
 
     # Add filters (same logic as GET /leads)
     if segment:
-        query += " AND segment = :segment"
+        query += " AND lr.segment = :segment"
         params["segment"] = segment
 
     if min_score is not None:
-        query += " AND readiness_score >= :min_score"
+        query += " AND lr.readiness_score >= :min_score"
         params["min_score"] = min_score
 
     if provider:
-        query += " AND provider = :provider"
+        query += " AND lr.provider = :provider"
         params["provider"] = provider
 
     # G19: Add search filter (full-text search in domain, canonical_name, provider)
     if search:
         search_pattern = f"%{search.lower()}%"
         query += """ AND (
-            LOWER(domain) LIKE :search 
-            OR LOWER(canonical_name) LIKE :search 
-            OR LOWER(provider) LIKE :search
+            LOWER(lr.domain) LIKE :search 
+            OR LOWER(lr.canonical_name) LIKE :search 
+            OR LOWER(lr.provider) LIKE :search
         )"""
         params["search"] = search_pattern
 
     # Only return leads that have been scanned (have a score)
-    query += " AND readiness_score IS NOT NULL"
+    query += " AND lr.readiness_score IS NOT NULL"
 
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
-    query += " ORDER BY domain, scanned_at DESC NULLS LAST"
+    query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
 
     try:
         result = db.execute(text(query), params)
@@ -194,6 +198,7 @@ async def export_leads(
                 "scan_status": row.scan_status or "",
                 "scanned_at": str(row.scanned_at) if row.scanned_at else "",
                 "reason": row.reason or "",
+                "referral_type": getattr(row, "referral_type", None) or "",  # Task 2.5: Partner Center referral type
             }
             leads_data.append(lead_dict)
 
@@ -318,37 +323,40 @@ async def get_leads(
     Returns:
         LeadsListResponse with paginated leads and metadata
     """
-    # Build query using leads_ready VIEW
+    # Build query using leads_ready VIEW with LEFT JOIN to partner_center_referrals
     # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
     # View includes G20 columns (tenant_size, local_provider, dmarc_coverage) and CSP P-Model columns
+    # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
     query = """
-        SELECT DISTINCT ON (domain)
-            company_id,
-            canonical_name,
-            domain,
-            provider,
-            tenant_size,
-            local_provider,
-            country,
-            spf,
-            dkim,
-            dmarc_policy,
-            dmarc_coverage,
-            mx_root,
-            registrar,
-            expires_at,
-            nameservers,
-            scan_status,
-            scanned_at,
-            readiness_score,
-            segment,
-            reason,
-            technical_heat,
-            commercial_segment,
-            commercial_heat,
-            priority_category,
-            priority_label
-        FROM leads_ready
+        SELECT DISTINCT ON (lr.domain)
+            lr.company_id,
+            lr.canonical_name,
+            lr.domain,
+            lr.provider,
+            lr.tenant_size,
+            lr.local_provider,
+            lr.country,
+            lr.spf,
+            lr.dkim,
+            lr.dmarc_policy,
+            lr.dmarc_coverage,
+            lr.mx_root,
+            lr.registrar,
+            lr.expires_at,
+            lr.nameservers,
+            lr.scan_status,
+            lr.scanned_at,
+            lr.readiness_score,
+            lr.segment,
+            lr.reason,
+            lr.technical_heat,
+            lr.commercial_segment,
+            lr.commercial_heat,
+            lr.priority_category,
+            lr.priority_label,
+            pcr.referral_type
+        FROM leads_ready lr
+        LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
     """
 
@@ -356,35 +364,35 @@ async def get_leads(
 
     # Add filters
     if segment:
-        query += " AND segment = :segment"
+        query += " AND lr.segment = :segment"
         params["segment"] = segment
 
     if min_score is not None:
-        query += " AND readiness_score >= :min_score"
+        query += " AND lr.readiness_score >= :min_score"
         params["min_score"] = min_score
 
     if provider:
-        query += " AND provider = :provider"
+        query += " AND lr.provider = :provider"
         params["provider"] = provider
 
     # G19: Add search filter (full-text search in domain, canonical_name, provider)
     if search:
         search_pattern = f"%{search.lower()}%"
         query += """ AND (
-            LOWER(domain) LIKE :search 
-            OR LOWER(canonical_name) LIKE :search 
-            OR LOWER(provider) LIKE :search
+            LOWER(lr.domain) LIKE :search 
+            OR LOWER(lr.canonical_name) LIKE :search 
+            OR LOWER(lr.provider) LIKE :search
         )"""
         params["search"] = search_pattern
 
     # Only return leads that have been scanned (have a score)
-    query += " AND readiness_score IS NOT NULL"
+    query += " AND lr.readiness_score IS NOT NULL"
 
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
     # Default sorting (if sort_by not specified) is by priority_score
-    query += " ORDER BY domain, scanned_at DESC NULLS LAST"
+    query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
 
     try:
         result = db.execute(text(query), params)
@@ -441,6 +449,7 @@ async def get_leads(
                 priority_category=getattr(row, "priority_category", None),
                 priority_label=getattr(row, "priority_label", None),
                 infrastructure_summary=infrastructure_summary,
+                referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
             )
             leads.append(lead)
 
@@ -524,6 +533,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid domain format")
 
     # Query using direct JOIN (more reliable than VIEW)
+    # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
     query = """
         SELECT 
             c.id AS company_id,
@@ -553,10 +563,12 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             ls.commercial_segment,
             ls.commercial_heat,
             ls.priority_category,
-            ls.priority_label
+            ls.priority_label,
+            pcr.referral_type
         FROM companies c
         LEFT JOIN domain_signals ds ON c.domain = ds.domain
         LEFT JOIN lead_scores ls ON c.domain = ls.domain
+        LEFT JOIN partner_center_referrals pcr ON c.domain = pcr.domain
         WHERE c.domain = :domain
     """
 
@@ -626,6 +638,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             priority_category=getattr(row, "priority_category", None),
             priority_label=getattr(row, "priority_label", None),
             infrastructure_summary=infrastructure_summary,
+            referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
         )
 
     except HTTPException:

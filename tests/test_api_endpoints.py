@@ -295,6 +295,128 @@ class TestLeadsEndpoints:
             assert "priority_score" in data
             assert isinstance(data["priority_score"], (int, type(None)))
 
+    def test_get_leads_includes_referral_type(self, client, db_session):
+        """Test that GET /leads includes referral_type field (Task 2.5)."""
+        from app.db.models import Company, DomainSignal, LeadScore, PartnerCenterReferral
+        from app.core.normalizer import normalize_domain
+
+        # Create test data: domain with referral
+        test_domain = normalize_domain("referraltest.com")
+        
+        # Create company
+        company = Company(domain=test_domain, canonical_name="Referral Test")
+        db_session.add(company)
+        
+        # Create domain signal
+        signal = DomainSignal(domain=test_domain, spf=True, dkim=True, dmarc_policy="reject")
+        db_session.add(signal)
+        
+        # Create lead score
+        score = LeadScore(domain=test_domain, readiness_score=75, segment="Migration")
+        db_session.add(score)
+        
+        # Create referral
+        referral = PartnerCenterReferral(
+            referral_id="test-ref-123",
+            referral_type="co-sell",
+            domain=test_domain,
+            company_name="Referral Test"
+        )
+        db_session.add(referral)
+        db_session.commit()
+
+        # Test GET /leads endpoint
+        response = client.get("/leads")
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Check response format (should be LeadsListResponse with pagination)
+        if "leads" in data:
+            # New format with pagination
+            leads = data["leads"]
+            assert isinstance(leads, list)
+            if len(leads) > 0:
+                # Find our test domain
+                test_lead = next((l for l in leads if l.get("domain") == test_domain), None)
+                if test_lead:
+                    assert "referral_type" in test_lead
+                    assert test_lead["referral_type"] == "co-sell"
+        else:
+            # Legacy format (list)
+            assert isinstance(data, list)
+            if len(data) > 0:
+                test_lead = next((l for l in data if l.get("domain") == test_domain), None)
+                if test_lead:
+                    assert "referral_type" in test_lead
+                    assert test_lead["referral_type"] == "co-sell"
+
+    def test_get_lead_includes_referral_type(self, client, db_session):
+        """Test that GET /leads/{domain} includes referral_type field (Task 2.5)."""
+        from app.db.models import Company, DomainSignal, LeadScore, PartnerCenterReferral
+        from app.core.normalizer import normalize_domain
+
+        # Create test data: domain with referral
+        test_domain = normalize_domain("referraltest2.com")
+        
+        # Create company
+        company = Company(domain=test_domain, canonical_name="Referral Test 2")
+        db_session.add(company)
+        
+        # Create domain signal
+        signal = DomainSignal(domain=test_domain, spf=True, dkim=True, dmarc_policy="reject")
+        db_session.add(signal)
+        
+        # Create lead score
+        score = LeadScore(domain=test_domain, readiness_score=80, segment="Migration")
+        db_session.add(score)
+        
+        # Create referral
+        referral = PartnerCenterReferral(
+            referral_id="test-ref-456",
+            referral_type="marketplace",
+            domain=test_domain,
+            company_name="Referral Test 2"
+        )
+        db_session.add(referral)
+        db_session.commit()
+
+        # Test GET /leads/{domain} endpoint
+        response = client.get(f"/leads/{test_domain}")
+        assert response.status_code == 200
+        data = response.json()
+        
+        assert "referral_type" in data
+        assert data["referral_type"] == "marketplace"
+
+    def test_get_leads_referral_type_none_when_no_referral(self, client, db_session):
+        """Test that referral_type is None when domain has no referral (Task 2.5)."""
+        from app.db.models import Company, DomainSignal, LeadScore
+        from app.core.normalizer import normalize_domain
+
+        # Create test data: domain without referral
+        test_domain = normalize_domain("noreferraltest.com")
+        
+        # Create company
+        company = Company(domain=test_domain, canonical_name="No Referral Test")
+        db_session.add(company)
+        
+        # Create domain signal
+        signal = DomainSignal(domain=test_domain, spf=True, dkim=True, dmarc_policy="reject")
+        db_session.add(signal)
+        
+        # Create lead score
+        score = LeadScore(domain=test_domain, readiness_score=70, segment="Migration")
+        db_session.add(score)
+        db_session.commit()
+
+        # Test GET /leads/{domain} endpoint
+        response = client.get(f"/leads/{test_domain}")
+        assert response.status_code == 200
+        data = response.json()
+        
+        assert "referral_type" in data
+        assert data["referral_type"] is None
+
 
 class TestDashboardEndpoints:
     """Test dashboard endpoints."""
