@@ -97,7 +97,10 @@
 
 ### Test 5: Leads Table
 - [ ] Lead tablosu görüntüleniyor mu?
-- [ ] Tablo kolonları doğru mu? (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Segment, Skor)
+- [ ] Tablo kolonları doğru mu? (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Referral, Segment, Skor)
+- [ ] Referral kolonu görüntüleniyor mu? (Task 2.5 - 2025-01-30)
+- [ ] Referral badge'leri doğru renkte mi? (co-sell: blue, marketplace: green, solution-provider: orange)
+- [ ] Referral yoksa "-" gösteriliyor mu?
 - [ ] Column widths optimize edilmiş mi? (domain, provider, score, segment, priority)
 - [ ] Row hover effect çalışıyor mu? (smooth transition)
 - [ ] Segment badge'leri doğru renkte mi? (Migration: green, Existing: blue, Cold: yellow, Skip: red)
@@ -226,6 +229,7 @@
 - [ ] Score breakdown modal çalışıyor (ESC key, backdrop click, tooltips)
 - [ ] **P-Model badges** görüntüleniyor (P1-P6 renkli badge'ler, tooltip'ler)
 - [ ] **CSP P-Model panel** score breakdown modal'da görüntüleniyor
+- [ ] **Referral badges** görüntüleniyor (co-sell: blue, marketplace: green, solution-provider: orange) (Task 2.5 - 2025-01-30)
 - [ ] **Provider-specific description** score breakdown modal'da doğru
 - [ ] **DMARC coverage** null/undefined durumunda gracefully handle ediliyor
 - [ ] Toast notifications çalışıyor (export başarı/hata)
@@ -250,5 +254,5 @@
 
 ---
 
-**Son Güncelleme**: 2025-01-29 (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon test senaryoları eklendi | Phase 3: CSP P-Model Integration test senaryoları eklendi - P-badges, tooltips, score breakdown panel, provider-specific descriptions, DMARC coverage handling | İyileştirmeler: Production-safe logging, improved error handling)
+**Son Güncelleme**: 2025-01-30 (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon test senaryoları eklendi | Phase 3: CSP P-Model Integration test senaryoları eklendi - P-badges, tooltips, score breakdown panel, provider-specific descriptions, DMARC coverage handling | Task 2.5: Partner Center Referral Column test senaryoları eklendi - Referral badges | İyileştirmeler: Production-safe logging, improved error handling)
 

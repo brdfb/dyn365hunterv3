@@ -58,7 +58,8 @@ http://localhost:8000/mini-ui/
 - **Search input** (Domain, şirket veya provider'da arama) - G19
 - **Sorting** (Table header'lara tıklayarak sıralama) - G19
 - **Pagination** (Sayfa numaraları, önceki/sonraki butonları, sayfa bilgisi) - G19
-- Tablo görüntüleme (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Segment, Skor)
+- Tablo görüntüleme (Öncelik, Domain, Şirket, Provider, Tenant Size, Local Provider, Referral, Segment, Skor)
+- **Referral column** (Task 2.5 - 2025-01-30) - Partner Center referral type badges (co-sell: blue, marketplace: green, solution-provider: orange)
 - **Table view improvements** (Gün 3) - Column width optimization, row hover effects, empty state with CTA, loading spinner
 - **P-Model Priority Badges** (Phase 3 - 2025-01-29) - P1-P6 renkli badge'ler, priority_label tooltip'leri
 - **Score breakdown modal** (G19 + Gün 3) - Click skor'a tıklayarak detaylı skor analizi, tooltips for signals/risks, ESC key support, backdrop click to close
@@ -263,6 +264,6 @@ Bu Mini UI ile:
 
 ---
 
-**Son Güncelleme**: 2025-01-29  
-**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications | Phase 3: CSP P-Model Integration - P-badges, tooltips, score breakdown panel, provider-specific descriptions | İyileştirmeler: Production-safe logging, improved error handling, DMARC coverage bug fix, risk summary text fix)
+**Son Güncelleme**: 2025-01-30  
+**Versiyon**: 1.1-stable (G19: Search, Sorting, Pagination | Gün 3: UI Stabilizasyon - Table cleanup, Modal improvements, Export/PDF, Tooltips, Toast notifications | Phase 3: CSP P-Model Integration - P-badges, tooltips, score breakdown panel, provider-specific descriptions | Task 2.5: Partner Center Referral Column - Referral type badges | İyileştirmeler: Production-safe logging, improved error handling, DMARC coverage bug fix, risk summary text fix)
 
