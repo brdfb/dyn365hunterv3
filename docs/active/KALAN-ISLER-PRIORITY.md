@@ -764,7 +764,12 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 - `[PLANNED]` Log volume & log rotation strategy
 - `[PLANNED]` Connection leak detection
 - `[NOT STARTED]` WHOIS fallback strategy (API fallback? third party?)
-- `[NOT STARTED]` DNS retry mekanizması
+- `[PLANNED - POST-MVP]` DNS retry mekanizması (Faz 3 - 2025-01-29'da planlandı)
+  - Geçici DNS timeout'larında otomatik retry (3 deneme, exponential backoff)
+  - Configurable max timeout limiti
+  - Sadece geçici hatalar için (Timeout, NoNameservers)
+  - Post-MVP sprint'inde implement edilecek
+  - İlgili: `docs/active/POST-MVP-STRATEGY.md` - Section 4: DNS Analyzer Advanced Features
 - `[DEFERRED]` Provider mapping override mekanizması (UI gerekli)
 - `[PLANNED]` Data normalizasyon conflict resolution
 - `[PLANNED]` Duplicate lead resolution

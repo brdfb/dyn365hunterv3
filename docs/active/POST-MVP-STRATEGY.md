@@ -209,7 +209,75 @@ Hunter'daki lead intelligence verisini:
 
 ---
 
-## 4. Öncelik Sırası (Execution Order)
+## 4. DNS Analyzer Advanced Features — "Reliability"
+
+### 4.1. Amaç
+
+DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak:
+
+- Geçici DNS hatalarında otomatik retry
+- Daha robust DMARC parsing
+- DNS server rotation/fallback mekanizması
+
+### 4.2. Scope
+
+**Faz 3 İyileştirmeleri** (Post-MVP - 2025-01-29'da planlandı):
+
+- **Retry Mekanizması** (Configurable):
+  - Geçici DNS timeout'larında otomatik retry (3 deneme, exponential backoff)
+  - Sadece geçici hatalar için (Timeout, NoNameservers)
+  - Configurable max timeout limiti (default: 30 saniye)
+  - `tenacity` library ile implementasyon
+
+- **DMARC Parsing İyileştirmesi** (Test Coverage ile):
+  - Daha robust regex-based parsing
+  - Edge case handling (malformed records, multiple policies)
+  - Comprehensive test coverage
+  - Mevcut davranışı koruyarak iyileştirme
+
+- **DNS Server Rotation** (Fallback olarak):
+  - Deterministic rotation veya fallback pattern
+  - Public DNS server'lar arasında otomatik geçiş
+  - Cache farklılıklarını minimize etme
+  - Sadece fallback olarak kullanım (primary DNS başarısız olursa)
+
+### 4.3. Out of Scope
+
+- Async DNS support (büyük refactoring gerektirir)
+- Custom DNS server configuration (UI gerekli)
+- DNS query batching/parallelization
+
+### 4.4. Riskler
+
+- Retry mekanizması yavaş domain'lerde gecikme yaratabilir
+- DNS server rotation bazı domain'lerde farklı sonuç verebilir (cache farkları)
+- DMARC parsing değişikliği edge case'lerde farklı sonuç verebilir
+
+### 4.5. Başarı Kriterleri
+
+- Geçici DNS hatalarında otomatik recovery
+- DNS query başarı oranı artışı (timeout'lar azalır)
+- DMARC parsing daha doğru ve robust
+- Mevcut davranış korunur (backward compatible)
+
+### 4.6. Durum
+
+- ✅ **Faz 1 & Faz 2 Tamamlandı** (2025-01-29):
+  - Error logging ✅
+  - Metrics tracking ✅
+  - Code quality improvements ✅
+  - Resolver caching ✅
+  - Cache invalidation ✅
+- ⏳ **Faz 3 Post-MVP'ye Bırakıldı**:
+  - Retry mekanizması
+  - DMARC parsing iyileştirmesi
+  - DNS server rotation
+
+**Not:** Faz 1 ve Faz 2 iyileştirmeleri production-ready ve backward-compatible. Faz 3 özellikleri post-MVP sprint'inde implement edilecek.
+
+---
+
+## 5. Öncelik Sırası (Execution Order)
 
 1. **IP Enrichment Production Activation** — XS/S  
 
@@ -230,13 +298,20 @@ Hunter'daki lead intelligence verisini:
 
    - Doğrudan ticari değer
 
+4. **DNS Analyzer Advanced Features** — S/M
+
+   - Güvenilirlik ve dayanıklılık artışı
+   - Geçici hatalarda otomatik recovery
+   - Daha robust parsing ve fallback mekanizmaları
+
 ---
 
-## 5. Özet
+## 6. Özet
 
 - ✅ Hunter v1.0 core engine hazır.
 - ✅ G20 Domain Intelligence Layer tamamlandı (Local Provider, Tenant Size, DMARC Coverage)
 - ✅ IP Enrichment implement edilmiş, production activation bekliyor
-- Post-MVP odağı: **derinlik** (IP Enrichment activation), **kaynak** (Partner Center), **pipeline** (D365).
+- ✅ DNS Analyzer Faz 1 & Faz 2 tamamlandı (2025-01-29) - Error logging, metrics, performance improvements
+- Post-MVP odağı: **derinlik** (IP Enrichment activation), **kaynak** (Partner Center), **pipeline** (D365), **reliability** (DNS advanced features).
 - Tüm işler feature flag'ler ve adapter mantığıyla, core engine'i bozmadan ilerlemeli.
 
