@@ -343,9 +343,10 @@ All completed planning documentation has been moved to `docs/archive/`:
 
 **Active TODOs:**
 - `INTEGRATION-ROADMAP.md` - Integration Roadmap: UI Stabilization → Partner Center → Dynamics 365 - 🔄 In Progress (2025-01-28)
-  - **Phase 1**: 🔄 Next - Mini UI Stabilization (P0.5) - 1 day
-  - **Phase 2**: ⏳ Pending - Partner Center Referrals (P1) - 2-3 days
+  - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day
+  - **Phase 2**: ✅ Completed - Partner Center Referrals (P1) - 2-3 days (2025-01-30)
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
+- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ **COMPLETED** (2025-01-30) - All tasks completed (2.1-2.6), all tests passing
 - `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
 
 **Archived TODOs:**
