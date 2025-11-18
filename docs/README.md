@@ -122,13 +122,17 @@ API contract documentation:
 #### Integration Roadmap Documentation (NEW - 2025-01-28)
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
-  - **Phase 2**: 🔄 **IN PROGRESS** - Partner Center Referrals (P1) - 67% completed
+  - **Phase 2**: ✅ **COMPLETED** - Partner Center Referrals (P1) - 100% completed (2025-01-30)
     - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
-    - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync`
+    - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync` + Celery task
     - ✅ **Backend tests completed** (Task 2.4 - 2025-01-30) - 7/7 tests passing (endpoint + Celery task tests)
+    - ✅ **UI Integration completed** (Task 2.5 - 2025-01-30) - Referral column with badges (co-sell: blue, marketplace: green, solution-provider: orange)
+    - ✅ **Background Sync completed** (Task 2.6 - 2025-01-30) - Celery Beat schedule (10 min prod, 30s dev)
+    - ✅ **All tests passing** (10/10 referral sync tests, 3/3 referral_type API tests)
     - ✅ **Preparation guide created** (2025-01-30) - `docs/active/PARTNER-CENTER-PREPARATION.md`
-    - ⏳ Remaining: UI integration (Task 2.5), Background sync (Task 2.6), Scoring pipeline
-    - **Status**: MVP'ye etkisi YOK (kod hazır ama aktif değil, feature flag OFF)
+    - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
+    - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
+    - **Remaining**: Scoring Pipeline Integration (Azure Tenant ID override + Co-sell boost) - Future enhancement
   - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
   - **Key Principle**: UI stability → Data ingestion → CRM integration
 - `PARTNER-CENTER-PREPARATION.md` - **Partner Center Integration Preparation Guide** (2025-01-30) - Comprehensive preparation checklist for Tasks 2.4, 2.5, 2.6
@@ -206,15 +210,18 @@ API contract documentation:
   1. IP Enrichment (G20) - Derinlik
   2. Partner Center Referrals Sync - Kaynak
   3. Dynamics 365 Sales Integration - Pipeline
-- 🔄 **Integration Roadmap**: In Progress (2025-01-29) - Correct sequence for external integrations
+- ✅ **Integration Roadmap**: Phase 2 Complete (2025-01-30) - Correct sequence for external integrations
   - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
-  - 🔄 Phase 2: Partner Center Referrals (P1) - **In Progress** (Branch: feature/partner-center-phase1, opened 2025-01-29)
-    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3 - 50% progress)
+  - ✅ Phase 2: Partner Center Referrals (P1) - **Completed** (Branch: feature/partner-center-phase1, opened 2025-01-29)
+    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
     - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync` + Celery task
     - ✅ **Backend tests completed** (Task 2.4 - 2025-01-30) - 7/7 tests passing
-    - ⏳ Remaining: UI integration (Task 2.5), Background sync (Task 2.6), Scoring pipeline
-    - **Status**: MVP-safe (feature flag default OFF, kod hazır ama aktif değil)
-    - **Next**: Task 2.5 - UI Integration (Add referral column to lead list)
+    - ✅ **UI Integration completed** (Task 2.5 - 2025-01-30) - Referral column with badges
+    - ✅ **Background Sync completed** (Task 2.6 - 2025-01-30) - Celery Beat schedule
+    - ✅ **All tests passing** (10/10 referral sync, 3/3 referral_type API)
+    - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented
+    - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
+    - **Remaining**: Scoring Pipeline Integration (Future enhancement)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
