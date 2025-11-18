@@ -293,25 +293,26 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 
 ## 📊 Progress Tracking
 
-**Current Status**: 🔄 **In Progress** (Tasks 2.1, 2.2, 2.3, 2.4 completed + backend tests)
+**Current Status**: ✅ **Phase 2 Complete** (Tasks 2.1-2.6 completed + all tests passing)
 
-**Completed Tasks**: 4/6 (67%) - **Backend Complete** (API + Celery Task + Tests)
+**Completed Tasks**: 6/6 (100%) - **Phase 2 Complete** (Backend + UI + Background Sync + Tests)
 
 **Task Status**:
 - [x] Task 2.1: Partner Center API Client ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.2: Referral Data Model ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.3: Referral Ingestion ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.4: API Endpoints ✅ **COMPLETED** (2025-01-30) - **Backend tests: 7/7 PASSED** ✅
-- [ ] Task 2.5: UI Integration
-- [ ] Task 2.6: Background Sync
+- [x] Task 2.5: UI Integration ✅ **COMPLETED** (2025-01-30) - **Aşama 1 & 2: Backend JOIN + UI Column** ✅
+- [x] Task 2.6: Background Sync ✅ **COMPLETED** (2025-01-30) - **Celery Beat schedule: 10/10 tests PASSED** ✅
 
 **Next Steps**:
 1. ✅ **Preparation Complete** - See `docs/active/PARTNER-CENTER-PREPARATION.md` for comprehensive preparation guide
 2. ✅ **Task 2.4 Complete** - API endpoints created (`app/api/referrals.py`) - `POST /api/referrals/sync` ✅
 3. ✅ **Task 2.4 Backend Tests Complete** - All tests passing (7/7) - Endpoint + Celery task tests ✅ (2025-01-30)
-4. Task 2.5: UI Integration - Add referral column to lead list
-5. Task 2.6: Background Sync - Celery task and beat schedule
-6. Scoring Pipeline Integration - Azure Tenant ID override and Co-sell boost
+4. ✅ **Task 2.5 Complete** - UI Integration: Referral column added to lead list (Backend JOIN + UI Column) ✅ (2025-01-30)
+5. ✅ **Task 2.6 Complete** - Background Sync: Celery Beat schedule configured (10/10 tests passing) ✅ (2025-01-30)
+6. **Optional**: Task 2.5 Aşama 3 - Sync Button (XS - manual trigger, may not be needed with background sync)
+7. **Future**: Scoring Pipeline Integration - Azure Tenant ID override and Co-sell boost
 
 ---
 
@@ -416,7 +417,7 @@ Comprehensive preparation guide created: `docs/active/PARTNER-CENTER-PREPARATION
 ---
 
 **Last Updated**: 2025-01-30  
-**Status**: 🔄 **TASK 2.4 COMPLETE** - API endpoints + Celery task + backend tests (7/7 PASSED) ✅
+**Status**: ✅ **PHASE 2 COMPLETE** - All tasks completed (2.1-2.6) + all tests passing (10/10 referral sync, 3/3 referral_type API) ✅
 
 **MVP Status**: ✅ **MVP'ye etkisi YOK** - Feature flag default OFF, kod hazır ama aktif değil
 

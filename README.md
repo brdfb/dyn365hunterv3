@@ -71,8 +71,12 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Cross-references added across all sales documentation
   - v1.0 (MVP) vs v2.0 (Target) distinction clarified
   - Tuning Factor status documented (design-only, not in production UI)
-- **Partner Center Integration - Phase 2** (🅿️ Parked - MVP-safe mode) - Partner Center referral ingestion and lifecycle tracking
+- **Partner Center Integration - Phase 2** (✅ Complete - MVP-safe mode) - Partner Center referral ingestion and lifecycle tracking
   - Core components completed: API client (MSAL + Device Code Flow), database model, referral ingestion pipeline
+  - Backend: API endpoints (`POST /api/referrals/sync`), Celery task, comprehensive testing (10/10 tests passing)
+  - UI: Referral column in leads table with badge colors (co-sell: blue, marketplace: green, solution-provider: orange)
+  - Background Sync: Celery Beat schedule (10 min prod, 30s dev) for automatic referral synchronization
+  - Feature flag: `partner_center_enabled=False` (disabled by default, MVP-safe)
   - Features: Lead type detection (Co-sell, Marketplace, Solution Provider), domain extraction fallback, Azure Tenant ID signal, idempotent domain scanning
   - Status: Tasks 2.1, 2.2, 2.3 completed. Parked in MVP-safe mode (feature flag disabled by default, no impact on MVP Go/No-Go)
   - Next: Post-MVP - API endpoints, background sync, UI integration, scoring pipeline integration

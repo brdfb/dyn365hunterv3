@@ -46,26 +46,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: ✅ **Tested and verified** - 19/19 tests passing, no impact on existing functionality
 
 ### Added
-- **Partner Center Integration - Phase 2** (2025-01-30) - Backend API endpoints and testing
+- **Partner Center Integration - Phase 2** (2025-01-30) - Complete integration with UI and background sync
   - **API Endpoints**: Created `POST /api/referrals/sync` endpoint for manual Partner Center referral synchronization
     - Feature flag check (`partner_center_enabled`) - returns 400 if disabled
     - Async execution via Celery task (`sync_partner_center_referrals_task`)
     - Task ID tracking in response for monitoring
     - Admin-only endpoint (documented as internal/admin use)
     - Files: `app/api/referrals.py` (new), `app/main.py` (router registration)
+  - **Lead API Integration**: Added `referral_type` field to Lead API responses (Task 2.5)
+    - `GET /leads`: LEFT JOIN `partner_center_referrals` to include referral type
+    - `GET /leads/{domain}`: LEFT JOIN `partner_center_referrals` to include referral type
+    - `GET /leads/export`: `referral_type` column added to export
+    - `LeadResponse` model: `referral_type: Optional[str]` field added
+    - Files: `app/api/leads.py`
+  - **UI Integration**: Added Referral column to leads table (Task 2.5)
+    - HTML: Referral column header with tooltip
+    - JavaScript: `getReferralBadge()` function with dynamic badge rendering
+    - CSS: Badge styles (co-sell: blue, marketplace: green, solution-provider: orange)
+    - Empty state: Shows '-' when no referral
+    - Files: `mini-ui/index.html`, `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`
+  - **Background Sync**: Celery Beat schedule for automatic referral synchronization (Task 2.6)
+    - Production: 600s (10 minutes) - configurable via `partner_center_sync_interval`
+    - Development: 30s (auto-override for testing)
+    - Task expires: 1 hour if not picked up
+    - Files: `app/core/celery_app.py`
   - **Celery Task**: Implemented `sync_partner_center_referrals_task` for background sync
     - Feature flag check (skips execution if disabled)
     - Calls `sync_referrals_from_partner_center()` for referral processing
     - Structured logging with source, duration, env, feature_flag_state, sync statistics
     - Graceful error handling (logs errors, doesn't crash)
     - Files: `app/core/tasks.py`
-  - **Backend Testing**: Comprehensive test suite for API endpoints and Celery task
+  - **Testing**: Comprehensive test suite for API endpoints, Celery task, and Beat schedule
     - Endpoint tests: Feature flag disabled (400), feature flag enabled (200 + task enqueued), error handling (500)
     - Task tests: Feature flag skip, sync function call, error handling, structured logging
-    - All tests passing (7/7) - Uses Celery `apply()` method for `bind=True` task testing
-    - Files: `tests/test_referrals_sync.py` (new)
-  - **Status**: ✅ **Backend Complete** - API endpoints and Celery task fully tested and ready
-  - **Next Steps**: UI Integration (Task 2.5), Background Sync Schedule (Task 2.6)
+    - Beat schedule tests: Schedule configuration, development/production interval checks
+    - Lead API tests: `referral_type` field in responses, None handling
+    - All tests passing (10/10 referral sync tests, 3/3 referral_type API tests)
+    - Files: `tests/test_referrals_sync.py`, `tests/test_api_endpoints.py`
+  - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
+  - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
 
 ### Production Ready
 - **CSP P-Model Integration + Sales Summary v1.1** (2025-01-29) - ✅ **DONE & PROD-READY**
