@@ -350,9 +350,11 @@ sorularına cevap verebilmesi.
 
   - Yerine: Internal Access Mode (network-level erişim)
 
-- Partner Center Phase 2 → **park edildi**
+- Partner Center Phase 2 → ✅ **COMPLETED** (2025-01-30)
 
-  - G21 Integration Roadmap ile yeniden çerçevelenecek
+  - All tasks completed (Tasks 2.1-2.6)
+  - Backend, UI, and background sync fully implemented and tested
+  - Feature flag default OFF (MVP-safe)
 
 - CRM-lite → **deprecated**
 

@@ -12,10 +12,13 @@
 - `feature/*` - Feature development branches
 
 ### Current Active Feature Branches
-- `feature/partner-center-phase1` - **ACTIVE** - Partner Center Phase 2 integration (opened 2025-01-29)
-  - Status: 🅿️ Parked (MVP-safe mode, 50% completed)
-  - Progress: Tasks 2.1, 2.2, 2.3 completed
-  - Remaining: Tasks 2.4, 2.5, 2.6 (post-MVP)
+- `feature/partner-center-phase1` - **ACTIVE** - Partner Center Phase 2 integration (opened 2025-01-29, completed 2025-01-30)
+  - Status: ✅ Completed (2025-01-30)
+  - Progress: All tasks completed (Tasks 2.1-2.6)
+  - Backend: API endpoints + Celery task (7/7 tests passing)
+  - UI: Referral column with badges (3/3 API tests passing)
+  - Background Sync: Celery Beat schedule (10/10 tests passing)
+  - Feature Flag: `partner_center_enabled=False` (disabled by default, MVP-safe)
 
 ---
 

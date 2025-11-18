@@ -84,7 +84,7 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
    - **Status**: All tasks completed (Task 1.1-1.5 ✅)
    - **Test Fixes**: ✅ Completed (2025-01-28) - Scoring engine fully validated (86 tests passing, 0 failures)
 
-2. **Phase 2: Partner Center Referrals (P1)** - 🔄 **NEXT** (2-3 days)
+2. **Phase 2: Partner Center Referrals (P1)** - ✅ **COMPLETED** (2025-01-30)
    - **MVP Yaklaşımı**: Minimal API client (50-70 satır), polling (10 min prod, 30s dev), sadece sync endpoint, lead listesine 1 kolon
    - **Why Second**: One-way sync (PC → Hunter), simpler than Dynamics
    - **Risk**: 2/10 (external API dependency)
@@ -93,16 +93,18 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
      - Azure Tenant ID signal → M365 existing customer detection
      - Lead types (Co-sell, Marketplace, Solution Provider)
      - Domain scan idempotent (domain bazlı, referral bazlı değil)
-     - Scoring pipeline entegrasyonu (Azure Tenant ID override + Co-sell boost)
+     - Scoring pipeline entegrasyonu (Azure Tenant ID override + Co-sell boost) - ⏳ Future enhancement
    - **Tasks**:
-     - [ ] **Task 2.1**: Partner Center API Client (MVP: minimal, 50-70 satır)
-     - [ ] **Task 2.2**: Referral Data Model (raw_leads + partner_center_referrals hybrid)
-     - [ ] **Task 2.3**: Referral Ingestion (lead tipi, domain extraction, Azure Tenant ID, idempotent scanning)
-     - [ ] **Task 2.4**: API Endpoint (MVP: sadece POST /api/referrals/sync)
-     - [ ] **Task 2.5**: UI Integration (lead listesine 1 kolon: referral type)
-     - [ ] **Task 2.6**: Background Sync (Celery polling: prod 10 dakika / dev 30-60s)
-   - **Detailed Task List**: `docs/prompts/2025-01-28-partner-center-phase2-task-list.md`
-   - **TODO Tracking**: `docs/todos/PARTNER-CENTER-PHASE2.md`
+     - [x] **Task 2.1**: Partner Center API Client (MVP: minimal, 50-70 satır) ✅ COMPLETED (2025-01-28)
+     - [x] **Task 2.2**: Referral Data Model (raw_leads + partner_center_referrals hybrid) ✅ COMPLETED (2025-01-28)
+     - [x] **Task 2.3**: Referral Ingestion (lead tipi, domain extraction, Azure Tenant ID, idempotent scanning) ✅ COMPLETED (2025-01-28)
+     - [x] **Task 2.4**: API Endpoint (MVP: sadece POST /api/referrals/sync) ✅ COMPLETED (2025-01-30) - 7/7 tests passing
+     - [x] **Task 2.5**: UI Integration (lead listesine 1 kolon: referral type) ✅ COMPLETED (2025-01-30) - 3/3 API tests passing
+     - [x] **Task 2.6**: Background Sync (Celery polling: prod 10 dakika / dev 30s) ✅ COMPLETED (2025-01-30) - 10/10 tests passing
+   - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
+   - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
+   - **Detailed Task List**: `docs/prompts/2025-01-28-partner-center-phase2-task-list.md` (archived)
+   - **TODO Tracking**: `docs/todos/PARTNER-CENTER-PHASE2.md` ✅ COMPLETED
 
 3. **Phase 3: Dynamics 365 Integration (P2)** - ⏳ Pending (6-10 days)
    - API client, data mapping, pipeline integration, sync mechanisms, UI integration

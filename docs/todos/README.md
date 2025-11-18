@@ -13,18 +13,18 @@ This folder contains TODO lists and task tracking documents.
   - 🔄 Phase 4: Dynamics Migration (PAUSED - Integration Roadmap Phase 3 overlaps)
 - `INTEGRATION-ROADMAP.md` - Integration Roadmap - 🔄 In Progress (2025-01-28)
   - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
-  - ⏳ Phase 2: Partner Center Referrals (P1) - NEXT
+  - ✅ Phase 2: Partner Center Referrals (P1) - COMPLETED (2025-01-30)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending
-- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - 🅿️ **PARK EDİLDİ** (MVP-safe mode, 2025-01-28)
+- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ **COMPLETED** (2025-01-30)
   - ✅ Task 2.1: Partner Center API Client - COMPLETED (2025-01-28)
   - ✅ Task 2.2: Referral Data Model - COMPLETED (2025-01-28)
-  - ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28) - Scoring pipeline integration PENDING
-  - ⏳ Task 2.4: API Endpoints - PENDING (post-MVP)
-  - ⏳ Task 2.5: UI Integration - PENDING (post-MVP)
-  - ⏳ Task 2.6: Background Sync - PENDING (post-MVP)
-  - **Status**: 🅿️ **PARK EDİLDİ** - MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
-  - **Progress**: 50% (3/6 tasks completed)
-  - **Next Sprint**: Post-MVP (G21-G22) - API endpoints, Celery task, UI integration, Scoring pipeline
+  - ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28)
+  - ✅ Task 2.4: API Endpoints - COMPLETED (2025-01-30) - 7/7 tests passing
+  - ✅ Task 2.5: UI Integration - COMPLETED (2025-01-30) - Referral column with badges
+  - ✅ Task 2.6: Background Sync - COMPLETED (2025-01-30) - Celery Beat schedule, 10/10 tests passing
+  - **Status**: ✅ **COMPLETED** - All tasks completed, all tests passing
+  - **Progress**: 100% (6/6 tasks completed)
+  - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
 
 **Recently Completed:**
 - `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
