@@ -1,7 +1,7 @@
 # Dyn365Hunter - Project Commands
 
 **Version:** 1.0.0  
-**Last Updated:** 2025-01-28
+**Last Updated:** 2025-01-30
 
 ## Setup Dev Environment
 
@@ -269,3 +269,31 @@ curl -X POST http://localhost:8000/scan/example.com/rescan
 # Bulk rescan
 curl -X POST "http://localhost:8000/scan/bulk/rescan?domain_list=example.com,google.com"
 ```
+
+---
+
+## Partner Center Sync
+
+Manually trigger Partner Center referral synchronization (Task 2.4 - 2025-01-30).
+
+**Usage:** `/sync-referrals` or mention "sync partner center referrals"
+
+**What it does:**
+- Triggers manual sync of referrals from Partner Center
+- Enqueues Celery task for background processing
+- Returns task_id for monitoring
+- Requires feature flag `partner_center_enabled=True` (disabled by default, MVP-safe)
+
+**Command:**
+```bash
+# Manual sync (requires feature flag enabled)
+curl -X POST http://localhost:8000/api/referrals/sync \
+  -H "Content-Type: application/json"
+
+# Response: {"task_id": "abc123", "status": "queued"}
+```
+
+**Note:** 
+- Background sync runs automatically via Celery Beat (10 min prod, 30s dev)
+- Manual sync is optional (Task 2.5 Aşama 3 - not implemented yet)
+- Feature flag: `HUNTER_PARTNER_CENTER_ENABLED=false` (default: disabled)
