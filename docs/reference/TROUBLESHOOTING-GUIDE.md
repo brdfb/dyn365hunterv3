@@ -1,9 +1,12 @@
 # Troubleshooting Guide - Hunter v1.0
 
-**Tarih**: 2025-01-28  
+**Tarih**: 2025-01-28 (Updated: 2025-01-30)  
 **Versiyon**: v1.0.0  
 **Status**: ✅ **Production Ready**  
 **Kullanım**: Production sorun giderme rehberi
+
+**Recent Updates** (2025-01-30):
+- Added Script Safety Guards documentation (Database Reset Protection)
 
 ---
 
@@ -363,8 +366,14 @@ with engine.connect() as conn:
 - ✅ **DO**: Use `./scripts/reset_db_with_alembic.sh` for database reset
 - ✅ **DO**: Verify critical columns after reset (tenant_size, local_provider, dmarc_coverage)
 
+**⚠️ Script Safety** (2025-01-30):
+- **Production Reset Protection**: `reset_db_with_alembic.sh` blocks production database resets unless `FORCE_PRODUCTION_RESET=yes` is explicitly set
+  - Script checks `DATABASE_URL` for `prod|production` patterns
+  - Prevents catastrophic data loss in production environments
+  - This script is for DEV/TEST environments only
+
 **See**: 
-- `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section
+- `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section & Safety Guards
 - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
 
 ---

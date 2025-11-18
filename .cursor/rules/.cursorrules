@@ -16,6 +16,7 @@
 - **✅ Production Bug Fixes**: ✅ DONE & PROD-READY (2025-01-29) - DMARC Coverage bug fix, Risk Summary text fix, Score Modal provider-specific description
 - **✅ Sales Summary v1.1**: ✅ DONE & PROD-READY (2025-01-29) - Intelligence Layer with reasoning capabilities, UX polished
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine (No-Break Refactor Plan)
+- **🔄 Partner Center Phase 2**: 🔄 In Progress (2025-01-29) - Integration Roadmap Phase 2 (Tasks 2.1-2.3 completed, 2.4-2.6 pending, feature flag OFF, MVP-safe)
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20), CSP P-Model (2025-01-29)
 
 ## Code Style & Standards
@@ -279,6 +280,42 @@
   - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
   - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
 
+### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
+  - **Requirement**: Script checks `DATABASE_URL` for `prod|production` patterns
+  - **Override**: Only allowed with explicit `FORCE_PRODUCTION_RESET=yes` flag
+  - **Impact**: Prevents catastrophic data loss in production environments
+  - **Policy**: This script is for DEV/TEST environments only
+  - **Files**: `scripts/reset_db_with_alembic.sh`
+- **⚠️ Production Deployment Protection**: `scripts/deploy_production.sh` **MUST** require explicit production flag
+  - **Requirement**: Requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+  - **Localhost Protection**: Blocks production deployments if `DATABASE_URL` points to localhost
+  - **Impact**: Prevents accidental production deployments and wrong database usage
+  - **Policy**: Production deployments must be explicit and intentional
+  - **Files**: `scripts/deploy_production.sh`
+- **Backup Integrity Check** (MANDATORY):
+  - ✅ **DO**: Validate backup file integrity before proceeding with deployment
+  - ✅ **DO**: Check for expected SQL format markers (PostgreSQL dump, CREATE TABLE, COPY/INSERT)
+  - ✅ **DO**: Warn if backup appears incomplete or corrupted
+  - ❌ **DO NOT**: Proceed with deployment if backup integrity check fails (hard fail)
+  - **Files**: `scripts/deploy_production.sh` - `backup_database()` function
+- **Script Logging** (RECOMMENDED):
+  - ✅ **DO**: Enable logging for critical scripts (deployment, database reset)
+  - ✅ **DO**: Log to `./logs/scripts/` directory with timestamp
+  - ✅ **DO**: Use `tee` to log both to file and stdout
+  - ✅ **DO**: Allow disabling logging via `LOG_DIR=""` environment variable
+  - **Files**: `scripts/reset_db_with_alembic.sh`, `scripts/deploy_production.sh`
+- **Script Safety Policy** (MANDATORY):
+  - ❌ **DO NOT**: Remove production protection guards from scripts
+  - ❌ **DO NOT**: Bypass safety checks without explicit force flags
+  - ❌ **DO NOT**: Deploy to production without backup integrity check
+  - ✅ **DO**: Always use official scripts (`reset_db_with_alembic.sh`, `deploy_production.sh`)
+  - ✅ **DO**: Verify environment variables before running scripts
+  - ✅ **DO**: Review script logs after execution
+- **Reference Documentation**:
+  - `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Safety Guards section
+  - `CHANGELOG.md` - Security & Safety section (Script Safety Guards)
+
 ## Code Review Checklist
 
 Before marking code as done, verify:
@@ -300,6 +337,8 @@ Before marking code as done, verify:
 - [ ] API contract respected (no breaking changes to frozen contracts)
 - [ ] **Database reset uses official script** (`./scripts/reset_db_with_alembic.sh`) - NOT `schema.sql` or legacy migrations
 - [ ] **API SQL queries** don't SELECT columns that may not exist in view (use dynamic checking or `getattr()`)
+- [ ] **Script safety guards** are present (production reset protection, deployment guards, backup integrity check)
+- [ ] **Production scripts** require explicit force flags (`FORCE_PRODUCTION=yes`, `FORCE_PRODUCTION_RESET=yes`)
 
 ## Common Patterns
 

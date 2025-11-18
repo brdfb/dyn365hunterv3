@@ -96,6 +96,30 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - **Format Check**: Ensure date prefix format is correct (`YYYY-MM-DD-`)
 - **Link Check**: Update all references when moving files to archive
 
+### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
+  - **Requirement**: Script checks `DATABASE_URL` for `prod|production` patterns
+  - **Override**: Only allowed with explicit `FORCE_PRODUCTION_RESET=yes` flag
+  - **Impact**: Prevents catastrophic data loss in production environments
+  - **Policy**: This script is for DEV/TEST environments only
+- **⚠️ Production Deployment Protection**: `scripts/deploy_production.sh` **MUST** require explicit production flag
+  - **Requirement**: Requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+  - **Localhost Protection**: Blocks production deployments if `DATABASE_URL` points to localhost
+  - **Impact**: Prevents accidental production deployments and wrong database usage
+- **Backup Integrity Check** (MANDATORY):
+  - ✅ **DO**: Validate backup file integrity before proceeding with deployment
+  - ✅ **DO**: Check for expected SQL format markers (PostgreSQL dump, CREATE TABLE, COPY/INSERT)
+  - ❌ **DO NOT**: Proceed with deployment if backup integrity check fails
+- **Script Logging** (RECOMMENDED):
+  - ✅ **DO**: Enable logging for critical scripts (deployment, database reset)
+  - ✅ **DO**: Log to `./logs/scripts/` directory with timestamp
+  - ✅ **DO**: Allow disabling logging via `LOG_DIR=""` environment variable
+- **Script Safety Policy** (MANDATORY):
+  - ❌ **DO NOT**: Remove production protection guards from scripts
+  - ❌ **DO NOT**: Bypass safety checks without explicit force flags
+  - ✅ **DO**: Always use official scripts (`reset_db_with_alembic.sh`, `deploy_production.sh`)
+  - ✅ **DO**: Verify environment variables before running scripts
+
 ### Database Migration & Reset Guardrails (CRITICAL - Lessons Learned 2025-01-29)
 - **⚠️ schema.sql DEPRECATED**: `app/db/schema.sql` is **OUTDATED** and **MUST NOT** be used for database reset
   - **Reason**: Missing G20 columns (`tenant_size`, `local_provider`, `dmarc_coverage`) and CSP P-Model columns

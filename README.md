@@ -25,10 +25,16 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 
 **Production Deployment**:
 - 📋 [Production Readiness Checklist](docs/active/PRODUCTION-READINESS-CHECKLIST-2025-01-29.md) - **CSP P-Model + Sales Summary v1.1 Pre-Production Checklist**
-- 📋 [Production Deployment Guide](docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md)
+- 📋 [Production Deployment Guide](docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md) - **Includes Script Safety Guards** (2025-01-30)
 - 📋 [Production Deployment Checklist](docs/reference/PRODUCTION-DEPLOYMENT-CHECKLIST.md)
 - 📋 [Smoke Tests Runbook](docs/reference/SMOKE-TESTS-RUNBOOK.md)
 - 📋 [Troubleshooting Guide](docs/reference/TROUBLESHOOTING-GUIDE.md)
+
+**Script Safety** (2025-01-30):
+- 🔒 **Production Reset Protection**: `reset_db_with_alembic.sh` blocks production database resets (requires `FORCE_PRODUCTION_RESET=yes`)
+- 🔒 **Production Deployment Guards**: `deploy_production.sh` requires `FORCE_PRODUCTION=yes` for production deployments
+- 🔒 **Backup Integrity Check**: Automatic backup validation before deployment
+- 📝 **Script Logging**: Critical scripts log to `./logs/scripts/` for audit trail
 
 **Post-MVP Roadmap**:
 - 🅿️ **Partner Center Integration** (Phase 2) - Parked (Post-MVP)

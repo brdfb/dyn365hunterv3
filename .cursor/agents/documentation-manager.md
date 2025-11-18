@@ -187,6 +187,42 @@ scripts/manage_docs.sh list
   - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
   - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
 
+### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
+  - **Requirement**: Script checks `DATABASE_URL` for `prod|production` patterns
+  - **Override**: Only allowed with explicit `FORCE_PRODUCTION_RESET=yes` flag
+  - **Impact**: Prevents catastrophic data loss in production environments
+  - **Policy**: This script is for DEV/TEST environments only
+  - **Files**: `scripts/reset_db_with_alembic.sh`
+- **⚠️ Production Deployment Protection**: `scripts/deploy_production.sh` **MUST** require explicit production flag
+  - **Requirement**: Requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+  - **Localhost Protection**: Blocks production deployments if `DATABASE_URL` points to localhost
+  - **Impact**: Prevents accidental production deployments and wrong database usage
+  - **Policy**: Production deployments must be explicit and intentional
+  - **Files**: `scripts/deploy_production.sh`
+- **Backup Integrity Check** (MANDATORY):
+  - ✅ **DO**: Validate backup file integrity before proceeding with deployment
+  - ✅ **DO**: Check for expected SQL format markers (PostgreSQL dump, CREATE TABLE, COPY/INSERT)
+  - ✅ **DO**: Warn if backup appears incomplete or corrupted
+  - ❌ **DO NOT**: Proceed with deployment if backup integrity check fails (hard fail)
+  - **Files**: `scripts/deploy_production.sh` - `backup_database()` function
+- **Script Logging** (RECOMMENDED):
+  - ✅ **DO**: Enable logging for critical scripts (deployment, database reset)
+  - ✅ **DO**: Log to `./logs/scripts/` directory with timestamp
+  - ✅ **DO**: Use `tee` to log both to file and stdout
+  - ✅ **DO**: Allow disabling logging via `LOG_DIR=""` environment variable
+  - **Files**: `scripts/reset_db_with_alembic.sh`, `scripts/deploy_production.sh`
+- **Script Safety Policy** (MANDATORY):
+  - ❌ **DO NOT**: Remove production protection guards from scripts
+  - ❌ **DO NOT**: Bypass safety checks without explicit force flags
+  - ❌ **DO NOT**: Deploy to production without backup integrity check
+  - ✅ **DO**: Always use official scripts (`reset_db_with_alembic.sh`, `deploy_production.sh`)
+  - ✅ **DO**: Verify environment variables before running scripts
+  - ✅ **DO**: Review script logs after execution
+- **Reference Documentation**:
+  - `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Safety Guards section
+  - `CHANGELOG.md` - Security & Safety section (Script Safety Guards)
+
 ## Examples
 
 ### Example 1: Code Change Auto-Update
@@ -259,6 +295,7 @@ Agent should regularly check:
 - **Production Bug Fixes status** (✅ DONE & PROD-READY - 2025-01-29 - DMARC coverage, risk summary, score modal)
 - **Sales Summary v1.1 status** (✅ DONE & PROD-READY - 2025-01-29 - Intelligence Layer, UX polished)
 - **G21 Architecture Refactor status** (🔄 In Progress - 2025-01-28)
+- **Partner Center Phase 2 status** (🔄 In Progress - 2025-01-29 - Branch: feature/partner-center-phase1, Tasks 2.1-2.3 completed, 2.4-2.6 pending, feature flag OFF, MVP-safe)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates

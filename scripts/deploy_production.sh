@@ -3,12 +3,17 @@
 # Deploys Hunter v1.0 to production environment
 #
 # Usage:
-#   bash scripts/deploy_production.sh [--dry-run] [--skip-backup] [--skip-tests]
+#   ENVIRONMENT=production FORCE_PRODUCTION=yes bash scripts/deploy_production.sh [--dry-run] [--skip-backup] [--skip-tests]
 #
 # Options:
 #   --dry-run        : Show what would be done without executing
 #   --skip-backup    : Skip database backup (not recommended)
 #   --skip-tests     : Skip smoke tests (not recommended)
+#
+# SAFETY GUARDS:
+#   - Requires FORCE_PRODUCTION=yes when ENVIRONMENT=production
+#   - Blocks localhost database usage in production
+#   - Validates backup integrity before proceeding
 
 set -e  # Exit on error
 
@@ -82,6 +87,21 @@ check_prerequisites() {
     
     local errors=0
     
+    # CRITICAL SAFETY CHECK: Production deployment guard
+    # Require explicit FORCE_PRODUCTION flag for production deployments
+    if [ "$ENVIRONMENT" = "production" ] && [ -z "$FORCE_PRODUCTION" ]; then
+        log_error "Production deployment requires FORCE_PRODUCTION=yes"
+        log_error "Set FORCE_PRODUCTION=yes to proceed (use with caution!)"
+        errors=$((errors + 1))
+    fi
+    
+    # CRITICAL SAFETY CHECK: Prevent localhost database in production
+    if [[ "$DATABASE_URL" =~ localhost|127.0.0.1 ]] && [ "$ENVIRONMENT" = "production" ]; then
+        log_error "Production DATABASE_URL cannot point to localhost!"
+        log_error "This is a safety check to prevent accidental local database usage in production"
+        errors=$((errors + 1))
+    fi
+    
     # Check Docker
     if ! command -v docker &> /dev/null; then
         log_error "Docker is not installed or not in PATH"
@@ -154,6 +174,20 @@ backup_database() {
         
         if [ -f "$backup_file" ] && [ -s "$backup_file" ]; then
             log_success "Database backup created: $backup_file"
+            
+            # Backup integrity check (basic validation for SQL format)
+            log_info "Verifying backup integrity..."
+            # Check if backup file contains expected PostgreSQL dump markers
+            if grep -q "PostgreSQL database dump" "$backup_file" 2>/dev/null || \
+               grep -q "CREATE TABLE" "$backup_file" 2>/dev/null || \
+               grep -q "COPY\|INSERT" "$backup_file" 2>/dev/null; then
+                log_success "Backup integrity check passed (SQL format validated)"
+            else
+                log_warning "Backup file may be incomplete or corrupted"
+                log_warning "File exists and has content, but doesn't contain expected SQL markers"
+                log_warning "Review backup manually: $backup_file"
+                # Don't fail hard - backup exists, just warn
+            fi
         else
             log_error "Database backup failed or file is empty"
             exit 1

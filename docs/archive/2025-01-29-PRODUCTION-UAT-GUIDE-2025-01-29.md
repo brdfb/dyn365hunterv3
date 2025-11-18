@@ -242,7 +242,7 @@ docker-compose logs api | jq '.' | head -20
 
 ## 📖 Related Documentation
 
-- **Production Readiness Checklist**: `docs/active/PRODUCTION-READINESS-CHECKLIST-2025-01-29.md`
+- **Production Readiness Checklist**: `docs/archive/2025-01-29-PRODUCTION-READINESS-CHECKLIST-2025-01-29.md`
 - **CSP P-Model Implementation**: `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md`
 - **Sales Engine v1.1**: `docs/active/SALES-ENGINE-V1.1.md`
 

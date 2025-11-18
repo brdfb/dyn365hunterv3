@@ -3,8 +3,32 @@
 # Database Reset Script - Pure Alembic Approach
 # This is the OFFICIAL way to reset the database for v1.0+
 # DO NOT use schema.sql or legacy SQL migrations - they are deprecated
+#
+# SAFETY: This script includes production protection guards
+# - Blocks production database resets unless FORCE_PRODUCTION_RESET=yes
+# - Checks DATABASE_URL for prod|production patterns
+# - Logs execution to ./logs/scripts/reset_db_*.log (optional, set LOG_DIR="" to disable)
 
 set -e
+
+# CRITICAL SAFETY CHECK: Prevent accidental production database reset
+# This script is for DEV/TEST environments only
+if [[ "$DATABASE_URL" =~ prod|production ]] && [ -z "$FORCE_PRODUCTION_RESET" ]; then
+    echo -e "\033[0;31m❌ CRITICAL: Production database reset blocked!\033[0m"
+    echo "   This script is for DEV/TEST environments only."
+    echo "   If you really need to reset production, set FORCE_PRODUCTION_RESET=yes"
+    echo "   (NOT RECOMMENDED - Use with extreme caution!)"
+    exit 1
+fi
+
+# Basic logging setup (optional, can be disabled by setting LOG_DIR="")
+LOG_DIR="${LOG_DIR:-./logs/scripts}"
+if [ -n "$LOG_DIR" ]; then
+    mkdir -p "$LOG_DIR"
+    LOG_FILE="${LOG_DIR}/reset_db_$(date +%Y%m%d_%H%M%S).log"
+    exec > >(tee -a "$LOG_FILE") 2>&1
+    echo "📝 Logging to: $LOG_FILE"
+fi
 
 echo "🔄 Database Reset - Pure Alembic Approach"
 echo "=========================================="

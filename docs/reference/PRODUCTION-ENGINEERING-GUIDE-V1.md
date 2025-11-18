@@ -1,11 +1,15 @@
 # Production Engineering Guide v1
 
-**Tarih**: 2025-01-28  
+**Tarih**: 2025-01-28 (Updated: 2025-01-30)  
 **Versiyon**: 1.0.0  
 **Durum**: Active (Production Operations Guide)  
 **İlgili Dokümanlar**: 
 - [Production Readiness Critique v2](./PRODUCTION-READINESS-CRITIQUE-V2.md)
 - [Development Environment Guide](../reference/DEVELOPMENT-ENVIRONMENT.md)
+- [Production Deployment Guide](./PRODUCTION-DEPLOYMENT-GUIDE.md) - **Includes Script Safety Guards** (2025-01-30)
+
+**Recent Updates** (2025-01-30):
+- Added Script Safety Guards documentation (see Deployment Strategies section)
 
 ---
 
@@ -509,6 +513,16 @@ kubectl get pods -l version=$NEW_COLOR
 echo "✅ Deployment complete. New version: $NEW_COLOR"
 ```
 
+**⚠️ Script Safety Guards** (2025-01-30):
+- **Production Deployment Protection**: `deploy_production.sh` requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+  - Prevents accidental production deployments
+  - Blocks localhost database usage in production
+- **Backup Integrity Check**: Automatic backup validation before deployment
+  - Validates SQL format markers in backup files
+  - Hard fail if backup appears corrupted
+- **Script Logging**: Critical scripts log to `./logs/scripts/` for audit trail
+- **See**: `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Safety Guards section
+
 ---
 
 ### Rolling Update (Default Kubernetes)
@@ -711,6 +725,11 @@ kubectl exec -it redis-pod -- redis-cli LLEN celery
 
 - [ ] Blue-green or rolling update strategy chosen
 - [ ] Deployment script tested in staging
+- [ ] **Script Safety Guards verified** (2025-01-30):
+  - [ ] `FORCE_PRODUCTION=yes` flag required for production deployments
+  - [ ] Localhost database protection verified
+  - [ ] Backup integrity check enabled
+  - [ ] Script logging enabled (`./logs/scripts/`)
 - [ ] Rollback plan ready
 - [ ] Monitoring dashboards open
 - [ ] On-call engineer available

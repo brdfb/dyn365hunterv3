@@ -1,7 +1,13 @@
 # Reference Folder Status Report (2025-01-29)
 
-**Tarih:** 2025-01-29  
-**Durum:** 📋 **12 dosya - Durum kontrolü**
+**Tarih:** 2025-01-29 (Updated: 2025-01-30)  
+**Durum:** 📋 **13 dosya - Durum kontrolü**
+
+**Recent Updates** (2025-01-30):
+- Script Safety Guards added to PRODUCTION-DEPLOYMENT-GUIDE.md
+- Script Safety Guards added to TROUBLESHOOTING-GUIDE.md
+- Script Safety Guards added to PRODUCTION-ENGINEERING-GUIDE-V1.md
+- PRODUCTION-MONITORING-WATCH.md moved from active/ to reference/ (operational runbook)
 
 ---
 
@@ -17,16 +23,18 @@
 
 2. **PRODUCTION-DEPLOYMENT-GUIDE.md**
    - **Versiyon:** v1.0.0
-   - **Tarih:** 2025-01-28
+   - **Tarih:** 2025-01-28 (Updated: 2025-01-30)
    - **Status:** ✅ Production Ready
-   - **Güncellik:** ✅ Güncel (reference guide, versiyon güncellenebilir)
+   - **Güncellik:** ✅ Güncel (reference guide, Script Safety Guards added)
+   - **Recent Updates:** Script Safety Guards (production reset protection, deployment guards, backup integrity check)
 
 3. **PRODUCTION-ENGINEERING-GUIDE-V1.md**
    - **Versiyon:** 1.0.0
-   - **Tarih:** 2025-01-28
+   - **Tarih:** 2025-01-28 (Updated: 2025-01-30)
    - **Status:** Active (Production Operations Guide)
    - **Not:** v1.1.0'dan bahsediyor (image tag)
-   - **Güncellik:** ✅ Güncel (reference guide)
+   - **Güncellik:** ✅ Güncel (reference guide, Script Safety Guards added)
+   - **Recent Updates:** Script Safety Guards (deployment strategies section)
 
 4. **PRODUCTION-CHECKLIST-RUNBOOK.md**
    - **Tarih:** Bilinmiyor (kontrol edilmeli)
@@ -48,7 +56,9 @@
    - **Güncellik:** ✅ Güncel (reference guide)
 
 8. **TROUBLESHOOTING-GUIDE.md**
-   - **Güncellik:** ✅ Güncel (reference guide)
+   - **Tarih:** 2025-01-28 (Updated: 2025-01-30)
+   - **Güncellik:** ✅ Güncel (reference guide, Script Safety Guards added)
+   - **Recent Updates:** Script Safety Guards (database reset protection)
 
 ---
 
@@ -65,6 +75,11 @@
 
 12. **WSL-GUIDE.md**
     - **Güncellik:** ✅ Güncel (reference guide)
+
+13. **PRODUCTION-MONITORING-WATCH.md**
+    - **Tarih:** 2025-11-17 (Moved: 2025-01-30)
+    - **Güncellik:** ✅ Güncel (reference guide, operational runbook)
+    - **Recent Updates:** Moved from active/ to reference/ (operational guide)
 
 ---
 
@@ -89,11 +104,16 @@ Tüm dosyalar reference guide'lar olduğu için:
 
 ## ✅ Sonuç
 
-**Toplam:** 12 dosya  
-**Güncel:** 12 dosya  
-**Güncellenmesi Gereken:** 0 dosya (opsiyonel: versiyon bilgileri)
+**Toplam:** 13 dosya  
+**Güncel:** 13 dosya  
+**Güncellenmesi Gereken:** 0 dosya
 
 **Status:** ✅ **TÜM REFERENCE GUIDE'LAR GÜNCEL**
 
-**Not:** Reference guide'lar "nasıl yapılır" rehberleri olduğu için CSP P-Model veya bug fix'ler gibi feature'ları içermeleri gerekmiyor. Operasyonel rehberler olarak güncel ve kullanılabilir durumda.
+**Recent Updates** (2025-01-30):
+- ✅ Script Safety Guards added to production deployment guides
+- ✅ Database reset protection documented in troubleshooting guide
+- ✅ All reference guides updated with safety information
+
+**Not:** Reference guide'lar "nasıl yapılır" rehberleri olduğu için operasyonel rehberler olarak güncel ve kullanılabilir durumda. Script Safety Guards kritik operasyonel bilgi olduğu için eklendi.
 

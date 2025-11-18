@@ -12,11 +12,12 @@
 | **"Post-MVP'de ne yapacağız?"** | `docs/active/POST-MVP-STRATEGY.md` |
 | **"Sales Engine nasıl kullanılır?"** | `docs/sales/SALES-GUIDE.md` |
 | **"Sales Engine v1.1 Intelligence Layer nedir?"** | `docs/active/SALES-ENGINE-V1.1.md` |
-| **"CSP P-Model nedir? P1-P6 nasıl hesaplanıyor?"** | `docs/active/CSP-COMMERCIAL-SEGMENT-DESIGN.md` (tasarım) + `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md` (implementation - completed) |
-| **"Commercial Segment & Heat nedir?"** | `docs/active/CSP-COMMERCIAL-SEGMENT-DESIGN.md` |
+| **"CSP P-Model nedir? P1-P6 nasıl hesaplanıyor?"** | `docs/archive/2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` (tasarım) + `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md` (implementation - completed) |
+| **"Commercial Segment & Heat nedir?"** | `docs/archive/2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` |
 | **"Segment ve priority nedir?"** | `docs/sales/SEGMENT-GUIDE.md` |
 | **"Development environment nasıl kurulur?"** | `docs/reference/DEVELOPMENT-ENVIRONMENT.md` |
-| **"Production deployment nasıl yapılır?"** | `docs/active/PRODUCTION-ENGINEERING-GUIDE-V1.md` |
+| **"Production deployment nasıl yapılır?"** | `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` |
+| **"Production monitoring nasıl yapılır?"** | `docs/reference/PRODUCTION-MONITORING-WATCH.md` |
 
 ---
 
@@ -96,14 +97,17 @@ API contract documentation:
 - `PRODUCTION-DEPLOYMENT-GUIDE.md` - Step-by-step deployment guide
 - `PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Pre-deployment checklist
 - `PRODUCTION-CHECKLIST-RUNBOOK.md` - Operational runbook (2-hour checklist)
+- `PRODUCTION-MONITORING-WATCH.md` - Production monitoring watch guide (first 1-2 days after deployment)
 - `ROLLBACK-PLAN.md` - Rollback procedures
 - `SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
 - `TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
 - `ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables checklist
 
 #### Feature Documentation (Active)
-- `CSP-COMMERCIAL-SEGMENT-DESIGN.md` - CSP Commercial Segment & Heat tasarımı (6 kategori, rule-based)
 - `SALES-ENGINE-V1.1.md` - Sales Engine v1.1 Intelligence Layer dokümantasyonu
+
+#### Feature Documentation (Archived)
+- ✅ **Archived** - `2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` - CSP Commercial Segment & Heat tasarımı (6 kategori, rule-based) - ✅ Completed (2025-01-29)
 
 #### P1 Implementation Documentation
 - ✅ **P1 Completed** (2025-01-28) - All P1 items completed
@@ -196,24 +200,33 @@ API contract documentation:
   1. IP Enrichment (G20) - Derinlik
   2. Partner Center Referrals Sync - Kaynak
   3. Dynamics 365 Sales Integration - Pipeline
-- 🔄 **Integration Roadmap**: In Progress (2025-01-28) - Correct sequence for external integrations
+- 🔄 **Integration Roadmap**: In Progress (2025-01-29) - Correct sequence for external integrations
   - ✅ Phase 1: Mini UI Stabilization (P0.5) - Completed (1 day)
-  - 🅿️ Phase 2: Partner Center Referrals (P1) - **PARK EDİLDİ** (MVP-safe mode, 50% completed)
-    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
-    - ⏳ Remaining: API endpoints, UI integration, Background sync, Scoring pipeline
-    - **Status**: MVP'ye etkisi YOK (feature flag default OFF, kod hazır ama aktif değil)
-    - **Next Sprint**: Post-MVP (see `POST-MVP-STRATEGY.md`)
+  - 🔄 Phase 2: Partner Center Referrals (P1) - **In Progress** (Branch: feature/partner-center-phase1, opened 2025-01-29)
+    - ✅ Core components completed (Tasks 2.1, 2.2, 2.3 - 50% progress)
+    - ⏳ Remaining: API endpoints (Task 2.4), UI integration (Task 2.5), Background sync (Task 2.6)
+    - **Status**: MVP-safe (feature flag default OFF, kod hazır ama aktif değil)
+    - **Next**: Task 2.4 - API Endpoints (POST /api/referrals/sync)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation
 - **CSP P-Model Implementation** (2025-01-29) - ✅ **FINAL & CLOSED**
   - `2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md` - CSP P-Model entegrasyon planı (Phase 1, 2 & 3 completed - Production v1.1 Core Feature)
+  - `2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` - CSP Commercial Segment & Heat tasarımı (6 kategori, rule-based)
   - `2025-01-29-DMARC-CACHE-FIX.md` - DMARC cache bug fix (analyzer_dns.py, cache invalidation)
   - `2025-01-29-DMKIMYA-ANALYSIS.md` - dmkimya.com.tr domain analysis (P-Model validation)
   - `2025-01-29-DMKIMYA-BUG-FIXES.md` - Bug fixes documentation (3 bugs fixed: DMARC coverage, risk summary, score modal)
   - `2025-01-29-FRESH-TEST-MANUAL-GUIDE.md` - Fresh test manual guide (DB reset & verification)
   - `2025-01-29-FRESH-TEST-RESULTS.md` - Fresh test results (all tests passed ✅)
+  - `2025-01-29-PRODUCTION-READINESS-CHECKLIST-2025-01-29.md` - Production readiness checklist (✅ DONE & PROD-READY)
+  - `2025-01-29-PRODUCTION-UAT-GUIDE-2025-01-29.md` - Production UAT guide (✅ DONE & PROD-READY)
+- **Script Safety Guards** (2025-01-30) - ✅ **IMPLEMENTED**
+  - Production database reset protection
+  - Production deployment guards
+  - Backup integrity checks
+  - Script logging for audit trail
+  - Reference: `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` (Safety Guards section)
 - `2025-01-28-DEPLOYMENT-READY-SUMMARY.md` - Deployment ready summary (Completed - 2025-01-28)
 - `2025-01-28-24-SAATLIK-YOL-HARITASI.md` - 24-hour roadmap analysis (Completed - 2025-01-28)
 - `2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Alembic migration plan (P1 completed - 2025-01-28)

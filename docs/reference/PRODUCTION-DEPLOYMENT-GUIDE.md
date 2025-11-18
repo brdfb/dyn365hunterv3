@@ -1,9 +1,14 @@
 # Production Deployment Guide - Hunter v1.0
 
-**Tarih**: 2025-01-28  
+**Tarih**: 2025-01-28 (Updated: 2025-01-30)  
 **Versiyon**: v1.0.0  
 **Status**: ✅ **Production Ready**  
 **Kullanım**: Production deployment için adım adım rehber
+
+**Recent Updates** (2025-01-30):
+- Added production deployment safety guards
+- Added backup integrity checks
+- Added script logging for audit trail
 
 ---
 
@@ -70,16 +75,33 @@ docker-compose exec api alembic current
 
 ```bash
 # Run deployment script
-bash scripts/deploy_production.sh
+# NOTE: Production deployments require FORCE_PRODUCTION=yes
+ENVIRONMENT=production FORCE_PRODUCTION=yes bash scripts/deploy_production.sh
 
 # This will:
-# 1. Check prerequisites
-# 2. Create database backup
+# 1. Check prerequisites (including safety guards)
+# 2. Create database backup (with integrity check)
 # 3. Run Alembic migration
 # 4. Build and deploy application
 # 5. Wait for services
 # 6. Run smoke tests
 ```
+
+### Safety Guards
+
+The deployment script includes critical safety checks:
+
+1. **Production Guard**: Requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+   - Prevents accidental production deployments
+   - Must be explicitly set: `FORCE_PRODUCTION=yes`
+
+2. **Localhost Protection**: Blocks production deployments if `DATABASE_URL` points to localhost
+   - Prevents accidental local database usage in production
+   - Safety check to ensure production database is remote
+
+3. **Backup Integrity**: Validates backup file integrity before proceeding
+   - Checks for expected SQL format markers
+   - Warns if backup appears incomplete or corrupted
 
 ### Dry Run (Recommended First)
 

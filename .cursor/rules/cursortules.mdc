@@ -14,6 +14,7 @@ alwaysApply: true
 - **✅ CSP P-Model Integration**: ✅ Completed (2025-01-29) - Production v1.1 Core Feature - Global CSP Priority Model (P1-P6), Commercial Segment & Heat, Technical Heat, Priority Category & Label, UI integration (P-badges, tooltips, score breakdown panel)
 - **✅ Production Bug Fixes**: ✅ Completed (2025-01-29) - DMARC Coverage bug fix, Risk Summary text fix, Score Modal provider-specific description
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
+- **🔄 Partner Center Phase 2**: 🔄 In Progress (2025-01-29) - Integration Roadmap Phase 2 (Branch: feature/partner-center-phase1, Tasks 2.1-2.3 completed, 2.4-2.6 pending, feature flag OFF, MVP-safe)
 - **Out of Scope**: D365 adapter, `scripts/demo_run.sh`
 
 ## Code Style & Standards
@@ -331,6 +332,30 @@ When a phase is completed (TODO status = "Completed"):
 - **Read-Only Mode**: Write endpoints return 410 Gone (Phase 3)
 - **Backward Compatibility**: Legacy endpoints remain available during migration
 - **Deprecation Monitoring**: Track deprecated endpoint usage via `/healthz/metrics`
+
+### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
+  - **Requirement**: Script checks `DATABASE_URL` for `prod|production` patterns
+  - **Override**: Only allowed with explicit `FORCE_PRODUCTION_RESET=yes` flag
+  - **Impact**: Prevents catastrophic data loss in production environments
+  - **Policy**: This script is for DEV/TEST environments only
+- **⚠️ Production Deployment Protection**: `scripts/deploy_production.sh` **MUST** require explicit production flag
+  - **Requirement**: Requires `FORCE_PRODUCTION=yes` when `ENVIRONMENT=production`
+  - **Localhost Protection**: Blocks production deployments if `DATABASE_URL` points to localhost
+  - **Impact**: Prevents accidental production deployments and wrong database usage
+- **Backup Integrity Check** (MANDATORY):
+  - ✅ **DO**: Validate backup file integrity before proceeding with deployment
+  - ✅ **DO**: Check for expected SQL format markers (PostgreSQL dump, CREATE TABLE, COPY/INSERT)
+  - ❌ **DO NOT**: Proceed with deployment if backup integrity check fails
+- **Script Logging** (RECOMMENDED):
+  - ✅ **DO**: Enable logging for critical scripts (deployment, database reset)
+  - ✅ **DO**: Log to `./logs/scripts/` directory with timestamp
+  - ✅ **DO**: Allow disabling logging via `LOG_DIR=""` environment variable
+- **Script Safety Policy** (MANDATORY):
+  - ❌ **DO NOT**: Remove production protection guards from scripts
+  - ❌ **DO NOT**: Bypass safety checks without explicit force flags
+  - ✅ **DO**: Always use official scripts (`reset_db_with_alembic.sh`, `deploy_production.sh`)
+  - ✅ **DO**: Verify environment variables before running scripts
 
 ### Database Migration & Reset Guardrails (CRITICAL - Lessons Learned 2025-01-29)
 - **⚠️ schema.sql DEPRECATED**: `app/db/schema.sql` is **OUTDATED** and **MUST NOT** be used for database reset

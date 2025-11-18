@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security & Safety
+- **Script Safety Guards** (2025-01-30) - Added critical safety checks to prevent accidental production operations
+  - **Database Reset Protection**: `reset_db_with_alembic.sh` now blocks production database resets unless `FORCE_PRODUCTION_RESET=yes` is explicitly set
+    - Checks `DATABASE_URL` for `prod|production` patterns
+    - Prevents catastrophic data loss in production environments
+    - Files: `scripts/reset_db_with_alembic.sh`
+  - **Production Deployment Guards**: `deploy_production.sh` now requires explicit `FORCE_PRODUCTION=yes` flag for production deployments
+    - Blocks deployment if `ENVIRONMENT=production` without force flag
+    - Prevents localhost database usage in production (safety check)
+    - Files: `scripts/deploy_production.sh`
+  - **Backup Integrity Check**: Added backup file validation to ensure backup integrity before deployment
+    - Validates SQL format markers in backup files
+    - Warns if backup appears incomplete or corrupted
+    - Files: `scripts/deploy_production.sh`
+  - **Script Logging**: Added optional logging to critical scripts for audit trail
+    - `reset_db_with_alembic.sh` now logs to `./logs/scripts/reset_db_*.log`
+    - Can be disabled by setting `LOG_DIR=""`
+    - Files: `scripts/reset_db_with_alembic.sh`
+  - **Status**: ✅ **Implemented** - All safety guards are non-breaking and only add protection layers
+
 ### Improved
 - **DNS Analyzer Enhancements** (2025-01-29) - Enhanced DNS analysis module with better error handling, metrics tracking, and performance optimizations
   - **Error Logging**: Added debug-level logging for all DNS operations (MX, SPF, DKIM, DMARC, A records) with error type and domain information
