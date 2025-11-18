@@ -213,42 +213,56 @@ class TestLeadsEndpoints:
     """Test leads endpoints."""
 
     def test_get_leads_empty(self, client):
-        """Test getting leads when none exist."""
+        """Test getting leads when none exist (G19: pagination format)."""
         response = client.get("/leads")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert "total" in data
+        assert "page" in data
+        assert "page_size" in data
+        assert "total_pages" in data
+        assert isinstance(data["leads"], list)
         # Note: May not be empty if other tests ran before (test isolation limitation)
-        # But should return valid list format
-        assert len(data) >= 0
+        assert data["total"] >= 0
+        assert len(data["leads"]) >= 0
 
     def test_get_leads_with_filter(self, client):
-        """Test getting leads with filters."""
+        """Test getting leads with filters (G19: pagination format)."""
         response = client.get("/leads?segment=Migration&min_score=70")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert isinstance(data["leads"], list)
 
     def test_get_leads_segment_filter(self, client):
-        """Test segment filter."""
+        """Test segment filter (G19: pagination format)."""
         response = client.get("/leads?segment=Migration")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert isinstance(data["leads"], list)
 
     def test_get_leads_min_score_filter(self, client):
-        """Test min_score filter."""
+        """Test min_score filter (G19: pagination format)."""
         response = client.get("/leads?min_score=50")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert isinstance(data["leads"], list)
 
     def test_get_leads_provider_filter(self, client):
-        """Test provider filter."""
+        """Test provider filter (G19: pagination format)."""
         response = client.get("/leads?provider=M365")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert isinstance(data["leads"], list)
 
     def test_get_lead_not_found(self, client):
         """Test getting single lead that doesn't exist."""
@@ -270,14 +284,16 @@ class TestLeadsEndpoints:
         assert response.status_code in [200, 404]
 
     def test_get_leads_includes_priority_score(self, client):
-        """Test that GET /leads includes priority_score in response."""
+        """Test that GET /leads includes priority_score in response (G19: pagination format)."""
         response = client.get("/leads")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        # G19: Response is now LeadsListResponse with pagination
+        assert "leads" in data
+        assert isinstance(data["leads"], list)
         # If there are leads, check that priority_score is included
-        if len(data) > 0:
-            assert "priority_score" in data[0]
+        if len(data["leads"]) > 0:
+            assert "priority_score" in data["leads"][0]
 
     def test_get_lead_includes_priority_score(self, client):
         """Test that GET /leads/{domain} includes priority_score in response."""
