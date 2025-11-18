@@ -2,12 +2,12 @@
 
 import socket
 import re
+import threading
 import dns.resolver
 import dns.exception
-from typing import Dict, Optional, List, Any
-from urllib.parse import urlparse
-from app.core.cache import get_cached_dns, set_cached_dns
-
+from typing import Dict, Optional, List, Any, Literal
+from app.core.cache import get_cached_dns, set_cached_dns, invalidate_dns_cache
+from app.core.logging import logger
 
 # DNS timeout in seconds
 DNS_TIMEOUT = 10
@@ -15,22 +15,109 @@ DNS_TIMEOUT = 10
 # Public DNS servers as fallback
 PUBLIC_DNS_SERVERS = ["8.8.8.8", "8.8.4.4", "1.1.1.1", "1.0.0.1"]
 
+# DNS metrics tracking (in-memory counters)
+_dns_metrics = {
+    "mx_queries": 0,
+    "mx_success": 0,
+    "mx_timeout": 0,
+    "mx_not_found": 0,
+    "spf_queries": 0,
+    "spf_found": 0,
+    "spf_not_found": 0,
+    "spf_timeout": 0,
+    "dkim_queries": 0,
+    "dkim_found": 0,
+    "dkim_not_found": 0,
+    "dkim_timeout": 0,
+    "dmarc_queries": 0,
+    "dmarc_found": 0,
+    "dmarc_not_found": 0,
+    "dmarc_timeout": 0,
+    "a_record_queries": 0,
+    "a_record_success": 0,
+    "a_record_failed": 0,
+}
+_metrics_lock = threading.Lock()
 
-def _get_resolver():
+# DNS resolver cache (thread-safe singleton)
+_resolver_cache: Optional[dns.resolver.Resolver] = None
+_resolver_lock = threading.Lock()
+
+
+def _get_resolver() -> dns.resolver.Resolver:
     """
-    Get DNS resolver with proper configuration.
+    Get DNS resolver with proper configuration (thread-safe singleton).
 
     Uses public DNS servers for reliable resolution in containers.
+    Caches resolver instance for better performance.
     """
-    resolver = dns.resolver.Resolver()
-    resolver.timeout = DNS_TIMEOUT
-    resolver.lifetime = DNS_TIMEOUT
+    global _resolver_cache
+    
+    if _resolver_cache is None:
+        with _resolver_lock:
+            if _resolver_cache is None:
+                _resolver_cache = dns.resolver.Resolver()
+                _resolver_cache.timeout = DNS_TIMEOUT
+                _resolver_cache.lifetime = DNS_TIMEOUT
+                # Use public DNS servers for reliable resolution in containers
+                # This ensures DNS works even if container DNS is misconfigured
+                _resolver_cache.nameservers = PUBLIC_DNS_SERVERS
+    
+    return _resolver_cache
 
-    # Use public DNS servers for reliable resolution in containers
-    # This ensures DNS works even if container DNS is misconfigured
-    resolver.nameservers = PUBLIC_DNS_SERVERS
 
-    return resolver
+def _parse_txt_record(txt_record: Any) -> str:
+    """
+    Parse TXT record to string (helper function to reduce code duplication).
+    
+    Args:
+        txt_record: DNS TXT record object
+        
+    Returns:
+        Parsed TXT record as string
+    """
+    return "".join([
+        s.decode("utf-8") if isinstance(s, bytes) else str(s)
+        for s in txt_record.strings
+    ])
+
+
+def get_dns_metrics() -> Dict[str, int]:
+    """
+    Get DNS query metrics.
+    
+    Returns:
+        Dictionary with DNS metrics (queries, success, timeout, not_found counts)
+    """
+    with _metrics_lock:
+        return _dns_metrics.copy()
+
+
+def reset_dns_metrics():
+    """Reset DNS metrics (for testing)."""
+    global _dns_metrics
+    with _metrics_lock:
+        _dns_metrics = {
+            "mx_queries": 0,
+            "mx_success": 0,
+            "mx_timeout": 0,
+            "mx_not_found": 0,
+            "spf_queries": 0,
+            "spf_found": 0,
+            "spf_not_found": 0,
+            "spf_timeout": 0,
+            "dkim_queries": 0,
+            "dkim_found": 0,
+            "dkim_not_found": 0,
+            "dkim_timeout": 0,
+            "dmarc_queries": 0,
+            "dmarc_found": 0,
+            "dmarc_not_found": 0,
+            "dmarc_timeout": 0,
+            "a_record_queries": 0,
+            "a_record_success": 0,
+            "a_record_failed": 0,
+        }
 
 
 def get_mx_records(domain: str) -> List[str]:
@@ -48,6 +135,9 @@ def get_mx_records(domain: str) -> List[str]:
         >>> get_mx_records("google.com")
         ['aspmx.l.google.com', 'alt1.aspmx.l.google.com', ...]
     """
+    with _metrics_lock:
+        _dns_metrics["mx_queries"] += 1
+    
     try:
         resolver = _get_resolver()
         mx_records = resolver.resolve(domain, "MX")
@@ -60,16 +150,26 @@ def get_mx_records(domain: str) -> List[str]:
         mx_list.sort(key=lambda x: x[0])
 
         # Return just the hostnames
-        return [mx[1] for mx in mx_list]
+        result = [mx[1] for mx in mx_list]
+        with _metrics_lock:
+            _dns_metrics["mx_success"] += 1
+        return result
 
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers):
         # No MX records found
+        with _metrics_lock:
+            _dns_metrics["mx_not_found"] += 1
+        logger.debug("dns_mx_not_found", domain=domain, error_type="NoAnswer/NXDOMAIN/NoNameservers")
         return []
     except (dns.exception.Timeout, socket.timeout):
         # Timeout
+        with _metrics_lock:
+            _dns_metrics["mx_timeout"] += 1
+        logger.debug("dns_mx_timeout", domain=domain, error_type="Timeout")
         return []
-    except Exception:
+    except Exception as e:
         # Any other error
+        logger.debug("dns_mx_query_failed", domain=domain, error=str(e), error_type=type(e).__name__)
         return []
 
 
@@ -87,13 +187,20 @@ def resolve_hostname_to_ip(hostname: str) -> Optional[str]:
         >>> resolve_hostname_to_ip("google.com")
         '142.250.185.14'
     """
+    with _metrics_lock:
+        _dns_metrics["a_record_queries"] += 1
+    
     try:
         resolver = _get_resolver()
         a_records = resolver.resolve(hostname, "A")
         if a_records:
+            with _metrics_lock:
+                _dns_metrics["a_record_success"] += 1
             return str(a_records[0])
-    except Exception:
-        pass
+    except Exception as e:
+        with _metrics_lock:
+            _dns_metrics["a_record_failed"] += 1
+        logger.debug("dns_a_record_failed", hostname=hostname, error=str(e), error_type=type(e).__name__)
     return None
 
 
@@ -250,27 +357,38 @@ def check_spf(domain: str) -> bool:
     Returns:
         True if SPF record exists, False otherwise
     """
+    with _metrics_lock:
+        _dns_metrics["spf_queries"] += 1
+    
     try:
         resolver = _get_resolver()
         txt_records = resolver.resolve(domain, "TXT")
 
         for txt in txt_records:
-            txt_string = "".join(
-                [
-                    s.decode("utf-8") if isinstance(s, bytes) else str(s)
-                    for s in txt.strings
-                ]
-            )
+            txt_string = _parse_txt_record(txt)
             if txt_string.startswith("v=spf1"):
+                with _metrics_lock:
+                    _dns_metrics["spf_found"] += 1
                 return True
 
+        with _metrics_lock:
+            _dns_metrics["spf_not_found"] += 1
         return False
 
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers):
+        with _metrics_lock:
+            _dns_metrics["spf_not_found"] += 1
+        logger.debug("dns_spf_not_found", domain=domain, error_type="NoAnswer/NXDOMAIN/NoNameservers")
         return False
     except (dns.exception.Timeout, socket.timeout):
+        with _metrics_lock:
+            _dns_metrics["spf_timeout"] += 1
+        logger.debug("dns_spf_timeout", domain=domain, error_type="Timeout")
         return False
-    except Exception:
+    except Exception as e:
+        with _metrics_lock:
+            _dns_metrics["spf_not_found"] += 1
+        logger.debug("dns_spf_query_failed", domain=domain, error=str(e), error_type=type(e).__name__)
         return False
 
 
@@ -285,21 +403,41 @@ def check_dkim(domain: str, selector: str = "default") -> bool:
     Returns:
         True if DKIM record exists, False otherwise
     """
+    with _metrics_lock:
+        _dns_metrics["dkim_queries"] += 1
+    
     try:
         resolver = _get_resolver()
         dkim_domain = f"{selector}._domainkey.{domain}"
         txt_records = resolver.resolve(dkim_domain, "TXT")
 
         for txt in txt_records:
-            txt_string = "".join(
-                [
-                    s.decode("utf-8") if isinstance(s, bytes) else str(s)
-                    for s in txt.strings
-                ]
-            )
+            txt_string = _parse_txt_record(txt)
             if "v=DKIM1" in txt_string or "k=rsa" in txt_string:
+                with _metrics_lock:
+                    _dns_metrics["dkim_found"] += 1
                 return True
 
+        # Try alternative selectors
+        common_selectors = ["default", "google", "selector1", "selector2"]
+        for alt_selector in common_selectors:
+            if alt_selector == selector:
+                continue
+            try:
+                resolver = _get_resolver()
+                dkim_domain = f"{alt_selector}._domainkey.{domain}"
+                txt_records = resolver.resolve(dkim_domain, "TXT")
+                for txt in txt_records:
+                    txt_string = _parse_txt_record(txt)
+                    if "v=DKIM1" in txt_string or "k=rsa" in txt_string:
+                        with _metrics_lock:
+                            _dns_metrics["dkim_found"] += 1
+                        return True
+            except Exception:
+                continue
+        
+        with _metrics_lock:
+            _dns_metrics["dkim_not_found"] += 1
         return False
 
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers):
@@ -313,20 +451,26 @@ def check_dkim(domain: str, selector: str = "default") -> bool:
                 dkim_domain = f"{alt_selector}._domainkey.{domain}"
                 txt_records = resolver.resolve(dkim_domain, "TXT")
                 for txt in txt_records:
-                    txt_string = "".join(
-                        [
-                            s.decode("utf-8") if isinstance(s, bytes) else str(s)
-                            for s in txt.strings
-                        ]
-                    )
+                    txt_string = _parse_txt_record(txt)
                     if "v=DKIM1" in txt_string or "k=rsa" in txt_string:
+                        with _metrics_lock:
+                            _dns_metrics["dkim_found"] += 1
                         return True
             except Exception:
                 continue
+        with _metrics_lock:
+            _dns_metrics["dkim_not_found"] += 1
+        logger.debug("dns_dkim_not_found", domain=domain, selector=selector, error_type="NoAnswer/NXDOMAIN/NoNameservers")
         return False
     except (dns.exception.Timeout, socket.timeout):
+        with _metrics_lock:
+            _dns_metrics["dkim_timeout"] += 1
+        logger.debug("dns_dkim_timeout", domain=domain, selector=selector, error_type="Timeout")
         return False
-    except Exception:
+    except Exception as e:
+        with _metrics_lock:
+            _dns_metrics["dkim_not_found"] += 1
+        logger.debug("dns_dkim_query_failed", domain=domain, selector=selector, error=str(e), error_type=type(e).__name__)
         return False
 
 
@@ -343,6 +487,9 @@ def check_dmarc(domain: str) -> Dict[str, Any]:
         - coverage: Integer 0-100 if DMARC record found (default: 100 if pct= not specified), None if DMARC record not found
         - record: Full DMARC record string (for reference)
     """
+    with _metrics_lock:
+        _dns_metrics["dmarc_queries"] += 1
+    
     result = {
         "policy": None,
         "coverage": None,  # DMARC record yoksa coverage None olmalı
@@ -355,12 +502,7 @@ def check_dmarc(domain: str) -> Dict[str, Any]:
         txt_records = resolver.resolve(dmarc_domain, "TXT")
 
         for txt in txt_records:
-            txt_string = "".join(
-                [
-                    s.decode("utf-8") if isinstance(s, bytes) else str(s)
-                    for s in txt.strings
-                ]
-            )
+            txt_string = _parse_txt_record(txt)
             if "v=DMARC1" in txt_string:
                 result["record"] = txt_string
                 
@@ -386,23 +528,36 @@ def check_dmarc(domain: str) -> Dict[str, Any]:
                     # DMARC record var ama pct= belirtilmemiş → DMARC spec default: 100
                     result["coverage"] = 100
                 
+                with _metrics_lock:
+                    _dns_metrics["dmarc_found"] += 1
                 return result
 
         # DMARC record bulunamadı → policy ve coverage None kalır
+        with _metrics_lock:
+            _dns_metrics["dmarc_not_found"] += 1
         return result
 
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.resolver.NoNameservers):
         # DMARC record yok → policy ve coverage None kalır
+        with _metrics_lock:
+            _dns_metrics["dmarc_not_found"] += 1
+        logger.debug("dns_dmarc_not_found", domain=domain, error_type="NoAnswer/NXDOMAIN/NoNameservers")
         return result
     except (dns.exception.Timeout, socket.timeout):
         # Timeout → policy ve coverage None kalır
+        with _metrics_lock:
+            _dns_metrics["dmarc_timeout"] += 1
+        logger.debug("dns_dmarc_timeout", domain=domain, error_type="Timeout")
         return result
-    except Exception:
+    except Exception as e:
         # Hata → policy ve coverage None kalır
+        with _metrics_lock:
+            _dns_metrics["dmarc_not_found"] += 1
+        logger.debug("dns_dmarc_query_failed", domain=domain, error=str(e), error_type=type(e).__name__)
         return result
 
 
-def analyze_dns(domain: str, use_cache: bool = True) -> Dict[str, Any]:
+def analyze_dns(domain: str, use_cache: bool = True, force_refresh: bool = False) -> Dict[str, Any]:
     """
     Perform complete DNS analysis for a domain.
 
@@ -417,6 +572,7 @@ def analyze_dns(domain: str, use_cache: bool = True) -> Dict[str, Any]:
     Args:
         domain: Domain name to analyze
         use_cache: Whether to use cache (default: True)
+        force_refresh: If True, invalidate cache and force fresh DNS queries (default: False)
 
     Returns:
         Dictionary with analysis results:
@@ -427,15 +583,19 @@ def analyze_dns(domain: str, use_cache: bool = True) -> Dict[str, Any]:
         - dmarc_policy: str ("none", "quarantine", "reject", or None)
         - dmarc_coverage: int (0-100 if DMARC record found, None if not found)
         - dmarc_record: str (Full DMARC record string, or None)
-        - status: str ("success", "dns_timeout", "invalid_domain")
+        - status: Literal["success", "dns_timeout", "invalid_domain"]
     """
+    # Invalidate cache if force_refresh is True
+    if force_refresh:
+        invalidate_dns_cache(domain)
+    
     # Check cache first
-    if use_cache:
+    if use_cache and not force_refresh:
         cached_result = get_cached_dns(domain)
         if cached_result is not None:
             return cached_result
 
-    result = {
+    result: Dict[str, Any] = {
         "mx_records": [],
         "mx_root": None,
         "spf": False,
@@ -469,8 +629,10 @@ def analyze_dns(domain: str, use_cache: bool = True) -> Dict[str, Any]:
 
     except (dns.exception.Timeout, socket.timeout):
         result["status"] = "dns_timeout"
+        logger.debug("dns_analysis_timeout", domain=domain, error_type="Timeout")
     except Exception as e:
         result["status"] = "invalid_domain"
+        logger.debug("dns_analysis_failed", domain=domain, error=str(e), error_type=type(e).__name__)
 
     # Cache result (even if failed, to avoid repeated queries)
     if use_cache:

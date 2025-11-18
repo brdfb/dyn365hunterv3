@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Improved
+- **DNS Analyzer Enhancements** (2025-01-29) - Enhanced DNS analysis module with better error handling, metrics tracking, and performance optimizations
+  - **Error Logging**: Added debug-level logging for all DNS operations (MX, SPF, DKIM, DMARC, A records) with error type and domain information
+  - **Code Quality**: Reduced code duplication by introducing `_parse_txt_record()` helper function for TXT record parsing
+  - **Metrics Tracking**: Added comprehensive DNS metrics tracking (queries, success, timeout, not_found counts) with thread-safe counters
+  - **Performance**: Implemented thread-safe DNS resolver singleton caching to reduce resolver instantiation overhead
+  - **Cache Management**: Added `force_refresh` parameter to `analyze_dns()` for cache invalidation during rescan operations
+  - **Type Safety**: Improved type hints with `Literal` types for status field
+  - **Backward Compatibility**: All changes are backward-compatible - no breaking changes to API, DB, or UI
+  - **Files**: `app/core/analyzer_dns.py`, `tests/test_scan_single.py`
+  - **Status**: ✅ **Tested and verified** - 19/19 tests passing, no impact on existing functionality
+
 ### Production Ready
 - **CSP P-Model Integration + Sales Summary v1.1** (2025-01-29) - ✅ **DONE & PROD-READY**
   - **Core Engine**: ✅ Domain analysis, scoring, provider classification, segment determination
