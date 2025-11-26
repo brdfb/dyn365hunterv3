@@ -12,6 +12,7 @@ from app.core.normalizer import (
     normalize_domain,
     extract_domain_from_email,
     extract_domain_from_website,
+    is_valid_domain,
 )
 from app.core.merger import upsert_companies
 from app.core.tasks import scan_single_domain
@@ -225,19 +226,29 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
                 )
                 return normalized
     
-    # 3. Legacy fallback: website → email (for backward compatibility)
-    website = referral.get("website") or referral.get("companyWebsite")
-    if website:
-        domain = extract_domain_from_website(website)
-        if domain:
-            normalized = normalize_domain(domain)
-            if normalized:
-                logger.debug(
-                    "partner_center_domain_extracted",
-                    source="website",
-                    domain=mask_pii(normalized),
-                )
-                return normalized
+    # 3. URL-based domain extraction (Phase 3.3)
+    # Check multiple URL fields in order of preference
+    url_fields = [
+        customer_profile.get("website"),  # customerProfile.website (preferred)
+        customer_profile.get("companyWebsite"),  # customerProfile.companyWebsite
+        referral.get("website"),  # Top-level website
+        referral.get("companyWebsite"),  # Top-level companyWebsite
+        (referral.get("details") or {}).get("website"),  # details.website
+    ]
+    
+    for website in url_fields:
+        if website:
+            domain = extract_domain_from_website(website)
+            if domain:
+                normalized = normalize_domain(domain)
+                if normalized and is_valid_domain(normalized):
+                    logger.debug(
+                        "partner_center_domain_extracted",
+                        source="url_based",
+                        domain=mask_pii(normalized),
+                        url_field=mask_pii(website),
+                    )
+                    return normalized
     
     contact = referral.get("contact") or {}
     email = contact.get("email") or referral.get("email")
@@ -335,6 +346,10 @@ def upsert_referral_tracking(
     """
     Upsert referral tracking in partner_center_referrals table.
     
+    Uses ON CONFLICT (referral_id) DO UPDATE strategy:
+    - Update: status, substatus, updatedDateTime, deal_value (if schema supports)
+    - Idempotent: re-fetch same referral updates existing record
+    
     Args:
         db: Database session
         referral: Partner Center referral dictionary
@@ -343,14 +358,18 @@ def upsert_referral_tracking(
     Returns:
         Created or updated PartnerCenterReferral instance
     """
-    referral_id = referral.get("id") or referral.get("referralId")
+    # Convert to DTO for consistent field extraction
+    dto = PartnerCenterReferralDTO.from_dict(referral)
+    
+    referral_id = dto.id
     if not referral_id:
         raise ValueError("Referral ID not found in referral data")
     
     referral_type = detect_referral_type(referral)
-    company_name = referral.get("companyName") or referral.get("company_name")
+    company_name = dto.customer_name or referral.get("companyName") or referral.get("company_name")
     azure_tenant_id = referral.get("azureTenantId") or referral.get("azure_tenant_id")
-    status = referral.get("status") or referral.get("state")
+    status = dto.status or referral.get("status") or referral.get("state")
+    substatus = dto.substatus
     
     # Try to find existing referral
     existing = (
@@ -359,14 +378,36 @@ def upsert_referral_tracking(
         .first()
     )
     
+    # Extract additional fields from DTO
+    engagement_id = dto.engagement_id
+    external_reference_id = None  # Not in current API response, reserved for future
+    referral_type_api = dto.type  # API type field (different from referral_type which is our internal mapping)
+    qualification = dto.qualification
+    direction = dto.direction
+    customer_name = dto.customer_name
+    customer_country = dto.customer_country
+    deal_value = dto.deal_value
+    currency = dto.currency
+    
     if existing:
-        # Update existing
+        # Update existing (Phase 4.2: Upsert Strategy)
+        # Update: status, substatus, updatedDateTime, deal_value
+        existing.engagement_id = engagement_id
+        existing.external_reference_id = external_reference_id
         existing.referral_type = referral_type
+        existing.type = referral_type_api
+        existing.qualification = qualification
+        existing.direction = direction
         existing.company_name = company_name
+        existing.customer_name = customer_name
+        existing.customer_country = customer_country
         existing.domain = normalized_domain
         existing.azure_tenant_id = azure_tenant_id
         existing.status = status
-        existing.raw_data = referral
+        existing.substatus = substatus
+        existing.deal_value = deal_value
+        existing.currency = currency
+        existing.raw_data = referral  # Always update raw_data with latest
         # synced_at is automatically updated via server_default
         db.commit()
         db.refresh(existing)
@@ -374,17 +415,29 @@ def upsert_referral_tracking(
             "partner_center_referral_updated",
             referral_id=mask_pii(str(referral_id)),
             domain=mask_pii(normalized_domain),
+            status=status,
+            substatus=substatus,
         )
         return existing
     else:
         # Create new
         referral_tracking = PartnerCenterReferral(
             referral_id=str(referral_id),
+            engagement_id=engagement_id,
+            external_reference_id=external_reference_id,
             referral_type=referral_type,
+            type=referral_type_api,
+            qualification=qualification,
+            direction=direction,
             company_name=company_name,
+            customer_name=customer_name,
+            customer_country=customer_country,
             domain=normalized_domain,
             azure_tenant_id=azure_tenant_id,
             status=status,
+            substatus=substatus,
+            deal_value=deal_value,
+            currency=currency,
             raw_data=referral,
         )
         db.add(referral_tracking)
@@ -394,6 +447,7 @@ def upsert_referral_tracking(
             "partner_center_referral_created",
             referral_id=mask_pii(str(referral_id)),
             domain=mask_pii(normalized_domain),
+            status=status,
         )
         return referral_tracking
 
@@ -498,6 +552,9 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         skipped_reasons = {
             "domain_not_found": 0,
             "duplicate": 0,
+            "direction_outgoing": 0,
+            "status_closed": 0,
+            "substatus_excluded": 0,
         }
         
         logger.info(
@@ -508,10 +565,61 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         # Process each referral independently
         for referral in referrals:
             try:
-                # 1. Lead tipi detection
+                # 1. Ingestion Filter Rules (Phase 4.3)
+                # Only process if:
+                # - direction = 'Incoming'
+                # - status IN ('New', 'Active')
+                # - substatus NOT IN ('Declined','Lost','Expired','Error')
+                # - domain IS NOT NULL (checked later)
+                
+                direction = referral.get("direction")
+                status = referral.get("status")
+                substatus = referral.get("substatus")
+                
+                # Filter: direction must be 'Incoming'
+                if direction != "Incoming":
+                    total_skipped += 1
+                    skipped_reasons.setdefault("direction_outgoing", 0)
+                    skipped_reasons["direction_outgoing"] += 1
+                    logger.warning(
+                        "partner_center_referral_skipped",
+                        referral_id=referral.get("id"),
+                        reason="direction_outgoing",
+                        direction=direction,
+                    )
+                    continue
+                
+                # Filter: status must be 'New' or 'Active'
+                if status not in ("New", "Active"):
+                    total_skipped += 1
+                    skipped_reasons.setdefault("status_closed", 0)
+                    skipped_reasons["status_closed"] += 1
+                    logger.warning(
+                        "partner_center_referral_skipped",
+                        referral_id=referral.get("id"),
+                        reason="status_closed",
+                        status=status,
+                    )
+                    continue
+                
+                # Filter: substatus must NOT be in excluded list
+                excluded_substatuses = {"Declined", "Lost", "Expired", "Error"}
+                if substatus in excluded_substatuses:
+                    total_skipped += 1
+                    skipped_reasons.setdefault("substatus_excluded", 0)
+                    skipped_reasons["substatus_excluded"] += 1
+                    logger.warning(
+                        "partner_center_referral_skipped",
+                        referral_id=referral.get("id"),
+                        reason="substatus_excluded",
+                        substatus=substatus,
+                    )
+                    continue
+                
+                # 2. Lead tipi detection
                 referral_type = detect_referral_type(referral)
                 
-                # 2. Domain extraction (fallback chain)
+                # 3. Domain extraction (fallback chain)
                 normalized_domain = extract_domain_from_referral(referral)
                 
                 if not normalized_domain:
@@ -525,13 +633,13 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                     )
                     continue
                 
-                # 3. raw_leads ingestion
+                # 4. raw_leads ingestion
                 ingest_to_raw_leads(db, referral, normalized_domain)
                 
-                # 4. partner_center_referrals tracking
+                # 5. partner_center_referrals tracking
                 upsert_referral_tracking(db, referral, normalized_domain)
                 
-                # 5. Azure Tenant ID sinyali → company provider override
+                # 6. Azure Tenant ID sinyali → company provider override
                 azure_tenant_id = (
                     referral.get("azureTenantId") or referral.get("azure_tenant_id")
                 )
@@ -539,7 +647,7 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                     referral.get("companyName") or referral.get("company_name")
                 )
                 
-                # 6. Company upsert (with provider override if Azure Tenant ID exists)
+                # 7. Company upsert (with provider override if Azure Tenant ID exists)
                 provider = "M365" if azure_tenant_id else None
                 company = upsert_companies(
                     db=db,
@@ -552,7 +660,7 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 if azure_tenant_id and company.provider != "M365":
                     apply_azure_tenant_signal(db, company, azure_tenant_id)
                 
-                # 7. Domain scan trigger (idempotent - domain bazlı)
+                # 8. Domain scan trigger (idempotent - domain bazlı)
                 # MVP NOTE: Scan trigger disabled for MVP safety. Manual scan via /scan/domain endpoint.
                 # Uncomment when ready for automatic scanning:
                 # trigger_domain_scan(db, normalized_domain)
@@ -596,13 +704,15 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         # Summary log with all metrics
         logger.info(
             "partner_center_sync_summary",
-            event="partner_center_sync_summary",
             total_fetched=total_fetched,
             total_processed=total_processed,
             total_inserted=total_inserted,
             total_skipped=total_skipped,
             skipped_no_domain=skipped_reasons["domain_not_found"],
             skipped_duplicate=skipped_reasons["duplicate"],
+            skipped_direction_outgoing=skipped_reasons.get("direction_outgoing", 0),
+            skipped_status_closed=skipped_reasons.get("status_closed", 0),
+            skipped_substatus_excluded=skipped_reasons.get("substatus_excluded", 0),
             failure_count=total_processed - total_inserted,
         )
         

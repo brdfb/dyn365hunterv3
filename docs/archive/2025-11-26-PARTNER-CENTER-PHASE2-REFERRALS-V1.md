@@ -104,8 +104,13 @@ Partner Center'dan referral'ları (leads/opportunities) çekip Hunter'a entegre 
 - [x] Add `CONSUMER_DOMAINS` set with common consumer email providers
 - **Status**: ✅ **COMPLETED** (2025-01-30)
 
-#### ⏳ Task 3.3: URL-based Domain Fallback
-- **Status**: ⏳ **POST-MVP** (not in current schema)
+#### ✅ Task 3.3: URL-based Domain Fallback
+- [x] Enhanced domain extraction with URL field support
+- [x] Multiple URL fields checked: `customerProfile.website`, `customerProfile.companyWebsite`, top-level `website`/`companyWebsite`, `details.website`
+- [x] Domain validation added (`is_valid_domain()` check)
+- [x] URL parsing enhanced (handles paths, query strings, missing schemes)
+- [x] Test coverage: 7 new test cases for URL-based extraction
+- **Status**: ✅ **COMPLETED** (2025-01-30) - All 7/7 URL-based tests passing ✅
 
 #### ✅ Task 3.4: Domain Extraction Unit Tests
 - [x] Test: Single contact email → domain

@@ -41,13 +41,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Fallback Chain**: CustomerProfile.Team → customerProfile.ids.External → website → email (with consumer domain filtering)
   - **Files**: `app/core/referral_ingestion.py`
   - **Status**: ✅ **Completed** - Tasks 3.1 & 3.2 (Phase 3.1-3.2: Referral DTO & Domain Extraction)
+- **Partner Center URL-based Domain Extraction** (2025-01-30) - Enhanced domain extraction with URL field support
+  - **URL Fields**: Added support for multiple URL fields in preference order: `customerProfile.website`, `customerProfile.companyWebsite`, top-level `website`/`companyWebsite`, `details.website`
+  - **Domain Validation**: Added `is_valid_domain()` check to filter invalid domains extracted from URLs
+  - **URL Parsing**: Enhanced URL parsing to handle URLs with paths, query strings, and missing schemes
+  - **Test Coverage**: Added 7 new test cases for URL-based extraction (customerProfile.website, companyWebsite, preference order, details.website, invalid domain filtering, URL with path, URL without scheme)
+  - **Files**: `app/core/referral_ingestion.py`, `tests/test_referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Task 3.3 (Phase 3.3: URL-based Domain Extraction) - All 7/7 URL-based tests passing ✅
 - **Partner Center Domain Extraction Unit Tests** (2025-01-30) - Comprehensive test coverage for domain extraction
-  - **Test File**: Created `tests/test_referral_ingestion.py` with 30 test cases
+  - **Test File**: Created `tests/test_referral_ingestion.py` with 37 test cases (30 original + 7 URL-based)
   - **Domain Extraction Tests**: 16 test cases covering all extraction scenarios (single email, multiple contacts, consumer filtering, fallback chains, edge cases)
+  - **URL-based Extraction Tests**: 7 test cases for URL field extraction (Phase 3.3)
   - **Consumer Domain Filtering Tests**: 9 test cases for consumer domain detection (gmail, outlook, yahoo, hotmail, icloud, case-insensitive, whitespace handling)
   - **DTO Mapping Tests**: 5 test cases for DTO mapping and datetime parsing
-  - **Test Coverage**: All edge cases covered (empty emails, None values, invalid formats, graceful error handling)
-  - **Status**: ✅ **Completed** - Task 3.4 (Phase 3.4: Domain Extraction Unit Tests) - All 30/30 tests passing ✅
+  - **Test Coverage**: All edge cases covered (empty emails, None values, invalid formats, graceful error handling, URL parsing)
+  - **Status**: ✅ **Completed** - Task 3.4 (Phase 3.4: Domain Extraction Unit Tests) - All 37/37 tests passing ✅
 - **Partner Center DB Schema Revision** (2025-01-30) - Added missing columns to `partner_center_referrals` table
   - **Migration**: Created Alembic migration `f972cf4c08f8_add_partner_center_referrals_phase4_fields`
   - **New Columns**: `engagement_id`, `external_reference_id`, `substatus`, `type`, `qualification`, `direction`, `customer_name`, `customer_country`, `deal_value`, `currency`
