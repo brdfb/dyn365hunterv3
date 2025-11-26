@@ -205,7 +205,7 @@ Partner Center'dan referral'ları (leads/opportunities) çekip Hunter'a entegre 
 - [x] DB schema documented
 - [x] Domain extraction rules documented
 - [x] Sync flow documented
-- [x] Production checklist created (`PARTNER-CENTER-PROD-GO-NO-GO.md`)
+- [x] Production checklist created (`docs/reference/PARTNER-CENTER-PRODUCTION-CHECKLIST.md`)
 - **Status**: ✅ **COMPLETED** (2025-01-30)
 
 ---
