@@ -2138,3 +2138,148 @@ body {
     font-size: 0.875rem;
     font-style: italic;
 }
+
+/* Phase 2: Tab Navigation */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background-color: white;
+    border-bottom: 2px solid #e0e0e0;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.tabs__button {
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tabs__button:hover {
+    color: #2c3e50;
+    background-color: #f5f5f5;
+}
+
+.tabs__button--active {
+    color: #2c3e50;
+    border-bottom-color: #3498db;
+    font-weight: 600;
+}
+
+/* Phase 2: Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content--active {
+    display: block;
+}
+
+/* Phase 2: Referrals Section */
+.referrals-section {
+    padding: 1.5rem 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.referrals-section__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+/* Phase 2: Link Status Badges */
+.link-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.link-status-badge--linked {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.link-status-badge--unlinked {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.link-status-badge--multi {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Phase 2: Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge--active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge--new {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge--closed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Phase 2: Referral Action Buttons */
+.referral-action-button {
+    padding: 0.375rem 0.75rem;
+    margin: 0.125rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    color: #2c3e50;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.referral-action-button:hover {
+    background-color: #f5f5f5;
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.referral-action-button--link {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.referral-action-button--link:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+.referral-action-button--create {
+    border-color: #27ae60;
+    color: #27ae60;
+}
+
+.referral-action-button--create:hover {
+    background-color: #27ae60;
+    color: white;
+}

@@ -1,7 +1,8 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary, syncPartnerCenterReferrals } from './api.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary, syncPartnerCenterReferrals, fetchReferralInbox, linkReferralToLead, createLeadFromReferral } from './api.js';
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading, showSalesSummary, hideSalesSummary, showSalesSummaryError, showSalesModalLoading, hideSalesModalLoading } from './ui-leads.js';
+import { renderReferralsTable, renderReferralPagination, showReferralLoading, hideReferralLoading, showReferralError, hideReferralError } from './ui-referrals.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 import { log, warn, error as logError } from './logger.js';
 import { escapeHtml } from './utils.js';
@@ -27,12 +28,28 @@ window.state = {
         page_size: 50,
         total_pages: 0
     },
+    // Phase 2: Referral inbox state
+    referrals: [],
+    referralFilters: {
+        linkStatus: '',
+        referralType: '',
+        status: '',
+        search: '',
+        page: 1,
+        pageSize: 50
+    },
+    referralPagination: {
+        total: 0,
+        page: 1,
+        page_size: 50
+    },
     dashboard: null,
     loading: false,
     // Modal cache - cache score breakdowns by domain to avoid duplicate API calls
     breakdownCache: {},  // { domain: breakdownData }
     // Pagination cache - prevent duplicate requests for same page/filters
-    lastLeadsRequest: null  // { filters, timestamp } - track last request to prevent duplicates
+    lastLeadsRequest: null,  // { filters, timestamp } - track last request to prevent duplicates
+    currentTab: 'leads'  // Phase 2: Current active tab
 };
 
 /**
@@ -253,6 +270,13 @@ async function init() {
     window.addEventListener('refreshLeads', () => {
         setTimeout(() => loadLeads(), REFRESH_DELAY);
     });
+    
+    // Phase 2: Tab navigation
+    bindTabNavigation();
+    
+    // Phase 2: Referral inbox filters and actions
+    bindReferralFilters();
+    bindReferralActions();
     
     // Phase 1.4: Restore filter state from localStorage before loading
     restoreFilterState();
@@ -850,6 +874,218 @@ function updateSyncStatus() {
     
     statusEl.textContent = statusText;
     statusEl.className = statusClass;
+}
+
+/**
+ * Bind tab navigation (Phase 2)
+ */
+function bindTabNavigation() {
+    const tabButtons = document.querySelectorAll('.tabs__button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            switchTab(tabName);
+        });
+    });
+}
+
+/**
+ * Switch between tabs (Phase 2)
+ */
+function switchTab(tabName) {
+    // Update active tab button
+    document.querySelectorAll('.tabs__button').forEach(btn => {
+        btn.classList.toggle('tabs__button--active', btn.dataset.tab === tabName);
+    });
+    
+    // Update active tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('tab-content--active', content.id === `tab-${tabName}`);
+    });
+    
+    window.state.currentTab = tabName;
+    
+    // Load data for active tab
+    if (tabName === 'referrals') {
+        loadReferrals();
+    }
+}
+
+/**
+ * Bind referral filters (Phase 2)
+ */
+function bindReferralFilters() {
+    const filterControls = document.querySelectorAll('.js-referral-filter-control');
+    filterControls.forEach(control => {
+        if (control.type === 'text' || control.tagName === 'INPUT') {
+            control.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyReferralFilters();
+                }
+            });
+        } else {
+            control.addEventListener('change', applyReferralFilters);
+        }
+    });
+    
+    const btnFilter = document.getElementById('btn-referral-filter');
+    if (btnFilter) {
+        btnFilter.addEventListener('click', applyReferralFilters);
+    }
+    
+    const btnClear = document.getElementById('btn-referral-filters-clear');
+    if (btnClear) {
+        btnClear.addEventListener('click', clearReferralFilters);
+    }
+    
+    // Pagination
+    const btnPrev = document.getElementById('btn-referrals-prev');
+    const btnNext = document.getElementById('btn-referrals-next');
+    if (btnPrev) {
+        btnPrev.addEventListener('click', () => {
+            if (window.state.referralFilters.page > 1) {
+                window.state.referralFilters.page--;
+                loadReferrals();
+            }
+        });
+    }
+    if (btnNext) {
+        btnNext.addEventListener('click', () => {
+            const totalPages = Math.ceil(window.state.referralPagination.total / window.state.referralFilters.pageSize);
+            if (window.state.referralFilters.page < totalPages) {
+                window.state.referralFilters.page++;
+                loadReferrals();
+            }
+        });
+    }
+    
+    // Page number clicks
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('pagination__page') && e.target.dataset.page) {
+            window.state.referralFilters.page = parseInt(e.target.dataset.page);
+            loadReferrals();
+        }
+    });
+}
+
+/**
+ * Apply referral filters (Phase 2)
+ */
+function applyReferralFilters() {
+    const linkStatus = document.getElementById('filter-referral-link-status')?.value || '';
+    const referralType = document.getElementById('filter-referral-type-inbox')?.value || '';
+    const status = document.getElementById('filter-referral-status')?.value || '';
+    const search = document.getElementById('filter-referral-search')?.value.trim() || '';
+    
+    window.state.referralFilters = {
+        linkStatus,
+        referralType,
+        status,
+        search,
+        page: 1,  // Reset to first page
+        pageSize: window.state.referralFilters.pageSize || 50
+    };
+    
+    loadReferrals();
+}
+
+/**
+ * Clear referral filters (Phase 2)
+ */
+function clearReferralFilters() {
+    document.getElementById('filter-referral-link-status').value = '';
+    document.getElementById('filter-referral-type-inbox').value = '';
+    document.getElementById('filter-referral-status').value = '';
+    document.getElementById('filter-referral-search').value = '';
+    
+    window.state.referralFilters = {
+        linkStatus: '',
+        referralType: '',
+        status: '',
+        search: '',
+        page: 1,
+        pageSize: 50
+    };
+    
+    loadReferrals();
+}
+
+/**
+ * Load referrals (Phase 2)
+ */
+async function loadReferrals() {
+    try {
+        hideReferralError();
+        showReferralLoading();
+        
+        const data = await fetchReferralInbox(window.state.referralFilters);
+        
+        window.state.referrals = data.referrals || [];
+        window.state.referralPagination = {
+            total: data.total || 0,
+            page: data.page || 1,
+            page_size: data.page_size || 50
+        };
+        
+        renderReferralsTable(window.state.referrals);
+        renderReferralPagination(window.state.referralPagination);
+        
+        hideReferralLoading();
+    } catch (error) {
+        logError('Failed to load referrals:', error);
+        showReferralError(error.message || 'Referral\'lar yüklenirken hata oluştu.');
+        hideReferralLoading();
+    }
+}
+
+/**
+ * Bind referral actions (Phase 2)
+ */
+function bindReferralActions() {
+    document.addEventListener('click', async (e) => {
+        // Link referral to lead
+        if (e.target.classList.contains('referral-action-button--link')) {
+            const referralId = e.target.dataset.referralId;
+            const domain = e.target.dataset.domain;
+            
+            if (!domain) {
+                alert('Bu referral\'ın domain\'i yok. Önce domain eklemelisiniz.');
+                return;
+            }
+            
+            const leadDomain = prompt('Link edilecek lead domain\'ini girin:', domain);
+            if (!leadDomain) return;
+            
+            try {
+                await linkReferralToLead(referralId, leadDomain);
+                alert('Referral başarıyla link edildi!');
+                loadReferrals();  // Refresh list
+            } catch (error) {
+                alert(`Link işlemi başarısız: ${error.message}`);
+            }
+        }
+        
+        // Create lead from referral
+        if (e.target.classList.contains('referral-action-button--create')) {
+            const referralId = e.target.dataset.referralId;
+            
+            if (!confirm('Bu referral\'dan yeni bir lead oluşturmak istediğinize emin misiniz?')) {
+                return;
+            }
+            
+            try {
+                await createLeadFromReferral(referralId);
+                alert('Lead başarıyla oluşturuldu!');
+                loadReferrals();  // Refresh list
+                // Also refresh leads if on leads tab
+                if (window.state.currentTab === 'leads') {
+                    loadLeads();
+                }
+            } catch (error) {
+                alert(`Lead oluşturma başarısız: ${error.message}`);
+            }
+        }
+    });
 }
 
 // Initialize when DOM is ready

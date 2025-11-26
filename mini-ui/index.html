@@ -44,6 +44,18 @@
 
     <!-- Main Content -->
     <main class="main">
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button type="button" class="tabs__button tabs__button--active" data-tab="leads">
+                📋 Leads
+            </button>
+            <button type="button" class="tabs__button" data-tab="referrals">
+                🔗 Partner Center Referrals
+            </button>
+        </div>
+
+        <!-- Leads Tab Content -->
+        <div id="tab-leads" class="tab-content tab-content--active">
         <!-- Left Block: Forms -->
         <aside class="forms">
             <!-- Form 1: CSV Upload -->
@@ -220,6 +232,106 @@
                 </div>
             </div>
         </section>
+        </div>
+
+        <!-- Referrals Tab Content -->
+        <div id="tab-referrals" class="tab-content">
+            <section class="referrals-section">
+                <h2 class="referrals-section__title">Partner Center Referrals</h2>
+                
+                <!-- Referral Filters -->
+                <div class="filters">
+                    <div class="filters__row">
+                        <div class="filters__group">
+                            <label for="filter-referral-link-status" class="filters__label">Link Status</label>
+                            <select id="filter-referral-link-status" class="filters__select js-referral-filter-control">
+                                <option value="">Tümü</option>
+                                <option value="auto_linked">Linked</option>
+                                <option value="unlinked">Unlinked</option>
+                            </select>
+                        </div>
+                        <div class="filters__group">
+                            <label for="filter-referral-type-inbox" class="filters__label">Referral Type</label>
+                            <select id="filter-referral-type-inbox" class="filters__select js-referral-filter-control">
+                                <option value="">Tümü</option>
+                                <option value="co-sell">Co-sell</option>
+                                <option value="marketplace">Marketplace</option>
+                                <option value="solution-provider">Solution Provider</option>
+                            </select>
+                        </div>
+                        <div class="filters__group">
+                            <label for="filter-referral-status" class="filters__label">Status</label>
+                            <select id="filter-referral-status" class="filters__select js-referral-filter-control">
+                                <option value="">Tümü</option>
+                                <option value="Active">Active</option>
+                                <option value="New">New</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="filters__group filters__group--search">
+                            <label for="filter-referral-search" class="filters__label">Ara</label>
+                            <input type="text" id="filter-referral-search" placeholder="Company, domain ara..." class="filters__input js-referral-filter-control">
+                        </div>
+                    </div>
+                    <div class="filters__row filters__row--actions">
+                        <button type="button" id="btn-referral-filter" class="filters__button js-referral-filter-control">Filtrele</button>
+                        <button type="button" id="btn-referral-filters-clear" class="filters__button filters__button--secondary">Temizle</button>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="referrals-loading" class="loading" style="display: none;">
+                    <span>Yükleniyor...</span>
+                </div>
+
+                <!-- Error Message -->
+                <div id="referrals-error" class="error" style="display: none;"></div>
+
+                <!-- Referrals Table -->
+                <div class="table-container" id="referrals-table-wrapper">
+                    <div class="leads-table-loading hidden" id="referrals-table-loading">
+                        <div class="leads-table-loading__spinner"></div>
+                        <div class="leads-table-loading__text">Yükleniyor...</div>
+                    </div>
+                    <table id="referrals-table" class="leads-table">
+                        <thead class="leads-table__head">
+                            <tr class="leads-table__row">
+                                <th class="leads-table__cell leads-table__cell--header">Company</th>
+                                <th class="leads-table__cell leads-table__cell--header">Domain</th>
+                                <th class="leads-table__cell leads-table__cell--header">Referral Type</th>
+                                <th class="leads-table__cell leads-table__cell--header">Status</th>
+                                <th class="leads-table__cell leads-table__cell--header">Link Status</th>
+                                <th class="leads-table__cell leads-table__cell--header">Deal Value</th>
+                                <th class="leads-table__cell leads-table__cell--header">Synced At</th>
+                                <th class="leads-table__cell leads-table__cell--header leads-table__cell--actions">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="referrals-table-body" class="leads-table__body">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="referrals-pagination" class="pagination" style="display: none;">
+                    <button type="button" id="btn-referrals-prev" class="pagination__button" disabled>Önceki</button>
+                    <div class="pagination__info">
+                        <span id="referrals-pagination-info" class="pagination__text"></span>
+                    </div>
+                    <div class="pagination__pages" id="referrals-pagination-pages">
+                        <!-- Dynamic page numbers -->
+                    </div>
+                    <button type="button" id="btn-referrals-next" class="pagination__button">Sonraki</button>
+                </div>
+
+                <!-- Empty State -->
+                <div id="referrals-empty-state" class="empty-state" style="display: none;">
+                    <div class="empty-state__icon">📋</div>
+                    <div class="empty-state__title">Henüz referral yok</div>
+                    <p>Partner Center'dan referral'lar sync edildiğinde burada görünecek.</p>
+                </div>
+            </section>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -278,6 +390,7 @@
     <script type="module" src="js/api.js"></script>
     <script type="module" src="js/ui-leads.js"></script>
     <script type="module" src="js/ui-forms.js"></script>
+    <script type="module" src="js/ui-referrals.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

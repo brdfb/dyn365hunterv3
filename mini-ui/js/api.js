@@ -341,3 +341,75 @@ export async function fetchSalesSummary(domain) {
     return await response.json();
 }
 
+/**
+ * Fetch referral inbox with filters (Phase 2)
+ * Returns: { referrals: [], total: 0, page: 1, page_size: 50 }
+ */
+export async function fetchReferralInbox(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.linkStatus) params.append('link_status', filters.linkStatus);
+    if (filters.referralType) params.append('referral_type', filters.referralType);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.page) params.append('page', filters.page);
+    if (filters.pageSize) params.append('page_size', filters.pageSize);
+
+    const url = `${API_BASE_URL}/api/v1/partner-center/referrals/inbox${params.toString() ? '?' + params.toString() : ''}`;
+    log('Fetching referral inbox:', url);
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Failed to fetch referral inbox:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    
+    return await response.json();
+}
+
+/**
+ * Link referral to existing lead (Phase 2)
+ */
+export async function linkReferralToLead(referralId, leadDomain) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/partner-center/referrals/${encodeURIComponent(referralId)}/link`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ lead_domain: leadDomain }),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Link referral failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+}
+
+/**
+ * Create lead from referral (Phase 2)
+ */
+export async function createLeadFromReferral(referralId, companyNameOverride = null, notes = null) {
+    const body = {};
+    if (companyNameOverride) body.company_name_override = companyNameOverride;
+    if (notes) body.notes = notes;
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/partner-center/referrals/${encodeURIComponent(referralId)}/create-lead`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Create lead from referral failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+}
+
