@@ -1,17 +1,29 @@
 """Partner Center referrals endpoints (Phase 2)."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, func
 from pydantic import BaseModel
 from typing import List, Optional
 from app.db.session import get_db
+from app.db.models import PartnerCenterReferral, Company, RawLead
 from app.config import settings
 from app.core.logging import logger
 from app.core.referral_ingestion import sync_referrals_from_partner_center
 from app.core.tasks import sync_partner_center_referrals_task
+from app.core.normalizer import normalize_domain
+from app.core.merger import upsert_companies
+from app.schemas.referrals import (
+    ReferralInboxItem,
+    ReferralInboxResponse,
+    LinkReferralRequest,
+    LinkReferralResponse,
+    CreateLeadFromReferralRequest,
+    CreateLeadFromReferralResponse,
+)
 
 
-router = APIRouter(prefix="/api/referrals", tags=["referrals"])
+router = APIRouter(prefix="/api/v1/partner-center/referrals", tags=["referrals", "partner-center"])
 
 
 class SyncReferralsRequest(BaseModel):
@@ -104,4 +116,257 @@ async def sync_referrals(
             status_code=500,
             detail=f"Failed to start referral sync: {str(e)}",
         )
+
+
+@router.get("/inbox", response_model=ReferralInboxResponse)
+async def get_referral_inbox(
+    link_status: Optional[str] = Query(None, description="Filter by link_status (auto_linked, unlinked)"),
+    referral_type: Optional[str] = Query(None, description="Filter by referral_type (co-sell, marketplace, solution-provider)"),
+    status: Optional[str] = Query(None, description="Filter by status (Active, New, etc.)"),
+    search: Optional[str] = Query(None, description="Free text search in company_name, customer_name, domain, raw_domain"),
+    page: int = Query(1, ge=1, description="Page number (1-based)"),
+    page_size: int = Query(50, ge=1, le=200, description="Number of items per page (max 200)"),
+    db: Session = Depends(get_db),
+):
+    """
+    Get Partner Center referrals inbox (all referrals, linked or unlinked).
+    
+    Phase 2: Referral Inbox endpoint for managing all Partner Center referrals.
+    
+    Query parameters:
+    - link_status: Filter by link status (auto_linked, unlinked)
+    - referral_type: Filter by referral type (co-sell, marketplace, solution-provider)
+    - status: Filter by Partner Center status (Active, New, etc.)
+    - search: Free text search in company_name, customer_name, domain, raw_domain
+    - page: Page number (default: 1)
+    - page_size: Items per page (default: 50, max: 200)
+    
+    Returns:
+        ReferralInboxResponse with paginated referrals list
+    """
+    query = db.query(PartnerCenterReferral)
+    
+    # Apply filters
+    if link_status:
+        query = query.filter(PartnerCenterReferral.link_status == link_status)
+    
+    if referral_type:
+        query = query.filter(PartnerCenterReferral.referral_type == referral_type)
+    
+    if status:
+        query = query.filter(PartnerCenterReferral.status == status)
+    
+    if search:
+        # Free text search in multiple fields
+        like = f"%{search.lower()}%"
+        query = query.filter(
+            or_(
+                func.lower(PartnerCenterReferral.company_name).like(like),
+                func.lower(PartnerCenterReferral.customer_name).like(like),
+                func.lower(PartnerCenterReferral.domain).like(like),
+                func.lower(PartnerCenterReferral.raw_domain).like(like),
+            )
+        )
+    
+    # Get total count before pagination
+    total = query.count()
+    
+    # Apply pagination and ordering
+    referrals = (
+        query.order_by(PartnerCenterReferral.synced_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+    
+    # Convert to response model
+    return ReferralInboxResponse(
+        referrals=[
+            ReferralInboxItem(
+                id=r.id,
+                referral_id=r.referral_id,
+                company_name=r.company_name,
+                customer_name=r.customer_name,
+                domain=r.domain,
+                raw_domain=r.raw_domain,
+                referral_type=r.referral_type,
+                status=r.status,
+                substatus=r.substatus,
+                link_status=r.link_status,
+                linked_lead_id=r.linked_lead_id,
+                deal_value=float(r.deal_value) if r.deal_value else None,
+                currency=r.currency,
+                synced_at=r.synced_at.isoformat() if r.synced_at else None,
+            )
+            for r in referrals
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/{referral_id}/link", response_model=LinkReferralResponse)
+async def link_referral_to_lead(
+    referral_id: str,
+    payload: LinkReferralRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Link unlinked referral to existing lead by domain.
+    
+    Phase 2: Link action - connects a referral to an existing Hunter lead.
+    
+    Args:
+        referral_id: Partner Center referral ID
+        payload: Link request with lead_domain
+        db: Database session
+        
+    Returns:
+        LinkReferralResponse with link status and lead info
+        
+    Raises:
+        404: If referral or lead not found
+        400: If domain is invalid
+    """
+    # Find referral
+    referral = (
+        db.query(PartnerCenterReferral)
+        .filter(PartnerCenterReferral.referral_id == referral_id)
+        .first()
+    )
+    
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+    
+    # Normalize domain
+    normalized_domain = normalize_domain(payload.lead_domain)
+    if not normalized_domain:
+        raise HTTPException(status_code=400, detail="Invalid domain format")
+    
+    # Find company (lead)
+    company = (
+        db.query(Company)
+        .filter(Company.domain == normalized_domain)
+        .first()
+    )
+    
+    if not company:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Lead not found for domain: {normalized_domain}",
+        )
+    
+    # Update referral link
+    referral.link_status = "auto_linked"
+    referral.linked_lead_id = company.id
+    referral.domain = normalized_domain  # Update domain if was NULL
+    
+    db.commit()
+    db.refresh(referral)
+    
+    logger.info(
+        "partner_center_referral_linked",
+        referral_id=referral_id,
+        lead_id=company.id,
+        domain=normalized_domain,
+    )
+    
+    return LinkReferralResponse(
+        status="linked",
+        lead_id=company.id,
+        domain=normalized_domain,
+    )
+
+
+@router.post("/{referral_id}/create-lead", response_model=CreateLeadFromReferralResponse)
+async def create_lead_from_referral(
+    referral_id: str,
+    payload: CreateLeadFromReferralRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Create Hunter lead from unlinked referral.
+    
+    Phase 2: Create lead action - creates a new Hunter lead from referral domain.
+    
+    Args:
+        referral_id: Partner Center referral ID
+        payload: Create lead request (optional company_name_override, notes)
+        db: Database session
+        
+    Returns:
+        CreateLeadFromReferralResponse with created lead info
+        
+    Raises:
+        404: If referral not found
+        400: If referral has no domain
+    """
+    # Find referral
+    referral = (
+        db.query(PartnerCenterReferral)
+        .filter(PartnerCenterReferral.referral_id == referral_id)
+        .first()
+    )
+    
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+    
+    # Check if referral has domain
+    if not referral.domain:
+        raise HTTPException(
+            status_code=400,
+            detail="Referral has no normalized domain; cannot create lead",
+        )
+    
+    # Determine company name (override > referral.company_name > referral.customer_name > domain)
+    company_name = (
+        payload.company_name_override
+        or referral.company_name
+        or referral.customer_name
+        or referral.domain
+    )
+    
+    # Create/upsert company using existing merger utility
+    company = upsert_companies(
+        db=db,
+        domain=referral.domain,
+        company_name=company_name,
+    )
+    
+    # Create raw_lead record (following existing pattern)
+    raw_lead = RawLead(
+        source="partner_center_referral",
+        company_name=company_name,
+        domain=referral.domain,
+        payload={
+            "referral_id": referral.referral_id,
+            "referral_type": referral.referral_type,
+            "notes": payload.notes,
+            "created_from": "referral_inbox",
+        },
+    )
+    db.add(raw_lead)
+    db.commit()
+    db.refresh(raw_lead)
+    
+    # Update referral link
+    referral.link_status = "auto_linked"
+    referral.linked_lead_id = company.id
+    db.commit()
+    db.refresh(referral)
+    
+    logger.info(
+        "partner_center_referral_lead_created",
+        referral_id=referral_id,
+        lead_id=company.id,
+        domain=company.domain,
+        company_name=company_name,
+    )
+    
+    return CreateLeadFromReferralResponse(
+        status="created",
+        lead_id=company.id,
+        domain=company.domain,
+    )
 

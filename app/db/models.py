@@ -455,6 +455,13 @@ class PartnerCenterReferral(Base):
     customer_name = Column(String(255), nullable=True)  # Customer name (from customerProfile.name)
     customer_country = Column(String(100), nullable=True)  # Customer country (from customerProfile.address.country)
     domain = Column(String(255), nullable=True, index=True)  # Normalized domain
+    raw_domain = Column(String(255), nullable=True)  # Original domain before normalization (Phase 1)
+    link_status = Column(
+        String(50), nullable=True, index=True
+    )  # 'auto_linked' | 'multi_candidate' | 'unlinked' (Phase 1)
+    linked_lead_id = Column(
+        Integer, nullable=True, index=True
+    )  # Company ID if linked (Phase 1, no FK constraint for v1)
     azure_tenant_id = Column(
         String(255), nullable=True, index=True
     )  # Azure Tenant ID (M365 signal)
@@ -482,4 +489,6 @@ class PartnerCenterReferral(Base):
         Index("idx_partner_center_referrals_synced_at", "synced_at"),  # For sync tracking
         Index("idx_partner_center_referrals_type", "referral_type"),  # For filtering by type
         Index("idx_partner_center_referrals_tenant_id", "azure_tenant_id"),  # For M365 signal queries
+        Index("idx_partner_center_referrals_link_status", "link_status"),  # Phase 1: For filtering by link status
+        Index("idx_partner_center_referrals_linked_lead_id", "linked_lead_id"),  # Phase 1: For querying linked leads
     )

@@ -4,6 +4,7 @@ import structlog
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
+from urllib.parse import urlparse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.db.models import RawLead, Company, PartnerCenterReferral, DomainSignal
@@ -269,6 +270,55 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
     return None
 
 
+def extract_raw_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
+    """
+    Extract raw (non-normalized) domain from referral for debugging/storage.
+    
+    Phase 1: Store original domain value before normalization.
+    This helps debug normalization issues and preserves original data.
+    
+    Args:
+        referral: Partner Center referral dictionary
+        
+    Returns:
+        Raw domain string (from website or email), or None if not found
+    """
+    customer_profile = referral.get("customerProfile") or {}
+    
+    # Try website fields first
+    url_fields = [
+        customer_profile.get("website"),
+        customer_profile.get("companyWebsite"),
+        referral.get("website"),
+        referral.get("companyWebsite"),
+        (referral.get("details") or {}).get("website"),
+    ]
+    
+    for website in url_fields:
+        if website:
+            # Extract domain without normalization
+            try:
+                if not website.startswith(("http://", "https://")):
+                    website = "http://" + website
+                parsed = urlparse(website)
+                domain = parsed.netloc or parsed.path.split("/")[0]
+                if ":" in domain:
+                    domain = domain.split(":")[0]
+                if domain:
+                    return domain.strip()
+            except Exception:
+                # If parsing fails, return as-is (might be just a domain)
+                return website.strip() if website else None
+    
+    # Try email
+    contact = referral.get("contact") or {}
+    email = contact.get("email") or referral.get("email")
+    if email and "@" in email:
+        return email.split("@")[-1].strip()
+    
+    return None
+
+
 def apply_azure_tenant_signal(
     db: Session, company: Company, azure_tenant_id: Optional[str]
 ) -> Company:
@@ -341,10 +391,12 @@ def ingest_to_raw_leads(
 
 
 def upsert_referral_tracking(
-    db: Session, referral: Dict[str, Any], normalized_domain: str
+    db: Session, referral: Dict[str, Any], normalized_domain: Optional[str], raw_domain: Optional[str] = None
 ) -> PartnerCenterReferral:
     """
     Upsert referral tracking in partner_center_referrals table.
+    
+    Phase 1: Now accepts nullable domain - all referrals are saved regardless of domain extraction.
     
     Uses ON CONFLICT (referral_id) DO UPDATE strategy:
     - Update: status, substatus, updatedDateTime, deal_value (if schema supports)
@@ -353,10 +405,15 @@ def upsert_referral_tracking(
     Args:
         db: Database session
         referral: Partner Center referral dictionary
-        normalized_domain: Normalized domain string
+        normalized_domain: Normalized domain string (nullable in Phase 1)
+        raw_domain: Original domain before normalization (optional, for debugging)
         
     Returns:
         Created or updated PartnerCenterReferral instance
+        
+    Note:
+        link_status and linked_lead_id are set by sync_referrals_from_partner_center(),
+        not by this function.
     """
     # Convert to DTO for consistent field extraction
     dto = PartnerCenterReferralDTO.from_dict(referral)
@@ -401,20 +458,22 @@ def upsert_referral_tracking(
         existing.company_name = company_name
         existing.customer_name = customer_name
         existing.customer_country = customer_country
-        existing.domain = normalized_domain
+        existing.domain = normalized_domain  # Can be NULL in Phase 1
+        existing.raw_domain = raw_domain  # Phase 1: Store original domain
         existing.azure_tenant_id = azure_tenant_id
         existing.status = status
         existing.substatus = substatus
         existing.deal_value = deal_value
         existing.currency = currency
         existing.raw_data = referral  # Always update raw_data with latest
+        # Note: link_status and linked_lead_id are set by sync function, not here
         # synced_at is automatically updated via server_default
         db.commit()
         db.refresh(existing)
         logger.debug(
             "partner_center_referral_updated",
             referral_id=mask_pii(str(referral_id)),
-            domain=mask_pii(normalized_domain),
+            domain=mask_pii(normalized_domain) if normalized_domain else None,
             status=status,
             substatus=substatus,
         )
@@ -432,13 +491,15 @@ def upsert_referral_tracking(
             company_name=company_name,
             customer_name=customer_name,
             customer_country=customer_country,
-            domain=normalized_domain,
+            domain=normalized_domain,  # Can be NULL in Phase 1
+            raw_domain=raw_domain,  # Phase 1: Store original domain
             azure_tenant_id=azure_tenant_id,
             status=status,
             substatus=substatus,
             deal_value=deal_value,
             currency=currency,
             raw_data=referral,
+            # Note: link_status and linked_lead_id are set by sync function, not here
         )
         db.add(referral_tracking)
         db.commit()
@@ -446,7 +507,7 @@ def upsert_referral_tracking(
         logger.debug(
             "partner_center_referral_created",
             referral_id=mask_pii(str(referral_id)),
-            domain=mask_pii(normalized_domain),
+            domain=mask_pii(normalized_domain) if normalized_domain else None,
             status=status,
         )
         return referral_tracking
@@ -510,18 +571,24 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
     """
     Sync referrals from Partner Center (ana sync fonksiyonu).
     
+    Phase 1: REVISED - All referrals are saved, regardless of domain extraction.
+    
     Flow:
     1. Partner Center'dan referral'ları çek
-    2. Her referral için:
+    2. Her referral için (filter rules geçerse):
        a. Lead tipi detection
        b. Domain extraction (fallback chain)
-       c. Domain yoksa → skip (log warning)
-       d. raw_leads ingestion
-       e. partner_center_referrals tracking
-       f. Azure Tenant ID sinyali → company provider override
-       g. Company upsert
-       h. Domain scan trigger (idempotent - domain bazlı)
-    3. Duplicate referral'ları skip et
+       c. Raw domain extraction (for debugging)
+       d. partner_center_referrals tracking (ALWAYS - domain olsun olmasın)
+       e. If domain exists:
+          - Check if company exists → set link_status
+          - raw_leads ingestion (existing flow)
+          - Company upsert (existing flow)
+          - Azure Tenant ID sinyali (existing flow)
+       f. If domain doesn't exist:
+          - link_status = 'unlinked'
+          - Skip raw_leads/company ingestion (Phase 1: no auto-ingest)
+    3. Duplicate referral'ları skip et (IntegrityError)
     4. Her referral bağımsız işlenir (bir hata diğerlerini etkilemez)
     
     Args:
@@ -531,7 +598,9 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         Dictionary with sync statistics:
         - success_count: Number of successfully processed referrals
         - failure_count: Number of failed referrals
-        - skipped_count: Number of skipped referrals (no domain, duplicates)
+        - skipped_count: Number of skipped referrals (filter rules, duplicates)
+        - total_fetched: Total referrals fetched from Partner Center
+        - total_inserted: Total referrals inserted/updated in DB
     """
     if not settings.partner_center_enabled:
         logger.warning("partner_center_sync_disabled")
@@ -556,12 +625,12 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         total_skipped = 0
         total_inserted = 0
         skipped_reasons = {
-            "domain_not_found": 0,
             "duplicate": 0,
             "direction_outgoing": 0,
             "status_closed": 0,
             "substatus_excluded": 0,
         }
+        # Phase 1: domain_not_found is no longer a skip reason (referrals are saved anyway)
         
         logger.info(
             "partner_center_sync_started",
@@ -628,59 +697,96 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 # 3. Domain extraction (fallback chain)
                 normalized_domain = extract_domain_from_referral(referral)
                 
-                if not normalized_domain:
-                    # Domain yoksa → skip (log warning)
-                    total_skipped += 1
-                    skipped_reasons["domain_not_found"] += 1
-                    logger.warning(
-                        "partner_center_referral_skipped",
-                        referral_id=referral.get("id"),
-                        reason="domain_not_found",
+                # 4. Raw domain extraction (Phase 1: for debugging)
+                raw_domain = extract_raw_domain_from_referral(referral)
+                
+                # 5. partner_center_referrals tracking (ALWAYS - Phase 1)
+                # Domain olsun olmasın, her referral kaydedilir
+                referral_tracking = upsert_referral_tracking(
+                    db, referral, normalized_domain, raw_domain
+                )
+                
+                # 6. Link status determination
+                linked_company = None
+                if normalized_domain:
+                    # Check if company exists
+                    linked_company = db.query(Company).filter(
+                        Company.domain == normalized_domain
+                    ).first()
+                    
+                    if linked_company:
+                        # Domain + company match → auto_linked
+                        referral_tracking.link_status = 'auto_linked'
+                        referral_tracking.linked_lead_id = linked_company.id
+                    else:
+                        # Domain var ama company yok → unlinked
+                        referral_tracking.link_status = 'unlinked'
+                        referral_tracking.linked_lead_id = None
+                else:
+                    # Domain yok → unlinked
+                    referral_tracking.link_status = 'unlinked'
+                    referral_tracking.linked_lead_id = None
+                
+                db.commit()
+                
+                # 7. Existing ingestion flow (only if domain exists)
+                # Phase 1: Mevcut flow'a dokunmuyoruz, sadece referral tarafındaki skip sorununu düzelttik
+                if normalized_domain:
+                    # raw_leads ingestion
+                    ingest_to_raw_leads(db, referral, normalized_domain)
+                    
+                    # Azure Tenant ID sinyali → company provider override
+                    azure_tenant_id = (
+                        referral.get("azureTenantId") or referral.get("azure_tenant_id")
                     )
-                    continue
+                    company_name = (
+                        referral.get("companyName") or referral.get("company_name")
+                    )
+                    
+                    # Company upsert (with provider override if Azure Tenant ID exists)
+                    provider = "M365" if azure_tenant_id else None
+                    company = upsert_companies(
+                        db=db,
+                        domain=normalized_domain,
+                        company_name=company_name,
+                        provider=provider,
+                    )
+                    
+                    # Apply Azure Tenant ID signal (if not already set)
+                    if azure_tenant_id and company.provider != "M365":
+                        apply_azure_tenant_signal(db, company, azure_tenant_id)
+                    
+                    # Update link_status if company was just created
+                    if not linked_company:
+                        # Company was just created, update referral link
+                        referral_tracking.link_status = 'auto_linked'
+                        referral_tracking.linked_lead_id = company.id
+                        db.commit()
+                    
+                    # Domain scan trigger (idempotent - domain bazlı)
+                    # MVP NOTE: Scan trigger disabled for MVP safety. Manual scan via /scan/domain endpoint.
+                    # Uncomment when ready for automatic scanning:
+                    # trigger_domain_scan(db, normalized_domain)
+                    
+                    # Successfully ingested
+                    total_inserted += 1
+                    logger.info(
+                        "partner_center_referral_ingested",
+                        referral_id=referral.get("id"),
+                        domain=mask_pii(normalized_domain),
+                        referral_type=referral_type,
+                        link_status=referral_tracking.link_status,
+                    )
+                else:
+                    # Domain yok ama referral kaydedildi (Phase 1)
+                    logger.info(
+                        "partner_center_referral_saved_no_domain",
+                        referral_id=referral.get("id"),
+                        link_status="unlinked",
+                    )
+                    total_inserted += 1  # Count as inserted (saved to DB)
                 
-                # 4. raw_leads ingestion
-                ingest_to_raw_leads(db, referral, normalized_domain)
-                
-                # 5. partner_center_referrals tracking
-                upsert_referral_tracking(db, referral, normalized_domain)
-                
-                # 6. Azure Tenant ID sinyali → company provider override
-                azure_tenant_id = (
-                    referral.get("azureTenantId") or referral.get("azure_tenant_id")
-                )
-                company_name = (
-                    referral.get("companyName") or referral.get("company_name")
-                )
-                
-                # 7. Company upsert (with provider override if Azure Tenant ID exists)
-                provider = "M365" if azure_tenant_id else None
-                company = upsert_companies(
-                    db=db,
-                    domain=normalized_domain,
-                    company_name=company_name,
-                    provider=provider,
-                )
-                
-                # Apply Azure Tenant ID signal (if not already set)
-                if azure_tenant_id and company.provider != "M365":
-                    apply_azure_tenant_signal(db, company, azure_tenant_id)
-                
-                # 8. Domain scan trigger (idempotent - domain bazlı)
-                # MVP NOTE: Scan trigger disabled for MVP safety. Manual scan via /scan/domain endpoint.
-                # Uncomment when ready for automatic scanning:
-                # trigger_domain_scan(db, normalized_domain)
-                
-                # Successfully ingested
-                total_inserted += 1
                 total_processed += 1
-                
-                logger.info(
-                    "partner_center_referral_ingested",
-                    referral_id=referral.get("id"),
-                    domain=mask_pii(normalized_domain),
-                    referral_type=referral_type,
-                )
                 
             except IntegrityError as e:
                 # Duplicate referral (referral_id unique constraint)
@@ -714,7 +820,6 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
             total_processed=total_processed,
             total_inserted=total_inserted,
             total_skipped=total_skipped,
-            skipped_no_domain=skipped_reasons["domain_not_found"],
             skipped_duplicate=skipped_reasons["duplicate"],
             skipped_direction_outgoing=skipped_reasons.get("direction_outgoing", 0),
             skipped_status_closed=skipped_reasons.get("status_closed", 0),
