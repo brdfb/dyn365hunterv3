@@ -15,23 +15,17 @@ This folder contains TODO lists and task tracking documents.
   - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
   - ✅ Phase 2: Partner Center Referrals (P1) - COMPLETED (2025-01-30)
   - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending
-- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ **COMPLETED** (2025-01-30)
-  - ✅ Task 2.1: Partner Center API Client - COMPLETED (2025-01-28)
-  - ✅ Task 2.2: Referral Data Model - COMPLETED (2025-01-28)
-  - ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28)
-  - ✅ Task 2.4: API Endpoints - COMPLETED (2025-01-30) - 7/7 tests passing
-  - ✅ Task 2.5: UI Integration - COMPLETED (2025-01-30) - Referral column with badges
-  - ✅ Task 2.6: Background Sync - COMPLETED (2025-01-30) - Celery Beat schedule, 10/10 tests passing
-  - **Status**: ✅ **COMPLETED** - All tasks completed, all tests passing
-  - **Progress**: 100% (6/6 tasks completed)
-  - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
 
 **Recently Completed:**
+- `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ Completed (2025-01-30) → Archived
+- `PARTNER-CENTER-PHASE2-REFERRALS-V1.md` - Partner Center Referrals Sync v1 Productization - ✅ Completed (2025-01-30) → Archived
 - `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-30-PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ Completed (2025-01-30)
+- `2025-01-30-PARTNER-CENTER-PHASE2-REFERRALS-V1.md` - Partner Center Referrals Sync v1 Productization - ✅ Completed (2025-01-30)
 - `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
 - `2025-01-28-STABILIZATION-SPRINT-stabilization.md` - Stabilization Sprint (3 gün) - ✅ Completed (2025-01-28)
 - `2025-01-28-P1-PREPARATION.md` - P1 Preparation: Alembic, Rate Limiting, Caching, Bulk Operations, API Versioning (✅ Completed)
