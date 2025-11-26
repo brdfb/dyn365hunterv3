@@ -1,8 +1,9 @@
 # G21 — Architecture & Integration Roadmap (Current State)
 
-**Son güncelleme:** 2025-01-28  
+**Son güncelleme:** 2025-01-30  
 
-**Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending
+**Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending  
+**Integration Roadmap:** Phase 2 (Partner Center) ✅ Completed (2025-01-30)
 
 ---
 
@@ -17,6 +18,8 @@ G21, Hunter'ı:
 - Entegrasyonları (Sales Engine, Partner Center, Dynamics 365) **adapter** mantığıyla dışarı taşımak
 
 için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
+
+**Not:** Integration Roadmap Phase 2 (Partner Center Referrals) ✅ **Completed** (2025-01-30) - Backend, UI, background sync tamamlandı. Partner Center entegrasyonu adapter pattern ile implement edildi.
 
 ---
 
@@ -118,6 +121,8 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
 - Önce Hunter core v1.0 stabilizasyonu tamamlandı
 
+- Integration Roadmap Phase 2 (Partner Center) tamamlandı (2025-01-30) → Phase 3 (Dynamics) sırası geldi
+
 **Şu anki durum:**
 
 - Temel şema ve mapping fikirleri hazır
@@ -182,7 +187,13 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
   - Hunter → dış sistemlere **adapter** katmanı ile bağlanacak.
 
-- Phase 4 (Dynamics Migration), **Integration Roadmap** ile birlikte ele alınacak.
+- Phase 4 (Dynamics Migration), **Integration Roadmap Phase 3** ile birlikte ele alınacak.
+
+- **Integration Roadmap Phase 2 (Partner Center)** ✅ **Completed** (2025-01-30):
+  - Backend: API client, referral ingestion, sync endpoint, Celery task
+  - UI: Referral column, referral type filter, sync button, sync status indicator
+  - Background Sync: Celery Beat schedule (10 min prod, 30s dev)
+  - Status: Production-ready, feature flag OFF (MVP-safe)
 
 ---
 
@@ -194,7 +205,9 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
   - Phase 0–3 tamam → "Core clean-up & Sales Engine" bitti.
 
-  - Phase 4–6 → Post-MVP entegrasyon ve temizlik işleri.
+  - **Integration Roadmap Phase 2 (Partner Center)** ✅ **Completed** (2025-01-30) → Adapter pattern ile entegrasyon tamamlandı.
+
+  - Phase 4–6 → Post-MVP entegrasyon ve temizlik işleri (Dynamics Migration Integration Roadmap Phase 3 ile birlikte).
 
 Bu doküman, G21 kapsamının **tek güncel referans noktası** olarak kullanılmalıdır.
 
