@@ -1,7 +1,9 @@
 """Partner Center referral ingestion module."""
 
 import structlog
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Tuple
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.db.models import RawLead, Company, PartnerCenterReferral, DomainSignal
@@ -17,6 +19,123 @@ from app.config import settings
 from app.core.logging import logger, mask_pii
 
 logger = structlog.get_logger(__name__)
+
+
+# Consumer domains to filter out
+CONSUMER_DOMAINS = {
+    "gmail.com",
+    "outlook.com",
+    "hotmail.com",
+    "yahoo.com",
+    "yahoo.co.uk",
+    "ymail.com",
+    "aol.com",
+    "icloud.com",
+    "me.com",
+    "mac.com",
+    "live.com",
+    "msn.com",
+    "protonmail.com",
+    "proton.me",
+    "zoho.com",
+    "mail.com",
+    "yandex.com",
+    "gmx.com",
+}
+
+
+def is_consumer_domain(domain: str) -> bool:
+    """
+    Check if a domain is a consumer email provider domain.
+    
+    Args:
+        domain: Domain string to check
+        
+    Returns:
+        True if domain is a consumer email provider, False otherwise
+    """
+    if not domain:
+        return False
+    
+    domain_lower = domain.lower().strip()
+    return domain_lower in CONSUMER_DOMAINS
+
+
+@dataclass
+class PartnerCenterReferralDTO:
+    """
+    Partner Center Referral Data Transfer Object.
+    
+    Maps Microsoft Partner Center referral schema to internal DTO.
+    """
+    id: str
+    engagement_id: Optional[str] = None
+    name: Optional[str] = None
+    created_date_time: Optional[datetime] = None
+    updated_date_time: Optional[datetime] = None
+    status: Optional[str] = None
+    substatus: Optional[str] = None
+    type: Optional[str] = None
+    qualification: Optional[str] = None
+    direction: Optional[str] = None
+    customer_name: Optional[str] = None
+    customer_country: Optional[str] = None
+    deal_value: Optional[float] = None
+    currency: Optional[str] = None
+    customer_profile: Optional[Dict[str, Any]] = None
+    details: Optional[Dict[str, Any]] = None
+    
+    @classmethod
+    def from_dict(cls, referral: Dict[str, Any]) -> "PartnerCenterReferralDTO":
+        """
+        Create DTO from Partner Center referral dictionary.
+        
+        Args:
+            referral: Partner Center referral dictionary
+            
+        Returns:
+            PartnerCenterReferralDTO instance
+        """
+        customer_profile = referral.get("customerProfile") or {}
+        details = referral.get("details") or {}
+        address = customer_profile.get("address") or {}
+        
+        # Parse datetime strings if present
+        created_date_time = None
+        updated_date_time = None
+        if referral.get("createdDateTime"):
+            try:
+                created_date_time = datetime.fromisoformat(
+                    referral["createdDateTime"].replace("Z", "+00:00")
+                )
+            except (ValueError, AttributeError):
+                pass
+        if referral.get("updatedDateTime"):
+            try:
+                updated_date_time = datetime.fromisoformat(
+                    referral["updatedDateTime"].replace("Z", "+00:00")
+                )
+            except (ValueError, AttributeError):
+                pass
+        
+        return cls(
+            id=str(referral.get("id", "")),
+            engagement_id=referral.get("engagementId"),
+            name=referral.get("name"),
+            created_date_time=created_date_time,
+            updated_date_time=updated_date_time,
+            status=referral.get("status"),
+            substatus=referral.get("substatus"),
+            type=referral.get("type"),
+            qualification=referral.get("qualification"),
+            direction=referral.get("direction"),
+            customer_name=customer_profile.get("name"),
+            customer_country=address.get("country"),
+            deal_value=details.get("dealValue"),
+            currency=details.get("currency"),
+            customer_profile=customer_profile,
+            details=details,
+        )
 
 
 def detect_referral_type(referral: Dict[str, Any]) -> Optional[str]:
@@ -52,10 +171,11 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
     """
     Extract domain from referral using fallback chain.
     
-    Fallback chain:
-    1. Try website: referral.website → extract_domain_from_website() → normalize_domain()
-    2. Try email: referral.contact.email → extract_domain_from_email() → normalize_domain()
-    3. Skip: Domain yoksa → None (log warning)
+    Fallback chain (per design doc):
+    1. CustomerProfile.Team member emails → extract domain, filter consumer domains
+    2. customerProfile.ids.External (if applicable)
+    3. Legacy fallback: website → email (for backward compatibility)
+    4. Skip: Domain yoksa → None (log warning)
     
     Args:
         referral: Partner Center referral dictionary
@@ -63,24 +183,77 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
     Returns:
         Normalized domain string, or None if not found
     """
-    # 1. Try website
+    customer_profile = referral.get("customerProfile") or {}
+    
+    # 1. Try CustomerProfile.Team member emails
+    team = customer_profile.get("team") or []
+    if isinstance(team, list):
+        candidate_emails = []
+        for member in team:
+            if isinstance(member, dict):
+                email = member.get("email")
+                if email:
+                    candidate_emails.append(email)
+        
+        # Extract domains from emails and filter consumer domains
+        for email in candidate_emails:
+            domain = extract_domain_from_email(email)
+            if domain:
+                normalized = normalize_domain(domain)
+                if normalized and not is_consumer_domain(normalized):
+                    logger.debug(
+                        "partner_center_domain_extracted",
+                        source="customer_profile_team",
+                        domain=mask_pii(normalized),
+                        email=mask_pii(email),
+                    )
+                    return normalized
+    
+    # 2. Try customerProfile.ids.External (if applicable)
+    ids = customer_profile.get("ids") or {}
+    external_id = ids.get("External")
+    if external_id:
+        # External ID might be a domain or URL
+        domain = extract_domain_from_website(str(external_id)) or extract_domain_from_email(str(external_id))
+        if domain:
+            normalized = normalize_domain(domain)
+            if normalized and not is_consumer_domain(normalized):
+                logger.debug(
+                    "partner_center_domain_extracted",
+                    source="customer_profile_ids_external",
+                    domain=mask_pii(normalized),
+                )
+                return normalized
+    
+    # 3. Legacy fallback: website → email (for backward compatibility)
     website = referral.get("website") or referral.get("companyWebsite")
     if website:
         domain = extract_domain_from_website(website)
         if domain:
-            logger.debug("partner_center_domain_extracted", source="website", domain=mask_pii(domain))
-            return domain
+            normalized = normalize_domain(domain)
+            if normalized:
+                logger.debug(
+                    "partner_center_domain_extracted",
+                    source="website",
+                    domain=mask_pii(normalized),
+                )
+                return normalized
     
-    # 2. Try email
     contact = referral.get("contact") or {}
     email = contact.get("email") or referral.get("email")
     if email:
         domain = extract_domain_from_email(email)
         if domain:
-            logger.debug("partner_center_domain_extracted", source="email", domain=mask_pii(domain))
-            return domain
+            normalized = normalize_domain(domain)
+            if normalized and not is_consumer_domain(normalized):
+                logger.debug(
+                    "partner_center_domain_extracted",
+                    source="email",
+                    domain=mask_pii(normalized),
+                )
+                return normalized
     
-    # 3. Skip (domain not found)
+    # 4. Skip (domain not found)
     logger.warning("partner_center_domain_not_found", referral_id=referral.get("id"))
     return None
 
@@ -317,14 +490,20 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         # Fetch referrals from Partner Center
         referrals = client.get_referrals()
         
+        # Metrics tracking
+        total_fetched = len(referrals)
+        total_processed = 0
+        total_skipped = 0
+        total_inserted = 0
+        skipped_reasons = {
+            "domain_not_found": 0,
+            "duplicate": 0,
+        }
+        
         logger.info(
             "partner_center_sync_started",
-            total_referrals=len(referrals),
+            total_fetched=total_fetched,
         )
-        
-        success_count = 0
-        failure_count = 0
-        skipped_count = 0
         
         # Process each referral independently
         for referral in referrals:
@@ -337,7 +516,8 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 
                 if not normalized_domain:
                     # Domain yoksa → skip (log warning)
-                    skipped_count += 1
+                    total_skipped += 1
+                    skipped_reasons["domain_not_found"] += 1
                     logger.warning(
                         "partner_center_referral_skipped",
                         referral_id=referral.get("id"),
@@ -377,14 +557,25 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 # Uncomment when ready for automatic scanning:
                 # trigger_domain_scan(db, normalized_domain)
                 
-                success_count += 1
+                # Successfully ingested
+                total_inserted += 1
+                total_processed += 1
+                
+                logger.info(
+                    "partner_center_referral_ingested",
+                    referral_id=referral.get("id"),
+                    domain=mask_pii(normalized_domain),
+                    referral_type=referral_type,
+                )
                 
             except IntegrityError as e:
                 # Duplicate referral (referral_id unique constraint)
-                skipped_count += 1
+                total_skipped += 1
+                skipped_reasons["duplicate"] += 1
                 logger.warning(
-                    "partner_center_referral_duplicate",
+                    "partner_center_referral_skipped",
                     referral_id=referral.get("id"),
+                    reason="duplicate",
                     error=str(e),
                 )
                 db.rollback()
@@ -392,7 +583,7 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 
             except Exception as e:
                 # Bir referral'da hata olsa bile diğerleri işlenmeye devam edecek
-                failure_count += 1
+                total_processed += 1  # Count as processed (attempted)
                 logger.error(
                     "partner_center_referral_error",
                     referral_id=referral.get("id"),
@@ -402,17 +593,23 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                 db.rollback()
                 continue
         
+        # Summary log with all metrics
         logger.info(
-            "partner_center_sync_completed",
-            success_count=success_count,
-            failure_count=failure_count,
-            skipped_count=skipped_count,
+            "partner_center_sync_summary",
+            event="partner_center_sync_summary",
+            total_fetched=total_fetched,
+            total_processed=total_processed,
+            total_inserted=total_inserted,
+            total_skipped=total_skipped,
+            skipped_no_domain=skipped_reasons["domain_not_found"],
+            skipped_duplicate=skipped_reasons["duplicate"],
+            failure_count=total_processed - total_inserted,
         )
         
         return {
-            "success_count": success_count,
-            "failure_count": failure_count,
-            "skipped_count": skipped_count,
+            "success_count": total_inserted,
+            "failure_count": total_processed - total_inserted,
+            "skipped_count": total_skipped,
         }
         
     except Exception as e:

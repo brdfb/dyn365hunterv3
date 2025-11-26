@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Partner Center Standard Query Template** (2025-01-30) - Configurable query builder for Partner Center Referrals API
+  - **Config Variables**: Added `HUNTER_PARTNER_CENTER_API_VERSION` (default: `v1.0`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_DIRECTION` (default: `Incoming`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_STATUS` (default: `Active`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_TOP` (default: `200`)
+  - **Query Builder Helper**: Added `build_referral_query()` function in `PartnerCenterClient` for standardized OData query construction
+  - **Standard Template**: `GET {base_url}/{api_version}/engagements/referrals?$filter=direction eq '{direction}' and status eq '{status}'&$top={top}&$orderby=createdDateTime desc`
+  - **Files**: `app/config.py`, `app/core/partner_center.py`
+  - **Status**: ✅ **Completed** - Task 1.2 (Phase 1.2: Standard Query Template)
+- **Partner Center Pagination Support** (2025-01-30) - OData pagination handling for Partner Center Referrals API
+  - **Config Variable**: Added `HUNTER_PARTNER_CENTER_REFERRAL_MAX_PAGES` (default: `10` pages = 2000 records with top=200)
+  - **Pagination Logic**: Added `_fetch_page()` helper method with retry logic and `@odata.nextLink` handling
+  - **Features**: Automatic page-by-page fetching, max pages limit enforcement, rate limiting between pages (sleep(1)), structured logging for pagination progress
+  - **Files**: `app/config.py`, `app/core/partner_center.py`
+  - **Status**: ✅ **Completed** - Task 1.3 (Phase 1.3: Pagination Support)
+- **Partner Center HTTP/Status Handling** (2025-01-30) - Enhanced error handling for Partner Center API
+  - **Custom Exceptions**: Added `PartnerCenterAuthError` (401/403) and `PartnerCenterRateLimitError` (429)
+  - **Error Handling**: 401/403 → `PartnerCenterAuthError` with request ID, 429 → exponential backoff + Retry-After header support, 5xx → retry with exponential backoff (max 3 retries)
+  - **Request ID Extraction**: `_extract_request_id()` helper for extracting request ID from response headers
+  - **Structured Logging**: Enhanced error logging with status_code, request_id, url for all error types
+  - **Files**: `app/core/exceptions.py` (new), `app/core/partner_center.py`
+  - **Status**: ✅ **Completed** - Task 2.2 (Phase 2.2: HTTP/Status Handling)
+- **Partner Center Structured Logging & Metrics** (2025-01-30) - Comprehensive metrics tracking for Partner Center sync operations
+  - **Metrics Tracking**: Per sync run metrics (`total_fetched`, `total_processed`, `total_skipped`, `total_inserted`)
+  - **Log Events**: `partner_center_referrals_fetched`, `partner_center_referral_ingested`, `partner_center_referral_skipped` with reasons
+  - **Summary Logging**: `partner_center_sync_summary` event at end of sync with all metrics and skipped reasons breakdown
+  - **Skipped Reasons Tracking**: Detailed tracking of skip reasons (`domain_not_found`, `duplicate`)
+  - **Files**: `app/core/partner_center.py`, `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Task 2.3 (Phase 2.3: Structured Logging & Metrics)
+- **Partner Center Referral DTO & Domain Extraction** (2025-01-30) - Data mapping and domain extraction improvements
+  - **DTO Class**: Added `PartnerCenterReferralDTO` dataclass with all required fields from Microsoft schema
+  - **Domain Extraction**: Enhanced `extract_domain_from_referral()` with CustomerProfile.Team member emails support
+  - **Consumer Domain Filtering**: Added `is_consumer_domain()` helper and `CONSUMER_DOMAINS` set to filter out consumer email providers (gmail, outlook, yahoo, hotmail, icloud, etc.)
+  - **Fallback Chain**: CustomerProfile.Team → customerProfile.ids.External → website → email (with consumer domain filtering)
+  - **Files**: `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Tasks 3.1 & 3.2 (Phase 3.1-3.2: Referral DTO & Domain Extraction)
+- **Partner Center Domain Extraction Unit Tests** (2025-01-30) - Comprehensive test coverage for domain extraction
+  - **Test File**: Created `tests/test_referral_ingestion.py` with 30 test cases
+  - **Domain Extraction Tests**: 16 test cases covering all extraction scenarios (single email, multiple contacts, consumer filtering, fallback chains, edge cases)
+  - **Consumer Domain Filtering Tests**: 9 test cases for consumer domain detection (gmail, outlook, yahoo, hotmail, icloud, case-insensitive, whitespace handling)
+  - **DTO Mapping Tests**: 5 test cases for DTO mapping and datetime parsing
+  - **Test Coverage**: All edge cases covered (empty emails, None values, invalid formats, graceful error handling)
+  - **Status**: ✅ **Completed** - Task 3.4 (Phase 3.4: Domain Extraction Unit Tests) - All 30/30 tests passing ✅
+
+### Fixed
+- **Partner Center API Endpoint Correction** (2025-11-26) - Fixed incorrect API endpoint causing 404 errors
+  - **Base URL**: Changed from `https://api.partnercenter.microsoft.com` to `https://api.partner.microsoft.com`
+  - **Endpoint**: Changed from `/v1/referrals` to `/v1.0/engagements/referrals`
+  - **Scope**: Already correct (`https://api.partner.microsoft.com/.default`)
+  - **Impact**: API now returns 200 OK instead of 404, referrals successfully fetched
+  - **Files**: `app/core/partner_center.py`, `app/config.py`, `.env.example`, `docker-compose.yml`
+  - **Status**: ✅ **Verified** - API returns 200 OK, 50 referrals fetched successfully
+
 ### Security & Safety
 - **Script Safety Guards** (2025-01-30) - Added critical safety checks to prevent accidental production operations
   - **Database Reset Protection**: `reset_db_with_alembic.sh` now blocks production database resets unless `FORCE_PRODUCTION_RESET=yes` is explicitly set

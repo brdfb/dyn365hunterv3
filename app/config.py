@@ -63,12 +63,20 @@ class Settings(BaseSettings):
     partner_center_client_id: Optional[str] = None  # OAuth client ID
     partner_center_client_secret: Optional[str] = None  # OAuth client secret (for ConfidentialClientApplication, optional)
     partner_center_tenant_id: Optional[str] = None  # Azure AD tenant ID (OAuth için)
+    partner_center_username: Optional[str] = None  # Partner Center username (for future use)
+    partner_center_password: Optional[str] = None  # Partner Center password (for future use)
+    partner_center_api_version: str = "v1.0"  # Partner Center API version
     partner_center_sync_interval: int = 600  # Production: 10 minutes (600 seconds), Development: 30-60 seconds
     partner_center_cosell_bonus: int = 15  # Co-sell referral priority boost
     partner_center_azure_tenant_score: int = 55  # M365 existing customer baseline score
     # MSAL + Device Code Flow (delegated permissions - application permissions not available):
     partner_center_scope: str = "https://api.partner.microsoft.com/.default"  # MSAL scope
     partner_center_token_cache_path: Optional[str] = None  # Token cache file path (optional, defaults to .token_cache)
+    # Standard Query Template defaults
+    partner_center_referral_default_direction: str = "Incoming"  # Default direction filter
+    partner_center_referral_default_status: str = "Active"  # Default status filter
+    partner_center_referral_default_top: int = 200  # Default top parameter
+    partner_center_referral_max_pages: int = 10  # Maximum pages to fetch (default: 10 pages = 2000 records with top=200)
 
     model_config = SettingsConfigDict(
         env_file=".env",
