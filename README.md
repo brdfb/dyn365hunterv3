@@ -71,15 +71,17 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Cross-references added across all sales documentation
   - v1.0 (MVP) vs v2.0 (Target) distinction clarified
   - Tuning Factor status documented (design-only, not in production UI)
-- **Partner Center Integration - Phase 2** (✅ Complete - MVP-safe mode) - Partner Center referral ingestion and lifecycle tracking
+- **Partner Center Integration - Phase 2** (✅ Complete - Production-ready) - Partner Center referral ingestion and lifecycle tracking
   - Core components completed: API client (MSAL + Device Code Flow), database model, referral ingestion pipeline
-  - Backend: API endpoints (`POST /api/referrals/sync`), Celery task, comprehensive testing (10/10 tests passing)
+  - Backend: API endpoints (`POST /api/referrals/sync`), Celery task, comprehensive testing (59/59 tests passing)
   - UI: Referral column in leads table with badge colors (co-sell: blue, marketplace: green, solution-provider: orange)
   - Background Sync: Celery Beat schedule (10 min prod, 30s dev) for automatic referral synchronization
-  - Feature flag: `partner_center_enabled=False` (disabled by default, MVP-safe)
+  - Phase 7: Production Enablement completed - Feature flag validation, logging review, metrics exposure, background sync enablement
+  - Metrics: Partner Center metrics exposed via `/healthz/metrics` endpoint
+  - Feature flag: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
   - Features: Lead type detection (Co-sell, Marketplace, Solution Provider), domain extraction fallback, Azure Tenant ID signal, idempotent domain scanning
-  - Status: Tasks 2.1, 2.2, 2.3 completed. Parked in MVP-safe mode (feature flag disabled by default, no impact on MVP Go/No-Go)
-  - Next: Post-MVP - API endpoints, background sync, UI integration, scoring pipeline integration
+  - Status: ✅ **Production-ready** - All phases completed (Phase 1-7), 59/59 tests passing, feature flag OFF (MVP-safe)
+  - Next: Post-MVP - Scoring Pipeline Integration (Future enhancement)
 - **IP Enrichment Minimal UI** (✅ Completed) - Added IP enrichment to score breakdown and sales summary
   - Backend: IP enrichment integrated into score-breakdown and sales-summary endpoints
   - UI: Network & Location section added to score breakdown modal (country + proxy warning)
