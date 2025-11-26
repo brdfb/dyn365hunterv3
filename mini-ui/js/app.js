@@ -743,7 +743,7 @@ async function handlePartnerCenterSync() {
         const response = await syncPartnerCenterReferrals();
         
         // Show toast notification
-        showToast('Sync queued', 'success');
+        showToast('Partner Center sync sıraya alındı', 'success');
         
         // Update sync status (queued)
         saveSyncStatus('queued', Date.now());
@@ -836,7 +836,7 @@ function updateSyncStatus() {
     let statusClass = 'header__sync-status';
     
     if (status === 'queued') {
-        statusText = `Son sync: ${timeText} (queued)`;
+        statusText = `Son sync: ${timeText} (Sırada)`;
         statusClass += ' header__sync-status--queued';
     } else if (status === 'ok') {
         statusText = `Son sync: ${timeText} (OK)`;
