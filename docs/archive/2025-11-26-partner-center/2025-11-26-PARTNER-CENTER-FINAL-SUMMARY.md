@@ -142,9 +142,9 @@ mkdir -p token_cache
 
 ## 🔗 Related Documents
 
-- `docs/active/PARTNER-CENTER-PROD-GO-NO-GO.md` - Production checklist
-- `docs/active/PARTNER-CENTER-ACTIVATION-PLAN.md` - 3 fazlı test planı
-- `docs/active/PARTNER-CENTER-TEST-GUIDE.md` - Test rehberi
+- `docs/reference/PARTNER-CENTER-PRODUCTION-CHECKLIST.md` - Production checklist
+- `docs/reference/PARTNER-CENTER-TEST-GUIDE.md` - Test rehberi
+- `docs/reference/PARTNER-CENTER-TOKEN-CACHE-SETUP.md` - Token cache setup guide
 - `docs/active/FAZ2-DEVICE-CODE-FLOW-MANUAL.md` - Device Code Flow manuel adımlar
 
 ---
