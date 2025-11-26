@@ -406,13 +406,16 @@ docker-compose logs -f api | grep -i error
 
 ## 🔗 Related Documents
 
-- `docs/active/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Full deployment checklist
-- `docs/active/PRODUCTION-CHECKLIST-RUNBOOK.md` - Production checklist runbook
-- `docs/active/SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
+- `docs/reference/PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Full deployment checklist
+- `docs/reference/PRODUCTION-CHECKLIST-RUNBOOK.md` - Production checklist runbook
+- `docs/reference/SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
 - `docs/archive/2025-01-28-ALEMBIC-MIGRATION-PLAN.md` - Migration procedures (archived - reference only)
-- `docs/active/ROLLBACK-PLAN.md` - Rollback procedures
-- `docs/active/ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables
-- `docs/active/TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
+- `docs/reference/ROLLBACK-PLAN.md` - Rollback procedures
+- `docs/reference/ENVIRONMENT-VARIABLES-CHECKLIST.md` - Environment variables
+- `docs/reference/TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
+- `docs/reference/PARTNER-CENTER-PRODUCTION-CHECKLIST.md` - Partner Center production GO/NO-GO checklist
+- `docs/reference/PARTNER-CENTER-TOKEN-CACHE-SETUP.md` - Partner Center token cache setup guide
+- `docs/reference/PARTNER-CENTER-TEST-GUIDE.md` - Partner Center integration test guide
 
 ---
 
