@@ -1,0 +1,54 @@
+# FAZ 2 - Device Code Flow Python Kodu
+# Python shell'de bu kodu çalıştırın:
+
+from msal import PublicClientApplication
+from app.config import settings
+
+# Create MSAL app
+authority = f'https://login.microsoftonline.com/{settings.partner_center_tenant_id}'
+app = PublicClientApplication(
+    client_id=settings.partner_center_client_id,
+    authority=authority,
+)
+
+# Initiate device code flow
+flow = app.initiate_device_flow(scopes=[settings.partner_center_scope])
+
+print('=' * 60)
+print('Device Code Flow')
+print('=' * 60)
+print(f'URL: {flow["verification_uri"]}')
+print(f'Code: {flow["user_code"]}')
+print('=' * 60)
+print('Browser\'da login yaptıktan sonra Enter\'a basın...')
+input()
+
+# Wait for authentication
+result = app.acquire_token_by_device_flow(flow)
+
+if 'access_token' in result:
+    print('✅ Token acquired!')
+    print(f'Expires in: {result.get("expires_in")} seconds')
+    
+    # Test silent acquisition
+    accounts = app.get_accounts()
+    if accounts:
+        account = accounts[0]
+        print(f'✅ Account cached: {accounts[0].get("username", "N/A")}')
+        
+        silent_result = app.acquire_token_silent(
+            scopes=[settings.partner_center_scope],
+            account=account
+        )
+        if silent_result and 'access_token' in silent_result:
+            print('✅ Silent token acquisition works!')
+            print('✅ FAZ 2 PASSED: Token cache created and working!')
+        else:
+            print('❌ Silent token acquisition failed')
+    else:
+        print('❌ No accounts in cache')
+else:
+    print('❌ Token acquisition failed')
+    print(f'Error: {result.get("error")}')
+    print(f'Description: {result.get("error_description")}')
+
