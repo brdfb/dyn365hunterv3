@@ -75,12 +75,18 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Core components completed: API client (MSAL + Device Code Flow), database model, referral ingestion pipeline
   - Backend: API endpoints (`POST /api/referrals/sync`), Celery task, comprehensive testing (59/59 tests passing)
   - UI: Referral column in leads table with badge colors (co-sell: blue, marketplace: green, solution-provider: orange)
+  - **UI Integration Complete** (2025-01-30): Referral type filter, sync button, sync status indicator
+    - Referral type filter: Filter bar dropdown (Co-sell, Marketplace, Solution Provider)
+    - Sync button: Header button for manual Partner Center sync
+    - Sync status: Right-top indicator showing last sync time and status (OK/FAIL/queued)
+    - Toast notifications: "Sync queued" notification on sync trigger
   - Background Sync: Celery Beat schedule (10 min prod, 30s dev) for automatic referral synchronization
   - Phase 7: Production Enablement completed - Feature flag validation, logging review, metrics exposure, background sync enablement
   - Metrics: Partner Center metrics exposed via `/healthz/metrics` endpoint
   - Feature flag: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
   - Features: Lead type detection (Co-sell, Marketplace, Solution Provider), domain extraction fallback, Azure Tenant ID signal, idempotent domain scanning
   - Status: ✅ **Production-ready** - All phases completed (Phase 1-7), 59/59 tests passing, feature flag OFF (MVP-safe)
+  - UI Status: ✅ **Complete** - All UI features implemented (referral column, filter, sync button, status indicator)
   - Next: Post-MVP - Scoring Pipeline Integration (Future enhancement)
 - **IP Enrichment Minimal UI** (✅ Completed) - Added IP enrichment to score breakdown and sales summary
   - Backend: IP enrichment integrated into score-breakdown and sales-summary endpoints

@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Partner Center UI Entegrasyonu Tamamlandı** (2025-01-30) - Referral type filtresi, sync butonu ve durum göstergesi
+  - **Referral Type Filtresi**: Filter bar'a "Referral" dropdown'ı eklendi (Co-sell, Marketplace, Solution Provider)
+    - Backend: `GET /leads` ve `GET /leads/export` endpoint'lerine `referral_type` query parameter eklendi
+    - Frontend: Filter state localStorage'da saklanıyor, export'ta da filtre uygulanıyor
+    - Files: `mini-ui/index.html`, `mini-ui/js/app.js`, `mini-ui/js/api.js`, `app/api/leads.py`
+  - **Partner Center Sync Butonu**: Header'a sync butonu eklendi
+    - Manual sync tetikleme (`POST /api/referrals/sync`)
+    - Toast notification ("Sync queued")
+    - Buton disable/enable logic
+    - Files: `mini-ui/index.html`, `mini-ui/js/app.js`, `mini-ui/js/api.js`
+  - **Sync Durumu Göstergesi**: Sağ üstte sync durumu gösterimi
+    - Format: "Son sync: X dk önce (OK/FAIL/queued)"
+    - Renk kodları: OK (yeşil), FAIL (kırmızı), queued (turuncu)
+    - Zaman hesaplama: "az önce", "X dk önce", "X saat önce"
+    - Sync durumu localStorage'da saklanıyor
+    - Files: `mini-ui/index.html`, `mini-ui/styles.css`, `mini-ui/js/app.js`
+  - **Bug Fix**: `ui-leads.js` satır 254'teki gereksiz `replace()` kodu kaldırıldı
+  - **Status**: ✅ **Completed** - Partner Center UI entegrasyonu tamamlandı (P1 - Sync Butonu + Durum Paneli)
+
+### Added
 - **Partner Center Standard Query Template** (2025-01-30) - Configurable query builder for Partner Center Referrals API
   - **Config Variables**: Added `HUNTER_PARTNER_CENTER_API_VERSION` (default: `v1.0`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_DIRECTION` (default: `Incoming`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_STATUS` (default: `Active`), `HUNTER_PARTNER_CENTER_REFERRAL_DEFAULT_TOP` (default: `200`)
   - **Query Builder Helper**: Added `build_referral_query()` function in `PartnerCenterClient` for standardized OData query construction
