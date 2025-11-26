@@ -1,13 +1,14 @@
 # Partner Center Phase 2 - TODO
 
 **Date Created**: 2025-01-28  
-**Last Updated**: 2025-01-29  
-**Status**: 🔄 In Progress (Branch opened: feature/partner-center-phase1)  
-**Phase**: Integration Roadmap - Phase 2  
+**Last Updated**: 2025-11-26  
+**Status**: 🔄 In Progress (API Endpoint Fixed, Productization Phase)  
+**Phase**: Integration Roadmap - Phase 2 (Referrals Sync v1)  
 **Priority**: P1  
-**Estimated Duration**: 2-3 days  
+**Estimated Duration**: 3-5 days (productization)  
 **Risk Level**: 2/10 (external API dependency)  
-**Branch**: `feature/partner-center-phase1` (opened 2025-01-29)
+**Branch**: `feature/partner-center-phase1` (opened 2025-01-29)  
+**Design Doc**: `docs/active/PARTNER-CENTER-REFERRALS-DESIGN.md`
 
 ---
 
@@ -230,35 +231,44 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 - `mini-ui/js/api.js` (modify - sadece sync call)
 - `app/api/leads.py` (modify - referral_type field ekle)
 
-#### 2.5.1: Lead Listesine Referral Kolonu
-- [ ] Leads API'ye referral bilgisi ekle (`app/api/leads.py`)
-  - [ ] `LeadResponse` model'ine `referral_type: Optional[str]` field'ı ekle
-  - [ ] SQL query'ye LEFT JOIN `partner_center_referrals` ekle (domain bazlı)
-  - [ ] Referral varsa `referral_type` doldur, yoksa `None`
-- [ ] Leads table'a "Referral" kolonu ekle (`mini-ui/js/ui-leads.js`)
-- [ ] Kolon gösterimi:
-  - [ ] Referral yoksa → "-"
-  - [ ] Referral varsa → Referral tipi: "Co-sell" / "Marketplace" / "SP"
-- [ ] Badge styling (minimal, mevcut badge pattern'ine uyumlu)
+#### 2.5.1: Lead Listesine Referral Kolonu ✅ **COMPLETED** (2025-01-30)
+- [x] ✅ Leads API'ye referral bilgisi ekle (`app/api/leads.py`)
+  - [x] `LeadResponse` model'ine `referral_type: Optional[str]` field'ı ekle
+  - [x] SQL query'ye LEFT JOIN `partner_center_referrals` ekle (domain bazlı)
+  - [x] Referral varsa `referral_type` doldur, yoksa `None`
+- [x] ✅ Leads table'a "Referral" kolonu ekle (`mini-ui/js/ui-leads.js`)
+- [x] ✅ Kolon gösterimi:
+  - [x] Referral yoksa → "-"
+  - [x] Referral varsa → Referral tipi: "Co-sell" / "Marketplace" / "SP"
+- [x] ✅ Badge styling (minimal, mevcut badge pattern'ine uyumlu)
 
-#### 2.5.2: API Integration (Minimal)
-- [ ] `api.js`'e sadece sync call ekle:
-  - [ ] `syncReferrals()` - POST /api/referrals/sync
-- [ ] Error handling (API errors)
-- [ ] Toast notification (sync başarılı/başarısız)
+#### 2.5.2: Referral Type Filter ✅ **COMPLETED** (2025-01-30)
+- [x] ✅ Filter bar'a referral type dropdown eklendi (`mini-ui/index.html`)
+- [x] ✅ Filter state management (`mini-ui/js/app.js`)
+- [x] ✅ API query parameter (`referral_type` filter)
+- [x] ✅ Backend filter support (`app/api/leads.py` - WHERE clause)
 
-**Future Enhancement** (Post-MVP - Şimdilik YOK):
+#### 2.5.3: Sync Button & Status Indicator ✅ **COMPLETED** (2025-01-30)
+- [x] ✅ Header'a "🔄 Partner Center Sync" butonu eklendi
+- [x] ✅ Sync button click handler (`mini-ui/js/app.js`)
+- [x] ✅ API sync call (`mini-ui/js/api.js` - `syncPartnerCenterReferrals()`)
+- [x] ✅ Sync status indicator - "Son sync: X dk önce (OK/FAIL/queued)"
+- [x] ✅ Status persistence (localStorage)
+- [x] ✅ Toast notifications (sync queued, success, error)
+
+**Future Enhancement** (Post-MVP):
 - ⏳ Referral detail modal
-- ⏳ Referral filter
 - ⏳ Referral status badges
 - ⏳ Referral listesi (ayrı tab)
 
 **Acceptance Criteria**:
-- [ ] Leads API response'unda referral_type field'ı var (JOIN ile partner_center_referrals)
-- [ ] Lead listesinde referral kolonu görünüyor
-- [ ] Referral tipi doğru gösteriliyor (Co-sell / Marketplace / SP)
-- [ ] Sync button çalışıyor (opsiyonel, admin için)
-- [ ] Toast notification çalışıyor
+- [x] ✅ Leads API response'unda referral_type field'ı var (JOIN ile partner_center_referrals)
+- [x] ✅ Lead listesinde referral kolonu görünüyor
+- [x] ✅ Referral tipi doğru gösteriliyor (Co-sell / Marketplace / SP)
+- [x] ✅ Referral type filter çalışıyor (filter bar dropdown)
+- [x] ✅ Sync button çalışıyor (header button, manual sync)
+- [x] ✅ Sync status indicator çalışıyor (last sync time + status)
+- [x] ✅ Toast notification çalışıyor
 
 ---
 
@@ -302,16 +312,16 @@ Partner Center'dan referral'ları çekip Hunter'a entegre etmek. Referral'lar ot
 - [x] Task 2.2: Referral Data Model ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.3: Referral Ingestion ✅ **COMPLETED** (2025-01-28)
 - [x] Task 2.4: API Endpoints ✅ **COMPLETED** (2025-01-30) - **Backend tests: 7/7 PASSED** ✅
-- [x] Task 2.5: UI Integration ✅ **COMPLETED** (2025-01-30) - **Aşama 1 & 2: Backend JOIN + UI Column** ✅
+- [x] Task 2.5: UI Integration ✅ **COMPLETED** (2025-01-30) - **Referral column, referral type filter, sync button, sync status indicator** ✅
 - [x] Task 2.6: Background Sync ✅ **COMPLETED** (2025-01-30) - **Celery Beat schedule: 10/10 tests PASSED** ✅
 
 **Next Steps**:
 1. ✅ **Preparation Complete** - See `docs/active/PARTNER-CENTER-PREPARATION.md` for comprehensive preparation guide
 2. ✅ **Task 2.4 Complete** - API endpoints created (`app/api/referrals.py`) - `POST /api/referrals/sync` ✅
 3. ✅ **Task 2.4 Backend Tests Complete** - All tests passing (7/7) - Endpoint + Celery task tests ✅ (2025-01-30)
-4. ✅ **Task 2.5 Complete** - UI Integration: Referral column added to lead list (Backend JOIN + UI Column) ✅ (2025-01-30)
+4. ✅ **Task 2.5 Complete** - UI Integration: Referral column, referral type filter, sync button, sync status indicator ✅ (2025-01-30)
 5. ✅ **Task 2.6 Complete** - Background Sync: Celery Beat schedule configured (10/10 tests passing) ✅ (2025-01-30)
-6. **Optional**: Task 2.5 Aşama 3 - Sync Button (XS - manual trigger, may not be needed with background sync)
+6. ✅ **UI Enhancements Complete** - Referral type filter, sync button, sync status indicator all implemented ✅ (2025-01-30)
 7. **Future**: Scoring Pipeline Integration - Azure Tenant ID override and Co-sell boost
 
 ---
@@ -410,7 +420,7 @@ Comprehensive preparation guide created: `docs/active/PARTNER-CENTER-PREPARATION
 
 10. **API Endpoints**: MVP için sadece `POST /api/referrals/sync`. List/get endpoints nice-to-have (post-MVP).
 
-11. **UI Integration**: MVP için sadece lead listesine 1 kolon (Referral tipi: Co-sell / Marketplace / SP). Yeni tab + modal + filter post-MVP.
+11. **UI Integration**: ✅ **COMPLETED** (2025-01-30) - Referral column, referral type filter, sync button, sync status indicator. Referral detail modal post-MVP.
 
 12. **Error Handling**: Her referral bağımsız işlenecek. Bir referral'da hata olsa bile diğerleri işlenmeye devam edecek.
 
