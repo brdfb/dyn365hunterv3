@@ -9,7 +9,17 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <h1 class="header__title">Dyn365Hunter</h1>
+        <div class="header__content">
+            <h1 class="header__title">Dyn365Hunter</h1>
+            <div class="header__actions">
+                <button type="button" id="btn-partner-center-sync" class="header__sync-button" title="Partner Center Sync">
+                    🔄 Partner Center Sync
+                </button>
+                <div class="header__sync-status" id="partner-center-sync-status">
+                    <!-- Dynamic sync status will be inserted here -->
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- KPI Area -->
@@ -102,6 +112,15 @@
                             <option value="Hosting">Hosting</option>
                             <option value="Local">Local</option>
                             <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="filters__group">
+                        <label for="filter-referral-type" class="filters__label">Referral</label>
+                        <select id="filter-referral-type" class="filters__select js-filter-control">
+                            <option value="">Tümü</option>
+                            <option value="co-sell">Co-sell</option>
+                            <option value="marketplace">Marketplace</option>
+                            <option value="solution-provider">Solution Provider</option>
                         </select>
                     </div>
                     <div class="filters__group">

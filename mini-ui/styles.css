@@ -24,9 +24,75 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.header__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
 .header__title {
     font-size: 1.25rem;
     font-weight: 600;
+}
+
+.header__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header__sync-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.header__sync-button:hover {
+    background-color: #2980b9;
+}
+
+.header__sync-button:disabled {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+}
+
+.header__sync-status {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    white-space: nowrap;
+}
+
+.header__sync-status--ok {
+    color: #27ae60;
+}
+
+.header__sync-status--fail {
+    color: #e74c3c;
+}
+
+.header__sync-status--queued {
+    color: #f39c12;
+}
+
+@media (max-width: 768px) {
+    .header__content {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .header__actions {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 
 /* Footer (Gün 3) */

@@ -60,6 +60,7 @@ export async function fetchLeads(filters = {}) {
         params.append('min_score', filters.minScore);
     }
     if (filters.provider) params.append('provider', filters.provider);
+    if (filters.referralType) params.append('referral_type', filters.referralType);
     
     // G19: Add pagination and sorting parameters
     if (filters.page) params.append('page', filters.page);
@@ -132,6 +133,27 @@ export async function ingestDomain(domain, companyName = null) {
     if (!response.ok) {
         const errorMessage = await getErrorMessage(response);
         logError('Ingest domain failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+}
+
+/**
+ * Sync Partner Center referrals
+ */
+export async function syncPartnerCenterReferrals() {
+    const response = await fetch(`${API_BASE_URL}/api/referrals/sync`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Partner Center sync failed:', errorMessage);
         throw new Error(errorMessage);
     }
 

@@ -1,6 +1,6 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary } from './api.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary, syncPartnerCenterReferrals } from './api.js';
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading, showSalesSummary, hideSalesSummary, showSalesSummaryError, showSalesModalLoading, hideSalesModalLoading } from './ui-leads.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 import { log, warn, error as logError } from './logger.js';
@@ -14,6 +14,7 @@ window.state = {
         segment: '',
         minScore: null,
         provider: '',
+        referralType: '',  // Partner Center referral type filter
         search: '',  // G19: Search query
         sortBy: null,  // G19: Sort field
         sortOrder: 'asc',  // G19: Sort order (asc/desc)
@@ -57,6 +58,15 @@ async function init() {
     if (btnExportExcel) {
         btnExportExcel.addEventListener('click', () => handleExport('excel'));
     }
+    
+    // Bind Partner Center sync button
+    const btnPartnerCenterSync = document.getElementById('btn-partner-center-sync');
+    if (btnPartnerCenterSync) {
+        btnPartnerCenterSync.addEventListener('click', handlePartnerCenterSync);
+    }
+    
+    // Initialize sync status display
+    updateSyncStatus();
     
     // G19: Bind search input (debounced)
     // Phase 1.4: Save filter state on search
@@ -364,11 +374,13 @@ function applyFilters() {
     const segment = document.getElementById('filter-segment').value;
     const minScore = document.getElementById('filter-min-score').value;
     const provider = document.getElementById('filter-provider').value;
+    const referralType = document.getElementById('filter-referral-type').value;
     
     // G19: Preserve search, sorting, and pagination when applying filters
     window.state.filters.segment = segment || '';
     window.state.filters.minScore = minScore ? parseInt(minScore, 10) : null;
     window.state.filters.provider = provider || '';
+    window.state.filters.referralType = referralType || '';
     window.state.filters.page = 1; // Reset to first page on filter change
     
     // Phase 1.4: Save filter state to localStorage
@@ -383,12 +395,14 @@ function applyFilters() {
 function clearFilters() {
     document.getElementById('filter-segment').value = '';
     document.getElementById('filter-provider').value = '';
+    document.getElementById('filter-referral-type').value = '';
     document.getElementById('filter-min-score').value = '';
     document.getElementById('filter-search').value = '';
     
     // Reset state filters
     window.state.filters.segment = '';
     window.state.filters.provider = '';
+    window.state.filters.referralType = '';
     window.state.filters.minScore = null;
     window.state.filters.search = '';
     window.state.filters.page = 1;
@@ -407,6 +421,7 @@ function getCurrentFilterState() {
     return {
         segment: document.getElementById('filter-segment')?.value || '',
         provider: document.getElementById('filter-provider')?.value || '',
+        referralType: document.getElementById('filter-referral-type')?.value || '',
         minScore: document.getElementById('filter-min-score')?.value || '',
         search: document.getElementById('filter-search')?.value || ''
     };
@@ -443,6 +458,10 @@ function restoreFilterState() {
             const providerEl = document.getElementById('filter-provider');
             if (providerEl) providerEl.value = state.provider;
         }
+        if (state.referralType !== undefined) {
+            const referralTypeEl = document.getElementById('filter-referral-type');
+            if (referralTypeEl) referralTypeEl.value = state.referralType;
+        }
         if (state.minScore !== undefined) {
             const minScoreEl = document.getElementById('filter-min-score');
             if (minScoreEl) minScoreEl.value = state.minScore;
@@ -455,6 +474,7 @@ function restoreFilterState() {
         // Update window.state.filters to match restored UI state
         window.state.filters.segment = state.segment || '';
         window.state.filters.provider = state.provider || '';
+        window.state.filters.referralType = state.referralType || '';
         window.state.filters.minScore = state.minScore ? parseInt(state.minScore, 10) : null;
         window.state.filters.search = state.search || '';
     } catch (error) {
@@ -707,6 +727,129 @@ function updateSortIcons() {
             }
         }
     });
+}
+
+/**
+ * Handle Partner Center sync button click
+ */
+async function handlePartnerCenterSync() {
+    const btn = document.getElementById('btn-partner-center-sync');
+    if (!btn) return;
+    
+    // Disable button during sync
+    btn.disabled = true;
+    
+    try {
+        const response = await syncPartnerCenterReferrals();
+        
+        // Show toast notification
+        showToast('Sync queued', 'success');
+        
+        // Update sync status (queued)
+        saveSyncStatus('queued', Date.now());
+        updateSyncStatus();
+        
+        log('Partner Center sync queued:', response.task_id);
+        
+        // After 2 minutes, assume sync completed successfully (simple approach)
+        // TODO: In future, poll backend for actual sync status
+        setTimeout(() => {
+            const currentStatus = getSyncStatus();
+            if (currentStatus && currentStatus.status === 'queued') {
+                saveSyncStatus('ok', currentStatus.timestamp);
+                updateSyncStatus();
+            }
+        }, 120000); // 2 minutes
+    } catch (error) {
+        logError('Partner Center sync error:', error);
+        showToast(`Sync failed: ${error.message}`, 'error');
+        
+        // Update sync status (failed)
+        saveSyncStatus('fail', Date.now());
+        updateSyncStatus();
+    } finally {
+        // Re-enable button after a short delay
+        setTimeout(() => {
+            btn.disabled = false;
+        }, 1000);
+    }
+}
+
+/**
+ * Save sync status to localStorage
+ */
+function saveSyncStatus(status, timestamp) {
+    try {
+        localStorage.setItem('hunter:partner-center:sync-status', JSON.stringify({
+            status,
+            timestamp
+        }));
+    } catch (error) {
+        warn('Failed to save sync status:', error);
+    }
+}
+
+/**
+ * Get sync status from localStorage
+ */
+function getSyncStatus() {
+    try {
+        const raw = localStorage.getItem('hunter:partner-center:sync-status');
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (error) {
+        warn('Failed to get sync status:', error);
+        return null;
+    }
+}
+
+/**
+ * Update sync status display
+ */
+function updateSyncStatus() {
+    const statusEl = document.getElementById('partner-center-sync-status');
+    if (!statusEl) return;
+    
+    const syncStatus = getSyncStatus();
+    if (!syncStatus) {
+        statusEl.textContent = '';
+        statusEl.className = 'header__sync-status';
+        return;
+    }
+    
+    const { status, timestamp } = syncStatus;
+    const now = Date.now();
+    const diffMs = now - timestamp;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    
+    let timeText;
+    if (diffMins < 1) {
+        timeText = 'az önce';
+    } else if (diffMins < 60) {
+        timeText = `${diffMins} dk önce`;
+    } else {
+        timeText = `${diffHours} saat önce`;
+    }
+    
+    let statusText;
+    let statusClass = 'header__sync-status';
+    
+    if (status === 'queued') {
+        statusText = `Son sync: ${timeText} (queued)`;
+        statusClass += ' header__sync-status--queued';
+    } else if (status === 'ok') {
+        statusText = `Son sync: ${timeText} (OK)`;
+        statusClass += ' header__sync-status--ok';
+    } else if (status === 'fail') {
+        statusText = `Son sync: ${timeText} (FAIL)`;
+        statusClass += ' header__sync-status--fail';
+    } else {
+        statusText = `Son sync: ${timeText}`;
+    }
+    
+    statusEl.textContent = statusText;
+    statusEl.className = statusClass;
 }
 
 // Initialize when DOM is ready

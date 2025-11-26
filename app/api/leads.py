@@ -79,6 +79,9 @@ async def export_leads(
     provider: Optional[str] = Query(
         None, description="Filter by provider (M365, Google, etc.)"
     ),
+    referral_type: Optional[str] = Query(
+        None, description="Filter by Partner Center referral type (co-sell, marketplace, solution-provider)"
+    ),
     search: Optional[str] = Query(
         None, description="Full-text search in domain, canonical_name, and provider"
     ),
@@ -152,6 +155,11 @@ async def export_leads(
     if provider:
         query += " AND lr.provider = :provider"
         params["provider"] = provider
+
+    # Partner Center referral type filter
+    if referral_type:
+        query += " AND pcr.referral_type = :referral_type"
+        params["referral_type"] = referral_type
 
     # G19: Add search filter (full-text search in domain, canonical_name, provider)
     if search:
@@ -284,6 +292,9 @@ async def get_leads(
     provider: Optional[str] = Query(
         None, description="Filter by provider (M365, Google, etc.)"
     ),
+    referral_type: Optional[str] = Query(
+        None, description="Filter by Partner Center referral type (co-sell, marketplace, solution-provider)"
+    ),
     favorite: Optional[bool] = Query(
         None,
         description="Filter by favorites (true = only favorites, false = all leads)",
@@ -313,6 +324,7 @@ async def get_leads(
     - segment: Filter by segment (Migration, Existing, Cold, Skip)
     - min_score: Minimum readiness score (0-100)
     - provider: Filter by provider name
+    - referral_type: Filter by Partner Center referral type (co-sell, marketplace, solution-provider)
     - favorite: Filter by favorites (true = only favorites, false = all leads)
     - sort_by: Sort by field (domain, readiness_score, priority_score, segment, provider, scanned_at)
     - sort_order: Sort order (asc or desc, default: asc)
@@ -374,6 +386,11 @@ async def get_leads(
     if provider:
         query += " AND lr.provider = :provider"
         params["provider"] = provider
+
+    # Partner Center referral type filter
+    if referral_type:
+        query += " AND pcr.referral_type = :referral_type"
+        params["referral_type"] = referral_type
 
     # G19: Add search filter (full-text search in domain, canonical_name, provider)
     if search:

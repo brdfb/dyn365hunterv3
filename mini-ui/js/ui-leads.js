@@ -250,8 +250,8 @@ function getReferralBadge(referral_type) {
     };
     
     const label = labels[type] || referral_type;
-    // Replace hyphens with single hyphen for CSS class (co-sell -> co-sell, solution-provider -> solution-provider)
-    const cssType = type.replace(/-/g, '-');
+    // CSS class uses the type as-is (co-sell, marketplace, solution-provider)
+    const cssType = type;  // Already in correct format for CSS class
     const badgeClass = `referral-badge referral-badge--${cssType}`;
     
     return `<span class="${badgeClass}">${escapeHtml(label)}</span>`;
