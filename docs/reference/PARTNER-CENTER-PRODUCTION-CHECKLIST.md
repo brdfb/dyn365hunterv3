@@ -39,6 +39,44 @@ Partner Center entegrasyonu **DEV ortamında test edildi ve çalışıyor**. Pro
 
 ---
 
+## 🔒 CRITICAL: Security Pre-Check (MUST DO BEFORE PUSH)
+
+### ⚠️ Secret Rotation (MANDATORY)
+
+**GitHub push protection hatası nedeniyle secret rotation şart:**
+
+1. **Azure Portal → Entra ID → App registrations**
+   - İlgili uygulamayı bul (Client ID: `1475ed28-175a-45f1-a299-e811147ad068`)
+   - **Certificates & secrets** sekmesine git
+
+2. **Yeni secret oluştur:**
+   - "New client secret" → Açıklama ekle → Expire date seç
+   - **Yeni secret değerini kopyala** (sadece bir kere gösterilir!)
+
+3. **Eski secret'ı öldür:**
+   - Eski secret'ı **Delete** et veya **Expire** et
+   - ⚠️ **CRITICAL**: Eski secret artık geçersiz olmalı
+
+4. **Config'leri güncelle:**
+   - `.env` dosyasında yeni secret'ı kullan
+   - KeyVault varsa orada da güncelle
+   - Production environment variables'ı güncelle
+
+5. **GitHub'da allow et:**
+   - URL: `https://github.com/brdfb/dyn365hunterv3/security/secret-scanning/unblock-secret/3621gBQv7eoyvyPdOacIVgvf53V`
+   - "Allow secret" seçeneğini kullan
+   - ⚠️ **Not**: Secret zaten rotate edildi, eski secret artık geçersiz
+
+6. **Push'u tamamla:**
+   ```bash
+   git push origin feature/partner-center-phase1
+   ```
+
+**Efor**: XS/S (10-20 dk)  
+**Status**: ⚠️ **MANDATORY** - Production'a geçmeden önce mutlaka yapılmalı
+
+---
+
 ## ✅ Pre-Production Checklist
 
 ### 1. Volume Mount Kontrolü
@@ -66,6 +104,7 @@ kubectl describe deployment <deployment-name> | grep -i volume
 
 - [ ] `HUNTER_PARTNER_CENTER_ENABLED=true` (production'da açılacak)
 - [ ] `HUNTER_PARTNER_CENTER_CLIENT_ID` → DEV ile aynı mı?
+- [ ] `HUNTER_PARTNER_CENTER_CLIENT_SECRET` → **YENİ ROTATE EDİLMİŞ SECRET** (eski secret değil!)
 - [ ] `HUNTER_PARTNER_CENTER_TENANT_ID` → DEV ile aynı mı?
 - [ ] `HUNTER_PARTNER_CENTER_API_URL` → Doğru mu? (`https://api.partner.microsoft.com`)
 - [ ] `HUNTER_PARTNER_CENTER_SCOPE` → Doğru mu? (default: `https://api.partner.microsoft.com/.default`)
