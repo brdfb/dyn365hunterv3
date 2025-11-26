@@ -535,7 +535,13 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
     """
     if not settings.partner_center_enabled:
         logger.warning("partner_center_sync_disabled")
-        return {"success_count": 0, "failure_count": 0, "skipped_count": 0}
+        return {
+            "success_count": 0,
+            "failure_count": 0,
+            "skipped_count": 0,
+            "total_fetched": 0,
+            "total_inserted": 0,
+        }
     
     try:
         # Initialize Partner Center client
@@ -720,6 +726,8 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
             "success_count": total_inserted,
             "failure_count": total_processed - total_inserted,
             "skipped_count": total_skipped,
+            "total_fetched": total_fetched,
+            "total_inserted": total_inserted,
         }
         
     except Exception as e:
@@ -728,5 +736,11 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
             error=str(e),
             exc_info=True,
         )
-        return {"success_count": 0, "failure_count": 0, "skipped_count": 0}
+        return {
+            "success_count": 0,
+            "failure_count": 0,
+            "skipped_count": 0,
+            "total_fetched": 0,
+            "total_inserted": 0,
+        }
 

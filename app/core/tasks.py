@@ -710,12 +710,22 @@ def sync_partner_center_referrals_task(self):
     """
     import time
     from app.core.referral_ingestion import sync_referrals_from_partner_center
+    from app.core.partner_center_metrics import (
+        track_sync_start,
+        track_sync_success,
+        track_sync_failed,
+        track_sync_skipped,
+    )
 
     start_time = time.time()
     task_id = self.request.id if hasattr(self.request, "id") else None
 
+    # Track sync start
+    track_sync_start()
+
     # Feature flag check (skip if disabled)
     if not settings.partner_center_enabled:
+        track_sync_skipped()
         logger.info(
             "partner_center_sync_skipped",
             source="partner_center",
@@ -750,6 +760,19 @@ def sync_partner_center_referrals_task(self):
         success_count = result.get("success_count", 0)
         failure_count = result.get("failure_count", 0)
         skipped_count = result.get("skipped_count", 0)
+        total_fetched = result.get("total_fetched", 0)
+        total_inserted = result.get("total_inserted", 0)
+
+        # Track metrics
+        track_sync_success(
+            duration=duration_sec,
+            fetched=total_fetched,
+            inserted=total_inserted,
+            skipped=skipped_count,
+        )
+        if failure_count > 0:
+            from app.core.partner_center_metrics import track_sync_failure
+            track_sync_failure(failure_count)
 
         logger.info(
             "partner_center_sync_task_completed",
@@ -775,6 +798,7 @@ def sync_partner_center_referrals_task(self):
 
     except Exception as e:
         duration_sec = time.time() - start_time
+        track_sync_failed(duration_sec)
         logger.error(
             "partner_center_sync_task_error",
             source="partner_center",

@@ -10,6 +10,7 @@ from app.core.distributed_rate_limiter import get_rate_limit_metrics
 from app.core.tasks import get_bulk_metrics
 from app.core.error_tracking import get_error_metrics
 from app.core.deprecated_monitoring import get_deprecated_metrics
+from app.core.partner_center_metrics import get_partner_center_metrics
 import redis
 
 router = APIRouter(tags=["health"])
@@ -121,7 +122,8 @@ async def health_check(db: Session = Depends(get_db)):
         "database": db_status,
         "redis": redis_status,
         "environment": settings.environment,
-        "enrichment_enabled": settings.enrichment_enabled
+        "enrichment_enabled": settings.enrichment_enabled,
+        "partner_center_enabled": settings.partner_center_enabled
     }
 
 
@@ -139,6 +141,7 @@ async def metrics_endpoint():
         bulk_metrics = get_bulk_metrics()
         error_metrics = get_error_metrics()
         deprecated_metrics = get_deprecated_metrics()
+        partner_center_metrics = get_partner_center_metrics()
         
         return {
             "cache": cache_metrics,
@@ -146,6 +149,7 @@ async def metrics_endpoint():
             "bulk_operations": bulk_metrics,
             "errors": error_metrics,
             "deprecated_endpoints": deprecated_metrics,
+            "partner_center": partner_center_metrics,
         }
     except Exception as e:
         raise HTTPException(
