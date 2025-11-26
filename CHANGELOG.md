@@ -181,12 +181,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `GET /leads/export`: `referral_type` column added to export
     - `LeadResponse` model: `referral_type: Optional[str]` field added
     - Files: `app/api/leads.py`
-  - **UI Integration**: Added Referral column to leads table (Task 2.5)
-    - HTML: Referral column header with tooltip
-    - JavaScript: `getReferralBadge()` function with dynamic badge rendering
-    - CSS: Badge styles (co-sell: blue, marketplace: green, solution-provider: orange)
-    - Empty state: Shows '-' when no referral
-    - Files: `mini-ui/index.html`, `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`
+  - **UI Integration**: Complete UI integration with referral column, filter, sync button, and status indicator (Task 2.5)
+    - **Referral Column**: Added referral column to leads table with badge colors (co-sell: blue, marketplace: green, solution-provider: orange)
+      - HTML: Referral column header with tooltip
+      - JavaScript: `getReferralBadge()` function with dynamic badge rendering
+      - Empty state: Shows '-' when no referral
+    - **Referral Type Filter**: Filter bar dropdown for filtering by referral type (Co-sell, Marketplace, Solution Provider)
+      - Backend: `GET /leads` and `GET /leads/export` endpoints support `referral_type` query parameter
+      - Frontend: Filter state persisted in localStorage, export includes filter
+    - **Sync Button**: Header button for manual Partner Center sync
+      - Manual sync trigger (`POST /api/referrals/sync`)
+      - Toast notification ("Sync queued")
+      - Button disable/enable logic
+    - **Sync Status Indicator**: Right-top indicator showing last sync time and status
+      - Format: "Son sync: X dk önce (OK/FAIL/queued)"
+      - Color codes: OK (green), FAIL (red), queued (orange)
+      - Time calculation: "az önce", "X dk önce", "X saat önce"
+      - Status persisted in localStorage
+    - Files: `mini-ui/index.html`, `mini-ui/js/ui-leads.js`, `mini-ui/js/app.js`, `mini-ui/js/api.js`, `mini-ui/styles.css`, `app/api/leads.py`
   - **Background Sync**: Celery Beat schedule for automatic referral synchronization (Task 2.6)
     - Production: 600s (10 minutes) - configurable via `partner_center_sync_interval`
     - Development: 30s (auto-override for testing)
@@ -205,8 +217,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Lead API tests: `referral_type` field in responses, None handling
     - All tests passing (10/10 referral sync tests, 3/3 referral_type API tests)
     - Files: `tests/test_referrals_sync.py`, `tests/test_api_endpoints.py`
-  - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
-  - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
+  - **Status**: ✅ **Phase 2 Complete** - Backend, UI (referral column, filter, sync button, status indicator), and background sync fully implemented and tested
+  - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
+  - **UI Status**: ✅ **Complete** - All UI features implemented (referral column, referral type filter, sync button, sync status indicator)
 
 ### Production Ready
 - **CSP P-Model Integration + Sales Summary v1.1** (2025-01-29) - ✅ **DONE & PROD-READY**
