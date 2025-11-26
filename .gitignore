@@ -138,3 +138,5 @@ token_cache/
 .token_cache
 .env.bak
 nul
+test_gibibyte.py
+test_sales_v11.py
