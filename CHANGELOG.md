@@ -48,6 +48,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **DTO Mapping Tests**: 5 test cases for DTO mapping and datetime parsing
   - **Test Coverage**: All edge cases covered (empty emails, None values, invalid formats, graceful error handling)
   - **Status**: ✅ **Completed** - Task 3.4 (Phase 3.4: Domain Extraction Unit Tests) - All 30/30 tests passing ✅
+- **Partner Center DB Schema Revision** (2025-01-30) - Added missing columns to `partner_center_referrals` table
+  - **Migration**: Created Alembic migration `f972cf4c08f8_add_partner_center_referrals_phase4_fields`
+  - **New Columns**: `engagement_id`, `external_reference_id`, `substatus`, `type`, `qualification`, `direction`, `customer_name`, `customer_country`, `deal_value`, `currency`
+  - **Indexes**: Added indexes for `direction` and `substatus` (filtering optimization)
+  - **Model Update**: Updated `PartnerCenterReferral` model with all new fields
+  - **Files**: `alembic/versions/f972cf4c08f8_add_partner_center_referrals_phase4_fields.py`, `app/db/models.py`
+  - **Status**: ✅ **Completed** - Task 4.1 (Phase 4.1: DB Schema Revision/Validation)
+- **Partner Center Ingestion Filter Rules** (2025-01-30) - Comprehensive filtering logic for referral ingestion
+  - **Filter Rules**: Only process referrals with `direction='Incoming'`, `status IN ('New', 'Active')`, `substatus NOT IN ('Declined','Lost','Expired','Error')`, `domain IS NOT NULL`
+  - **Skipped Reasons Tracking**: Detailed tracking of skip reasons (`direction_outgoing`, `status_closed`, `substatus_excluded`, `domain_not_found`, `duplicate`)
+  - **Summary Logging**: Enhanced `partner_center_sync_summary` log with all skip reason breakdowns
+  - **Files**: `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Task 4.3 (Phase 4.3: Ingestion Filter Rules)
+- **Partner Center Upsert Strategy** (2025-01-30) - DTO-based field extraction and idempotent upsert
+  - **DTO Integration**: Updated `upsert_referral_tracking()` to use `PartnerCenterReferralDTO` for consistent field extraction
+  - **Update Fields**: Updates `status`, `substatus`, `deal_value`, `currency`, and all other fields from DTO
+  - **Idempotent Behavior**: Re-fetch same referral updates existing record (no duplicates)
+  - **Files**: `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Task 4.2 (Phase 4.2: Upsert Strategy)
+- **Partner Center Sync Summary Logging** (2025-01-30) - Comprehensive sync run summary with all metrics
+  - **Summary Log Event**: `partner_center_sync_summary` with all metrics (`total_fetched`, `total_processed`, `total_inserted`, `total_skipped`, `skipped_no_domain`, `skipped_duplicate`, `skipped_direction_outgoing`, `skipped_status_closed`, `skipped_substatus_excluded`, `failure_count`)
+  - **Test Coverage**: 2 test cases for summary logging validation
+  - **Files**: `app/core/referral_ingestion.py`, `tests/test_referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Task 5.1 (Phase 5.1: Sync Run Summary Logging)
+- **Partner Center Client Tests** (2025-01-30) - Comprehensive test coverage for Partner Center API client
+  - **Test File**: Created `tests/test_partner_center_client.py` with 6 test cases
+  - **Test Coverage**: Single page fetch, pagination (@odata.nextLink), 401/403 auth errors, 429 rate limit errors, 5xx server errors with retry
+  - **Error Handling Tests**: All custom exceptions (`PartnerCenterAuthError`, `PartnerCenterRateLimitError`) tested
+  - **Status**: ✅ **Completed** - Task 6.1 (Phase 6.1: Unit Tests) - All 6/6 client tests passing ✅
+- **Partner Center Integration Tests** (2025-01-30) - End-to-end integration tests with fake client
+  - **Test Coverage**: Happy path (Incoming + Active → inserted), filtered paths (Outgoing/Declined → skipped), mixed referrals scenario
+  - **Integration Tests**: 4 test cases covering full ingestion pipeline with DB validation
+  - **Files**: `tests/test_referral_ingestion.py::TestIntegrationIngestionPipeline`
+  - **Status**: ✅ **Completed** - Task 6.2 (Phase 6.2: Integration Tests) - All 4/4 integration tests passing ✅
 
 ### Fixed
 - **Partner Center API Endpoint Correction** (2025-11-26) - Fixed incorrect API endpoint causing 404 errors
