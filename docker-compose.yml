@@ -58,6 +58,13 @@ services:
       HUNTER_AZURE_CLIENT_SECRET: ${HUNTER_AZURE_CLIENT_SECRET:-}
       HUNTER_AZURE_TENANT_ID: ${HUNTER_AZURE_TENANT_ID:-}
       HUNTER_AZURE_REDIRECT_URI: ${HUNTER_AZURE_REDIRECT_URI:-http://localhost:8000/auth/callback}
+      # Partner Center Integration (Phase 2) - UAT
+      HUNTER_PARTNER_CENTER_ENABLED: ${HUNTER_PARTNER_CENTER_ENABLED:-false}
+      HUNTER_PARTNER_CENTER_CLIENT_ID: ${HUNTER_PARTNER_CENTER_CLIENT_ID:-}
+      HUNTER_PARTNER_CENTER_CLIENT_SECRET: ${HUNTER_PARTNER_CENTER_CLIENT_SECRET:-}
+      HUNTER_PARTNER_CENTER_TENANT_ID: ${HUNTER_PARTNER_CENTER_TENANT_ID:-}
+      HUNTER_PARTNER_CENTER_API_URL: ${HUNTER_PARTNER_CENTER_API_URL:-https://api.partner.microsoft.com}
+      HUNTER_PARTNER_CENTER_SYNC_INTERVAL: ${HUNTER_PARTNER_CENTER_SYNC_INTERVAL:-600}
     ports:
       - "8000:8000"
     volumes:
@@ -66,6 +73,8 @@ services:
       - ./mini-ui:/app/mini-ui
       - ./alembic:/app/alembic
       - ./app/data:/app/app/data:ro  # IP enrichment DB files (read-only)
+      - ./.env:/app/.env:ro  # Environment variables file (read-only)
+      - ./.token_cache:/app/.token_cache  # Partner Center token cache file (persistent)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
       interval: 10s
@@ -90,9 +99,18 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      # Partner Center Integration (Phase 2) - UAT
+      HUNTER_PARTNER_CENTER_ENABLED: ${HUNTER_PARTNER_CENTER_ENABLED:-false}
+      HUNTER_PARTNER_CENTER_CLIENT_ID: ${HUNTER_PARTNER_CENTER_CLIENT_ID:-}
+      HUNTER_PARTNER_CENTER_CLIENT_SECRET: ${HUNTER_PARTNER_CENTER_CLIENT_SECRET:-}
+      HUNTER_PARTNER_CENTER_TENANT_ID: ${HUNTER_PARTNER_CENTER_TENANT_ID:-}
+      HUNTER_PARTNER_CENTER_API_URL: ${HUNTER_PARTNER_CENTER_API_URL:-https://api.partner.microsoft.com}
+      HUNTER_PARTNER_CENTER_SYNC_INTERVAL: ${HUNTER_PARTNER_CENTER_SYNC_INTERVAL:-600}
     volumes:
       - ./app:/app/app
       - ./tests:/app/tests
+      - ./.env:/app/.env:ro  # Environment variables file (read-only)
+      - ./.token_cache:/app/.token_cache  # Partner Center token cache file (persistent)
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info --concurrency=5 --max-tasks-per-child=50 --time-limit=900 --soft-time-limit=870
     networks:
       - dyn365hunter-network

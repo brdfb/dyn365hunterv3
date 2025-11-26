@@ -14,6 +14,7 @@ from sqlalchemy import (
     JSON,
     Index,
     UniqueConstraint,
+    Numeric,
 )
 from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.sql import func
@@ -442,15 +443,25 @@ class PartnerCenterReferral(Base):
     referral_id = Column(
         String(255), nullable=False, unique=True, index=True
     )  # Partner Center referral ID (UNIQUE)
+    engagement_id = Column(String(255), nullable=True)  # Engagement ID from Partner Center
+    external_reference_id = Column(String(255), nullable=True)  # Dynamics ID mapping
     referral_type = Column(
         String(50), nullable=True, index=True
     )  # 'co-sell', 'marketplace', 'solution-provider'
-    company_name = Column(String(255), nullable=True)
+    type = Column(String(50), nullable=True)  # Referral type from Partner Center API
+    qualification = Column(String(50), nullable=True)  # Qualification status
+    direction = Column(String(50), nullable=True, index=True)  # 'Incoming' or 'Outgoing'
+    company_name = Column(String(255), nullable=True)  # Company name (from referral)
+    customer_name = Column(String(255), nullable=True)  # Customer name (from customerProfile.name)
+    customer_country = Column(String(100), nullable=True)  # Customer country (from customerProfile.address.country)
     domain = Column(String(255), nullable=True, index=True)  # Normalized domain
     azure_tenant_id = Column(
         String(255), nullable=True, index=True
     )  # Azure Tenant ID (M365 signal)
     status = Column(String(50), nullable=True, index=True)  # Referral status
+    substatus = Column(String(50), nullable=True, index=True)  # Referral substatus
+    deal_value = Column(Numeric(15, 2), nullable=True)  # Deal value from details.dealValue
+    currency = Column(String(10), nullable=True)  # Currency code from details.currency
     raw_data = Column(JSONB, nullable=True)  # Full referral data from Partner Center (for debugging)
     synced_at = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), nullable=False, index=True
