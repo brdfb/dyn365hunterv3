@@ -1,6 +1,6 @@
 # Hunter v1.0 — Sistem Durum Özeti
 
-**Son güncelleme:** 2025-01-28  
+**Son güncelleme:** 2025-01-30  
 
 **Durum:** Production-ready core engine (v1.0.0)
 
@@ -306,17 +306,17 @@ sorularına cevap verebilmesi.
 
 ## 8. Henüz Yapılmayanlar (Bilinçli Olarak Post-MVP)
 
-- **Partner Center Integration (Phase 1–2)**
+- **Partner Center Integration (Phase 1–2)** → ✅ **COMPLETED** (2025-01-30)
 
-  - API client, model ve pipeline kısmen hazır
+  - ✅ API client, model ve pipeline tamamlandı
 
-  - Feature flag: OFF
+  - ✅ UI entegrasyonu tamamlandı (referral column, referral type filter, sync button, sync status indicator)
 
-  - UI entegrasyonu yok
+  - ✅ Background sync (Celery task) tamamlandı
 
-  - Background sync (Celery task) yok
+  - ✅ Feature flag: OFF (MVP-safe, production-ready)
 
-  - Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil
+  - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
 - **Dynamics 365 Integration**
 
@@ -353,8 +353,11 @@ sorularına cevap verebilmesi.
 - Partner Center Phase 2 → ✅ **COMPLETED** (2025-01-30)
 
   - All tasks completed (Tasks 2.1-2.6)
-  - Backend, UI, and background sync fully implemented and tested
-  - Feature flag default OFF (MVP-safe)
+  - Backend: API client, referral ingestion, sync endpoint, Celery task
+  - UI: Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top)
+  - Background sync: Celery Beat schedule (10 min prod, 30s dev)
+  - All tests passing (59/59 tests)
+  - Feature flag default OFF (MVP-safe, production-ready)
 
 - CRM-lite → **deprecated**
 

@@ -1,7 +1,7 @@
 # Hunter — Post-MVP Strategy
 
 **Versiyon:** v1.0 sonrası  
-**Son Güncelleme:** 2025-01-28
+**Son Güncelleme:** 2025-01-30
 
 **Odak:** 3 ana iş paketi  
 
@@ -73,6 +73,8 @@ IP Enrichment özelliği tamamen implement edilmiş ve production'da aktif. Feat
 
 ## 2. Partner Center Referrals Sync (G21 Phase 1) — "Kaynak"
 
+**Durum**: ✅ **COMPLETED** (2025-01-30) - Integration Roadmap Phase 2 tamamlandı
+
 ### 2.1. Amaç
 
 Microsoft Partner Center'dan gelen **resmi referrals** verisini Hunter'a çekmek:
@@ -129,13 +131,23 @@ Microsoft Partner Center'dan gelen **resmi referrals** verisini Hunter'a çekmek
 
 ### 2.5. Başarı Kriterleri
 
-- Günlük job sorunsuz çalışıyor (retry + logging ile)
+- ✅ Günlük job sorunsuz çalışıyor (retry + logging ile) - Celery Beat schedule (10 min prod, 30s dev)
 
-- Hunter lead ekranında:
+- ✅ Hunter lead ekranında:
 
-  - "Bu domain Partner Center referral mı?" sorusuna net yanıt
+  - ✅ "Bu domain Partner Center referral mı?" sorusuna net yanıt - Referral column with badges (co-sell: blue, marketplace: green, solution-provider: orange)
+  - ✅ Referral type filter - "Sadece Partner Center gelenleri göster" filtresi
+  - ✅ Sync button - Header'da "🔄 Partner Center Sync" butonu
+  - ✅ Sync status indicator - "Son sync: X dk önce (OK/FAIL/queued)" göstergesi
 
-- Partner Center kapalıyken Hunter core fonksiyonları tam çalışır (flag OFF)
+- ✅ Partner Center kapalıyken Hunter core fonksiyonları tam çalışır (flag OFF)
+
+**Tamamlanan Özellikler** (2025-01-30):
+- ✅ Backend: API client, referral ingestion, sync endpoint, Celery task
+- ✅ UI: Referral column, referral type filter, sync button, sync status indicator
+- ✅ Background sync: Celery Beat schedule
+- ✅ All tests passing (59/59 tests)
+- ✅ Production-ready, feature flag OFF (MVP-safe)
 
 ---
 
@@ -289,11 +301,13 @@ DNS analiz modülünün güvenilirliğini ve dayanıklılığını artırmak (op
    - 🔄 Sadece feature flag aktifleştirme ve validation gerekiyor
    - Kısa sürede "kalite hissi" artırır
 
-2. **Partner Center Referrals Sync** — S/M  
+2. **Partner Center Referrals Sync** — S/M ✅ **COMPLETED** (2025-01-30)
 
-   - Hunter'a resmi kaynak kazandırır
+   - ✅ Hunter'a resmi kaynak kazandırır
 
-   - Domain datasını daha anlamlı yapar
+   - ✅ Domain datasını daha anlamlı yapar
+
+   - ✅ UI entegrasyonu tamamlandı (referral filter, sync button, sync status)
 
 3. **Dynamics 365 Sales Integration** — M/L  
 

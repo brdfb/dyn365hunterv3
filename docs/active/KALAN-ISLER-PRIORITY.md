@@ -1,8 +1,8 @@
 # Kalan İşler - Öncelik Sırası (CRITIQUE GÜNCELLEMESİ)
 
 **Tarih**: 2025-01-28  
-**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → ✅ **Test Fixes Tamamlandı (2025-01-28)** → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
-**Son Güncelleme**: 2025-01-28 (Test fixes completed, scoring engine validated, Phase 2 task breakdown added)  
+**Durum**: ✅ P0 Hardening Tamamlandı (G19) → ✅ P1 Performance Tamamlandı (2025-01-28) → ✅ **Stabilization Sprint (3 Gün) TAMAMLANDI** - ✅ Gün 1 Tamamlandı → ✅ Gün 2 Tamamlandı → ✅ Gün 3 Tamamlandı → ✅ **Test Fixes Tamamlandı (2025-01-28)** → ✅ **Integration Roadmap Phase 2 (Partner Center) TAMAMLANDI (2025-01-30)** → 🔄 **G21: Architecture Refactor (IN PROGRESS)** → P2 Backlog  
+**Son Güncelleme**: 2025-01-30 (Partner Center UI entegrasyonu tamamlandı - referral filter, sync button, sync status)  
 **Not**: P0 maddelerin tamamı G19'da tamamlandı. P1 maddelerin tamamı 2025-01-28'de tamamlandı. **Stabilization Sprint (3 gün) tamamlandı.** Tüm günler (Gün 1, Gün 2, Gün 3) tamamlandı. **Test Fixes tamamlandı (2025-01-28) - 86 test passing, 0 failures.** **G21: Architecture Refactor başlatıldı (2025-01-28).** P2 backlog olarak kaldı.
 
 ---
@@ -99,10 +99,10 @@ Hunter'ın "motoru" çalışıyor ve entegrasyona hazır:
      - [x] **Task 2.2**: Referral Data Model (raw_leads + partner_center_referrals hybrid) ✅ COMPLETED (2025-01-28)
      - [x] **Task 2.3**: Referral Ingestion (lead tipi, domain extraction, Azure Tenant ID, idempotent scanning) ✅ COMPLETED (2025-01-28)
      - [x] **Task 2.4**: API Endpoint (MVP: sadece POST /api/referrals/sync) ✅ COMPLETED (2025-01-30) - 7/7 tests passing
-     - [x] **Task 2.5**: UI Integration (lead listesine 1 kolon: referral type) ✅ COMPLETED (2025-01-30) - 3/3 API tests passing
+     - [x] **Task 2.5**: UI Integration ✅ COMPLETED (2025-01-30) - Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top), toast notifications
      - [x] **Task 2.6**: Background Sync (Celery polling: prod 10 dakika / dev 30s) ✅ COMPLETED (2025-01-30) - 10/10 tests passing
-   - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
-   - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
+   - **Status**: ✅ **Phase 2 Complete** - Backend, UI (referral filter + sync button + status), and background sync fully implemented and tested
+   - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
    - **Detailed Task List**: `docs/prompts/2025-01-28-partner-center-phase2-task-list.md` (archived)
    - **TODO Tracking**: `docs/todos/PARTNER-CENTER-PHASE2.md` ✅ COMPLETED
 
