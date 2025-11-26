@@ -14,7 +14,8 @@ alwaysApply: true
 - **✅ CSP P-Model Integration**: ✅ Completed (2025-01-29) - Production v1.1 Core Feature - Global CSP Priority Model (P1-P6), Commercial Segment & Heat, Technical Heat, Priority Category & Label, UI integration (P-badges, tooltips, score breakdown panel)
 - **✅ Production Bug Fixes**: ✅ Completed (2025-01-29) - DMARC Coverage bug fix, Risk Summary text fix, Score Modal provider-specific description
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine
-- **🔄 Partner Center Phase 2**: 🔄 In Progress (2025-01-29) - Integration Roadmap Phase 2 (Branch: feature/partner-center-phase1, Tasks 2.1-2.3 completed, 2.4-2.6 pending, feature flag OFF, MVP-safe)
+- **✅ Partner Center Phase 2**: ✅ Completed (2025-01-30) - Integration Roadmap Phase 2 (Tasks 2.1-2.6 + UI Integration completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
+  - **UI Integration**: ✅ Completed (2025-01-30) - Referral column, referral type filter, sync button, sync status indicator
 - **Out of Scope**: D365 adapter, `scripts/demo_run.sh`
 
 ## Code Style & Standards

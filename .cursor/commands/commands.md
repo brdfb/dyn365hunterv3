@@ -295,5 +295,6 @@ curl -X POST http://localhost:8000/api/referrals/sync \
 
 **Note:** 
 - Background sync runs automatically via Celery Beat (10 min prod, 30s dev)
-- Manual sync is optional (Task 2.5 Aşama 3 - not implemented yet)
+- Manual sync is available via UI: Header "🔄 Partner Center Sync" button (2025-01-30)
+- UI shows sync status: "Son sync: X dk önce (OK/FAIL/queued)" in header right-top
 - Feature flag: `HUNTER_PARTNER_CENTER_ENABLED=false` (default: disabled)

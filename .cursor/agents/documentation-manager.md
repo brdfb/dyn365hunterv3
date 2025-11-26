@@ -295,7 +295,8 @@ Agent should regularly check:
 - **Production Bug Fixes status** (✅ DONE & PROD-READY - 2025-01-29 - DMARC coverage, risk summary, score modal)
 - **Sales Summary v1.1 status** (✅ DONE & PROD-READY - 2025-01-29 - Intelligence Layer, UX polished)
 - **G21 Architecture Refactor status** (🔄 In Progress - 2025-01-28)
-- **Partner Center Phase 2 status** (✅ Completed - 2025-01-30 - Branch: feature/partner-center-phase1, Tasks 2.1-2.6 completed, all tests passing (10/10 referral sync + 3/3 referral_type API), feature flag OFF, MVP-safe)
+- **Partner Center Phase 2 status** (✅ Completed - 2025-01-30 - Branch: feature/partner-center-phase1, Tasks 2.1-2.6 + UI Integration completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
+  - **UI Integration**: ✅ Completed (2025-01-30) - Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top), toast notifications
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -322,7 +323,7 @@ This agent should be **always active** in the AI assistant's context. When you s
 - User mentions "G19 başlıyor" or "G21 başlıyor" or "Starting G21" → Create TODO
 - User mentions "Stabilization Sprint tamamlandı" → Archive stabilization docs
 - User mentions "CSP P-Model tamamlandı" → Archive CSP P-Model docs
-- User mentions "Partner Center Phase 2 tamamlandı" → Update Partner Center Phase 2 status to completed
+- User mentions "Partner Center Phase 2 tamamlandı" or "Partner Center UI tamamlandı" → Update Partner Center Phase 2 status to completed (already completed - 2025-01-30)
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
