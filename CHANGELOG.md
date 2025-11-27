@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Partner Center: Referral Detail Modal Action Buttons** (2025-01-30) - Quick actions for referral details
+  - **Quick Copy Buttons**: Copy email, domain, deal value, and referral ID with one click
+    - Toast feedback: "✓ Kopyalandı: {value}"
+    - Visual feedback: Button shows checkmark and green highlight on success
+    - Fallback support for older browsers (document.execCommand)
+  - **Send to Dynamics Button**: Placeholder button for future D365 integration
+    - Disabled state with tooltip: "Dynamics 365 entegrasyonu yakında"
+    - Icon: 📤
+  - **Open in Partner Center Link**: External link to Partner Center dashboard
+    - Opens referral in new tab: `https://partner.microsoft.com/en-us/dashboard/referrals/{referral_id}`
+    - Icon: 🔗
+  - **UI Layout**: Action buttons bar in modal header (sticky, responsive)
+  - **Files**: `mini-ui/js/app.js`, `mini-ui/js/ui-referrals.js`, `mini-ui/styles.css`, `docs/active/HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+  - **Status**: ✅ **Completed** - Modal action buttons ready for use
+
 ### Changed
 - **Partner Center: Unlimited Referral Pagination** (2025-01-30) - Removed hard max-pages limit for Partner Center sync
   - **Config**: `HUNTER_PARTNER_CENTER_REFERRAL_MAX_PAGES` now defaults to `0` (unlimited pagination)

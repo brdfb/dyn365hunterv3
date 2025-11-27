@@ -166,6 +166,40 @@ export function renderReferralDetail(detail) {
         return escapeHtml(String(deal.estimated_value));
     })();
 
+    // Build action buttons
+    const emailToCopy = contact.email || (teamMembers.length > 0 ? teamMembers[0].email : null);
+    const domainToCopy = detail.domain || detail.raw_domain;
+    const dealValueToCopy = deal.estimated_value 
+        ? `${deal.estimated_value.toLocaleString('tr-TR')} ${deal.currency || detail.currency || 'USD'}`
+        : null;
+    
+    const actionButtonsHtml = `
+        <div class="referral-detail__actions" data-referral-id="${escapeHtml(detail.referral_id)}">
+            <div class="referral-detail__actions-group">
+                ${emailToCopy ? `<button type="button" class="referral-detail__action-btn referral-detail__action-btn--copy" data-copy-value="${escapeHtml(emailToCopy)}" title="E-posta adresini kopyala">
+                    📧 E-posta
+                </button>` : ''}
+                ${domainToCopy ? `<button type="button" class="referral-detail__action-btn referral-detail__action-btn--copy" data-copy-value="${escapeHtml(domainToCopy)}" title="Domain'i kopyala">
+                    🌐 Domain
+                </button>` : ''}
+                ${dealValueToCopy ? `<button type="button" class="referral-detail__action-btn referral-detail__action-btn--copy" data-copy-value="${escapeHtml(dealValueToCopy)}" title="Deal değerini kopyala">
+                    💰 Deal Value
+                </button>` : ''}
+                <button type="button" class="referral-detail__action-btn referral-detail__action-btn--copy" data-copy-value="${escapeHtml(detail.referral_id)}" title="Referral ID'yi kopyala">
+                    🆔 Referral ID
+                </button>
+            </div>
+            <div class="referral-detail__actions-group">
+                <button type="button" class="referral-detail__action-btn referral-detail__action-btn--d365" disabled title="Dynamics 365 entegrasyonu yakında">
+                    📤 Send to Dynamics
+                </button>
+                <a href="https://partner.microsoft.com/en-us/dashboard/referrals/${escapeHtml(detail.referral_id)}" target="_blank" rel="noopener noreferrer" class="referral-detail__action-btn referral-detail__action-btn--link" title="Partner Center'da aç">
+                    🔗 Open in PC
+                </a>
+            </div>
+        </div>
+    `;
+
     content.innerHTML = `
         <div class="referral-detail">
             <div class="referral-detail__header">
@@ -179,6 +213,7 @@ export function renderReferralDetail(detail) {
                     ${detail.substatus ? `<span class="referral-detail__chip">${escapeHtml(detail.substatus)}</span>` : ''}
                 </div>
             </div>
+            ${actionButtonsHtml}
 
             <div class="referral-detail__grid">
                 <section class="referral-detail__section">

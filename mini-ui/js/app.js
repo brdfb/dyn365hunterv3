@@ -1167,7 +1167,64 @@ function bindReferralActions() {
                 button.textContent = originalText;
             }
         }
+
+        // Referral detail modal: Copy buttons
+        if (e.target.classList.contains('referral-detail__action-btn--copy')) {
+            const copyValue = e.target.dataset.copyValue;
+            if (!copyValue) return;
+
+            try {
+                await copyToClipboard(copyValue);
+                const originalText = e.target.textContent;
+                e.target.textContent = '✓ Kopyalandı';
+                e.target.classList.add('referral-detail__action-btn--copied');
+                showToast(`✓ Kopyalandı: ${copyValue}`, 'success');
+                
+                setTimeout(() => {
+                    e.target.textContent = originalText;
+                    e.target.classList.remove('referral-detail__action-btn--copied');
+                }, 2000);
+            } catch (error) {
+                logError('Copy to clipboard failed:', error);
+                showToast('Kopyalama başarısız. Lütfen manuel olarak kopyalayın.', 'error');
+            }
+            return;
+        }
+
+        // Referral detail modal: Send to Dynamics button (placeholder)
+        if (e.target.classList.contains('referral-detail__action-btn--d365')) {
+            if (!e.target.disabled) {
+                // Future: Implement D365 push
+                showToast('Dynamics 365 entegrasyonu yakında aktif olacak.', 'info');
+            }
+            return;
+        }
     });
+}
+
+/**
+ * Copy text to clipboard (async, with fallback)
+ */
+async function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
 }
 
 // Initialize when DOM is ready

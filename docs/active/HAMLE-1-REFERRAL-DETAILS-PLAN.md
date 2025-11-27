@@ -50,6 +50,32 @@
 - Butona basınca modal açılıyor, contact email vb. görünür
 - Ham JSON sekmesi ile Microsoft datası incelebilir
 - Feature flag kapalıysa UI butonu göstermez
-- Devtools network’te detail endpoint 200 döner
+- Devtools network'te detail endpoint 200 döner
+
+### 🚀 Phase 2: Action Buttons (2025-01-30)
+**Goal**: Modal'a quick actions eklemek (copy, send to D365, external link)
+
+**Actions**:
+1. **Quick Copy Buttons**:
+   - Copy Email (contact.email veya team member email)
+   - Copy Domain
+   - Copy Deal Value (formatted: "74 USD")
+   - Copy Referral ID
+   - Toast feedback: "✓ Kopyalandı: {value}"
+
+2. **Send to Dynamics Button**:
+   - Placeholder button (gelecekte D365 entegrasyonu için)
+   - Disabled state + tooltip: "Dynamics 365 entegrasyonu yakında"
+   - Icon: 📤 veya 🚀
+
+3. **Open in Partner Center Link**:
+   - External link: `https://partner.microsoft.com/en-us/dashboard/referrals/{referral_id}`
+   - Icon: 🔗
+   - Opens in new tab
+
+**UI Layout**:
+- Action buttons bar: Modal header'ın altında, sticky
+- Button style: Small, icon + text, grouped
+- Copy buttons: Show checkmark on success, toast notification
 
 
