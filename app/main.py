@@ -47,6 +47,7 @@ from app.api.v1 import (
     rescan as rescan_v1,
     alerts as alerts_v1,
     sales_summary as sales_summary_v1,
+    d365_routes as d365_routes_v1,
 )
 from fastapi import APIRouter
 
@@ -136,6 +137,7 @@ v1_router.include_router(pdf_v1.router)  # Already has /leads prefix
 v1_router.include_router(rescan_v1.router)  # Already has /scan prefix
 v1_router.include_router(alerts_v1.router)  # Already has /alerts prefix
 v1_router.include_router(sales_summary_v1.router)  # Already has /leads prefix
+v1_router.include_router(d365_routes_v1.router)  # Already has /d365 prefix
 # Note: referrals router will be added to v1 when v1 version is created
 app.include_router(v1_router)
 

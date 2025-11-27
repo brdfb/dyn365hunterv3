@@ -22,12 +22,21 @@ Comprehensive documentation management agent that automatically updates document
 - **Extract Key Context**: Capture decisions and important discussions
 
 ### 4. Regular Maintenance
+- **ACTIVE-STATUS-SUMMARY.md Check**: Düzenli kontrol et (haftalık veya önemli değişikliklerden sonra)
+  - Dosya sayısı kontrolü (hedef: 5-7 dosya)
+  - Tutarlılık kontrolü (Partner Center, Dynamics 365, UI durumları)
+  - Cleanup önerileri kontrolü
 - **Weekly Cleanup**: Check for outdated prompts (not referenced in 7+ days)
 - **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files, reference guides moved to `docs/reference/`)
 - **Feature Documentation**: Archive feature docs when complete (e.g., PROVIDER-CHANGE-TRACKING.md, DUPLICATE-PREVENTION.md)
 - **Planning Docs**: Archive completed planning docs to `docs/archive/`
 - **Token Efficiency**: Archive immediately when work is complete
 - **Reference Guides**: Reference guides are in `docs/reference/` (not in `docs/active/`)
+- **Hamle Completion Cleanup**: Hamle 1 tamamlandığında 4 dosya archive et:
+  - `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
+  - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
+  - `HAMLE-1-EXECUTION-RUNBOOK.md`
+  - `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
 
 ## Triggers
 
@@ -286,6 +295,10 @@ scripts/manage_docs.sh list
 ## Status Monitoring
 
 Agent should regularly check:
+- **ACTIVE-STATUS-SUMMARY.md** (📊 **NEW** - 2025-01-30): Düzenli kontrol et - Tek bakışta tüm active dosyaların durumu
+  - Dosya sayısı kontrolü (hedef: 5-7 dosya)
+  - Tutarlılık kontrolü (Partner Center, Dynamics 365, UI durumları)
+  - Cleanup önerileri (archive edilebilir dosyalar)
 - TODO files status changes
 - Active documentation count (should be < 7 files, reference guides are in `docs/reference/`)
 - Feature documentation in `docs/active/` (should be archived when complete)
@@ -295,8 +308,15 @@ Agent should regularly check:
 - **Production Bug Fixes status** (✅ DONE & PROD-READY - 2025-01-29 - DMARC coverage, risk summary, score modal)
 - **Sales Summary v1.1 status** (✅ DONE & PROD-READY - 2025-01-29 - Intelligence Layer, UX polished)
 - **G21 Architecture Refactor status** (🔄 In Progress - 2025-01-28)
-- **Partner Center Phase 2 status** (✅ Completed - 2025-01-30 - Branch: feature/partner-center-phase1, Tasks 2.1-2.6 + UI Integration completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
+- **Partner Center Phase 2 status** (✅ Backend Completed - 2025-01-30, ⚠️ Production'da aktif değil - feature flag OFF)
   - **UI Integration**: ✅ Completed (2025-01-30) - Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top), toast notifications
+  - **Hamle 1**: ⏳ Pending - Aktifleştirme ve debug gerekiyor (`CRITICAL-3-HAMLE-PRODUCT-READY.md`)
+- **Hamle 1 (Partner Center Activation) status**: ⏳ Pending - Backend tamamlanmış, feature flag OFF, aktifleştirme gerekiyor
+  - **Cleanup Trigger**: Hamle 1 tamamlandığında 4 dosya archive edilebilir:
+    - `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
+    - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
+    - `HAMLE-1-EXECUTION-RUNBOOK.md`
+    - `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -324,7 +344,14 @@ This agent should be **always active** in the AI assistant's context. When you s
 - User mentions "Stabilization Sprint tamamlandı" → Archive stabilization docs
 - User mentions "CSP P-Model tamamlandı" → Archive CSP P-Model docs
 - User mentions "Partner Center Phase 2 tamamlandı" or "Partner Center UI tamamlandı" → Update Partner Center Phase 2 status to completed (already completed - 2025-01-30)
+- User mentions "Hamle 1 tamamlandı" or "Partner Center aktifleştirildi" → Run Hamle 1 cleanup workflow:
+  1. Archive 4 Hamle 1 dosyası: `HAMLE-1-PRODUCTION-DEPLOYMENT.md`, `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`, `HAMLE-1-EXECUTION-RUNBOOK.md`, `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+  2. Update `ACTIVE-STATUS-SUMMARY.md` (Hamle 1 completed, dosya sayısı güncelle)
+  3. Update `HUNTER-STATE-v1.0.md` (Partner Center production'da aktif)
+  4. Update `G21-ROADMAP-CURRENT.md` (Partner Center production'da aktif)
+  5. Confirm: "✅ Hamle 1 completed - 4 dosya archived, documentation updated"
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
+- **ACTIVE-STATUS-SUMMARY.md Update**: Önemli değişikliklerden sonra güncelle (phase completion, cleanup, etc.)
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
 

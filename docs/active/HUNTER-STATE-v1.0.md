@@ -1,8 +1,18 @@
 # Hunter v1.0 — Sistem Durum Özeti
 
-**Son güncelleme:** 2025-01-30  
+**Son güncelleme:** 2025-01-30 (Tüm durumlar netleştirildi: Partner Center, Dynamics 365, UI, Backend Engine, Core Freeze)  
 
 **Durum:** Production-ready core engine (v1.0.0)
+
+**Önemli Notlar:**
+- **Backend Engine:** ✅ Ferrari seviyesinde (DNS, scoring, enrichment, signals)
+- **Core Freeze:** ✅ **AKTİF** — Core modüller dokunulmaz (CODEOWNERS, CI regression job, feature flags)
+- **Partner Center:** ✅ Backend tamamlanmış, ⚠️ Production'da aktif değil (feature flag OFF)
+- **Dynamics 365:** ❌ Sıfır kod - Sadece plan var (Adapter pattern ile implement edilecek)
+- **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
+
+**Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
+**Core Freeze + D365 Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
 
 ---
 
@@ -23,6 +33,34 @@ sorularına cevap verebilmesi.
 ---
 
 ## 2. Core Engine (Production-Ready)
+
+**Durum:** ✅ **Ferrari seviyesinde** - DNS, scoring, enrichment, signals tam çalışıyor  
+**Core Freeze:** ✅ **AKTİF** — Core modüller dokunulmaz koruma altında (2025-01-30)
+
+### 2.0. Core Freeze Protokolü
+
+**Amaç:** Core'a dokunursak enayi oluruz — 497 test, P0/P1/P-Stabilization hepsi yeşil.
+
+**Koruma Mekanizmaları:**
+- **CODEOWNERS:** Core modüller için 2 reviewer zorunlu
+- **CI Regression Job:** Core testleri fail → merge yok
+- **Feature Flags:** Yeni entegrasyonlar flag altında (`HUNTER_D365_ENABLED`, `HUNTER_PARTNER_CENTER_ENABLED`)
+- **Fiziksel Ayrım:** Core (`app/core/`) vs Integration (`app/integrations/`)
+
+**Dokunulmaz Core Modüller:**
+- `app/core/scorer.py`
+- `app/core/analyzer_*.py` (analyzer_dns, analyzer_whois, analyzer_enrichment)
+- `app/core/normalizer.py`
+- `app/core/provider_map.py`
+- `app/core/priority.py`
+- `app/core/sales_engine.py`
+- `app/core/enrichment*.py`
+- `app/core/ip_enrichment/` (L1 zaten prod active)
+- `tests/test_scorer_*.py`
+- `tests/test_regression_dataset.py`
+- `tests/test_sales_*.py`
+
+**Detaylar:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
 
 ### 2.1. Analiz Yetkinlikleri
 
@@ -212,6 +250,8 @@ sorularına cevap verebilmesi.
 
 ## 5. UI (Mini UI v1.1)
 
+**Durum:** ✅ **Çalışıyor** - ⚠️ **Estetik iyileştirme gerekiyor** (Hamle 3: UI Polish)
+
 - Lead table:
 
   - Sorting
@@ -253,6 +293,8 @@ sorularına cevap verebilmesi.
   - Empty state'ler
 
   - Sales-friendly metinler
+
+**Not:** UI çalışıyor ancak estetik iyileştirme gerekiyor (design system, component library, UX improvements). Detaylar için `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 3) dosyasına bakın.
 
 ---
 
@@ -306,7 +348,7 @@ sorularına cevap verebilmesi.
 
 ## 8. Henüz Yapılmayanlar (Bilinçli Olarak Post-MVP)
 
-- **Partner Center Integration (Phase 1–2)** → ✅ **COMPLETED** (2025-01-30)
+- **Partner Center Integration (Phase 1–2)** → ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL**
 
   - ✅ API client, model ve pipeline tamamlandı
 
@@ -316,17 +358,22 @@ sorularına cevap verebilmesi.
 
   - ✅ Background sync (Celery task) tamamlandı
 
-  - ✅ Feature flag: OFF (MVP-safe, production-ready)
+  - ⚠️ **Feature flag: OFF** - Production'da aktif değil (Hamle 1: Aktifleştirme ve debug gerekiyor - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
-- **Dynamics 365 Integration**
+- **Dynamics 365 Integration** → ❌ **SIFIR KOD** (Hamle 2: 6-10 gün)
 
-  - Hunter → D365 Sales:
-
-    - Lead → Contact/Account → Opportunity mapping
-
-  - İki yönlü sync yok
+  - ⚠️ **Durum:** Sadece plan var, hiçbir dosya yok
+  - **Mimari:** Adapter Pattern — Core'a dokunmadan yan taraftan takma
+  - Plan: Hunter → D365 Sales:
+    - Lead → D365 Lead mapping (tek yönlü push)
+    - Duplicate detection (upsert by domain/email)
+    - Custom hunter fields (`hunter_score`, `hunter_segment`, vb.)
+  - İki yönlü sync yok (planlanmış değil)
+  - **Detaylar:** 
+    - `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 2)
+    - `CORE-FREEZE-D365-PUSH-PLAN.md` (Mimari plan)
 
 - **G21 Architecture Refactor (Phase 4–6)**
 
@@ -352,14 +399,14 @@ sorularına cevap verebilmesi.
 
   - Yerine: Internal Access Mode (network-level erişim)
 
-- Partner Center Phase 2 → ✅ **COMPLETED** (2025-01-30)
+- Partner Center Phase 2 → ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL**
 
   - All tasks completed (Tasks 2.1-2.6)
   - Backend: API client, referral ingestion, sync endpoint, Celery task
   - UI: Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top)
   - Background sync: Celery Beat schedule (10 min prod, 30s dev)
   - All tests passing (59/59 tests)
-  - Feature flag default OFF (MVP-safe, production-ready)
+  - ⚠️ **Feature flag default OFF** - Production'da aktif değil (Hamle 1: Aktifleştirme gerekiyor - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
 
 - CRM-lite → **deprecated**
 

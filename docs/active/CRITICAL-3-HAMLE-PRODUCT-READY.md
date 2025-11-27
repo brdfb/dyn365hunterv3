@@ -81,80 +81,90 @@
 ---
 
 ### **HAMLE 2: Dynamics 365 Push Entegrasyonu**
-**Süre**: 6-10 gün  
-**Öncelik**: P0 (Kritik - Satış pipeline'ı)
+**Süre**: 6-10 gün (4 faz: S + M + S-M + S = ~1 hafta)  
+**Öncelik**: P0 (Kritik - Satış pipeline'ı)  
+**Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma
 
 #### Problem:
 - **Sıfır kod** - Hiçbir dosya yok
 - Plan var ama execution yok
 - Satış ekibi Hunter → D365 manuel export/import yapıyor
 
-#### Aksiyonlar:
+#### Mimari Yaklaşım:
+**Core Freeze + Adapter Pattern:**
+- Core'a **dokunulmayacak** (dokunulmaz çekirdek)
+- D365 entegrasyonu **tamamen adapter katmanı** (`app/integrations/d365/`)
+- Fiziksel ayrım: Core vs Integration
+- Feature flag: `HUNTER_D365_ENABLED` (default: `false`)
 
-**Task 2.1: Dynamics 365 API Client** (2-3 gün)
-- [ ] `app/core/dynamics365.py` oluştur
-- [ ] OAuth 2.0 authentication (Azure AD)
-- [ ] Token refresh mechanism
-- [ ] Rate limiting handling
-- [ ] Batch request API
-- [ ] Error handling (network, API, auth)
+**Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
 
-**Task 2.2: Data Mapping** (1-2 gün)
-- [ ] `app/core/dynamics_mapping.py` oluştur
-- [ ] Hunter lead → D365 Lead mapping
-- [ ] Hunter score → D365 Opportunity Stage mapping
-- [ ] Hunter segment → D365 Lead Source mapping
-- [ ] IP enrichment → D365 Custom Fields mapping
-- [ ] Validation (required fields check)
+#### Aksiyonlar (4 Faz):
 
-**Task 2.3: Pipeline Integration** (2-3 gün)
-- [ ] `app/core/dynamics_pipeline.py` oluştur
-- [ ] Lead → Contact → Account → Opportunity flow
-- [ ] Duplicate detection (check existing records)
-- [ ] Account merge logic
-- [ ] Opportunity creation
-- [ ] Transaction logging (audit trail)
+**Faz 1: Skeleton + Plumbing (S - 0.5-1 gün)**
+- [ ] `POST /api/v1/d365/push-lead` endpoint (lead_id/domain alır, job başlatır)
+- [ ] `push_lead_to_d365` Celery task (şimdilik sadece log yazar)
+- [ ] `d365_sync_status` alanlarını ekleyen migration
+- [ ] Basit unit test'ler
+- [ ] `app/integrations/d365/` klasör yapısı
 
-**Task 2.4: Sync Mechanisms** (1-2 gün)
-- [ ] `app/core/dynamics_sync.py` oluştur
-- [ ] Hunter → D365 push sync
-- [ ] Sync status tracking (synced, failed, pending)
-- [ ] `DynamicsSyncLog` model (database)
-- [ ] Alembic migration
+**Faz 2: D365 Client + Mapping (M - ~1 gün)**
+- [ ] `app/integrations/d365/client.py` (token, create/update)
+- [ ] `app/integrations/d365/mapping.py` (map_lead_to_d365)
+- [ ] Retry + idempotency
+- [ ] Testler:
+  - Mapping unit tests
+  - Client için mock-based tests
+- [ ] `.env` + Prod Engineering Guide'a uygun secret yönetimi
 
-**Task 2.5: API Endpoints** (1 gün)
-- [ ] `app/api/dynamics.py` oluştur
-- [ ] `POST /api/dynamics/sync/{domain}` - Manual sync
-- [ ] `GET /api/dynamics/status/{domain}` - Sync status
-- [ ] `POST /api/dynamics/bulk-sync` - Bulk sync
-- [ ] Error handling ve validation
+**Faz 3: UI & Status + Monitoring (S-M - ~1 gün)**
+- [ ] Lead tablosuna `D365` column (badge)
+- [ ] Lead detail modal'a `D365 status` bölümü
+- [ ] "Push to Dynamics" butonu (single + bulk)
+- [ ] Metrics:
+  - `d365_push_total`
+  - `d365_push_fail_total`
+- [ ] Sentry breadcrumb'ler (hangi lead, hangi status)
 
-**Task 2.6: UI Integration** (1 gün)
-- [ ] Mini UI'da "Push to Dynamics" butonu
-- [ ] Sync status indicator
-- [ ] Error handling UI (toast notifications)
-- [ ] Loading states
+**Faz 4: Hardening & Guardrails (S - ~0.5 gün)**
+- [ ] D365 down ise:
+  - Task retry + exponential backoff
+  - 3 fail sonrası `error` state, UI'da kırmızı badge
+- [ ] D365 mini-checklist:
+  - Token alınıyor mu?
+  - Lead create çalışıyor mu?
+  - Mapping testleri yeşil mi?
 
 #### Başarı Kriterleri:
-- ✅ Hunter'dan bir lead, tek tıkla D365'te lead/opp olarak görünebiliyor
-- ✅ Duplicate detection çalışıyor
-- ✅ Account merge logic çalışıyor
+- ✅ Hunter'dan bir lead, tek tıkla D365'te lead olarak görünebiliyor
+- ✅ Duplicate detection çalışıyor (upsert by domain/email)
 - ✅ Error handling robust (auth, rate limit, validation)
-- ✅ UI'da sync butonu ve status indicator çalışıyor
+- ✅ UI'da sync butonu ve status çalışıyor
+- ✅ **D365 down olsa bile Hunter core çalışıyor** (health check'te D365 bağımlılığı yok)
 
-#### Dosyalar (Yeni):
-- `app/core/dynamics365.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/core/dynamics_mapping.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/core/dynamics_pipeline.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/core/dynamics_sync.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/api/dynamics.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/db/models.py` - `DynamicsSyncLog` model eklenecek
-- `alembic/versions/XXXX_add_dynamics_sync_tables.py` ⚠️ **YOK - OLUŞTURULACAK**
+#### Dosyalar (Yeni - Adapter Katmanı):
+- `app/integrations/d365/__init__.py` ⚠️ **YOK - OLUŞTURULACAK**
+- `app/integrations/d365/client.py` ⚠️ **YOK - OLUŞTURULACAK** (D365 Web API client)
+- `app/integrations/d365/mapping.py` ⚠️ **YOK - OLUŞTURULACAK** (Hunter → D365 DTO mapping)
+- `app/integrations/d365/dto.py` ⚠️ **YOK - OLUŞTURULACAK** (D365 data transfer objects)
+- `app/integrations/d365/errors.py` ⚠️ **YOK - OLUŞTURULACAK** (D365-specific exceptions)
+- `app/tasks/d365_push.py` ⚠️ **YOK - OLUŞTURULACAK** (Celery task)
+- `app/api/v1/d365_routes.py` ⚠️ **YOK - OLUŞTURULACAK** (API endpoints)
+- `alembic/versions/XXXX_add_d365_sync_fields.py` ⚠️ **YOK - OLUŞTURULACAK** (DB migration)
+- `alembic/versions/XXXX_add_d365_push_jobs_table.py` ⚠️ **YOK - OLUŞTURULACAK** (audit table)
 
 #### Dosyalar (Modifiye):
-- `mini-ui/js/ui-leads.js` - "Push to Dynamics" butonu
+- `app/api/v1/leads.py` - `d365_status` field ekle
+- `mini-ui/js/d365_actions.js` (veya `.js`) - "Push to Dynamics" butonu + state
 - `mini-ui/index.html` - UI elements
-- `app/main.py` - Dynamics router ekle
+- `app/main.py` - D365 router ekle
+- `app/config.py` - `HUNTER_D365_ENABLED` feature flag
+
+#### Core Freeze Protokolü:
+- ✅ Core modüllere **dokunulmayacak** (`app/core/scorer.py`, `analyzer_*.py`, vb.)
+- ✅ CODEOWNERS dosyası oluşturulacak (core için 2 reviewer zorunlu)
+- ✅ CI'de core regression job (fail → merge yok)
+- ✅ Feature flag ile core korunuyor
 
 ---
 

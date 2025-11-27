@@ -181,80 +181,81 @@ Implement correct engineering sequence for Hunter integration with external syst
 ### Phase 3: Dynamics 365 Integration (P2) ⏳ **PENDING**
 
 **Status**: ⏳ **Pending** (after Phase 2)  
-**Duration**: 6-10 days  
+**Duration**: 6-10 days (4 faz: S + M + S-M + S = ~1 hafta)  
 **Risk**: 4/10  
 **Priority**: P2  
-**Branch**: `feature/dynamics365-integration`
+**Branch**: `feature/d365-push-v1`  
+**Mimari**: Adapter Pattern — Core Freeze + Integration Layer
 
-#### Tasks
+**Not:** Detaylı mimari plan için `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
 
-- [ ] **Task 3.1**: Dynamics 365 API Client
-  - [ ] Create `app/core/dynamics365.py` - Dynamics 365 API client
-  - [ ] Implement OAuth 2.0 authentication
-  - [ ] Implement token refresh mechanism
-  - [ ] Implement rate limiting handling
-  - [ ] Implement batch request API
+#### Tasks (4 Faz)
 
-- [ ] **Task 3.2**: Data Mapping
-  - [ ] Create `app/core/dynamics_mapping.py` - Data mapping logic
-  - [ ] Map Hunter lead → Dynamics Lead
-  - [ ] Map Hunter score → Dynamics Opportunity Stage
-  - [ ] Map Hunter segment → Dynamics Lead Source
-  - [ ] Map IP enrichment → Dynamics Custom Fields
+**Faz 1: Skeleton + Plumbing (S - 0.5-1 gün)**
+- [ ] `POST /api/v1/d365/push-lead` endpoint (lead_id/domain alır, job başlatır)
+- [ ] `push_lead_to_d365` Celery task (şimdilik sadece log yazar)
+- [ ] `d365_sync_status` alanlarını ekleyen migration
+- [ ] Basit unit test'ler
+- [ ] `app/integrations/d365/` klasör yapısı
 
-- [ ] **Task 3.3**: Pipeline Integration
-  - [ ] Create `app/core/dynamics_pipeline.py` - Pipeline logic
-  - [ ] Implement Lead → Contact → Account → Opportunity flow
-  - [ ] Implement duplicate detection
-  - [ ] Implement account merge logic
-  - [ ] Implement opportunity creation
+**Faz 2: D365 Client + Mapping (M - ~1 gün)**
+- [ ] `app/integrations/d365/client.py` (token, create/update)
+- [ ] `app/integrations/d365/mapping.py` (map_lead_to_d365)
+- [ ] Retry + idempotency
+- [ ] Testler:
+  - Mapping unit tests
+  - Client için mock-based tests
+- [ ] `.env` + Prod Engineering Guide'a uygun secret yönetimi
 
-- [ ] **Task 3.4**: Sync Mechanisms
-  - [ ] Create `app/core/dynamics_sync.py` - Sync logic
-  - [ ] Implement Hunter → Dynamics sync (push)
-  - [ ] Implement Dynamics → Hunter sync (pull) - optional
-  - [ ] Implement conflict resolution
-  - [ ] Implement audit logging
+**Faz 3: UI & Status + Monitoring (S-M - ~1 gün)**
+- [ ] Lead tablosuna `D365` column (badge)
+- [ ] Lead detail modal'a `D365 status` bölümü
+- [ ] "Push to Dynamics" butonu (single + bulk)
+- [ ] Metrics:
+  - `d365_push_total`
+  - `d365_push_fail_total`
+- [ ] Sentry breadcrumb'ler (hangi lead, hangi status)
 
-- [ ] **Task 3.5**: API Endpoints
-  - [ ] Create `app/api/dynamics.py` - Dynamics endpoints
-  - [ ] `POST /dynamics/sync/{domain}` - Manual sync to Dynamics
-  - [ ] `GET /dynamics/status/{domain}` - Check sync status
-  - [ ] `POST /dynamics/bulk-sync` - Bulk sync to Dynamics
+**Faz 4: Hardening & Guardrails (S - ~0.5 gün)**
+- [ ] D365 down ise:
+  - Task retry + exponential backoff
+  - 3 fail sonrası `error` state, UI'da kırmızı badge
+- [ ] D365 mini-checklist:
+  - Token alınıyor mu?
+  - Lead create çalışıyor mu?
+  - Mapping testleri yeşil mi?
 
-- [ ] **Task 3.6**: UI Integration
-  - [ ] Add Dynamics sync button to Mini UI
-  - [ ] Add Dynamics status indicator
-  - [ ] Add Dynamics sync history
-  - [ ] Add Dynamics error handling UI
-
-- [ ] **Task 3.7**: Background Sync
-  - [ ] Create Celery task for periodic Dynamics sync
-  - [ ] Configure sync schedule
-  - [ ] Handle sync errors and retries
-  - [ ] Implement exponential backoff
-
-**Files to Create**:
-- `app/core/dynamics365.py`
-- `app/core/dynamics_mapping.py`
-- `app/core/dynamics_pipeline.py`
-- `app/core/dynamics_sync.py`
-- `app/api/dynamics.py`
-- `app/db/models.py` - Dynamics sync tracking models
-- `alembic/versions/XXXX_add_dynamics_sync_tables.py`
+**Files to Create** (Adapter Katmanı):
+- `app/integrations/d365/__init__.py`
+- `app/integrations/d365/client.py` (D365 Web API client)
+- `app/integrations/d365/mapping.py` (Hunter → D365 DTO mapping)
+- `app/integrations/d365/dto.py` (D365 data transfer objects)
+- `app/integrations/d365/errors.py` (D365-specific exceptions)
+- `app/tasks/d365_push.py` (Celery task)
+- `app/api/v1/d365_routes.py` (API endpoints)
+- `alembic/versions/XXXX_add_d365_sync_fields.py` (DB migration)
+- `alembic/versions/XXXX_add_d365_push_jobs_table.py` (audit table)
 
 **Files to Modify**:
-- `mini-ui/js/ui-leads.js`
-- `mini-ui/index.html`
-- `app/core/celery_app.py`
+- `app/api/v1/leads.py` - `d365_status` field ekle
+- `mini-ui/js/d365_actions.js` (veya `.js`) - "Push to Dynamics" butonu + state
+- `mini-ui/index.html` - UI elements
+- `app/main.py` - D365 router ekle
+- `app/config.py` - `HUNTER_D365_ENABLED` feature flag
+
+**Core Freeze Protokolü:**
+- ✅ Core modüllere **dokunulmayacak** (`app/core/scorer.py`, `analyzer_*.py`, vb.)
+- ✅ CODEOWNERS dosyası oluşturulacak (core için 2 reviewer zorunlu)
+- ✅ CI'de core regression job (fail → merge yok)
+- ✅ Feature flag ile core korunuyor
 
 **Success Criteria**:
 - [ ] Dynamics authentication working
-- [ ] Data mapping complete
-- [ ] Pipeline integration working
-- [ ] Sync mechanisms working
+- [ ] Data mapping complete (Hunter → D365 Lead, tek yönlü push)
+- [ ] Duplicate detection working (upsert by domain/email)
 - [ ] UI integration complete
-- [ ] Error handling robust
+- [ ] Error handling robust (auth, rate limit, validation)
+- [ ] **D365 down olsa bile Hunter core çalışıyor** (health check'te D365 bağımlılığı yok)
 - [ ] Audit logging complete
 
 ---

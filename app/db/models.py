@@ -66,6 +66,19 @@ class Company(Base):
     linkedin_pattern = Column(
         String(255), nullable=True
     )  # Detected LinkedIn email pattern (G16: Lead enrichment)
+    # D365 Integration fields (Phase 2.5)
+    d365_lead_id = Column(
+        String(255), nullable=True, index=True
+    )  # D365 Lead ID after successful push
+    d365_sync_status = Column(
+        String(50), nullable=True, server_default="pending", index=True
+    )  # 'pending', 'in_progress', 'synced', 'error'
+    d365_sync_last_at = Column(
+        TIMESTAMP(timezone=True), nullable=True
+    )  # Last sync timestamp
+    d365_sync_error = Column(
+        Text(), nullable=True
+    )  # Last error message if sync failed
     updated_at = Column(
         TIMESTAMP(timezone=True),
         server_default=func.now(),

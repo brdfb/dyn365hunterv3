@@ -1,9 +1,9 @@
 # G21 — Architecture & Integration Roadmap (Current State)
 
-**Son güncelleme:** 2025-01-30  
+**Son güncelleme:** 2025-01-30 (Partner Center ve Dynamics 365 durumları netleştirildi)  
 
 **Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending  
-**Integration Roadmap:** Phase 2 (Partner Center) ✅ Completed (2025-01-30)
+**Integration Roadmap:** Phase 2 (Partner Center) ✅ BACKEND COMPLETED (2025-01-30), ⚠️ PRODUCTION'DA AKTİF DEĞİL
 
 ---
 
@@ -19,7 +19,7 @@ G21, Hunter'ı:
 
 için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
-**Not:** Integration Roadmap Phase 2 (Partner Center Referrals) ✅ **Completed** (2025-01-30) - Backend, UI, background sync tamamlandı. Partner Center entegrasyonu adapter pattern ile implement edildi.
+**Not:** Integration Roadmap Phase 2 (Partner Center Referrals) ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL** - Backend, UI, background sync tamamlandı. Partner Center entegrasyonu adapter pattern ile implement edildi. Feature flag OFF (MVP-safe). Aktifleştirme için `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 1) dosyasına bakın.
 
 ---
 
@@ -125,9 +125,11 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
 **Şu anki durum:**
 
-- Temel şema ve mapping fikirleri hazır
-
-- Uygulama: Post-MVP
+- ❌ **SIFIR KOD** - Sadece plan var, hiçbir dosya yok
+- **Mimari:** Adapter Pattern — Core Freeze + Integration Layer
+- Temel şema ve mapping fikirleri hazır (plan seviyesinde)
+- Uygulama: Post-MVP (Hamle 2: 6-10 gün - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
+- **Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın
 
 ---
 
@@ -189,12 +191,12 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
 - Phase 4 (Dynamics Migration), **Integration Roadmap Phase 3** ile birlikte ele alınacak.
 
-- **Integration Roadmap Phase 2 (Partner Center)** ✅ **Completed** (2025-01-30):
+- **Integration Roadmap Phase 2 (Partner Center)** ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL**:
   - Backend: API client, referral ingestion, sync endpoint, referral detail endpoint, Celery task
   - UI: Referral column, referral type filter, sync button, sync status indicator, referral detail modal
   - Referral Detail Modal: Detay butonu, modal content, action buttons (copy, send to D365, open in PC)
   - Background Sync: Celery Beat schedule (10 min prod, 30s dev)
-  - Status: Production-ready, feature flag OFF (MVP-safe)
+  - ⚠️ **Status:** Production-ready, feature flag OFF (MVP-safe) - Aktifleştirme için `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 1) dosyasına bakın
 
 ---
 
@@ -206,7 +208,7 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
   - Phase 0–3 tamam → "Core clean-up & Sales Engine" bitti.
 
-  - **Integration Roadmap Phase 2 (Partner Center)** ✅ **Completed** (2025-01-30) → Adapter pattern ile entegrasyon tamamlandı.
+  - **Integration Roadmap Phase 2 (Partner Center)** ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL** → Adapter pattern ile entegrasyon tamamlandı. Aktifleştirme için `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 1) dosyasına bakın.
 
   - Phase 4–6 → Post-MVP entegrasyon ve temizlik işleri (Dynamics Migration Integration Roadmap Phase 3 ile birlikte).
 

@@ -78,6 +78,14 @@ class Settings(BaseSettings):
     partner_center_referral_default_top: int = 200  # Default top parameter
     partner_center_referral_max_pages: int = 0  # 0 or negative => unlimited pages (full history sync)
 
+    # Dynamics 365 Integration (Feature flag: disabled by default)
+    d365_enabled: bool = False
+    d365_base_url: Optional[str] = None  # D365 Web API base URL (e.g., https://yourorg.crm.dynamics.com)
+    d365_client_id: Optional[str] = None  # Azure AD OAuth client ID
+    d365_client_secret: Optional[str] = None  # Azure AD OAuth client secret
+    d365_tenant_id: Optional[str] = None  # Azure AD tenant ID
+    d365_api_version: str = "v9.2"  # D365 Web API version
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

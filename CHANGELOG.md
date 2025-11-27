@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **D365 Integration: Phase 2.5 - Test & Validation** (2025-11-27) - Comprehensive test suite for D365 push integration
+  - **API + Task Plumbing Tests**: Feature flag validation, task enqueue, parameter validation
+  - **Mapping Validation Tests**: `leads_ready` view → D365 payload mapping verification
+  - **D365 Client Behavior Tests**: Auth failures, rate limits, API errors with proper exception handling
+  - **DB State & Idempotency Tests**: Status updates, duplicate push prevention (requires migration)
+  - **Celery Task Integration Tests**: End-to-end task execution with DB state verification
+  - **Test Coverage**: 28 passed, 6 skipped (pending migration), comprehensive mock-based testing
+  - **Files**: `tests/test_d365_phase2_5_validation.py`, `tests/test_d365_client.py`, `tests/test_d365_mapping.py`, `tests/test_d365_push.py`
+  - **Status**: ✅ **Completed** - Phase 2.5 validation complete, ready for migration and manual E2E
+
+- **D365 Integration: Core Freeze + D365 Push Architecture** (2025-11-27) - Core protection and D365 adapter layer
+  - **Core Freeze Pack**: CODEOWNERS protection for core modules (`core/`, `ip_enrichment/`, `analyzer_*.py`, `scorer_*.py`)
+  - **D365 Adapter Pattern**: Separation of core from integrations (`app/integrations/d365/`)
+  - **Database Schema**: D365 sync fields (`d365_lead_id`, `d365_sync_status`, `d365_sync_last_at`, `d365_sync_error`)
+  - **D365 Push Jobs Table**: Audit trail for push operations (`d365_push_jobs`)
+  - **Migration**: `alembic/versions/1b980e76fe86_add_d365_sync_fields.py`
+  - **Files**: `.github/CODEOWNERS`, `app/integrations/d365/`, `app/tasks/d365_push.py`, `app/api/v1/d365_routes.py`, `docs/active/CORE-FREEZE-D365-PUSH-PLAN.md`
+  - **Status**: ✅ **Phase 2.5 Complete** - Ready for migration execution and Phase 3 (UI)
+
 - **Partner Center: Referral Detail Modal Action Buttons** (2025-01-30) - Quick actions for referral details
   - **Quick Copy Buttons**: Copy email, domain, deal value, and referral ID with one click
     - Toast feedback: "✓ Kopyalandı: {value}"

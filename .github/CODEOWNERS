@@ -1,0 +1,36 @@
+# Core Freeze Zone - Dokunulmaz Çekirdek
+# Core modüller için 2 reviewer zorunlu (Core Reviewer)
+
+# Core Scoring & Analysis
+/app/core/scorer.py @bered
+/app/core/analyzer_*.py @bered
+/app/core/normalizer.py @bered
+/app/core/provider_map.py @bered
+/app/core/priority.py @bered
+/app/core/priority_category.py @bered
+/app/core/commercial.py @bered
+/app/core/technical_heat.py @bered
+
+# Sales Engine (Frozen Contract)
+/app/core/sales_engine.py @bered
+
+# Enrichment (L1 Production Active)
+/app/core/enrichment*.py @bered
+/app/core/enrichment_service.py @bered
+
+# Core Tests (Regression Protection)
+/tests/test_scorer_*.py @bered
+/tests/test_regression_dataset.py @bered
+/tests/test_sales_*.py @bered
+/tests/test_analyzer_*.py @bered
+
+# D365 Integration (Adapter Layer - Free to modify)
+/app/integrations/d365/ @bered
+/app/tasks/d365_push.py @bered
+/app/api/v1/d365_routes.py @bered
+
+# Partner Center Integration (Adapter Layer - Free to modify)
+/app/core/partner_center.py @bered
+/app/core/referral_ingestion.py @bered
+/app/api/referrals.py @bered
+

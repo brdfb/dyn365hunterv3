@@ -37,7 +37,8 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - Active prompts (if actively referenced)
 - Current acceptance criteria
 - **Feature documentation** - New features (provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, notes/tags/favorites, rescan, alerts, IP enrichment)
-- **Reference guides** - Development environment, testing, troubleshooting guides
+- **Reference guides** - Development environment, testing, troubleshooting guides (moved to `docs/reference/`)
+- **Status Summary** - `ACTIVE-STATUS-SUMMARY.md` (tek bakışta tüm active dosyaların durumu)
 
 ## Prompt Management
 
@@ -95,6 +96,10 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - **Before Updating**: Verify documentation is still active (not archived)
 - **Format Check**: Ensure date prefix format is correct (`YYYY-MM-DD-`)
 - **Link Check**: Update all references when moving files to archive
+- **ACTIVE-STATUS-SUMMARY.md Check**: Düzenli kontrol et (haftalık veya önemli değişikliklerden sonra)
+  - Dosya sayısı kontrolü (hedef: 5-7 dosya)
+  - Tutarlılık kontrolü (Partner Center, Dynamics 365, UI durumları)
+  - Cleanup önerileri kontrolü
 
 ### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
 - **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
@@ -176,4 +181,32 @@ scripts/manage_docs.sh create-todo G2 database-schema
 
 # Create prompt
 scripts/manage_docs.sh create-prompt api-design
+
+# Check ACTIVE-STATUS-SUMMARY.md (NEW - 2025-01-30)
+# Düzenli kontrol: docs/ACTIVE-STATUS-SUMMARY.md dosyasını kontrol et
+# - Dosya sayısı (hedef: 5-7)
+# - Tutarlılık kontrolü
+# - Cleanup önerileri
 ```
+
+## Hamle Completion Workflows
+
+### Hamle 1 (Partner Center Activation) Cleanup
+**Trigger**: "Hamle 1 tamamlandı" veya "Partner Center aktifleştirildi"
+
+**Actions**:
+1. Archive 4 Hamle 1 dosyası:
+   - `docs/active/HAMLE-1-PRODUCTION-DEPLOYMENT.md` → `docs/archive/2025-01-XX-HAMLE-1-PRODUCTION-DEPLOYMENT.md`
+   - `docs/active/HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` → `docs/archive/2025-01-XX-HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
+   - `docs/active/HAMLE-1-EXECUTION-RUNBOOK.md` → `docs/archive/2025-01-XX-HAMLE-1-EXECUTION-RUNBOOK.md`
+   - `docs/active/HAMLE-1-REFERRAL-DETAILS-PLAN.md` → `docs/archive/2025-01-XX-HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+2. Update `ACTIVE-STATUS-SUMMARY.md`:
+   - Hamle 1 status: ✅ Completed
+   - Dosya sayısı güncelle (14 → 10)
+   - Cleanup önerileri güncelle
+3. Update `HUNTER-STATE-v1.0.md`:
+   - Partner Center: ✅ Production'da aktif
+4. Update `G21-ROADMAP-CURRENT.md`:
+   - Partner Center: ✅ Production'da aktif
+5. Update `CRITICAL-3-HAMLE-PRODUCT-READY.md`:
+   - Hamle 1: ✅ Completed
