@@ -195,6 +195,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "requires_integration: mark test as requiring Redis and Celery"
     )
+    config.addinivalue_line(
+        "markers", "integration: mark test as integration test (requires real database connection)"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
