@@ -204,8 +204,14 @@ class PartnerCenterClient:
         for retry in range(max_retries):
             try:
                 # Exponential backoff for retries (except first attempt)
+                # Add jitter to prevent thundering herd
                 if retry > 0:
-                    backoff_time = min(2 ** retry, 60)  # Max 60 seconds
+                    from app.core.retry_utils import compute_backoff_with_jitter
+                    backoff_time = compute_backoff_with_jitter(
+                        base_seconds=1,
+                        attempt=retry,
+                        max_seconds=60  # Max 60 seconds
+                    )
                     time.sleep(backoff_time)
                 
                 logger.debug(
@@ -285,8 +291,19 @@ class PartnerCenterClient:
                     )
                     
                     # Use Retry-After header if available, otherwise exponential backoff
+                    # Clamp and add jitter to prevent thundering herd
+                    from app.core.retry_utils import clamp_retry_after, compute_backoff_with_jitter
+                    
                     if retry_after:
-                        time.sleep(retry_after)
+                        sleep_time = clamp_retry_after(retry_after, min_seconds=1, max_seconds=3600)
+                    else:
+                        # Exponential backoff with jitter if no Retry-After header
+                        sleep_time = compute_backoff_with_jitter(
+                            base_seconds=1,
+                            attempt=retry,
+                            max_seconds=60  # Max 60s for Partner Center exponential backoff
+                        )
+                    time.sleep(sleep_time)
                     
                     # Retry up to max_retries
                     if retry < max_retries - 1:

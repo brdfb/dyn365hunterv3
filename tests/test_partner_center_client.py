@@ -166,3 +166,30 @@ class TestGetReferrals:
                 with pytest.raises(httpx.HTTPStatusError):
                     client.get_referrals()
 
+
+def test_retry_after_clamped_and_jittered():
+    """Test that Partner Center Retry-After header is clamped and jittered."""
+    from app.core.retry_utils import clamp_retry_after
+    
+    # Test normal Retry-After value
+    retry_time = clamp_retry_after(30, min_seconds=1, max_seconds=3600)
+    assert 30.0 <= retry_time <= 40.0  # 30s + jitter (0-10s)
+    
+    # Test clamped to minimum
+    retry_time_min = clamp_retry_after(-5, min_seconds=1, max_seconds=3600)
+    assert 1.0 <= retry_time_min <= 11.0  # 1s (clamped) + jitter
+    
+    # Test clamped to maximum
+    retry_time_max = clamp_retry_after(5000, min_seconds=1, max_seconds=3600)
+    assert 3600.0 <= retry_time_max <= 3610.0  # 3600s (clamped) + jitter
+    
+    # Test None (uses default)
+    retry_time_none = clamp_retry_after(None, min_seconds=1, max_seconds=3600)
+    assert 1.0 <= retry_time_none <= 11.0  # 1s (default) + jitter
+    
+    # Test jitter variation
+    retry_times = [clamp_retry_after(30) for _ in range(10)]
+    assert all(30.0 <= r <= 40.0 for r in retry_times)
+    # Should have variation (jitter)
+    unique_values = len(set(round(r, 1) for r in retry_times))
+    assert unique_values > 1, "Jitter should create variation in retry times"

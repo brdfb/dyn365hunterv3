@@ -381,7 +381,7 @@ sorularına cevap verebilmesi.
     - App registration, Application User, Role + izinler
     - Custom hunter_* alanları
     - Manual E2E test (2-3 lead push)
-    - **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md`
+    - **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook)
   - **Mimari:** Adapter Pattern — Core'a dokunmadan yan taraftan takma
   - Plan: Hunter → D365 Sales:
     - Lead → D365 Lead mapping (tek yönlü push)

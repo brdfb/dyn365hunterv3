@@ -134,7 +134,8 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
   - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
 - ⏳ **PHASE 2.9 (E2E WIRING) PENDING** (D365 tenant hazır olunca, ops fazı)
   - App registration, Application User, Role + izinler, custom hunter_* alanları
-  - **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md`
+  - **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook)
+  - **Status:** Runbook hazır, tenant setup bekleniyor
 - **Mimari:** Adapter Pattern — Core Freeze + Integration Layer
 - **Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın
 

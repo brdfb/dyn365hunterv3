@@ -428,23 +428,24 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
         is_rescan: If True, use rescan_domain (with change detection), else use scan_single_domain
     """
     tracker = get_progress_tracker()
-    db = SessionLocal()
-
+    
+    # Use context manager for job-level operations
     try:
-        # Get job and domain list
-        job = tracker.get_job(job_id)
-        if not job:
-            logger.error("job_not_found", job_id=job_id)
-            return
+        with SessionLocal() as job_db:
+            # Get job and domain list
+            job = tracker.get_job(job_id)
+            if not job:
+                logger.error("job_not_found", job_id=job_id)
+                return
 
-        domain_list = tracker.get_domain_list(job_id)
-        if not domain_list:
-            logger.error("domain_list_not_found", job_id=job_id)
-            tracker.set_status(job_id, "failed")
-            return
+            domain_list = tracker.get_domain_list(job_id)
+            if not domain_list:
+                logger.error("domain_list_not_found", job_id=job_id)
+                tracker.set_status(job_id, "failed")
+                return
 
-        # Set status to running
-        tracker.set_status(job_id, "running")
+            # Set status to running
+            tracker.set_status(job_id, "running")
 
         # Calculate optimal batch size (rate-limit aware)
         optimal_batch_size = calculate_optimal_batch_size(
@@ -481,14 +482,16 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
 
             try:
                 # Process batch with retry logic (deadlock prevention)
-                succeeded, failed, committed, failed_results = process_batch_with_retry(
-                    batch=batch,
-                    job_id=job_id,
-                    batch_no=batch_no + 1,
-                    total_batches=total_batches,
-                    is_rescan=is_rescan,
-                    db=db,
-                )
+                # Use batch-level session for isolation
+                with SessionLocal() as batch_db:
+                    succeeded, failed, committed, failed_results = process_batch_with_retry(
+                        batch=batch,
+                        job_id=job_id,
+                        batch_no=batch_no + 1,
+                        total_batches=total_batches,
+                        is_rescan=is_rescan,
+                        db=batch_db,
+                    )
 
                 # Store partial commit log
                 store_partial_commit_log(
@@ -560,17 +563,18 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
                         job_id, processed, total_succeeded, total_failed, error
                     )
 
-        # Set status to completed
-        tracker.set_status(job_id, "completed")
-        logger.info(
-            "bulk_scan_completed",
-            job_id=job_id,
-            scan_type="rescan" if is_rescan else "scan",
-            succeeded=total_succeeded,
-            failed=total_failed,
-            total_batches=total_batches,
-        )
-
+            # Set status to completed (after all batches)
+            tracker.set_status(job_id, "completed")
+            logger.info(
+                "bulk_scan_completed",
+                job_id=job_id,
+                scan_type="rescan" if is_rescan else "scan",
+                succeeded=total_succeeded,
+                failed=total_failed,
+                total_batches=total_batches,
+            )
+            # Context manager automatically closes job_db session
+        
     except Exception as e:
         logger.error(
             "bulk_scan_error",
@@ -581,9 +585,7 @@ def bulk_scan_task(self, job_id: str, is_rescan: bool = False):
         )
         tracker.set_status(job_id, "failed")
         raise
-
-    finally:
-        db.close()
+        # Context manager automatically closes job_db session
 
 
 @celery_app.task(bind=True)
@@ -601,20 +603,18 @@ def process_pending_alerts_task(self):
 
     logger.info("pending_alerts_task_started")
 
-    db = SessionLocal()
+    # Use context manager for DB session
+    with SessionLocal() as db:
+        try:
+            # Process pending alerts (async function, need to run in event loop)
+            processed = asyncio.run(process_pending_alerts(db))
+            logger.info("pending_alerts_processed", processed=processed)
+            return {"status": "completed", "processed": processed}
 
-    try:
-        # Process pending alerts (async function, need to run in event loop)
-        processed = asyncio.run(process_pending_alerts(db))
-        logger.info("pending_alerts_processed", processed=processed)
-        return {"status": "completed", "processed": processed}
-
-    except Exception as e:
-        logger.error("pending_alerts_task_error", error=str(e), exc_info=True)
-        raise
-
-    finally:
-        db.close()
+        except Exception as e:
+            logger.error("pending_alerts_task_error", error=str(e), exc_info=True)
+            raise
+            # Context manager automatically closes session
 
 
 @celery_app.task(bind=True)
@@ -631,63 +631,61 @@ def daily_rescan_task(self):
 
     logger.info("daily_rescan_task_started")
 
-    db = SessionLocal()
+    # Use context manager for DB session
+    with SessionLocal() as db:
+        try:
+            # Get all domains that have been scanned (have domain_signals)
+            domains_with_signals = db.query(DomainSignal.domain).distinct().all()
+            domain_list = [row[0] for row in domains_with_signals]
 
-    try:
-        # Get all domains that have been scanned (have domain_signals)
-        domains_with_signals = db.query(DomainSignal.domain).distinct().all()
-        domain_list = [row[0] for row in domains_with_signals]
+            if not domain_list:
+                logger.info("daily_rescan_no_domains")
+                return {
+                    "status": "completed",
+                    "total": 0,
+                    "message": "No domains to rescan",
+                }
 
-        if not domain_list:
-            logger.info("daily_rescan_no_domains")
-            return {
-                "status": "completed",
-                "total": 0,
-                "message": "No domains to rescan",
-            }
+            logger.info("daily_rescan_domains_found", count=len(domain_list))
 
-        logger.info("daily_rescan_domains_found", count=len(domain_list))
+            # Process in batches of 100 to avoid overwhelming the system
+            batch_size = 100
+            total_processed = 0
 
-        # Process in batches of 100 to avoid overwhelming the system
-        batch_size = 100
-        total_processed = 0
+            for i in range(0, len(domain_list), batch_size):
+                batch = domain_list[i : i + batch_size]
 
-        for i in range(0, len(domain_list), batch_size):
-            batch = domain_list[i : i + batch_size]
+                # Create bulk rescan job for this batch (creates job_id automatically)
+                tracker = get_progress_tracker()
+                job_id = tracker.create_job(batch)
 
-            # Create bulk rescan job for this batch (creates job_id automatically)
-            tracker = get_progress_tracker()
-            job_id = tracker.create_job(batch)
+                # Start async rescan task (with is_rescan=True for change detection)
+                bulk_scan_task.delay(job_id, is_rescan=True)
 
-            # Start async rescan task (with is_rescan=True for change detection)
-            bulk_scan_task.delay(job_id, is_rescan=True)
+                total_processed += len(batch)
+                logger.info(
+                    "rescan_job_created",
+                    job_id=job_id,
+                    batch_size=len(batch),
+                    batch_number=i//batch_size + 1,
+                )
 
-            total_processed += len(batch)
             logger.info(
-                "rescan_job_created",
-                job_id=job_id,
-                batch_size=len(batch),
-                batch_number=i//batch_size + 1,
+                "daily_rescan_completed",
+                total_processed=total_processed,
             )
 
-        logger.info(
-            "daily_rescan_completed",
-            total_processed=total_processed,
-        )
-
-        return {
-            "status": "completed",
-            "total": total_processed,
-            "batches": (len(domain_list) + batch_size - 1) // batch_size,
-            "message": f"Queued {total_processed} domains for rescan",
-        }
-
-    except Exception as e:
-        logger.error("daily_rescan_error", error=str(e), exc_info=True)
-        raise
-
-    finally:
-        db.close()
+            return {
+                "status": "completed",
+                "total": total_processed,
+                "batches": (len(domain_list) + batch_size - 1) // batch_size,
+                "message": f"Queued {total_processed} domains for rescan",
+            }
+        
+        except Exception as e:
+            logger.error("daily_rescan_error", error=str(e), exc_info=True)
+            raise
+            # Context manager automatically closes session
 
 
 @celery_app.task(bind=True)
@@ -750,77 +748,75 @@ def sync_partner_center_referrals_task(self):
         env=settings.environment,
     )
 
-    db = SessionLocal()
+    # Use context manager for DB session
+    with SessionLocal() as db:
+        try:
+            # Sync referrals from Partner Center
+            result = sync_referrals_from_partner_center(db)
 
-    try:
-        # Sync referrals from Partner Center
-        result = sync_referrals_from_partner_center(db)
+            duration_sec = time.time() - start_time
+            success_count = result.get("success_count", 0)
+            failure_count = result.get("failure_count", 0)
+            skipped_count = result.get("skipped_count", 0)
+            total_fetched = result.get("total_fetched", 0)
+            total_inserted = result.get("total_inserted", 0)
 
-        duration_sec = time.time() - start_time
-        success_count = result.get("success_count", 0)
-        failure_count = result.get("failure_count", 0)
-        skipped_count = result.get("skipped_count", 0)
-        total_fetched = result.get("total_fetched", 0)
-        total_inserted = result.get("total_inserted", 0)
+            # Track metrics
+            track_sync_success(
+                duration=duration_sec,
+                fetched=total_fetched,
+                inserted=total_inserted,
+                skipped=skipped_count,
+            )
+            if failure_count > 0:
+                from app.core.partner_center_metrics import track_sync_failure
+                track_sync_failure(failure_count)
 
-        # Track metrics
-        track_sync_success(
-            duration=duration_sec,
-            fetched=total_fetched,
-            inserted=total_inserted,
-            skipped=skipped_count,
-        )
-        if failure_count > 0:
-            from app.core.partner_center_metrics import track_sync_failure
-            track_sync_failure(failure_count)
+            logger.info(
+                "partner_center_sync_task_completed",
+                source="partner_center",
+                task_id=task_id,
+                success_count=success_count,
+                failure_count=failure_count,
+                skipped_count=skipped_count,
+                synced_count=success_count,  # Alias for clarity
+                error_count=failure_count,  # Alias for clarity
+                duration_sec=round(duration_sec, 2),
+                duration_ms=round(duration_sec * 1000, 2),
+                feature_flag_state=True,
+                env=settings.environment,
+            )
 
-        logger.info(
-            "partner_center_sync_task_completed",
-            source="partner_center",
-            task_id=task_id,
-            success_count=success_count,
-            failure_count=failure_count,
-            skipped_count=skipped_count,
-            synced_count=success_count,  # Alias for clarity
-            error_count=failure_count,  # Alias for clarity
-            duration_sec=round(duration_sec, 2),
-            duration_ms=round(duration_sec * 1000, 2),
-            feature_flag_state=True,
-            env=settings.environment,
-        )
+            return {
+                "status": "completed",
+                "success_count": success_count,
+                "failure_count": failure_count,
+                "skipped_count": skipped_count,
+            }
 
-        return {
-            "status": "completed",
-            "success_count": success_count,
-            "failure_count": failure_count,
-            "skipped_count": skipped_count,
-        }
-
-    except Exception as e:
-        duration_sec = time.time() - start_time
-        track_sync_failed(duration_sec)
-        logger.error(
-            "partner_center_sync_task_error",
-            source="partner_center",
-            task_id=task_id,
-            error=str(e),
-            duration_sec=round(duration_sec, 2),
-            duration_ms=round(duration_sec * 1000, 2),
-            feature_flag_state=True,
-            env=settings.environment,
-            exc_info=True,
-        )
-        # Don't crash - return error status
-        return {
-            "status": "failed",
-            "error": str(e),
-            "success_count": 0,
-            "failure_count": 0,
-            "skipped_count": 0,
-        }
-
-    finally:
-        db.close()
+        except Exception as e:
+            duration_sec = time.time() - start_time
+            track_sync_failed(duration_sec)
+            logger.error(
+                "partner_center_sync_task_error",
+                source="partner_center",
+                task_id=task_id,
+                error=str(e),
+                duration_sec=round(duration_sec, 2),
+                duration_ms=round(duration_sec * 1000, 2),
+                feature_flag_state=True,
+                env=settings.environment,
+                exc_info=True,
+            )
+            # Don't crash - return error status
+            return {
+                "status": "failed",
+                "error": str(e),
+                "success_count": 0,
+                "failure_count": 0,
+                "skipped_count": 0,
+            }
+            # Context manager automatically closes session
 
 
 def get_bulk_metrics() -> Dict[str, Any]:

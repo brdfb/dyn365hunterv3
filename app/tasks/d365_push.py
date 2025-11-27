@@ -20,6 +20,7 @@ from app.integrations.d365.errors import (
     D365DuplicateError,
 )
 from app.core.d365_metrics import track_push_success, track_push_failed
+from app.core.retry_utils import compute_backoff_with_jitter
 
 
 @celery_app.task(bind=True, name="push_lead_to_d365", max_retries=3)
@@ -50,31 +51,74 @@ def push_lead_to_d365(self, lead_id: int):
         )
         return {"status": "skipped", "reason": "d365_disabled"}
     
-    db = SessionLocal()
-    
-    try:
-        logger.info(
-            "d365_push_started",
-            message="D365 push task started",
-            lead_id=lead_id
-        )
-        
-        # Get company by ID
-        company = db.query(Company).filter(Company.id == lead_id).first()
-        if not company:
-            logger.error(
-                "d365_company_not_found",
-                message="Company not found",
+    # Use context manager for DB session to prevent leaks
+    with SessionLocal() as db:
+        try:
+            logger.info(
+                "d365_push_started",
+                message="D365 push task started",
                 lead_id=lead_id
             )
-            return {"status": "error", "error": "Company not found"}
-        
-        domain = company.domain
-        
-        # Query lead data from leads_ready view
-        # Include D365 fields and Partner Center referral_id
-        # Note: D365 fields may not exist if migration not run yet - use dynamic query
-        query = """
+            
+            # Get company by ID
+            company = db.query(Company).filter(Company.id == lead_id).first()
+            if not company:
+                logger.error(
+                    "d365_company_not_found",
+                    message="Company not found",
+                    lead_id=lead_id
+                )
+                return {"status": "error", "error": "Company not found"}
+            
+            domain = company.domain
+            
+            # Idempotency check: If lead already exists in D365, skip
+            if company.d365_lead_id:
+                try:
+                    client = D365Client()
+                    existing_lead = asyncio.run(client._find_lead_by_id(company.d365_lead_id))
+                    if existing_lead and existing_lead.get("leadid"):
+                        logger.info(
+                            "d365_lead_already_exists",
+                            message="Lead already exists in D365, skipping push",
+                            lead_id=lead_id,
+                            d365_lead_id=company.d365_lead_id,
+                            domain=domain
+                        )
+                        # Update sync status if needed
+                        if company.d365_sync_status != "synced":
+                            company.d365_sync_status = "synced"
+                            company.d365_sync_error = None
+                            db.commit()
+                        
+                        return {
+                            "status": "skipped",
+                            "reason": "already_exists",
+                            "d365_lead_id": company.d365_lead_id,
+                            "domain": domain
+                        }
+                except D365RateLimitError:
+                    # Rate limit on verification - continue with push (will retry)
+                    logger.warning(
+                        "d365_lead_verification_rate_limit",
+                        message="Rate limit during lead verification, proceeding with push",
+                        lead_id=lead_id,
+                        d365_lead_id=company.d365_lead_id
+                    )
+                except Exception as e:
+                    # Verification failed - continue with push (will handle error later)
+                    logger.warning(
+                        "d365_lead_verification_failed",
+                        message="Failed to verify existing lead, proceeding with push",
+                        lead_id=lead_id,
+                        d365_lead_id=company.d365_lead_id,
+                    error=str(e)
+                )
+            
+            # Query lead data from leads_ready view
+            # Include D365 fields and Partner Center referral_id
+            # Note: D365 fields may not exist if migration not run yet - use dynamic query
+            query = """
             SELECT 
                 lr.company_id,
                 lr.canonical_name,
@@ -98,22 +142,22 @@ def push_lead_to_d365(self, lead_id: int):
             LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
             WHERE lr.company_id = :company_id
             LIMIT 1
-        """
-        
-        result = db.execute(text(query), {"company_id": lead_id})
-        row = result.fetchone()
-        
-        if not row:
-            logger.error(
-                "d365_lead_not_found",
-                message="Lead not found in leads_ready view",
-                lead_id=lead_id,
-                domain=domain
-            )
-            return {"status": "error", "error": "Lead not found"}
-        
-        # Convert row to dict
-        lead_data = {
+            """
+            
+            result = db.execute(text(query), {"company_id": lead_id})
+            row = result.fetchone()
+            
+            if not row:
+                logger.error(
+                    "d365_lead_not_found",
+                    message="Lead not found in leads_ready view",
+                    lead_id=lead_id,
+                    domain=domain
+                )
+                return {"status": "error", "error": "Lead not found"}
+            
+            # Convert row to dict
+            lead_data = {
             "company_id": row.company_id,
             "canonical_name": row.canonical_name,
             "domain": row.domain,
@@ -128,116 +172,125 @@ def push_lead_to_d365(self, lead_id: int):
             "commercial_heat": row.commercial_heat,
             "priority_category": row.priority_category,
             "priority_label": row.priority_label,
-            "referral_id": row.referral_id if hasattr(row, "referral_id") else None,
-        }
+                "referral_id": row.referral_id if hasattr(row, "referral_id") else None,
+            }
+            
+            # Update status to in_progress
+            company.d365_sync_status = "in_progress"
+            company.d365_sync_error = None
+            db.commit()
+            
+            # Map to D365 payload
+            d365_payload = map_lead_to_d365(lead_data)
+            
+            # Call D365 client (async, need to run in event loop)
+            client = D365Client()
+            d365_result = asyncio.run(client.create_or_update_lead(d365_payload))
+            
+            # Extract D365 lead ID
+            d365_lead_id = d365_result.get("leadid")
+            if not d365_lead_id:
+                raise D365APIError("D365 response missing leadid")
+            
+            # Update company with D365 status
+            company.d365_lead_id = d365_lead_id
+            company.d365_sync_status = "synced"
+            company.d365_sync_last_at = datetime.now()
+            company.d365_sync_error = None
+            db.commit()
+            
+            # Phase 3: Track success metrics
+            duration = time.time() - start_time
+            track_push_success(duration)
+            
+            logger.info(
+                "d365_push_success",
+                message="Lead pushed to D365 successfully",
+                lead_id=lead_id,
+                domain=domain,
+                d365_lead_id=d365_lead_id,
+                duration=duration
+            )
+            
+            return {
+                "status": "completed",
+                "d365_lead_id": d365_lead_id,
+                "domain": domain
+            }
         
-        # Update status to in_progress
-        company.d365_sync_status = "in_progress"
-        company.d365_sync_error = None
-        db.commit()
+        except D365RateLimitError as e:
+            # Rate limit - retry with exponential backoff
+            logger.warning(
+                "d365_rate_limit",
+                message="D365 rate limit exceeded, will retry",
+                lead_id=lead_id,
+                error=str(e)
+            )
+            company.d365_sync_status = "error"
+            company.d365_sync_error = f"Rate limit: {str(e)}"
+            db.commit()
+            
+            # Retry with exponential backoff + jitter + cap
+            backoff = compute_backoff_with_jitter(
+                base_seconds=60,
+                attempt=self.request.retries,
+                max_seconds=3600
+            )
+            raise self.retry(exc=e, countdown=backoff)
         
-        # Map to D365 payload
-        d365_payload = map_lead_to_d365(lead_data)
-        
-        # Call D365 client (async, need to run in event loop)
-        client = D365Client()
-        d365_result = asyncio.run(client.create_or_update_lead(d365_payload))
-        
-        # Extract D365 lead ID
-        d365_lead_id = d365_result.get("leadid")
-        if not d365_lead_id:
-            raise D365APIError("D365 response missing leadid")
-        
-        # Update company with D365 status
-        company.d365_lead_id = d365_lead_id
-        company.d365_sync_status = "synced"
-        company.d365_sync_last_at = datetime.now()
-        company.d365_sync_error = None
-        db.commit()
-        
-        # Phase 3: Track success metrics
-        duration = time.time() - start_time
-        track_push_success(duration)
-        
-        logger.info(
-            "d365_push_success",
-            message="Lead pushed to D365 successfully",
-            lead_id=lead_id,
-            domain=domain,
-            d365_lead_id=d365_lead_id,
-            duration=duration
-        )
-        
-        return {
-            "status": "completed",
-            "d365_lead_id": d365_lead_id,
-            "domain": domain
-        }
-        
-    except D365RateLimitError as e:
-        # Rate limit - retry with exponential backoff
-        logger.warning(
-            "d365_rate_limit",
-            message="D365 rate limit exceeded, will retry",
-            lead_id=lead_id,
-            error=str(e)
-        )
-        company.d365_sync_status = "error"
-        company.d365_sync_error = f"Rate limit: {str(e)}"
-        db.commit()
-        
-        # Retry with exponential backoff
-        raise self.retry(exc=e, countdown=60 * (2 ** self.request.retries))
-        
-    except (D365AuthenticationError, D365APIError, D365DuplicateError) as e:
-        # Non-retryable errors
-        # Phase 3: Track failure metrics
-        track_push_failed()
-        
-        logger.error(
-            "d365_push_failed",
-            message="D365 push failed (non-retryable)",
-            lead_id=lead_id,
-            error=str(e),
-            error_type=type(e).__name__
-        )
-        company.d365_sync_status = "error"
-        company.d365_sync_error = str(e)
-        db.commit()
-        
-        return {
-            "status": "error",
-            "error": str(e),
-            "error_type": type(e).__name__
-        }
-        
-    except Exception as e:
-        # Phase 3: Track failure metrics (only on final failure, not retries)
-        if self.request.retries >= self.max_retries:
+        except (D365AuthenticationError, D365APIError, D365DuplicateError) as e:
+            # Non-retryable errors
+            # Phase 3: Track failure metrics
             track_push_failed()
-        
-        logger.error(
-            "d365_push_error",
-            message="D365 push task failed (unexpected error)",
-            lead_id=lead_id,
-            error=str(e),
-            exc_info=True
-        )
-        
-        # Update status to error
-        try:
+            
+            logger.error(
+                "d365_push_failed",
+                message="D365 push failed (non-retryable)",
+                lead_id=lead_id,
+                error=str(e),
+                error_type=type(e).__name__
+            )
             company.d365_sync_status = "error"
             company.d365_sync_error = str(e)
             db.commit()
-        except:
-            pass
+            
+            return {
+                "status": "error",
+                "error": str(e),
+                "error_type": type(e).__name__
+            }
         
-        # Retry if we haven't exceeded max retries
-        if self.request.retries < self.max_retries:
-            raise self.retry(exc=e, countdown=60 * (2 ** self.request.retries))
-        else:
-            raise
-    
-    finally:
-        db.close()
+        except Exception as e:
+            # Phase 3: Track failure metrics (only on final failure, not retries)
+            if self.request.retries >= self.max_retries:
+                track_push_failed()
+            
+            logger.error(
+                "d365_push_error",
+                message="D365 push task failed (unexpected error)",
+                lead_id=lead_id,
+                error=str(e),
+                exc_info=True
+            )
+            
+            # Update status to error
+            try:
+                company.d365_sync_status = "error"
+                company.d365_sync_error = str(e)
+                db.commit()
+            except:
+                pass
+            
+            # Retry if we haven't exceeded max retries
+            if self.request.retries < self.max_retries:
+                # Retry with exponential backoff + jitter + cap
+                backoff = compute_backoff_with_jitter(
+                    base_seconds=60,
+                    attempt=self.request.retries,
+                    max_seconds=3600
+                )
+                raise self.retry(exc=e, countdown=backoff)
+            else:
+                raise
+            # Context manager automatically closes session
 
