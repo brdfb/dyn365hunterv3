@@ -32,7 +32,7 @@ export function renderLeadsTable(leads) {
                     ${lead.domain && lead.domain !== '-' ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${escapeHtml(lead.domain || '-')}
                 </td>
-                <td class="leads-table__cell">${escapeHtml(lead.canonical_name || '-')}</td>
+                <td class="leads-table__cell leads-table__cell--company" title="${lead.canonical_name ? escapeHtml(lead.canonical_name) : ''}">${escapeHtml(lead.canonical_name || '-')}</td>
                 <td class="leads-table__cell leads-table__cell--provider">
                     ${lead.provider && lead.provider !== '-' 
                         ? `<span class="provider-badge ${getProviderBadgeClass(lead.provider)}">${escapeHtml(lead.provider)}</span>`
@@ -249,12 +249,21 @@ function getReferralBadge(referral_type) {
         'solution-provider': 'SP'
     };
     
+    // Full descriptions for tooltips
+    const descriptions = {
+        'co-sell': 'Co-sell',
+        'marketplace': 'Marketplace',
+        'solution-provider': 'Solution Provider'
+    };
+    
     const label = labels[type] || referral_type;
+    const description = descriptions[type] || referral_type;
+    
     // CSS class uses the type as-is (co-sell, marketplace, solution-provider)
     const cssType = type;  // Already in correct format for CSS class
     const badgeClass = `referral-badge referral-badge--${cssType}`;
     
-    return `<span class="${badgeClass}">${escapeHtml(label)}</span>`;
+    return `<span class="${badgeClass}" title="Partner Center Referral: ${escapeHtml(description)}">${escapeHtml(label)}</span>`;
 }
 
 /**
