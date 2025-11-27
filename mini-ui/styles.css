@@ -2412,9 +2412,14 @@ body {
     color: #856404;
 }
 
-.link-status-badge--multi {
+.link-status-badge--mixed {
     background-color: #d1ecf1;
     color: #0c5460;
+}
+
+.link-status-badge--none {
+    background-color: #f5f5f5;
+    color: #999;
 }
 
 /* Phase 2: Status Badges */

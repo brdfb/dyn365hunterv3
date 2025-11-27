@@ -59,12 +59,12 @@ export function renderReferralsTable(referrals) {
                 </td>
                 <td class="leads-table__cell leads-table__cell--actions">
                     <button type="button" class="referral-action-button referral-action-button--detail" data-referral-id="${escapeHtml(referral.referral_id)}" title="Detayları göster">🔍 Detay</button>
-                    ${referral.link_status === 'unlinked' || !referral.link_status
+                    ${referral.link_status === 'unlinked' || !referral.link_status || referral.link_status === 'none'
                         ? `<button type="button" class="referral-action-button referral-action-button--link" data-referral-id="${escapeHtml(referral.referral_id)}" data-domain="${referral.domain ? escapeHtml(referral.domain) : ''}" title="Link to existing lead">🔗 Link</button>
                            ${referral.domain ? `<button type="button" class="referral-action-button referral-action-button--create" data-referral-id="${escapeHtml(referral.referral_id)}" title="Create lead from referral">➕ Create Lead</button>` : ''}`
-                        : referral.link_status === 'auto_linked'
+                        : referral.link_status === 'auto_linked' || referral.link_status === 'linked'
                         ? `<span style="color: #27ae60; font-size: 0.875rem;">✓ Linked</span>`
-                        : referral.link_status === 'multi_candidate'
+                        : referral.link_status === 'multi_candidate' || referral.link_status === 'mixed'
                         ? `<span style="color: #f39c12; font-size: 0.875rem;">Multiple</span>`
                         : '-'
                     }
@@ -307,41 +307,72 @@ if (document.readyState === 'loading') {
  * Get link status badge
  */
 function getLinkStatusBadge(linkStatus) {
-    if (!linkStatus) {
-        return '<span style="color: #999; font-style: italic;">Not set</span>';
+    // Normalize: handle both raw values (from Referrals API) and normalized values (from Leads API)
+    if (!linkStatus || linkStatus === 'none') {
+        return '<span class="link-status-badge link-status-badge--none" title="Partner Center referral yok">-</span>';
     }
     
-    switch (linkStatus) {
+    const status = linkStatus.toLowerCase();
+    let badgeClass = 'link-status-badge';
+    let icon = '';
+    let tooltip = '';
+    
+    // Handle both raw and normalized values for consistency
+    switch (status) {
+        case 'linked':
         case 'auto_linked':
-            return '<span class="link-status-badge link-status-badge--linked" title="Linked to Hunter lead">✓ Linked</span>';
+            badgeClass += ' link-status-badge--linked';
+            icon = '🔗';
+            tooltip = 'Bu domain Partner Center referral\'ına bağlı';
+            break;
         case 'unlinked':
-            return '<span class="link-status-badge link-status-badge--unlinked" title="Not linked to any Hunter lead">Unlinked</span>';
+            badgeClass += ' link-status-badge--unlinked';
+            icon = '🔓';
+            tooltip = 'Partner Center referral\'ı var ama lead ile linklenmemiş';
+            break;
+        case 'mixed':
         case 'multi_candidate':
-            return '<span class="link-status-badge link-status-badge--multi" title="Multiple candidate leads found">Multiple</span>';
+            badgeClass += ' link-status-badge--mixed';
+            icon = '🔀';
+            tooltip = 'Bu domain için birden fazla referral var (farklı link durumları)';
+            break;
         default:
-            return escapeHtml(linkStatus);
+            badgeClass += ' link-status-badge--none';
+            tooltip = 'Partner Center referral durumu bilinmiyor';
     }
+    
+    return `<span class="${badgeClass}" title="${escapeHtml(tooltip)}">${icon}</span>`;
 }
 
 /**
  * Get referral type badge (reuse from ui-leads.js pattern)
  */
 function getReferralBadge(referralType) {
+    // Match Leads Tab badge rendering for consistency
     if (!referralType) return '-';
     
-    const badgeClass = {
-        'co-sell': 'referral-badge referral-badge--co-sell',
-        'marketplace': 'referral-badge referral-badge--marketplace',
-        'solution-provider': 'referral-badge referral-badge--solution-provider'
-    }[referralType] || 'referral-badge';
+    const type = referralType.toLowerCase();
+    const labels = {
+        'co-sell': 'Co-sell',
+        'marketplace': 'Marketplace',
+        'solution-provider': 'SP'  // Match Leads Tab: short label
+    };
     
-    const label = {
+    // Full descriptions for tooltips
+    const descriptions = {
         'co-sell': 'Co-sell',
         'marketplace': 'Marketplace',
         'solution-provider': 'Solution Provider'
-    }[referralType] || referralType;
+    };
     
-    return `<span class="${badgeClass}" title="Partner Center Referral: ${escapeHtml(label)}">${escapeHtml(label)}</span>`;
+    const label = labels[type] || referralType;
+    const description = descriptions[type] || referralType;
+    
+    // CSS class uses the type as-is (co-sell, marketplace, solution-provider)
+    const cssType = type;  // Already in correct format for CSS class
+    const badgeClass = `referral-badge referral-badge--${cssType}`;
+    
+    return `<span class="${badgeClass}" title="Partner Center Referral: ${escapeHtml(description)}">${escapeHtml(label)}</span>`;
 }
 
 /**

@@ -57,6 +57,8 @@ class LeadResponse(BaseModel):
     priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
     infrastructure_summary: Optional[str] = None  # IP enrichment summary (Level 1)
     referral_type: Optional[str] = None  # Partner Center referral type ('co-sell', 'marketplace', 'solution-provider')
+    link_status: Optional[str] = None  # Partner Center link status ('linked', 'unlinked', 'mixed') - mixed when multiple referrals with different statuses
+    referral_id: Optional[str] = None  # Partner Center referral ID (primary referral if multiple exist)
     # D365 Integration fields (Phase 3)
     d365_sync_status: Optional[str] = None  # 'not_synced', 'queued', 'in_progress', 'synced', 'error'
     d365_sync_last_at: Optional[str] = None  # Last sync timestamp (ISO format)
@@ -114,6 +116,7 @@ async def export_leads(
     # Build query using leads_ready VIEW with LEFT JOIN to partner_center_referrals (same as GET /leads)
     # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
     # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
+    # Aggregate link_status for multiple referrals: if all same, use it; otherwise 'mixed'
     query = """
         SELECT DISTINCT ON (lr.domain)
             lr.company_id,
@@ -141,7 +144,30 @@ async def export_leads(
             lr.commercial_heat,
             lr.priority_category,
             lr.priority_label,
-            pcr.referral_type
+            MAX(pcr.referral_type) AS referral_type,
+            -- Calculate aggregated link_status: normalize NULL to 'none' when no referrals, 'unlinked' when referral exists but status is NULL
+            -- Also normalize 'auto_linked' to 'linked' for consistency
+            CASE 
+                WHEN COUNT(pcr.id) = 0 THEN 'none'
+                WHEN COUNT(DISTINCT COALESCE(
+                    CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END, 
+                    'unlinked'
+                )) = 1 
+                     THEN MIN(COALESCE(
+                         CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END,
+                         'unlinked'
+                     ))
+                ELSE 'mixed'
+            END AS aggregated_link_status,
+            -- Get primary referral_id: deterministic ordering (most recent referral first)
+            COALESCE(
+                (SELECT pcr_inner.referral_id 
+                 FROM partner_center_referrals pcr_inner 
+                 WHERE pcr_inner.domain = lr.domain 
+                 ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
+                 LIMIT 1),
+                NULL
+            ) AS primary_referral_id
         FROM leads_ready lr
         LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
@@ -180,6 +206,8 @@ async def export_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND lr.readiness_score IS NOT NULL"
 
+    # GROUP BY is needed for aggregate functions (aggregated_link_status, primary_referral_id)
+    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label"
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
@@ -213,6 +241,7 @@ async def export_leads(
                 "scanned_at": str(row.scanned_at) if row.scanned_at else "",
                 "reason": row.reason or "",
                 "referral_type": getattr(row, "referral_type", None) or "",  # Task 2.5: Partner Center referral type
+                "link_status": getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none)
             }
             leads_data.append(lead_dict)
 
@@ -345,6 +374,7 @@ async def get_leads(
     # Use DISTINCT ON (domain) to prevent duplicates when there are multiple domain_signals or lead_scores
     # View includes G20 columns (tenant_size, local_provider, dmarc_coverage) and CSP P-Model columns
     # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
+    # Aggregate link_status for multiple referrals: if all same, use it; otherwise 'mixed'
     query = """
         SELECT DISTINCT ON (lr.domain)
             lr.company_id,
@@ -372,7 +402,30 @@ async def get_leads(
             lr.commercial_heat,
             lr.priority_category,
             lr.priority_label,
-            pcr.referral_type
+            MAX(pcr.referral_type) AS referral_type,
+            -- Calculate aggregated link_status: normalize NULL to 'none' when no referrals, 'unlinked' when referral exists but status is NULL
+            -- Also normalize 'auto_linked' to 'linked' for consistency
+            CASE 
+                WHEN COUNT(pcr.id) = 0 THEN 'none'
+                WHEN COUNT(DISTINCT COALESCE(
+                    CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END, 
+                    'unlinked'
+                )) = 1 
+                     THEN MIN(COALESCE(
+                         CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END,
+                         'unlinked'
+                     ))
+                ELSE 'mixed'
+            END AS aggregated_link_status,
+            -- Get primary referral_id: deterministic ordering (most recent referral first)
+            COALESCE(
+                (SELECT pcr_inner.referral_id 
+                 FROM partner_center_referrals pcr_inner 
+                 WHERE pcr_inner.domain = lr.domain 
+                 ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
+                 LIMIT 1),
+                NULL
+            ) AS primary_referral_id
         FROM leads_ready lr
         LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
@@ -411,6 +464,8 @@ async def get_leads(
     # Only return leads that have been scanned (have a score)
     query += " AND lr.readiness_score IS NOT NULL"
 
+    # GROUP BY is needed for aggregate functions (aggregated_link_status, primary_referral_id)
+    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label"
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
@@ -493,6 +548,8 @@ async def get_leads(
                 priority_label=getattr(row, "priority_label", None),
                 infrastructure_summary=infrastructure_summary,
                 referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
+                link_status=getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none) - normalize NULL to 'none'
+                referral_id=getattr(row, "primary_referral_id", None),  # Primary referral ID (if multiple exist)
                 # D365 Integration fields (Phase 3)
                 d365_sync_status=d365_sync_status,
                 d365_sync_last_at=d365_sync_last_at,
@@ -582,6 +639,7 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
 
     # Query using direct JOIN (more reliable than VIEW)
     # LEFT JOIN partner_center_referrals to get referral_type (Task 2.5)
+    # Aggregate link_status for multiple referrals: if all same, use it; otherwise 'mixed'
     query = """
         SELECT 
             c.id AS company_id,
@@ -615,12 +673,36 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             c.d365_lead_id,
             c.d365_sync_status,
             c.d365_sync_last_at,
-            pcr.referral_type
+            MAX(pcr.referral_type) AS referral_type,
+            -- Calculate aggregated link_status: normalize NULL to 'none' when no referrals, 'unlinked' when referral exists but status is NULL
+            -- Also normalize 'auto_linked' to 'linked' for consistency
+            CASE 
+                WHEN COUNT(pcr.id) = 0 THEN 'none'
+                WHEN COUNT(DISTINCT COALESCE(
+                    CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END, 
+                    'unlinked'
+                )) = 1 
+                     THEN MIN(COALESCE(
+                         CASE WHEN pcr.link_status = 'auto_linked' THEN 'linked' ELSE pcr.link_status END,
+                         'unlinked'
+                     ))
+                ELSE 'mixed'
+            END AS aggregated_link_status,
+            -- Get primary referral_id: deterministic ordering (most recent referral first)
+            COALESCE(
+                (SELECT pcr_inner.referral_id 
+                 FROM partner_center_referrals pcr_inner 
+                 WHERE pcr_inner.domain = c.domain 
+                 ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
+                 LIMIT 1),
+                NULL
+            ) AS primary_referral_id
         FROM companies c
         LEFT JOIN domain_signals ds ON c.domain = ds.domain
         LEFT JOIN lead_scores ls ON c.domain = ls.domain
         LEFT JOIN partner_center_referrals pcr ON c.domain = pcr.domain
         WHERE c.domain = :domain
+        GROUP BY c.id, c.canonical_name, c.domain, c.provider, c.tenant_size, c.country, c.contact_emails, c.contact_quality_score, c.linkedin_pattern, ds.spf, ds.dkim, ds.dmarc_policy, ds.dmarc_coverage, ds.mx_root, ds.local_provider, ds.registrar, ds.expires_at, ds.nameservers, ds.scan_status, ds.scanned_at, ls.readiness_score, ls.segment, ls.reason, ls.technical_heat, ls.commercial_segment, ls.commercial_heat, ls.priority_category, ls.priority_label, c.d365_lead_id, c.d365_sync_status, c.d365_sync_last_at
     """
 
     try:
@@ -710,6 +792,8 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             priority_label=getattr(row, "priority_label", None),
             infrastructure_summary=infrastructure_summary,
             referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
+            link_status=getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none) - normalize NULL to 'none'
+            referral_id=getattr(row, "primary_referral_id", None),  # Primary referral ID (if multiple exist)
             # D365 Integration fields (Phase 3)
             d365_sync_status=d365_sync_status,
             d365_sync_last_at=d365_sync_last_at,
@@ -944,7 +1028,24 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
         breakdown_dict["commercial_heat"] = lead_score.commercial_heat
         breakdown_dict["priority_category"] = lead_score.priority_category
         breakdown_dict["priority_label"] = lead_score.priority_label
+    
+    # Partner Center referral info (for breakdown modal)
+    from app.db.models import PartnerCenterReferral
+    referral = (
+        db.query(PartnerCenterReferral)
+        .filter(PartnerCenterReferral.domain == normalized_domain)
+        .first()
+    )
+    if referral:
+        breakdown_dict["referral_type"] = referral.referral_type
+        breakdown_dict["link_status"] = referral.link_status
+        breakdown_dict["referral_id"] = referral.referral_id
     else:
+        breakdown_dict["referral_type"] = None
+        breakdown_dict["link_status"] = None
+        breakdown_dict["referral_id"] = None
+    
+    if not lead_score:
         # Fallback: Calculate P-model fields on the fly if not in DB
         from app.core.scorer import score_domain
         scoring_result = score_domain(

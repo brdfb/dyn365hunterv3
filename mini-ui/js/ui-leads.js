@@ -47,6 +47,7 @@ export function renderLeadsTable(leads) {
                 </td>
                 <td class="leads-table__cell leads-table__cell--referral">
                     ${getReferralBadge(lead.referral_type)}
+                    ${lead.link_status ? ` ${getLinkStatusBadge(lead.link_status)}` : ''}
                 </td>
                 <td class="leads-table__cell leads-table__cell--segment">
                     ${lead.segment ? `<span class="segment-badge segment-badge--${segmentClass}" title="${getSegmentTooltip(lead.segment, lead.provider, lead.readiness_score)}">${escapeHtml(lead.segment)}</span>` : '-'}
@@ -237,6 +238,46 @@ function getPriorityBadge(priority_category_or_score) {
         default:
             return '-'; // Unknown
     }
+}
+
+/**
+ * Get link status badge (Partner Center link status)
+ * Returns badge HTML for linked/unlinked/mixed status
+ */
+function getLinkStatusBadge(link_status) {
+    // Normalize: backend always returns 'none' for no referrals, but handle null/undefined gracefully
+    if (!link_status || link_status === 'none') {
+        return '<span class="link-status-badge link-status-badge--none" title="Partner Center referral yok">-</span>';
+    }
+    
+    const status = link_status.toLowerCase();
+    let badgeClass = 'link-status-badge';
+    let icon = '';
+    let tooltip = '';
+    
+    switch (status) {
+        case 'linked':
+        case 'auto_linked':
+            badgeClass += ' link-status-badge--linked';
+            icon = '🔗';
+            tooltip = 'Bu domain Partner Center referral\'ına bağlı';
+            break;
+        case 'unlinked':
+            badgeClass += ' link-status-badge--unlinked';
+            icon = '🔓';
+            tooltip = 'Partner Center referral\'ı var ama lead ile linklenmemiş';
+            break;
+        case 'mixed':
+            badgeClass += ' link-status-badge--mixed';
+            icon = '🔀';
+            tooltip = 'Bu domain için birden fazla referral var (farklı link durumları)';
+            break;
+        default:
+            badgeClass += ' link-status-badge--none';
+            tooltip = 'Partner Center referral durumu bilinmiyor';
+    }
+    
+    return `<span class="${badgeClass}" title="${escapeHtml(tooltip)}">${icon}</span>`;
 }
 
 /**
@@ -998,6 +1039,35 @@ export function showScoreBreakdown(breakdown, domain) {
     // Phase 3: D365 Integration Panel
     // Note: D365 data comes from lead response, not breakdown
     // We'll fetch lead data separately or pass it as parameter
+    // Partner Center Referral section (if available - only show if referral exists, not for 'none' status)
+    if (breakdown.referral_type || (breakdown.link_status && breakdown.link_status !== 'none')) {
+        html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 2px solid #e0e0e0; padding-top: 1rem;">
+            <div class="score-breakdown__section-title">Partner Center Referral</div>`;
+        
+        if (breakdown.referral_type) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Referral Type</span>
+                <span class="score-breakdown__value">${getReferralBadge(breakdown.referral_type)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.link_status) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Link Status</span>
+                <span class="score-breakdown__value">${getLinkStatusBadge(breakdown.link_status)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.referral_id) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Referral ID</span>
+                <span class="score-breakdown__value" style="font-family: monospace; font-size: 0.85rem;">${escapeHtml(breakdown.referral_id)}</span>
+            </div>`;
+        }
+        
+        html += `</div>`;
+    }
+    
     html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 2px solid #e0e0e0; padding-top: 1rem;">
         <div class="score-breakdown__section-title">Dynamics 365</div>
         <div id="d365-panel-${escapeHtml(domain)}" class="d365-panel">

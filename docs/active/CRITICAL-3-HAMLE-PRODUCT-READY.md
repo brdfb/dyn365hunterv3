@@ -81,13 +81,13 @@
 ---
 
 ### **HAMLE 2: Dynamics 365 Push Entegrasyonu**
-**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 2.9 ⏳ Pending, Phase 3 ▶️ ŞİMDİ)  
+**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 3 ✅ Tamamlandı, Phase 2.9 ⏳ Pending)  
 **Öncelik**: P0 (Kritik - Satış pipeline'ı)  
 **Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma
 
 #### Problem:
 - ✅ **Backend Hazır**: D365 push backend'i tamamlandı (Phase 2.5 - %94)
-- ❌ **UI Eksik**: Kullanıcı D365 status'u göremiyor, push butonu yok
+- ✅ **UI Tamamlandı**: D365 status görünüyor, push butonu çalışıyor (Phase 3 - 2025-01-30)
 - ⏳ **E2E Beklemede**: D365 tenant hazır olunca test edilecek (Phase 2.9 - ops fazı)
 
 #### Mimari Yaklaşım:
@@ -118,12 +118,12 @@
 - **Kapsam**: Tamamen ops/environment işi (kod değişikliği yok)
 - **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md` dosyasına bakın
 
-**▶️ Phase 3 — UI & Status (ŞİMDİ BAŞLAYABİLİR)**
-- [ ] API: Companies/Leads response'a D365 alanlarını ekle
-- [ ] UI: Lead listesine D365 badge
-- [ ] UI: "Push to Dynamics" aksiyonu
-- [ ] UI: Lead detail view'da detaylı D365 kutusu
-- [ ] Monitoring / Logging (minimum)
+**✅ Phase 3 — UI & Status (TAMAMLANDI - 2025-01-30)**
+- ✅ API: Companies/Leads response'a D365 alanlarını eklendi
+- ✅ UI: Lead listesine D365 badge eklendi
+- ✅ UI: "Push to Dynamics" aksiyonu eklendi
+- ✅ UI: Lead detail view'da detaylı D365 kutusu eklendi
+- ⚠️ Monitoring / Logging (minimum - opsiyonel, post-MVP)
 - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md` dosyasına bakın
 
 #### Başarı Kriterleri:
@@ -142,11 +142,11 @@
 - ✅ `app/api/v1/d365_routes.py` (API endpoints)
 - ✅ `alembic/versions/XXXX_add_d365_sync_fields.py` (DB migration)
 
-#### Dosyalar (UI - ▶️ PHASE 3'TE YAPILACAK):
-- [ ] `app/api/v1/leads.py` - `d365_status` field ekle (response'a)
-- [ ] `mini-ui/js/d365_actions.js` (veya mevcut UI dosyası) - "Push to Dynamics" butonu + state
-- [ ] `mini-ui/index.html` - UI elements
-- [ ] `app/config.py` - `HUNTER_D365_BASE_URL` config ekle (eğer yoksa)
+#### Dosyalar (UI - ✅ PHASE 3 TAMAMLANDI):
+- ✅ `app/api/leads.py` - `d365_sync_status`, `d365_lead_id`, `d365_lead_url` field'leri eklendi (response'a)
+- ✅ `mini-ui/js/ui-leads.js` - "Push to Dynamics" butonu + state (handleD365Push, renderD365Panel, getD365Badge)
+- ✅ `mini-ui/js/api.js` - D365 push API çağrısı (pushLeadToD365)
+- ✅ `app/config.py` - `HUNTER_D365_BASE_URL` config mevcut
 
 #### Core Freeze Protokolü:
 - ✅ Core modüllere **dokunulmayacak** (`app/core/scorer.py`, `analyzer_*.py`, vb.)
@@ -216,10 +216,10 @@
 2. **HAMLE 2** (Dynamics 365 Push) - **Revize edildi**:
    - ✅ **Phase 2.5** (Backend Validation) - **TAMAMLANDI** (%94)
    - ⏳ **Phase 2.9** (E2E Wiring) - **PENDING** (D365 tenant hazır olunca, ops fazı)
-   - ▶️ **Phase 3** (UI & Status) - **ŞİMDİ BAŞLAYABİLİR** (~1 gün)
+   - ✅ **Phase 3** (UI & Status) - **TAMAMLANDI** (2025-01-30)
 3. **HAMLE 3** (UI Polish) - **3-5 gün** - En görünür iyileştirme
 
-**Toplam Süre**: Revize edildi - Phase 3 (UI) hemen başlayabilir, Phase 2.9 tenant hazır olunca yapılacak
+**Toplam Süre**: Revize edildi - ✅ Phase 3 (UI) tamamlandı (2025-01-30), ⏳ Phase 2.9 tenant hazır olunca yapılacak
 
 ---
 
@@ -235,7 +235,7 @@
 - ✅ **Phase 2.5**: Backend D365 push çalışıyor (client, mapping, task, API endpoint)
 - ✅ **Phase 2.5**: Duplicate detection çalışıyor (upsert by domain/email)
 - ⏳ **Phase 2.9**: E2E test (D365 tenant hazır olunca)
-- ▶️ **Phase 3**: UI'da sync butonu ve status çalışıyor (şimdi başlayacak)
+- ✅ **Phase 3**: UI'da sync butonu ve status çalışıyor (tamamlandı - 2025-01-30)
 
 ### Hamle 3 Başarısı:
 - ✅ UI "profesyonel" görünüyor

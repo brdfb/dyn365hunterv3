@@ -144,26 +144,64 @@ def detect_referral_type(referral: Dict[str, Any]) -> Optional[str]:
     """
     Detect referral type from Partner Center referral data.
     
+    Enhanced detection: Checks multiple fields and locations in the referral structure.
+    
     Args:
         referral: Partner Center referral dictionary
         
     Returns:
         Referral type: 'co-sell', 'marketplace', 'solution-provider', or None
     """
-    # Partner Center referral types (based on API structure)
-    referral_type = referral.get("type") or referral.get("referralType")
+    # Try multiple locations for referral type (Partner Center API structure varies)
+    # 1. Top-level 'type' field
+    referral_type = referral.get("type")
     
+    # 2. Top-level 'referralType' field (alternative naming)
+    if not referral_type:
+        referral_type = referral.get("referralType")
+    
+    # 3. Details.type (some referral structures have type in details)
+    if not referral_type:
+        details = referral.get("details") or {}
+        referral_type = details.get("type")
+    
+    # 4. Category field (sometimes used instead of type)
+    if not referral_type:
+        referral_type = referral.get("category")
+    
+    # 5. Source field (sometimes contains type information)
+    if not referral_type:
+        source = referral.get("source")
+        if source and isinstance(source, str):
+            # Check if source contains type keywords
+            source_lower = source.lower()
+            if "co-sell" in source_lower or "cosell" in source_lower:
+                return "co-sell"
+            elif "marketplace" in source_lower:
+                return "marketplace"
+            elif "solution" in source_lower or "provider" in source_lower:
+                return "solution-provider"
+    
+    # If still no type found, return None
     if not referral_type:
         return None
     
-    referral_type_lower = referral_type.lower()
+    # Normalize and map to internal types
+    referral_type_lower = str(referral_type).lower()
     
     # Map Partner Center types to our internal types
-    if "co-sell" in referral_type_lower or "cosell" in referral_type_lower:
+    # Co-sell variations
+    if "co-sell" in referral_type_lower or "cosell" in referral_type_lower or "co_sell" in referral_type_lower:
         return "co-sell"
-    elif "marketplace" in referral_type_lower:
+    # Marketplace variations
+    elif "marketplace" in referral_type_lower or "market_place" in referral_type_lower:
         return "marketplace"
-    elif "solution" in referral_type_lower or "provider" in referral_type_lower:
+    # Solution Provider variations
+    elif "solution" in referral_type_lower and "provider" in referral_type_lower:
+        return "solution-provider"
+    elif "solution-provider" in referral_type_lower or "solution_provider" in referral_type_lower:
+        return "solution-provider"
+    elif referral_type_lower == "sp":
         return "solution-provider"
     
     return None
@@ -852,5 +890,107 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
             "skipped_count": 0,
             "total_fetched": 0,
             "total_inserted": 0,
+        }
+
+
+def update_existing_referral_types(db: Session) -> Dict[str, int]:
+    """
+    Update referral_type for existing referrals that have raw_data but null referral_type.
+    
+    This is a one-time migration function to fix referral types for existing records.
+    Uses the enhanced detect_referral_type() function to re-analyze raw_data.
+    
+    Args:
+        db: Database session
+        
+    Returns:
+        Dictionary with update statistics:
+        - updated_count: Number of referrals updated
+        - skipped_count: Number of referrals skipped (no raw_data or already has type)
+        - error_count: Number of errors encountered
+    """
+    from app.db.models import PartnerCenterReferral
+    
+    updated_count = 0
+    skipped_count = 0
+    error_count = 0
+    
+    try:
+        # Find all referrals with raw_data but null referral_type
+        referrals = (
+            db.query(PartnerCenterReferral)
+            .filter(
+                PartnerCenterReferral.raw_data.isnot(None),
+                PartnerCenterReferral.referral_type.is_(None)
+            )
+            .all()
+        )
+        
+        logger.info(
+            "referral_type_update_start",
+            total_referrals=len(referrals)
+        )
+        
+        for referral in referrals:
+            try:
+                raw_data = referral.raw_data
+                if not raw_data:
+                    skipped_count += 1
+                    continue
+                
+                # Detect referral type using enhanced function
+                new_referral_type = detect_referral_type(raw_data)
+                
+                if new_referral_type:
+                    referral.referral_type = new_referral_type
+                    updated_count += 1
+                    logger.debug(
+                        "referral_type_updated",
+                        referral_id=mask_pii(referral.referral_id),
+                        referral_type=new_referral_type
+                    )
+                else:
+                    skipped_count += 1
+                    logger.debug(
+                        "referral_type_not_detected",
+                        referral_id=mask_pii(referral.referral_id)
+                    )
+            except Exception as e:
+                error_count += 1
+                logger.error(
+                    "referral_type_update_error",
+                    referral_id=mask_pii(referral.referral_id) if referral else None,
+                    error=str(e),
+                    exc_info=True
+                )
+                continue
+        
+        # Commit all updates
+        db.commit()
+        
+        logger.info(
+            "referral_type_update_complete",
+            updated_count=updated_count,
+            skipped_count=skipped_count,
+            error_count=error_count
+        )
+        
+        return {
+            "updated_count": updated_count,
+            "skipped_count": skipped_count,
+            "error_count": error_count
+        }
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(
+            "referral_type_update_failed",
+            error=str(e),
+            exc_info=True
+        )
+        return {
+            "updated_count": updated_count,
+            "skipped_count": skipped_count,
+            "error_count": error_count + 1
         }
 

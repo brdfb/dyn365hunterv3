@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.db.models import PartnerCenterReferral, Company, RawLead
 from app.config import settings
 from app.core.logging import logger
-from app.core.referral_ingestion import sync_referrals_from_partner_center
+from app.core.referral_ingestion import sync_referrals_from_partner_center, update_existing_referral_types
 from app.core.tasks import sync_partner_center_referrals_task
 from app.core.normalizer import normalize_domain
 from app.core.merger import upsert_companies

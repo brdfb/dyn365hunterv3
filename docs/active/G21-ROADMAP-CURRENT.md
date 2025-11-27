@@ -128,8 +128,9 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 - ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5 - 2025-01-30)
   - API endpoint, Celery task, D365 client, mapping, DB migration tamamlandı
   - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
-- ▶️ **PHASE 3 (UI) BAŞLAYABİLİR** (~1 gün)
-  - Lead listesine D365 badge, "Push to Dynamics" butonu, lead detail modal D365 paneli
+- ✅ **PHASE 3 (UI) TAMAMLANDI** (2025-01-30)
+  - ✅ Lead listesine D365 badge, "Push to Dynamics" butonu, lead detail modal D365 paneli
+  - ✅ API response'a D365 alanları eklendi
   - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
 - ⏳ **PHASE 2.9 (E2E WIRING) PENDING** (D365 tenant hazır olunca, ops fazı)
   - App registration, Application User, Role + izinler, custom hunter_* alanları

@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Partner Center: Solution 1 - Link Status & Referral ID Enhancement** (2025-01-30) - Enhanced Leads API with link status and referral ID for consistency between Leads and Referrals tabs
+  - **Backend API Enhancements**:
+    - Added `link_status` field to Leads API response (`none`, `linked`, `unlinked`, `mixed`)
+    - Added `primary_referral_id` field (deterministic selection: most recent referral by `synced_at DESC, created_at DESC`)
+    - Normalized link status values: `auto_linked` → `linked`, `multi_candidate` → `mixed`, `NULL` → `none` or `unlinked`
+    - Enhanced referral type detection: checks multiple fields (`type`, `referralType`, `details.type`, `category`, `source`)
+    - Migration endpoint: `POST /api/v1/partner-center/referrals/update-types` to fix existing referral types
+  - **UI Enhancements**:
+    - Link status badge in Leads table (green 🔗 for linked, gray 🔓 for unlinked, yellow 🔀 for mixed, gray "-" for none)
+    - Link status badge in Referrals table (consistent rendering with Leads tab)
+    - Breakdown modal: Partner Center Referral section with referral type, link status, and referral ID
+    - Conditional render: Breakdown modal hides referral section when `link_status === 'none'`
+  - **Export Support**: `link_status` column added to CSV/XLSX export
+  - **Test Coverage**: 9/9 tests passing (7 scenarios + 2 integration tests)
+    - Test scenarios: no referrals, single linked/unlinked, multiple same status, mixed status, NULL status handling
+  - **UI Consistency**: Fixed badge rendering inconsistencies between Leads and Referrals tabs
+    - Unified `getLinkStatusBadge()` and `getReferralBadge()` functions
+    - Consistent referral type labels ("SP" short form)
+    - Support for both raw and normalized link status values
+  - **Files**: `app/api/leads.py`, `app/core/referral_ingestion.py`, `app/api/referrals.py`, `mini-ui/js/ui-leads.js`, `mini-ui/js/ui-referrals.js`, `tests/test_leads_link_status.py`
+  - **Documentation**: `docs/active/SOLUTION-1-UI-CONSISTENCY-CHECK.md`, `docs/active/PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md`
+  - **Status**: ✅ **Completed** - Solution 1 package complete, production-ready, no technical debt
+
+- **D365 Integration: Phase 3 - UI & Status** (2025-01-30) - Complete UI implementation for D365 push integration
+  - **API Response Fields**: Added D365 fields to leads API response (`d365_sync_status`, `d365_sync_last_at`, `d365_lead_id`, `d365_lead_url`)
+    - Fields automatically populated from `companies` table
+    - D365 lead URL generated from `HUNTER_D365_BASE_URL` config
+  - **D365 Badge in Lead List**: Visual status indicator in lead table
+    - Status badges: Not Synced (gray), Queued/In Progress (yellow), Synced (green), Error (red)
+    - Clickable badges open lead detail modal with D365 panel
+    - Tooltips show detailed status information
+  - **Push to Dynamics Button**: Action button in lead detail modal
+    - Single lead push via `POST /api/v1/d365/push-lead`
+    - Optimistic UI updates (badge immediately shows "queued")
+    - Error handling with toast notifications
+    - Feature flag aware (disabled when `HUNTER_D365_ENABLED=false`)
+  - **D365 Panel in Lead Detail**: Comprehensive D365 status panel
+    - Status badge with visual indicators
+    - Last sync time (human-readable: "2 hours ago")
+    - "Open in Dynamics" link (when lead_id exists)
+    - Push button (when not synced or error)
+  - **Files**: `app/api/leads.py`, `mini-ui/js/ui-leads.js`, `mini-ui/js/api.js`
+  - **Status**: ✅ **Completed** - Phase 3 UI implementation complete, ready for Phase 2.9 (E2E Wiring)
+
 - **D365 Integration: Phase 2.5 - Test & Validation** (2025-11-27) - Comprehensive test suite for D365 push integration
   - **API + Task Plumbing Tests**: Feature flag validation, task enqueue, parameter validation
   - **Mapping Validation Tests**: `leads_ready` view → D365 payload mapping verification

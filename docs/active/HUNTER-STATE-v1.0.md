@@ -8,7 +8,7 @@
 - **Backend Engine:** ✅ Ferrari seviyesinde (DNS, scoring, enrichment, signals)
 - **Core Freeze:** ✅ **AKTİF** — Core modüller dokunulmaz (CODEOWNERS, CI regression job, feature flags)
 - **Partner Center:** ✅ Backend tamamlanmış, ⚠️ Production'da aktif değil (feature flag OFF)
-- **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ▶️ **Phase 3 (UI) başlayabilir**, ⏳ **Phase 2.9 (E2E) tenant hazır olunca** (Adapter pattern ile implement edildi)
+- **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ✅ **Phase 3 (UI) tamamlandı** (2025-01-30), ⏳ **Phase 2.9 (E2E) tenant hazır olunca** (Adapter pattern ile implement edildi)
 - **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
 
 **Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
@@ -362,7 +362,7 @@ sorularına cevap verebilmesi.
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
-- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ▶️ **PHASE 3 (UI) BAŞLAYABİLİR**, ⏳ **PHASE 2.9 (E2E) PENDING**
+- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ✅ **PHASE 3 (UI) TAMAMLANDI** (2025-01-30), ⏳ **PHASE 2.9 (E2E) PENDING**
 
   - ✅ **Phase 2.5 (Backend Validation)**: Backend tamamlandı (%94)
     - API endpoint: `POST /api/v1/d365/push-lead`
@@ -371,10 +371,11 @@ sorularına cevap verebilmesi.
     - Mapping: `app/integrations/d365/mapping.py`
     - DB migration: `d365_sync_status`, `d365_lead_id`, `d365_sync_last_at` alanları
     - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
-  - ▶️ **Phase 3 (UI & Status)**: Şimdi başlayabilir (~1 gün)
-    - Lead listesine D365 badge
-    - "Push to Dynamics" butonu
-    - Lead detail modal'da D365 paneli
+  - ✅ **Phase 3 (UI & Status)**: Tamamlandı (2025-01-30)
+    - ✅ Lead listesine D365 badge eklendi
+    - ✅ "Push to Dynamics" butonu eklendi
+    - ✅ Lead detail modal'da D365 paneli eklendi
+    - ✅ API response'a D365 alanları eklendi (d365_sync_status, d365_lead_id, d365_lead_url)
     - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
   - ⏳ **Phase 2.9 (E2E Wiring)**: D365 tenant hazır olunca (ops fazı)
     - App registration, Application User, Role + izinler
