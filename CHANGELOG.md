@@ -8,6 +8,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Partner Center: Solution 2 - Multiple Referrals Aggregate (MVP)** (2025-01-30) - Aggregate information for domains with multiple Partner Center referrals
+  - **Backend API Enhancements**:
+    - Added `referral_count` field (total number of referrals for a domain)
+    - Added `referral_types` array field (distinct referral types: `["co-sell", "marketplace"]`)
+    - Added `referral_ids` array field (referral IDs sorted by priority: most recent first)
+    - SQL aggregation using `ARRAY_AGG(DISTINCT ...)` and `COUNT(...)` for efficient querying
+    - Backward compatible: existing fields (`referral_type`, `link_status`, `referral_id`) remain unchanged
+  - **UI Enhancements**:
+    - Referral count badge in Leads table: `(2)`, `(3+)` when multiple referrals exist
+    - Tooltip on count badge: shows all referral types (e.g., "co-sell, marketplace")
+    - Breakdown modal: "Partner Center Referrals (n)" section with aggregate info
+      - Total count display
+      - All referral types as badges
+      - Primary referral ID (backward compatible)
+      - All referral IDs list (when multiple exist)
+  - **Export Support**: `referral_count`, `referral_types` (comma-separated), `referral_ids` (comma-separated) columns added to CSV/XLSX export
+  - **Test Coverage**: Extended existing test suite with Solution 2 aggregate field assertions
+    - Tests verify `referral_count`, `referral_types`, and `referral_ids` for all 7 scenarios
+    - All 9 tests passing (7 scenarios + 2 integration tests)
+  - **Files**: `app/api/leads.py`, `mini-ui/js/ui-leads.js`, `mini-ui/styles.css`, `tests/test_leads_link_status.py`
+  - **Documentation**: `docs/active/SOLUTION-2-MULTIPLE-REFERRALS-AGGREGATE-PLAN.md`
+  - **Status**: ✅ **Completed (MVP)** - Core aggregate fields implemented, `link_status_breakdown` deferred to post-MVP
+
 - **Partner Center: Solution 1 - Link Status & Referral ID Enhancement** (2025-01-30) - Enhanced Leads API with link status and referral ID for consistency between Leads and Referrals tabs
   - **Backend API Enhancements**:
     - Added `link_status` field to Leads API response (`none`, `linked`, `unlinked`, `mixed`)

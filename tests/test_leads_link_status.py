@@ -80,6 +80,10 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "none"
         assert lead.referral_id is None
         assert lead.referral_type is None
+        # Solution 2: Aggregate fields (no referrals)
+        assert lead.referral_count == 0
+        assert lead.referral_types == []
+        assert lead.referral_ids == []
     
     @pytest.mark.asyncio
     async def test_scenario_b_one_referral_linked(self, db_session, test_domain: str, setup_base_lead):
@@ -107,6 +111,10 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "linked"
         assert lead.referral_id == "ref-001"
         assert lead.referral_type == "co-sell"
+        # Solution 2: Aggregate fields
+        assert lead.referral_count == 1
+        assert lead.referral_types == ["co-sell"]
+        assert lead.referral_ids == ["ref-001"]
     
     @pytest.mark.asyncio
     async def test_scenario_c_one_referral_unlinked(self, db_session, test_domain: str, setup_base_lead):
@@ -134,6 +142,10 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "unlinked"
         assert lead.referral_id == "ref-002"
         assert lead.referral_type == "marketplace"
+        # Solution 2: Aggregate fields
+        assert lead.referral_count == 1
+        assert lead.referral_types == ["marketplace"]
+        assert lead.referral_ids == ["ref-002"]
     
     @pytest.mark.asyncio
     async def test_scenario_d_two_referrals_both_linked(self, db_session, test_domain: str, setup_base_lead):
@@ -172,6 +184,12 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "linked"
         assert lead.referral_id == "ref-004"  # Most recent (synced_at DESC)
         assert lead.referral_type in ["co-sell", "marketplace"]  # MAX() picks one
+        # Solution 2: Aggregate fields (2 referrals, both linked)
+        assert lead.referral_count == 2
+        assert set(lead.referral_types) == {"co-sell", "marketplace"}  # DISTINCT types
+        assert len(lead.referral_ids) == 2
+        assert "ref-004" in lead.referral_ids  # Most recent first
+        assert "ref-003" in lead.referral_ids
     
     @pytest.mark.asyncio
     async def test_scenario_e_two_referrals_both_unlinked(self, db_session, test_domain: str, setup_base_lead):
@@ -210,6 +228,12 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "unlinked"
         assert lead.referral_id == "ref-006"  # Most recent
         assert lead.referral_type in ["solution-provider", "co-sell"]  # MAX() picks one
+        # Solution 2: Aggregate fields (2 referrals, both unlinked)
+        assert lead.referral_count == 2
+        assert set(lead.referral_types) == {"solution-provider", "co-sell"}  # DISTINCT types
+        assert len(lead.referral_ids) == 2
+        assert "ref-006" in lead.referral_ids  # Most recent first
+        assert "ref-005" in lead.referral_ids
     
     @pytest.mark.asyncio
     async def test_scenario_f_two_referrals_mixed(self, db_session, test_domain: str, setup_base_lead):
@@ -248,6 +272,12 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "mixed"
         assert lead.referral_id == "ref-008"  # Most recent (synced_at DESC)
         assert lead.referral_type in ["co-sell", "marketplace"]  # MAX() picks one
+        # Solution 2: Aggregate fields (2 referrals, mixed status)
+        assert lead.referral_count == 2
+        assert set(lead.referral_types) == {"co-sell", "marketplace"}  # DISTINCT types
+        assert len(lead.referral_ids) == 2
+        assert "ref-008" in lead.referral_ids  # Most recent first
+        assert "ref-007" in lead.referral_ids
     
     @pytest.mark.asyncio
     async def test_scenario_g_two_referrals_null_status(self, db_session, test_domain: str, setup_base_lead):
@@ -286,6 +316,12 @@ class TestLinkStatusScenarios:
         assert lead.link_status == "unlinked"  # NULL defaults to 'unlinked'
         assert lead.referral_id == "ref-010"  # Most recent
         assert lead.referral_type in ["co-sell", "marketplace"]  # MAX() picks one
+        # Solution 2: Aggregate fields (2 referrals, both NULL status)
+        assert lead.referral_count == 2
+        assert set(lead.referral_types) == {"co-sell", "marketplace"}  # DISTINCT types
+        assert len(lead.referral_ids) == 2
+        assert "ref-010" in lead.referral_ids  # Most recent first
+        assert "ref-009" in lead.referral_ids
 
 
 class TestGetLeadsListLinkStatus:
@@ -336,6 +372,10 @@ class TestGetLeadsListLinkStatus:
         assert test_lead.link_status == "linked"
         assert test_lead.referral_id == "ref-list-001"
         assert test_lead.referral_type == "co-sell"
+        # Solution 2: Aggregate fields
+        assert test_lead.referral_count == 1
+        assert test_lead.referral_types == ["co-sell"]
+        assert test_lead.referral_ids == ["ref-list-001"]
 
 
 class TestExportLinkStatus:

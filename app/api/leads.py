@@ -59,6 +59,10 @@ class LeadResponse(BaseModel):
     referral_type: Optional[str] = None  # Partner Center referral type ('co-sell', 'marketplace', 'solution-provider')
     link_status: Optional[str] = None  # Partner Center link status ('linked', 'unlinked', 'mixed') - mixed when multiple referrals with different statuses
     referral_id: Optional[str] = None  # Partner Center referral ID (primary referral if multiple exist)
+    # Solution 2: Multiple referrals aggregate (MVP)
+    referral_count: int = 0  # Total number of referrals for this domain
+    referral_types: List[str] = []  # Array of distinct referral types (e.g., ["co-sell", "marketplace"])
+    referral_ids: List[str] = []  # Array of referral IDs sorted by priority (most recent first)
     # D365 Integration fields (Phase 3)
     d365_sync_status: Optional[str] = None  # 'not_synced', 'queued', 'in_progress', 'synced', 'error'
     d365_sync_last_at: Optional[str] = None  # Last sync timestamp (ISO format)
@@ -167,7 +171,12 @@ async def export_leads(
                  ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
                  LIMIT 1),
                 NULL
-            ) AS primary_referral_id
+            ) AS primary_referral_id,
+            -- Solution 2: Multiple referrals aggregate (MVP)
+            COUNT(pcr.id) AS referral_count,
+            ARRAY_AGG(DISTINCT pcr.referral_type) FILTER (WHERE pcr.referral_type IS NOT NULL) AS referral_types,
+            ARRAY_AGG(pcr.referral_id ORDER BY pcr.synced_at DESC, pcr.created_at DESC) 
+                FILTER (WHERE pcr.referral_id IS NOT NULL) AS referral_ids
         FROM leads_ready lr
         LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
@@ -242,6 +251,10 @@ async def export_leads(
                 "reason": row.reason or "",
                 "referral_type": getattr(row, "referral_type", None) or "",  # Task 2.5: Partner Center referral type
                 "link_status": getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none)
+                # Solution 2: Multiple referrals aggregate (MVP)
+                "referral_count": getattr(row, "referral_count", 0) or 0,
+                "referral_types": ", ".join(getattr(row, "referral_types", [])) if getattr(row, "referral_types", None) else "",  # Comma-separated string
+                "referral_ids": ", ".join(getattr(row, "referral_ids", [])) if getattr(row, "referral_ids", None) else "",  # Comma-separated string
             }
             leads_data.append(lead_dict)
 
@@ -425,7 +438,12 @@ async def get_leads(
                  ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
                  LIMIT 1),
                 NULL
-            ) AS primary_referral_id
+            ) AS primary_referral_id,
+            -- Solution 2: Multiple referrals aggregate (MVP)
+            COUNT(pcr.id) AS referral_count,
+            ARRAY_AGG(DISTINCT pcr.referral_type) FILTER (WHERE pcr.referral_type IS NOT NULL) AS referral_types,
+            ARRAY_AGG(pcr.referral_id ORDER BY pcr.synced_at DESC, pcr.created_at DESC) 
+                FILTER (WHERE pcr.referral_id IS NOT NULL) AS referral_ids
         FROM leads_ready lr
         LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
         WHERE 1=1
@@ -550,6 +568,10 @@ async def get_leads(
                 referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
                 link_status=getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none) - normalize NULL to 'none'
                 referral_id=getattr(row, "primary_referral_id", None),  # Primary referral ID (if multiple exist)
+                # Solution 2: Multiple referrals aggregate (MVP)
+                referral_count=getattr(row, "referral_count", 0) or 0,  # Total referral count
+                referral_types=list(getattr(row, "referral_types", [])) if getattr(row, "referral_types", None) else [],  # Array of distinct referral types
+                referral_ids=list(getattr(row, "referral_ids", [])) if getattr(row, "referral_ids", None) else [],  # Array of referral IDs (priority order)
                 # D365 Integration fields (Phase 3)
                 d365_sync_status=d365_sync_status,
                 d365_sync_last_at=d365_sync_last_at,
@@ -696,7 +718,12 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
                  ORDER BY pcr_inner.synced_at DESC, pcr_inner.created_at DESC 
                  LIMIT 1),
                 NULL
-            ) AS primary_referral_id
+            ) AS primary_referral_id,
+            -- Solution 2: Multiple referrals aggregate (MVP)
+            COUNT(pcr.id) AS referral_count,
+            ARRAY_AGG(DISTINCT pcr.referral_type) FILTER (WHERE pcr.referral_type IS NOT NULL) AS referral_types,
+            ARRAY_AGG(pcr.referral_id ORDER BY pcr.synced_at DESC, pcr.created_at DESC) 
+                FILTER (WHERE pcr.referral_id IS NOT NULL) AS referral_ids
         FROM companies c
         LEFT JOIN domain_signals ds ON c.domain = ds.domain
         LEFT JOIN lead_scores ls ON c.domain = ls.domain
@@ -794,6 +821,10 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
             link_status=getattr(row, "aggregated_link_status", None) or "none",  # Partner Center link status (linked/unlinked/mixed/none) - normalize NULL to 'none'
             referral_id=getattr(row, "primary_referral_id", None),  # Primary referral ID (if multiple exist)
+            # Solution 2: Multiple referrals aggregate (MVP)
+            referral_count=getattr(row, "referral_count", 0) or 0,  # Total referral count
+            referral_types=list(getattr(row, "referral_types", [])) if getattr(row, "referral_types", None) else [],  # Array of distinct referral types
+            referral_ids=list(getattr(row, "referral_ids", [])) if getattr(row, "referral_ids", None) else [],  # Array of referral IDs (priority order)
             # D365 Integration fields (Phase 3)
             d365_sync_status=d365_sync_status,
             d365_sync_last_at=d365_sync_last_at,
@@ -927,6 +958,13 @@ class ScoreBreakdownResponse(BaseModel):
     commercial_heat: Optional[str] = None  # 'HIGH', 'MEDIUM', 'LOW'
     priority_category: Optional[str] = None  # 'P1', 'P2', 'P3', 'P4', 'P5', 'P6'
     priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
+    # Solution 2: Partner Center referral aggregate info (for breakdown modal)
+    referral_type: Optional[str] = None  # Primary referral type
+    link_status: Optional[str] = None  # Primary referral link status
+    referral_id: Optional[str] = None  # Primary referral ID
+    referral_count: int = 0  # Total referral count
+    referral_types: List[str] = []  # Array of distinct referral types
+    referral_ids: List[str] = []  # Array of referral IDs (priority order)
 
 
 @router.get("/{domain}/score-breakdown", response_model=ScoreBreakdownResponse)
@@ -1029,21 +1067,32 @@ async def get_score_breakdown(domain: str, db: Session = Depends(get_db)):
         breakdown_dict["priority_category"] = lead_score.priority_category
         breakdown_dict["priority_label"] = lead_score.priority_label
     
-    # Partner Center referral info (for breakdown modal)
+    # Partner Center referral info (for breakdown modal) - Solution 2: Aggregate info
     from app.db.models import PartnerCenterReferral
-    referral = (
+    referrals = (
         db.query(PartnerCenterReferral)
         .filter(PartnerCenterReferral.domain == normalized_domain)
-        .first()
+        .order_by(PartnerCenterReferral.synced_at.desc(), PartnerCenterReferral.created_at.desc())
+        .all()
     )
-    if referral:
-        breakdown_dict["referral_type"] = referral.referral_type
-        breakdown_dict["link_status"] = referral.link_status
-        breakdown_dict["referral_id"] = referral.referral_id
+    if referrals:
+        # Primary referral (most recent)
+        primary_referral = referrals[0]
+        breakdown_dict["referral_type"] = primary_referral.referral_type
+        breakdown_dict["link_status"] = primary_referral.link_status
+        breakdown_dict["referral_id"] = primary_referral.referral_id
+        # Solution 2: Aggregate info
+        breakdown_dict["referral_count"] = len(referrals)
+        breakdown_dict["referral_types"] = list(set([r.referral_type for r in referrals if r.referral_type]))
+        breakdown_dict["referral_ids"] = [r.referral_id for r in referrals if r.referral_id]
     else:
         breakdown_dict["referral_type"] = None
         breakdown_dict["link_status"] = None
         breakdown_dict["referral_id"] = None
+        # Solution 2: Aggregate info (empty)
+        breakdown_dict["referral_count"] = 0
+        breakdown_dict["referral_types"] = []
+        breakdown_dict["referral_ids"] = []
     
     if not lead_score:
         # Fallback: Calculate P-model fields on the fly if not in DB

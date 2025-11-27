@@ -98,6 +98,12 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
     - Export: Added `link_status` column to CSV/XLSX export
     - Tests: 9/9 passing (7 scenarios + 2 integration tests)
     - UI Consistency: Fixed badge rendering inconsistencies between Leads and Referrals tabs
+  - **Solution 2 - Multiple Referrals Aggregate (MVP)** (✅ Complete - 2025-01-30)
+    - Backend: Added `referral_count`, `referral_types[]`, `referral_ids[]` to Leads API (backward compatible)
+    - UI: Referral count badge `(2)`, `(3+)` in Leads table with tooltip showing all referral types
+    - Breakdown modal: "Partner Center Referrals (n)" section with aggregate info (total, types, IDs)
+    - Export: Added `referral_count`, `referral_types` (comma-separated), `referral_ids` (comma-separated) columns
+    - Tests: Extended test suite with Solution 2 aggregate field assertions (9/9 passing)
   - Status: ✅ **Production-ready** - All phases completed (Phase 1-7), 68/68 tests passing (59 referral + 9 link status), feature flag OFF (MVP-safe)
   - UI Status: ✅ **Complete** - All UI features implemented (referral column, filter, sync button, status indicator, link status badges)
   - Next: Post-MVP - Scoring Pipeline Integration (Future enhancement)

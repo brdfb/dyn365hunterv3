@@ -1073,6 +1073,19 @@ body {
     cursor: default;
 }
 
+/* Solution 2: Referral count badge */
+.referral-count-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-left: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+
 /* G20: Tenant Size Badge */
 .tenant-size-badge {
     display: inline-block;

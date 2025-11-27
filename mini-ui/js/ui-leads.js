@@ -47,6 +47,7 @@ export function renderLeadsTable(leads) {
                 </td>
                 <td class="leads-table__cell leads-table__cell--referral">
                     ${getReferralBadge(lead.referral_type)}
+                    ${lead.referral_count > 1 ? `<span class="referral-count-badge" title="${lead.referral_types && lead.referral_types.length > 0 ? escapeHtml(lead.referral_types.join(', ')) : ''}">(${lead.referral_count})</span>` : ''}
                     ${lead.link_status ? ` ${getLinkStatusBadge(lead.link_status)}` : ''}
                 </td>
                 <td class="leads-table__cell leads-table__cell--segment">
@@ -1039,12 +1040,26 @@ export function showScoreBreakdown(breakdown, domain) {
     // Phase 3: D365 Integration Panel
     // Note: D365 data comes from lead response, not breakdown
     // We'll fetch lead data separately or pass it as parameter
-    // Partner Center Referral section (if available - only show if referral exists, not for 'none' status)
-    if (breakdown.referral_type || (breakdown.link_status && breakdown.link_status !== 'none')) {
+    // Partner Center Referral section (Solution 2: Aggregate info)
+    if (breakdown.referral_count > 0 || breakdown.referral_type || (breakdown.link_status && breakdown.link_status !== 'none')) {
+        const referralCount = breakdown.referral_count || (breakdown.referral_type ? 1 : 0);
         html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 2px solid #e0e0e0; padding-top: 1rem;">
-            <div class="score-breakdown__section-title">Partner Center Referral</div>`;
+            <div class="score-breakdown__section-title">Partner Center Referrals (${referralCount})</div>`;
         
-        if (breakdown.referral_type) {
+        // Solution 2: Aggregate info
+        if (referralCount > 0) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Toplam</span>
+                <span class="score-breakdown__value">${referralCount} referral</span>
+            </div>`;
+        }
+        
+        if (breakdown.referral_types && breakdown.referral_types.length > 0) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Türler</span>
+                <span class="score-breakdown__value">${breakdown.referral_types.map(t => getReferralBadge(t)).join(' ')}</span>
+            </div>`;
+        } else if (breakdown.referral_type) {
             html += `<div class="score-breakdown__item">
                 <span class="score-breakdown__label">Referral Type</span>
                 <span class="score-breakdown__value">${getReferralBadge(breakdown.referral_type)}</span>
@@ -1060,8 +1075,15 @@ export function showScoreBreakdown(breakdown, domain) {
         
         if (breakdown.referral_id) {
             html += `<div class="score-breakdown__item">
-                <span class="score-breakdown__label">Referral ID</span>
+                <span class="score-breakdown__label">Primary Referral ID</span>
                 <span class="score-breakdown__value" style="font-family: monospace; font-size: 0.85rem;">${escapeHtml(breakdown.referral_id)}</span>
+            </div>`;
+        }
+        
+        if (breakdown.referral_ids && breakdown.referral_ids.length > 1) {
+            html += `<div class="score-breakdown__item">
+                <span class="score-breakdown__label">Tüm Referral IDs</span>
+                <span class="score-breakdown__value" style="font-family: monospace; font-size: 0.85rem;">${breakdown.referral_ids.map(id => escapeHtml(id)).join(', ')}</span>
             </div>`;
         }
         
