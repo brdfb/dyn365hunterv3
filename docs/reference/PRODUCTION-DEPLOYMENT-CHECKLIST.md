@@ -27,7 +27,7 @@
 - [ ] Sentry DSN (`SENTRY_DSN`)
 - [ ] Log level (`LOG_LEVEL=INFO`)
 - [ ] Environment (`ENVIRONMENT=production`)
-- [ ] Partner Center feature flag (`PARTNER_CENTER_ENABLED=false` - Post-MVP)
+- [ ] Partner Center feature flag (`HUNTER_PARTNER_CENTER_ENABLED=true` - Production ready, see `docs/active/HAMLE-1-PRODUCTION-DEPLOYMENT.md`)
 
 #### Database Migration
 - [ ] Alembic migration system verified (`alembic current`)
