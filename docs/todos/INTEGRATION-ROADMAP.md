@@ -178,16 +178,30 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ---
 
-### Phase 3: Dynamics 365 Integration (P2) ⏳ **PENDING**
+### Phase 3: Dynamics 365 Integration (P2) 🔄 **IN PROGRESS**
 
-**Status**: ⏳ **Pending** (after Phase 2)  
+**Status**: 🔄 **In Progress** (Backend %94 + UI completed, E2E runbook ready)  
 **Duration**: 6-10 days (4 faz: S + M + S-M + S = ~1 hafta)  
 **Risk**: 4/10  
 **Priority**: P2  
 **Branch**: `feature/d365-push-v1`  
 **Mimari**: Adapter Pattern — Core Freeze + Integration Layer
 
-**Not:** Detaylı mimari plan için `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
+**Current Progress:**
+- ✅ **Phase 2.5 (Backend)**: %94 completed (2025-01-30)
+  - API endpoint, Celery task, D365 client, mapping, DB migration completed
+  - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
+- ✅ **Phase 3 (UI)**: Completed (2025-01-30)
+  - Lead listesine D365 badge, "Push to Dynamics" butonu, lead detail modal D365 paneli
+  - API response'a D365 alanları eklendi
+- ✅ **Roast Sprint**: Completed (2025-01-30)
+  - 5/5 critical fixes completed (security, idempotency, token cache, session lifecycle, retry backoff)
+- ⏳ **Phase 2.9 (E2E)**: Runbook ready, tenant setup pending
+  - Step-by-step runbook: `D365-PHASE-2.9-E2E-RUNBOOK.md`
+  - Tenant & App Registration, Hunter config, Manual E2E tests, Go/No-Go gate
+
+**Not:** Detaylı mimari plan için `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.  
+**E2E Runbook:** `D365-PHASE-2.9-E2E-RUNBOOK.md` (tenant setup için step-by-step guide)
 
 #### Tasks (4 Faz)
 
@@ -262,9 +276,9 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 2 (Partner Center Referrals) ✅ **COMPLETED** (2025-01-30)
+**Current Phase**: Phase 3 (Dynamics 365 Integration) 🔄 **IN PROGRESS** (Backend %94 + UI completed, E2E runbook ready)
 
-**Completed**: 1/3 phases (Phase 1 ✅ Completed 2025-01-28)
+**Completed**: 2/3 phases (Phase 1 ✅ Completed 2025-01-28, Phase 2 ✅ Completed 2025-01-30)
 
 **Phase 1 Status**: ✅ **COMPLETED** (2025-01-28)
 - All tasks done (Task 1.1-1.5 ✅)
@@ -279,10 +293,20 @@ Implement correct engineering sequence for Hunter integration with external syst
 - **Status**: Phase 2 Complete - Feature flag default OFF (MVP-safe), can be enabled when ready
 - **Remaining**: Scoring Pipeline Integration (Azure Tenant ID override + Co-sell boost) - Future enhancement
 
+**Phase 3 Status**: 🔄 **IN PROGRESS** (Backend %94 + UI completed, E2E runbook ready)
+- ✅ Phase 2.5 (Backend): %94 completed (API, Celery task, D365 client, mapping, DB migration)
+- ✅ Phase 3 (UI): Completed (badge, push button, detail modal, status fields)
+- ✅ Roast Sprint: Completed (5/5 tasks: security, idempotency, token cache, session lifecycle, retry backoff)
+- ⏳ Phase 2.9 (E2E): Runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`), tenant setup pending
+
 **Next Steps**:
 1. ✅ Phase 1 completed - All tasks done (Task 1.1-1.5 ✅)
 2. ✅ Phase 2: Partner Center Referrals - **COMPLETED** (2025-01-30)
-3. ⏳ Phase 3: Dynamics 365 Integration - Pending (after Phase 2 completion)
+3. 🔄 Phase 3: Dynamics 365 Integration - **IN PROGRESS**
+   - ✅ Phase 2.5 (Backend): %94 completed
+   - ✅ Phase 3 (UI): Completed
+   - ✅ Roast Sprint: Completed (5/5 tasks)
+   - ⏳ Phase 2.9 (E2E): Runbook ready, execute when tenant is ready
 
 ---
 

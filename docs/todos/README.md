@@ -11,10 +11,14 @@ This folder contains TODO lists and task tracking documents.
   - ✅ Phase 2: Sales Engine (2025-01-28)
   - ✅ Phase 3: Read-Only Mode (2025-01-28)
   - 🔄 Phase 4: Dynamics Migration (PAUSED - Integration Roadmap Phase 3 overlaps)
-- `INTEGRATION-ROADMAP.md` - Integration Roadmap - 🔄 In Progress (2025-01-28)
+- `INTEGRATION-ROADMAP.md` - Integration Roadmap - 🔄 In Progress (2025-01-30)
   - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
   - ✅ Phase 2: Partner Center Referrals (P1) - COMPLETED (2025-01-30)
-  - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending
+  - 🔄 Phase 3: Dynamics 365 Integration (P2) - IN PROGRESS
+    - ✅ Phase 2.5 (Backend): %94 completed
+    - ✅ Phase 3 (UI): Completed
+    - ✅ Roast Sprint: Completed (5/5 tasks)
+    - ⏳ Phase 2.9 (E2E): Runbook ready, tenant setup pending
 
 **Recently Completed:**
 - `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ Completed (2025-01-30) → Archived
