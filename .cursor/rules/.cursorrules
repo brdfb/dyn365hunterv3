@@ -17,6 +17,8 @@
 - **✅ Sales Summary v1.1**: ✅ DONE & PROD-READY (2025-01-29) - Intelligence Layer with reasoning capabilities, UX polished
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine (No-Break Refactor Plan)
 - **✅ Partner Center Phase 2**: ✅ Completed (2025-01-30) - Integration Roadmap Phase 2 (Tasks 2.1-2.6 + Phase 4-6 productization + Phase 7 production enablement completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
+- **✅ Pre-D365 Roast Sprint**: ✅ Completed (2025-01-30) - 5/5 critical fixes (security, idempotency, token cache, session lifecycle, retry backoff)
+- **🔄 Dynamics 365 Integration**: 🔄 In Progress (2025-01-30) - Backend %94 completed (Phase 2.5), UI completed (Phase 3), E2E runbook ready (Phase 2.9)
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20), CSP P-Model (2025-01-29)
 
 ## Code Style & Standards
@@ -422,16 +424,36 @@ When a phase is completed (TODO status = "Completed"):
 
 ### Documentation Structure
 - `docs/active/` - Current phase documentation (keep minimal, max 5-7 files)
+  - **Current**: 9 files (2025-01-30) - Target: 5-7 files
+  - **Recent cleanup**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
+  - **Files**: HUNTER-STATE-v1.0.md, CRITICAL-3-HAMLE-PRODUCT-READY.md, CORE-FREEZE-D365-PUSH-PLAN.md, D365-PHASE-2.9-E2E-RUNBOOK.md, G21-ROADMAP-CURRENT.md, KALAN-ISLER-PRIORITY.md, NO-BREAK-REFACTOR-PLAN.md, PRE-D365-ROAST-SPRINT-TASK-BOARD.md, SALES-ENGINE-V1.1.md
 - `docs/archive/` - Completed phase documentation (date-prefixed)
+  - **Recent**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
+  - **Recent**: Hamle 1 dosyaları archived (2025-01-30)
 - `docs/reference/` - Reference guides (development, setup, troubleshooting) - NOT in `docs/active/`
+  - **New**: `DEV-PROD-DIFFERENCES.md` (2025-01-30) - Dev vs Prod environment comparison
+  - **New**: `D365-PHASE-2.9-E2E-RUNBOOK.md` reference added to docs/README.md
 - `docs/prompts/` - Important prompts (date-prefixed, archive when done)
+  - **Recent**: Roast sprint prompts saved (2025-01-30)
+    - `2025-01-30-cursor-roast-prompt-v1.0.md`
+    - `2025-01-30-cursor-roast-prompt-v1.1-pro.md`
+    - `2025-01-30-cursor-roast-results-v1.0.md`
+    - `2025-01-30-cursor-roast-results-v1.1-pro.md`
 - `docs/todos/` - TODO lists (archive when phase complete)
+  - **Current**: INTEGRATION-ROADMAP.md (Phase 3 IN PROGRESS), G21-architecture-refactor.md (Phase 4 PAUSED)
+  - **Status**: Phase 3 (D365) - Backend %94 + UI completed, E2E runbook ready
 - `docs/plans/` - Project plans
 
 ### When to Archive
 - Phase complete → Run phase completion workflow (see above)
+  - **Recent**: D365 Phase 2.5, 3 archived (2025-01-30)
+  - **Recent**: Hamle 1 dosyaları archived (2025-01-30)
 - Prompt no longer referenced → Archive prompt
 - Keep only active/current documentation visible
+- **Sprint boards**: Can stay active if they have reference value (decision logs, etc.)
+  - **Example**: `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (completed, but has decision log)
+- **Phase documentation**: Archive immediately when phase completes
+  - **Recent**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
 
 ## Post-MVP Sprint Planning (G15-G19)
 
@@ -503,4 +525,7 @@ When a phase is completed (TODO status = "Completed"):
 11. **Am I implementing features in the wrong sprint?** (Check roadmap for correct sprint assignment)
 12. **Stabilization Sprint**: ✅ Completed (2025-01-28) - v1.1-stable released (Enterprise-Ready / UI-Stable / Integration-Ready)
 13. **G21 Architecture Refactor**: 🔄 In Progress (2025-01-28) - Zero-downtime refactoring, additive-first approach
+14. **Pre-D365 Roast Sprint**: ✅ Completed (2025-01-30) - 5/5 critical fixes (security, idempotency, token cache, session lifecycle, retry backoff)
+15. **D365 Integration**: 🔄 In Progress (2025-01-30) - Backend %94 + UI completed, E2E runbook ready
+16. **Dev vs Prod Parity**: ✅ Code EQUAL, ⚠️ Configuration DIFFERENT (expected) - See `docs/reference/DEV-PROD-DIFFERENCES.md`
 

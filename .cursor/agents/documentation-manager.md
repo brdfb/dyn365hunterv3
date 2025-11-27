@@ -134,13 +134,20 @@ scripts/manage_docs.sh list
 
 ### Documentation Guardrails
 - **Active Docs Limit**: Maximum 5-7 files in `docs/active/` (enforced)
+  - **Current**: 9 files (2025-01-30) - Target: 5-7 files
+  - **Progress**: 13 → 9 files (D365 phase cleanup completed - 2025-01-30)
 - **Reference Guides**: Reference guides (development, setup, troubleshooting) are in `docs/reference/` (not in `docs/active/`)
+  - **New**: `DEV-PROD-DIFFERENCES.md` added to reference (2025-01-30)
 - **Archive Immediately**: Archive completed phase docs immediately (don't wait)
+  - **Recent**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
 - **Date Prefix**: All archived files must have `YYYY-MM-DD-` prefix (required)
 - **Auto-Update**: Always update README.md, CHANGELOG.md, docs/README.md when code changes
 - **Token Efficiency**: Don't repeat archived information, reference when needed
 - **Feature Docs**: Archive feature documentation when complete
+  - **Recent**: D365 phase docs archived when completed (2025-01-30)
 - **Planning Docs**: Archive completed planning docs to `docs/archive/`
+- **Sprint Boards**: Completed sprint boards can stay active if they have reference value (decision logs, etc.)
+  - **Example**: `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (completed, but has decision log)
 
 ### Validation Rules
 - **Before Archiving**: Verify phase is actually complete (check TODO status)
@@ -149,6 +156,10 @@ scripts/manage_docs.sh list
 - **Format Check**: Ensure date prefix format is correct (`YYYY-MM-DD-`)
 - **Link Check**: Update all references when moving files to archive
 - **Test Count**: Maintain test count documentation (currently 497 tests)
+- **Dev vs Prod Parity**: Document environment differences in `docs/reference/DEV-PROD-DIFFERENCES.md`
+  - **Code parity**: ✅ EQUAL (same code, same branch)
+  - **Configuration**: ⚠️ DIFFERENT (expected: sync interval, log level, format, Sentry)
+  - **Feature flags**: ✅ EQUAL (all default false, MVP-safe)
 
 ### Code Change Guardrails
 - **New API Endpoints**: Must update README.md API Endpoints section
@@ -312,11 +323,23 @@ Agent should regularly check:
   - **UI Integration**: ✅ Completed (2025-01-30) - Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top), toast notifications
   - **Hamle 1**: ⏳ Pending - Aktifleştirme ve debug gerekiyor (`CRITICAL-3-HAMLE-PRODUCT-READY.md`)
 - **Hamle 1 (Partner Center Activation) status**: ⏳ Pending - Backend tamamlanmış, feature flag OFF, aktifleştirme gerekiyor
-  - **Cleanup Trigger**: Hamle 1 tamamlandığında 4 dosya archive edilebilir:
-    - `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
-    - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
-    - `HAMLE-1-EXECUTION-RUNBOOK.md`
-    - `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+  - **Cleanup Trigger**: Hamle 1 tamamlandığında 4 dosya archive edilebilir (✅ Already archived - 2025-01-30)
+    - `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → `archive/2025-01-30-HAMLE-1-PRODUCTION-DEPLOYMENT.md`
+    - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` → `archive/2025-01-30-HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
+    - `HAMLE-1-EXECUTION-RUNBOOK.md` → `archive/2025-01-30-HAMLE-1-EXECUTION-RUNBOOK.md`
+    - `HAMLE-1-REFERRAL-DETAILS-PLAN.md` → `archive/2025-01-30-HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+- **Pre-D365 Roast Sprint status**: ✅ Completed (2025-01-30) - 5/5 tasks completed
+  - Task 1: SQL/OData Injection Fix ✅
+  - Task 2: D365 Push Idempotency ✅
+  - Task 3: Token Cache Redis Migration ✅
+  - Task 4: DB Session Lifecycle Fix ✅
+  - Task 5: Retry Backoff + Jitter ✅
+  - **Cleanup**: Sprint board aktif kalabilir (referans değeri var, decision log içeriyor)
+- **D365 Phase 2.5, 3, 2.9 status**: ✅ Backend %94 completed, ✅ UI completed, ⏳ E2E runbook ready
+  - **Phase 2.5**: ✅ Completed (archived - 2025-01-30)
+  - **Phase 3**: ✅ Completed (archived - 2025-01-30)
+  - **Phase 2.9**: ⏳ E2E runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`), tenant setup pending
+  - **Cleanup**: Phase 2.5 ve 3 dosyaları archive edildi (2025-01-30)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -345,11 +368,21 @@ This agent should be **always active** in the AI assistant's context. When you s
 - User mentions "CSP P-Model tamamlandı" → Archive CSP P-Model docs
 - User mentions "Partner Center Phase 2 tamamlandı" or "Partner Center UI tamamlandı" → Update Partner Center Phase 2 status to completed (already completed - 2025-01-30)
 - User mentions "Hamle 1 tamamlandı" or "Partner Center aktifleştirildi" → Run Hamle 1 cleanup workflow:
-  1. Archive 4 Hamle 1 dosyası: `HAMLE-1-PRODUCTION-DEPLOYMENT.md`, `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`, `HAMLE-1-EXECUTION-RUNBOOK.md`, `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+  1. Archive 4 Hamle 1 dosyası: `HAMLE-1-PRODUCTION-DEPLOYMENT.md`, `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`, `HAMLE-1-EXECUTION-RUNBOOK.md`, `HAMLE-1-REFERRAL-DETAILS-PLAN.md` (✅ Already archived - 2025-01-30)
   2. Update `ACTIVE-STATUS-SUMMARY.md` (Hamle 1 completed, dosya sayısı güncelle)
   3. Update `HUNTER-STATE-v1.0.md` (Partner Center production'da aktif)
   4. Update `G21-ROADMAP-CURRENT.md` (Partner Center production'da aktif)
   5. Confirm: "✅ Hamle 1 completed - 4 dosya archived, documentation updated"
+- User mentions "Roast Sprint tamamlandı" or "Pre-D365 sprint bitti" → Update Roast Sprint status:
+  1. Update `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (decision log ekle)
+  2. Update `ACTIVE-STATUS-SUMMARY.md` (Roast Sprint completed)
+  3. Update `HUNTER-STATE-v1.0.md` (D365 durumu güncelle)
+  4. Confirm: "✅ Roast Sprint completed - All 5 tasks done, ready for D365 Phase 2.9"
+- User mentions "D365 Phase 2.5/3 tamamlandı" → Archive D365 phase dosyaları:
+  1. Archive `D365-PHASE-2.5-*.md` dosyaları (✅ Already archived - 2025-01-30)
+  2. Archive `D365-PHASE-3-*.md` dosyaları (✅ Already archived - 2025-01-30)
+  3. Update `ACTIVE-STATUS-SUMMARY.md` (dosya sayısı güncelle)
+  4. Confirm: "✅ D365 Phase 2.5/3 archived"
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 - **ACTIVE-STATUS-SUMMARY.md Update**: Önemli değişikliklerden sonra güncelle (phase completion, cleanup, etc.)
 
