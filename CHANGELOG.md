@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Partner Center Sync API Endpoint Fix** (2025-01-30) - Corrected sync endpoint path in UI
+  - **Bug**: UI was calling `/api/referrals/sync` which returned 404 Not Found
+  - **Fix**: Changed to correct endpoint `/api/v1/partner-center/referrals/sync`
+  - **Impact**: Sync button now works correctly, sync status indicator shows proper status
+  - **Files**: `mini-ui/js/api.js`
+  - **Status**: ✅ **Fixed** - Sync button and status indicator now working
+
+### Added
+- **Hamle 1: Partner Center Production Deployment Plan** (2025-01-30) - Complete production deployment guide
+  - **Execution Runbook**: `docs/active/HAMLE-1-EXECUTION-RUNBOOK.md` - Step-by-step commands for Partner Center activation
+  - **Production Ready Plan**: `docs/active/HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` - Detailed analysis and checklist
+  - **Production Deployment**: `docs/active/HAMLE-1-PRODUCTION-DEPLOYMENT.md` - Production deployment checklist and procedures
+  - **Critical 3-Hamle Plan**: `docs/active/CRITICAL-3-HAMLE-PRODUCT-READY.md` - Strategic plan for making Hunter a real product
+  - **Status**: ✅ **Completed** - All documentation ready for production deployment
+
 ### Added
 - **Partner Center UI Entegrasyonu Tamamlandı** (2025-01-30) - Referral type filtresi, sync butonu ve durum göstergesi
   - **Referral Type Filtresi**: Filter bar'a "Referral" dropdown'ı eklendi (Co-sell, Marketplace, Solution Provider)
