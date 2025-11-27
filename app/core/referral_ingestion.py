@@ -173,11 +173,15 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
     """
     Extract domain from referral using fallback chain.
     
-    Fallback chain (per design doc):
-    1. CustomerProfile.Team member emails → extract domain, filter consumer domains
-    2. customerProfile.ids.External (if applicable)
-    3. Legacy fallback: website → email (for backward compatibility)
-    4. Skip: Domain yoksa → None (log warning)
+    Fallback chain (updated 2025-01-30):
+    1. Contact email (referral.contact.email) → extract domain, filter consumer domains
+    2. CustomerProfile.Team member emails → extract domain, filter consumer domains
+    3. customerProfile.ids.External (if applicable)
+    4. URL-based domain extraction (website fields)
+    5. Top-level email (referral.email) → extract domain, filter consumer domains
+    6. Skip: Domain yoksa → None (log warning)
+    
+    NOTE: Contact email moved to priority 1 (2025-01-30) - most reliable source for domain extraction.
     
     Args:
         referral: Partner Center referral dictionary
@@ -187,7 +191,24 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
     """
     customer_profile = referral.get("customerProfile") or {}
     
-    # 1. Try CustomerProfile.Team member emails
+    # 1. Try Contact email first (highest priority - updated 2025-01-30)
+    # Contact email is the most reliable source as shown in Partner Center UI
+    contact = referral.get("contact") or {}
+    contact_email = contact.get("email")
+    if contact_email:
+        domain = extract_domain_from_email(contact_email)
+        if domain:
+            normalized = normalize_domain(domain)
+            if normalized and not is_consumer_domain(normalized):
+                logger.debug(
+                    "partner_center_domain_extracted",
+                    source="contact_email",
+                    domain=mask_pii(normalized),
+                    email=mask_pii(contact_email),
+                )
+                return normalized
+    
+    # 2. Try CustomerProfile.Team member emails
     team = customer_profile.get("team") or []
     if isinstance(team, list):
         candidate_emails = []
@@ -211,7 +232,7 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
                     )
                     return normalized
     
-    # 2. Try customerProfile.ids.External (if applicable)
+    # 3. Try customerProfile.ids.External (if applicable)
     ids = customer_profile.get("ids") or {}
     external_id = ids.get("External")
     if external_id:
@@ -227,7 +248,7 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
                 )
                 return normalized
     
-    # 3. URL-based domain extraction (Phase 3.3)
+    # 4. URL-based domain extraction (Phase 3.3)
     # Check multiple URL fields in order of preference
     url_fields = [
         customer_profile.get("website"),  # customerProfile.website (preferred)
@@ -251,17 +272,18 @@ def extract_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
                     )
                     return normalized
     
-    contact = referral.get("contact") or {}
-    email = contact.get("email") or referral.get("email")
-    if email:
-        domain = extract_domain_from_email(email)
+    # 5. Try top-level email (referral.email) as last resort
+    top_level_email = referral.get("email")
+    if top_level_email:
+        domain = extract_domain_from_email(top_level_email)
         if domain:
             normalized = normalize_domain(domain)
             if normalized and not is_consumer_domain(normalized):
                 logger.debug(
                     "partner_center_domain_extracted",
-                    source="email",
+                    source="top_level_email",
                     domain=mask_pii(normalized),
+                    email=mask_pii(top_level_email),
                 )
                 return normalized
     
@@ -310,11 +332,16 @@ def extract_raw_domain_from_referral(referral: Dict[str, Any]) -> Optional[str]:
                 # If parsing fails, return as-is (might be just a domain)
                 return website.strip() if website else None
     
-    # Try email
+    # Try contact email first (updated 2025-01-30 - higher priority)
     contact = referral.get("contact") or {}
-    email = contact.get("email") or referral.get("email")
-    if email and "@" in email:
-        return email.split("@")[-1].strip()
+    contact_email = contact.get("email")
+    if contact_email and "@" in contact_email:
+        return contact_email.split("@")[-1].strip()
+    
+    # Try top-level email as fallback
+    top_level_email = referral.get("email")
+    if top_level_email and "@" in top_level_email:
+        return top_level_email.split("@")[-1].strip()
     
     return None
 

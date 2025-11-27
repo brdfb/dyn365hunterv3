@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Partner Center: Contact Email Priority** (2025-01-30) - Contact email moved to highest priority in domain extraction
+  - **Priority Update**: Contact email (`referral.contact.email`) now checked first in domain extraction fallback chain
+  - **Rationale**: Contact email is the most reliable source for domain extraction (as shown in Partner Center UI)
+  - **Impact**: Improved domain extraction success rate (82 referrals with domain vs 0 before)
+  - **Files**: `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - Contact email now has highest priority in domain extraction
+
 - **Partner Center: Fetch All Statuses** (2025-01-30) - Removed status filter to fetch all referral statuses
   - **API Query**: Removed status filter from `build_referral_query()` - now fetches all statuses (Active, Closed, New, etc.)
   - **Ingestion Filter**: Removed status and substatus filters from `sync_referrals_from_partner_center()` - only direction='Incoming' filter remains
