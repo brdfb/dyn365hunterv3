@@ -91,8 +91,15 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Metrics: Partner Center metrics exposed via `/healthz/metrics` endpoint
   - Feature flag: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
   - Features: Lead type detection (Co-sell, Marketplace, Solution Provider), domain extraction fallback, Azure Tenant ID signal, idempotent domain scanning
-  - Status: ✅ **Production-ready** - All phases completed (Phase 1-7), 59/59 tests passing, feature flag OFF (MVP-safe)
-  - UI Status: ✅ **Complete** - All UI features implemented (referral column, filter, sync button, status indicator)
+  - **Solution 1 - Link Status & Referral ID Enhancement** (✅ Complete - 2025-01-30)
+    - Backend: Added `link_status` (none/linked/unlinked/mixed) and `primary_referral_id` to Leads API
+    - UI: Link status badges in Leads and Referrals tabs (consistent rendering)
+    - Breakdown modal: Partner Center Referral section with referral type, link status, and referral ID
+    - Export: Added `link_status` column to CSV/XLSX export
+    - Tests: 9/9 passing (7 scenarios + 2 integration tests)
+    - UI Consistency: Fixed badge rendering inconsistencies between Leads and Referrals tabs
+  - Status: ✅ **Production-ready** - All phases completed (Phase 1-7), 68/68 tests passing (59 referral + 9 link status), feature flag OFF (MVP-safe)
+  - UI Status: ✅ **Complete** - All UI features implemented (referral column, filter, sync button, status indicator, link status badges)
   - Next: Post-MVP - Scoring Pipeline Integration (Future enhancement)
 - **IP Enrichment Minimal UI** (✅ Completed) - Added IP enrichment to score breakdown and sales summary
   - Backend: IP enrichment integrated into score-breakdown and sales-summary endpoints
