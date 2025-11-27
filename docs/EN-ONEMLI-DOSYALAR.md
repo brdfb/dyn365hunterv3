@@ -47,21 +47,36 @@
 
 ---
 
-### 4. **HAMLE-1-PRODUCTION-DEPLOYMENT.md** ⭐⭐
-**Konum:** `docs/active/HAMLE-1-PRODUCTION-DEPLOYMENT.md`  
-**Önemi:** Partner Center production deployment planı  
+### 4. **D365-PHASE-2.9-E2E-RUNBOOK.md** ⭐⭐
+**Konum:** `docs/active/D365-PHASE-2.9-E2E-RUNBOOK.md`  
+**Önemi:** D365 Phase 2.9 E2E wiring runbook  
 **İçerik:**
-- Partner Center feature flag aktifleştirme
-- Production deployment adımları
-- Test ve validation
+- Tenant & App Registration (Azure AD + D365)
+- Hunter config & feature flag setup
+- Manual E2E tests (3 core senaryo)
+- Error & rate limit senaryoları
+- Go/No-Go gate (Dev → Prod)
 
-**Ne Zaman Bakılır:** Partner Center'ı production'a çıkarırken
+**Ne Zaman Bakılır:** D365 tenant setup ve E2E test yaparken
+
+---
+
+### 5. **PRE-D365-ROAST-SPRINT-TASK-BOARD.md** ⭐⭐
+**Konum:** `docs/active/PRE-D365-ROAST-SPRINT-TASK-BOARD.md`  
+**Önemi:** Pre-D365 hotfix sprint task board (✅ Completed)  
+**İçerik:**
+- 5 kritik fix (security, idempotency, token cache, session lifecycle, retry)
+- Implementation details
+- Test plans
+- Decision log
+
+**Ne Zaman Bakılır:** D365 entegrasyonu öncesi hotfix'leri referans almak için
 
 ---
 
 ## 🚀 **PRODUCTION REHBERLERİ** (Öncelik: P0 - Production için)
 
-### 4. **PRODUCTION-DEPLOYMENT-GUIDE.md** ⭐⭐⭐
+### 6. **PRODUCTION-DEPLOYMENT-GUIDE.md** ⭐⭐⭐
 **Konum:** `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md`  
 **Önemi:** 🔥 **PRODUCTION DEPLOYMENT** - Adım adım rehber  
 **İçerik:**
@@ -77,7 +92,7 @@
 
 ---
 
-### 5. **PRODUCTION-ENGINEERING-GUIDE-V1.md** ⭐⭐⭐
+### 7. **PRODUCTION-ENGINEERING-GUIDE-V1.md** ⭐⭐⭐
 **Konum:** `docs/reference/PRODUCTION-ENGINEERING-GUIDE-V1.md`  
 **Önemi:** 🔥 **SRE RUNBOOK** - Production operasyonları  
 **İçerik:**
@@ -92,7 +107,7 @@
 
 ---
 
-### 6. **PRODUCTION-DEPLOYMENT-CHECKLIST.md** ⭐⭐
+### 8. **PRODUCTION-DEPLOYMENT-CHECKLIST.md** ⭐⭐
 **Konum:** `docs/reference/PRODUCTION-DEPLOYMENT-CHECKLIST.md`  
 **Önemi:** Pre-deployment kontrol listesi  
 **İçerik:**
@@ -106,7 +121,7 @@
 
 ---
 
-### 7. **TROUBLESHOOTING-GUIDE.md** ⭐⭐
+### 9. **TROUBLESHOOTING-GUIDE.md** ⭐⭐
 **Konum:** `docs/reference/TROUBLESHOOTING-GUIDE.md`  
 **Önemi:** Sorun giderme rehberi  
 **İçerik:**
@@ -121,7 +136,7 @@
 
 ## 📊 **STRATEJİ VE ROADMAP** (Öncelik: P1)
 
-### 8. **G21-ROADMAP-CURRENT.md** ⭐⭐
+### 10. **G21-ROADMAP-CURRENT.md** ⭐⭐
 **Konum:** `docs/active/G21-ROADMAP-CURRENT.md`  
 **Önemi:** Mimari refactor roadmap  
 **İçerik:**
@@ -133,8 +148,8 @@
 
 ---
 
-### 9. **POST-MVP-STRATEGY.md** ⭐⭐
-**Konum:** `docs/active/POST-MVP-STRATEGY.md`  
+### 11. **POST-MVP-STRATEGY.md** ⭐⭐
+**Konum:** `docs/plans/2025-01-30-POST-MVP-STRATEGY.md`  
 **Önemi:** v1.0 sonrası strateji  
 **İçerik:**
 - Post-MVP iş paketleri
@@ -146,7 +161,7 @@
 
 ---
 
-### 10. **KALAN-ISLER-PRIORITY.md** ⭐
+### 12. **KALAN-ISLER-PRIORITY.md** ⭐
 **Konum:** `docs/active/KALAN-ISLER-PRIORITY.md`  
 **Önemi:** Kalan işler öncelik listesi  
 **İçerik:**
@@ -159,7 +174,7 @@
 
 ## 📖 **SATIŞ EKİBİ DOKÜMANTASYONU** (Öncelik: P1)
 
-### 11. **SALES-GUIDE.md** ⭐⭐
+### 13. **SALES-GUIDE.md** ⭐⭐
 **Konum:** `docs/sales/SALES-GUIDE.md`  
 **Önemi:** Satış ekibi kullanım kılavuzu  
 **İçerik:**
@@ -172,7 +187,7 @@
 
 ---
 
-### 12. **SEGMENT-GUIDE.md** ⭐⭐
+### 14. **SEGMENT-GUIDE.md** ⭐⭐
 **Konum:** `docs/sales/SEGMENT-GUIDE.md`  
 **Önemi:** 🔥 **KANONİK KAYNAK** - Segment-Priority matrisi  
 **İçerik:**
@@ -184,7 +199,7 @@
 
 ---
 
-### 13. **SALES-ENGINE-V1.1.md** ⭐
+### 15. **SALES-ENGINE-V1.1.md** ⭐
 **Konum:** `docs/active/SALES-ENGINE-V1.1.md`  
 **Önemi:** Sales Engine v1.1 dokümantasyonu  
 **İçerik:**
@@ -198,7 +213,7 @@
 
 ## 🛠️ **DEVELOPMENT REHBERLERİ** (Öncelik: P2)
 
-### 14. **DEVELOPMENT-ENVIRONMENT.md** ⭐
+### 16. **DEVELOPMENT-ENVIRONMENT.md** ⭐
 **Konum:** `docs/reference/DEVELOPMENT-ENVIRONMENT.md`  
 **Önemi:** Development environment setup  
 **İçerik:**
@@ -210,7 +225,7 @@
 
 ---
 
-### 15. **BRANCH-MANAGEMENT.md** ⭐
+### 17. **BRANCH-MANAGEMENT.md** ⭐
 **Konum:** `docs/reference/BRANCH-MANAGEMENT.md`  
 **Önemi:** Git branch stratejisi  
 **İçerik:**
@@ -237,21 +252,30 @@
 
 ---
 
-### 17. **DOCUMENTATION-STATUS-2025-01-29.md** ⭐
-**Konum:** `docs/DOCUMENTATION-STATUS-2025-01-29.md`  
-**Önemi:** Dokümantasyon durum raporu  
+### 18. **ACTIVE-STATUS-SUMMARY.md** ⭐⭐
+**Konum:** `docs/ACTIVE-STATUS-SUMMARY.md`  
+**Önemi:** 🔥 **AKTİF DOKÜMANTASYON DURUMU** - Güncel durum özeti  
 **İçerik:**
-- Cleanup işlemleri
-- Güncellik durumu
-- Archive durumu
+- Active dosya sayısı ve durumu
+- Kritik durumlar (Partner Center, D365, Core Freeze, UI)
+- Dosya kategorileri
+- Tutarlılık kontrolü
+- Cleanup önerileri
 
-**Ne Zaman Bakılır:** Dokümantasyon durumunu kontrol etmek için
+**Ne Zaman Bakılır:** Dokümantasyon durumunu kontrol etmek için (güncel: 2025-01-30)
+
+---
+
+### 19. **DOCUMENTATION-STATUS-2025-01-29.md** ⭐
+**Konum:** `docs/DOCUMENTATION-STATUS-2025-01-29.md`  
+**Önemi:** Eski dokümantasyon durum raporu (tarihsel referans)  
+**Not:** Güncel durum için `ACTIVE-STATUS-SUMMARY.md` dosyasına bakın
 
 ---
 
 ## 📋 **TODO VE ROADMAP** (Öncelik: P1)
 
-### 18. **G21-architecture-refactor.md** ⭐
+### 20. **G21-architecture-refactor.md** ⭐
 **Konum:** `docs/todos/G21-architecture-refactor.md`  
 **Önemi:** G21 refactor TODO  
 **İçerik:**
@@ -262,7 +286,7 @@
 
 ---
 
-### 19. **INTEGRATION-ROADMAP.md** ⭐
+### 21. **INTEGRATION-ROADMAP.md** ⭐
 **Konum:** `docs/todos/INTEGRATION-ROADMAP.md`  
 **Önemi:** Integration roadmap TODO  
 **İçerik:**
@@ -292,8 +316,10 @@
 
 ### 📊 **Strateji ve Planlama (P1)**
 - `G21-ROADMAP-CURRENT.md`
-- `POST-MVP-STRATEGY.md`
+- `POST-MVP-STRATEGY.md` (plans klasöründe)
 - `KALAN-ISLER-PRIORITY.md`
+- `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (✅ Completed)
+- `D365-PHASE-2.9-E2E-RUNBOOK.md`
 
 ### 👥 **Satış Ekibi (P1)**
 - `SALES-GUIDE.md`
@@ -321,5 +347,9 @@
 
 ---
 
-**Son Güncelleme:** 2025-01-30
+**Son Güncelleme:** 2025-01-30  
+**Not:** 
+- `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → Archive edildi (2025-01-30)
+- `POST-MVP-STRATEGY.md` → Plans klasörüne taşındı (2025-01-30)
+- Yeni dosyalar eklendi: `PRE-D365-ROAST-SPRINT-TASK-BOARD.md`, `D365-PHASE-2.9-E2E-RUNBOOK.md`
 
