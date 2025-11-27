@@ -76,7 +76,7 @@ class Settings(BaseSettings):
     partner_center_referral_default_direction: str = "Incoming"  # Default direction filter
     partner_center_referral_default_status: str = "Active"  # Default status filter
     partner_center_referral_default_top: int = 200  # Default top parameter
-    partner_center_referral_max_pages: int = 10  # Maximum pages to fetch (default: 10 pages = 2000 records with top=200)
+    partner_center_referral_max_pages: int = 0  # 0 or negative => unlimited pages (full history sync)
 
     model_config = SettingsConfigDict(
         env_file=".env",

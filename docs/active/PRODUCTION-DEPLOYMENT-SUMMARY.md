@@ -213,11 +213,13 @@ docker-compose exec postgres psql -U <user> -d <database> -c \
 - ✅ Removed status filter from API query - now fetches all statuses
 - ✅ Removed status and substatus filters from ingestion - only direction='Incoming' filter remains
 - ✅ All referrals are now saved to database regardless of status
+- ✅ Removed pagination cap (max pages) - sync now fetches full Partner Center history (no 250-record limit)
 
 **Results**:
-- ✅ **250 referrals saved** (88 Active, 162 Closed)
+- ✅ **250+ referrals saved** (88 Active, 162 Closed + historical records as pagination continues)
 - ✅ **0 skipped** (previously 50 skipped due to status filter)
-- ✅ All statuses are now stored in database
+- ✅ All statuses and substatuses are now stored in database
+- ✅ Pagination no longer truncates after 10 pages (historical referrals such as KOCAELIKAYA will sync)
 - ✅ Filtering can be done in UI or application layer after data is stored
 
 **Dev/Prod Consistency**: ✅ **VERIFIED**

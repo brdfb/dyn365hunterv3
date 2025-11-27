@@ -402,11 +402,16 @@ class PartnerCenterClient:
         all_referrals: List[Dict[str, Any]] = []
         current_url = base_url
         max_pages = settings.partner_center_referral_max_pages
+        unlimited_pages = max_pages <= 0
         page_count = 0
         
-        logger.info("partner_center_fetching_referrals", max_pages=max_pages)
+        logger.info(
+            "partner_center_fetching_referrals",
+            max_pages=max_pages,
+            unlimited_pages=unlimited_pages,
+        )
         
-        while current_url and page_count < max_pages:
+        while current_url and (unlimited_pages or page_count < max_pages):
             page_count += 1
             
             # Fetch current page
@@ -433,34 +438,38 @@ class PartnerCenterClient:
             # Add to accumulated list
             all_referrals.extend(page_referrals)
             
+            has_next = next_link is not None
             logger.info(
                 "partner_center_page_fetched",
                 page=page_count,
-                page_count=len(page_referrals),
+                page_size=len(page_referrals),
                 total_count=len(all_referrals),
-                has_next=next_link is not None
+                has_next=has_next,
+                max_pages=max_pages,
+                unlimited_pages=unlimited_pages,
             )
             
             # Check for next page
             if next_link:
                 current_url = next_link
-                # Basic rate limiting: sleep(1) between pages
                 time.sleep(1)
             else:
                 current_url = None
         
-        if page_count >= max_pages and current_url:
+        if not unlimited_pages and page_count >= max_pages and current_url:
             logger.warning(
                 "partner_center_max_pages_reached",
                 max_pages=max_pages,
                 total_fetched=len(all_referrals),
-                has_more=True
+                has_more=True,
             )
         
         logger.info(
             "partner_center_referrals_fetched",
             total_count=len(all_referrals),
-            pages_fetched=page_count
+            pages_fetched=page_count,
+            max_pages=max_pages,
+            unlimited_pages=unlimited_pages,
         )
         
         return all_referrals

@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Partner Center: Unlimited Referral Pagination** (2025-01-30) - Removed hard max-pages limit for Partner Center sync
+  - **Config**: `HUNTER_PARTNER_CENTER_REFERRAL_MAX_PAGES` now defaults to `0` (unlimited pagination)
+  - **Behavior**: Sync continues until Partner Center stops returning `@odata.nextLink`, ensuring full historical data (not just newest 250 records)
+  - **Logging**: Enhanced pagination logs with `unlimited_pages` flag and page size info
+  - **Files**: `app/config.py`, `app/core/partner_center.py`
+  - **Status**: ✅ **Completed** - KOCAELIKAYA gibi eski referral'lar da artık sync edilebilecek
+
 - **Partner Center: Contact Email Priority** (2025-01-30) - Contact email moved to highest priority in domain extraction
   - **Priority Update**: Contact email (`referral.contact.email`) now checked first in domain extraction fallback chain
   - **Rationale**: Contact email is the most reliable source for domain extraction (as shown in Partner Center UI)
