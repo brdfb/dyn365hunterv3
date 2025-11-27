@@ -174,11 +174,33 @@ D365 client + mapping + Celery task kompleks bir entegrasyon. UI eklemeden önce
 ## 🚀 Next Steps
 
 After Phase 2.5 completion:
-1. ✅ All tests passing
-2. ✅ Manual E2E verified
-3. → **Phase 3: UI & Status + Monitoring**
+1. ✅ All tests passing (32/34 unit tests, 2/34 integration tests marked)
+2. ⏸️ Manual E2E - **BEKLEMEDE** (D365 tenant hazırlanmadı)
+3. → **Phase 3: UI & Status + Monitoring** (Manual E2E sonrası)
 
 ---
 
-**Son Güncelleme:** 2025-01-30
+## 📊 Test Configuration
+
+**Default Test Command:**
+```bash
+pytest -m "not integration"
+```
+- Excludes integration tests (requires real DB connection)
+- 32/34 tests run by default
+
+**Integration Tests:**
+```bash
+pytest -m integration
+```
+- Requires `DATABASE_URL` with `postgres` hostname
+- 2/34 tests (Celery task integration)
+
+**CI Configuration:**
+- `.github/workflows/ci.yml`: Uses `pytest -m "not integration"`
+- Integration tests skipped in CI (require real DB)
+
+---
+
+**Son Güncelleme:** 2025-11-27
 
