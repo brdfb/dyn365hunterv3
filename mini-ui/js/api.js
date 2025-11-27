@@ -434,3 +434,25 @@ export async function fetchReferralDetail(referralId, includeRaw = true) {
     return await response.json();
 }
 
+/**
+ * Push lead to Dynamics 365 (Phase 3)
+ */
+export async function pushLeadToD365(leadId) {
+    const url = `${API_BASE_URL}/api/v1/d365/push-lead`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ lead_id: leadId }),
+    });
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Push lead to D365 failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+}
+

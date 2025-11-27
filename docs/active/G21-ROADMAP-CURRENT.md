@@ -125,10 +125,16 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
 **Şu anki durum:**
 
-- ❌ **SIFIR KOD** - Sadece plan var, hiçbir dosya yok
+- ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5 - 2025-01-30)
+  - API endpoint, Celery task, D365 client, mapping, DB migration tamamlandı
+  - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
+- ▶️ **PHASE 3 (UI) BAŞLAYABİLİR** (~1 gün)
+  - Lead listesine D365 badge, "Push to Dynamics" butonu, lead detail modal D365 paneli
+  - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
+- ⏳ **PHASE 2.9 (E2E WIRING) PENDING** (D365 tenant hazır olunca, ops fazı)
+  - App registration, Application User, Role + izinler, custom hunter_* alanları
+  - **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md`
 - **Mimari:** Adapter Pattern — Core Freeze + Integration Layer
-- Temel şema ve mapping fikirleri hazır (plan seviyesinde)
-- Uygulama: Post-MVP (Hamle 2: 6-10 gün - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
 - **Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın
 
 ---

@@ -8,6 +8,7 @@ from app.config import settings
 from app.core.logging import logger
 from app.db.session import get_db
 from app.tasks.d365_push import push_lead_to_d365
+from app.core.d365_metrics import track_push_requested
 
 
 router = APIRouter(prefix="/d365", tags=["d365", "v1"])
@@ -66,6 +67,8 @@ async def push_lead_to_d365_endpoint(
     if request.lead_id:
         task = push_lead_to_d365.delay(request.lead_id)
         job_id = task.id
+        # Phase 3: Track metrics
+        track_push_requested()
     else:
         # TODO: Resolve domain to lead_id
         raise HTTPException(

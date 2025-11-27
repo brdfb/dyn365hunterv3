@@ -403,7 +403,16 @@ async def get_referral_detail(
     raw_data = referral.raw_data or {}
     customer_profile = raw_data.get("customerProfile") or {}
     details_data = raw_data.get("details") or {}
+    
+    # Try multiple locations for contact info (Partner Center API structure varies)
+    # 1. Top-level contact
     contact_data = raw_data.get("contact") or {}
+    # 2. Details.contact (some referral types)
+    if not contact_data.get("email") and not contact_data.get("name"):
+        contact_data = details_data.get("contact") or contact_data
+    # 3. CustomerProfile.primaryContact (if exists)
+    if not contact_data.get("email") and not contact_data.get("name"):
+        contact_data = customer_profile.get("primaryContact") or contact_data
 
     def _full_name(obj: dict) -> Optional[str]:
         name = obj.get("name")
@@ -414,12 +423,44 @@ async def get_referral_detail(
         full = f"{first} {last}".strip()
         return full if full else None
 
+    # Extract contact info (primary contact from lead's organization)
+    # Note: contact is the primary contact person from the customer's organization
     contact_info = {
         "name": _full_name(contact_data),
         "email": contact_data.get("email"),
         "phone": contact_data.get("phoneNumber") or contact_data.get("phone"),
         "title": contact_data.get("jobTitle") or contact_data.get("title"),
     }
+    
+    # Extract team members (customer's team from customerProfile.team)
+    # Note: customerProfile.team = customer's organization team members (not Microsoft partner team)
+    # These are additional people from the customer's organization, not the primary contact
+    team_members = []
+    for member in customer_profile.get("team") or []:
+        team_members.append(
+            {
+                "name": _full_name(member),
+                "email": member.get("email"),
+                "role": member.get("role") or member.get("title"),
+                "phone": member.get("phoneNumber"),
+            }
+        )
+    
+    # Fallback: If contact is completely empty but we have team members,
+    # use first team member as primary contact (practical fallback)
+    # This is a pragmatic solution since Partner Center API often doesn't provide contact info
+    # In practice, if contact is empty, the first team member is likely the primary contact
+    if not contact_info["name"] and not contact_info["email"] and team_members:
+        first_member = team_members[0]
+        contact_info = {
+            "name": first_member.get("name"),
+            "email": first_member.get("email"),
+            "phone": first_member.get("phone"),
+            "title": first_member.get("role"),
+        }
+        # Remove first member from team list to avoid duplication
+        # (since we're using it as primary contact)
+        team_members = team_members[1:]
 
     deal_info = {
         "lead_name": details_data.get("leadName") or raw_data.get("name"),
@@ -438,17 +479,6 @@ async def get_referral_detail(
             deal_info["estimated_value"] = estimated_value
     elif referral.deal_value is not None:
         deal_info["estimated_value"] = float(referral.deal_value)
-
-    team_members = []
-    for member in customer_profile.get("team") or []:
-        team_members.append(
-            {
-                "name": _full_name(member),
-                "email": member.get("email"),
-                "role": member.get("role") or member.get("title"),
-                "phone": member.get("phoneNumber"),
-            }
-        )
 
     organization_size = customer_profile.get("organizationSize")
     if not organization_size:

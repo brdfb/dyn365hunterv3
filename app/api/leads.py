@@ -16,6 +16,7 @@ from app.core.enrichment import enrich_company_data
 from app.core.score_breakdown import calculate_score_breakdown
 from app.core.enrichment_service import build_infra_summary
 from app.db.models import Company, Favorite, DomainSignal, LeadScore
+from app.config import settings
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -56,6 +57,11 @@ class LeadResponse(BaseModel):
     priority_label: Optional[str] = None  # Human-readable label (e.g., 'High Potential Greenfield')
     infrastructure_summary: Optional[str] = None  # IP enrichment summary (Level 1)
     referral_type: Optional[str] = None  # Partner Center referral type ('co-sell', 'marketplace', 'solution-provider')
+    # D365 Integration fields (Phase 3)
+    d365_sync_status: Optional[str] = None  # 'not_synced', 'queued', 'in_progress', 'synced', 'error'
+    d365_sync_last_at: Optional[str] = None  # Last sync timestamp (ISO format)
+    d365_lead_id: Optional[str] = None  # D365 Lead ID (for generating link)
+    d365_lead_url: Optional[str] = None  # D365 Lead URL (generated from base_url + lead_id)
 
 
 class LeadsListResponse(BaseModel):
@@ -436,6 +442,26 @@ async def get_leads(
             
             # Build infrastructure summary (Level 1 - IP enrichment)
             infrastructure_summary = build_infra_summary(row.domain, db)
+            
+            # D365 fields (Phase 3)
+            d365_sync_status = getattr(row, "d365_sync_status", None)
+            # Normalize status: 'pending' -> 'not_synced' for UI consistency
+            if d365_sync_status == "pending":
+                d365_sync_status = "not_synced"
+            elif d365_sync_status is None:
+                d365_sync_status = "not_synced"
+            
+            d365_sync_last_at = None
+            if getattr(row, "d365_sync_last_at", None):
+                d365_sync_last_at = getattr(row, "d365_sync_last_at").isoformat() if hasattr(getattr(row, "d365_sync_last_at"), "isoformat") else str(getattr(row, "d365_sync_last_at"))
+            
+            d365_lead_id = getattr(row, "d365_lead_id", None)
+            
+            # Generate D365 lead URL if base_url and lead_id are available
+            d365_lead_url = None
+            if d365_lead_id and settings.d365_base_url:
+                app_id_param = f"&appid={settings.d365_app_id}" if settings.d365_app_id else ""
+                d365_lead_url = f"{settings.d365_base_url}/main.aspx?pagetype=entityrecord&etn=lead&id={d365_lead_id}{app_id_param}"
 
             lead = LeadResponse(
                 company_id=row.company_id,
@@ -467,6 +493,11 @@ async def get_leads(
                 priority_label=getattr(row, "priority_label", None),
                 infrastructure_summary=infrastructure_summary,
                 referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
+                # D365 Integration fields (Phase 3)
+                d365_sync_status=d365_sync_status,
+                d365_sync_last_at=d365_sync_last_at,
+                d365_lead_id=d365_lead_id,
+                d365_lead_url=d365_lead_url,
             )
             leads.append(lead)
 
@@ -581,6 +612,9 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             ls.commercial_heat,
             ls.priority_category,
             ls.priority_label,
+            c.d365_lead_id,
+            c.d365_sync_status,
+            c.d365_sync_last_at,
             pcr.referral_type
         FROM companies c
         LEFT JOIN domain_signals ds ON c.domain = ds.domain
@@ -622,6 +656,26 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
                 contact_emails = (
                     list(row.contact_emails) if row.contact_emails else None
                 )
+        
+        # D365 fields (Phase 3)
+        d365_sync_status = getattr(row, "d365_sync_status", None)
+        # Normalize status: 'pending' -> 'not_synced' for UI consistency
+        if d365_sync_status == "pending":
+            d365_sync_status = "not_synced"
+        elif d365_sync_status is None:
+            d365_sync_status = "not_synced"
+        
+        d365_sync_last_at = None
+        if getattr(row, "d365_sync_last_at", None):
+            d365_sync_last_at = getattr(row, "d365_sync_last_at").isoformat() if hasattr(getattr(row, "d365_sync_last_at"), "isoformat") else str(getattr(row, "d365_sync_last_at"))
+        
+        d365_lead_id = getattr(row, "d365_lead_id", None)
+        
+        # Generate D365 lead URL if base_url and lead_id are available
+        d365_lead_url = None
+        if d365_lead_id and settings.d365_base_url:
+            app_id_param = f"&appid={settings.d365_app_id}" if settings.d365_app_id else ""
+            d365_lead_url = f"{settings.d365_base_url}/main.aspx?pagetype=entityrecord&etn=lead&id={d365_lead_id}{app_id_param}"
 
         return LeadResponse(
             company_id=row.company_id,
@@ -656,6 +710,11 @@ async def get_lead(domain: str, db: Session = Depends(get_db)):
             priority_label=getattr(row, "priority_label", None),
             infrastructure_summary=infrastructure_summary,
             referral_type=getattr(row, "referral_type", None),  # Task 2.5: Partner Center referral type
+            # D365 Integration fields (Phase 3)
+            d365_sync_status=d365_sync_status,
+            d365_sync_last_at=d365_sync_last_at,
+            d365_lead_id=d365_lead_id,
+            d365_lead_url=d365_lead_url,
         )
 
     except HTTPException:

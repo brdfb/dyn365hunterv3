@@ -8,7 +8,7 @@
 - **Backend Engine:** ✅ Ferrari seviyesinde (DNS, scoring, enrichment, signals)
 - **Core Freeze:** ✅ **AKTİF** — Core modüller dokunulmaz (CODEOWNERS, CI regression job, feature flags)
 - **Partner Center:** ✅ Backend tamamlanmış, ⚠️ Production'da aktif değil (feature flag OFF)
-- **Dynamics 365:** ❌ Sıfır kod - Sadece plan var (Adapter pattern ile implement edilecek)
+- **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ▶️ **Phase 3 (UI) başlayabilir**, ⏳ **Phase 2.9 (E2E) tenant hazır olunca** (Adapter pattern ile implement edildi)
 - **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
 
 **Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
@@ -362,9 +362,25 @@ sorularına cevap verebilmesi.
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
-- **Dynamics 365 Integration** → ❌ **SIFIR KOD** (Hamle 2: 6-10 gün)
+- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ▶️ **PHASE 3 (UI) BAŞLAYABİLİR**, ⏳ **PHASE 2.9 (E2E) PENDING**
 
-  - ⚠️ **Durum:** Sadece plan var, hiçbir dosya yok
+  - ✅ **Phase 2.5 (Backend Validation)**: Backend tamamlandı (%94)
+    - API endpoint: `POST /api/v1/d365/push-lead`
+    - Celery task: `push_lead_to_d365`
+    - D365 client: `app/integrations/d365/client.py`
+    - Mapping: `app/integrations/d365/mapping.py`
+    - DB migration: `d365_sync_status`, `d365_lead_id`, `d365_sync_last_at` alanları
+    - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
+  - ▶️ **Phase 3 (UI & Status)**: Şimdi başlayabilir (~1 gün)
+    - Lead listesine D365 badge
+    - "Push to Dynamics" butonu
+    - Lead detail modal'da D365 paneli
+    - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
+  - ⏳ **Phase 2.9 (E2E Wiring)**: D365 tenant hazır olunca (ops fazı)
+    - App registration, Application User, Role + izinler
+    - Custom hunter_* alanları
+    - Manual E2E test (2-3 lead push)
+    - **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md`
   - **Mimari:** Adapter Pattern — Core'a dokunmadan yan taraftan takma
   - Plan: Hunter → D365 Sales:
     - Lead → D365 Lead mapping (tek yönlü push)
@@ -372,7 +388,7 @@ sorularına cevap verebilmesi.
     - Custom hunter fields (`hunter_score`, `hunter_segment`, vb.)
   - İki yönlü sync yok (planlanmış değil)
   - **Detaylar:** 
-    - `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 2)
+    - `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 2 - revize edildi)
     - `CORE-FREEZE-D365-PUSH-PLAN.md` (Mimari plan)
 
 - **G21 Architecture Refactor (Phase 4–6)**

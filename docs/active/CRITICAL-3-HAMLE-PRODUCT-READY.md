@@ -81,14 +81,14 @@
 ---
 
 ### **HAMLE 2: Dynamics 365 Push Entegrasyonu**
-**Süre**: 6-10 gün (4 faz: S + M + S-M + S = ~1 hafta)  
+**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 2.9 ⏳ Pending, Phase 3 ▶️ ŞİMDİ)  
 **Öncelik**: P0 (Kritik - Satış pipeline'ı)  
 **Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma
 
 #### Problem:
-- **Sıfır kod** - Hiçbir dosya yok
-- Plan var ama execution yok
-- Satış ekibi Hunter → D365 manuel export/import yapıyor
+- ✅ **Backend Hazır**: D365 push backend'i tamamlandı (Phase 2.5 - %94)
+- ❌ **UI Eksik**: Kullanıcı D365 status'u göremiyor, push butonu yok
+- ⏳ **E2E Beklemede**: D365 tenant hazır olunca test edilecek (Phase 2.9 - ops fazı)
 
 #### Mimari Yaklaşım:
 **Core Freeze + Adapter Pattern:**
@@ -99,41 +99,32 @@
 
 **Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
 
-#### Aksiyonlar (4 Faz):
+#### Revize Edilmiş Faz Yapısı:
 
-**Faz 1: Skeleton + Plumbing (S - 0.5-1 gün)**
-- [ ] `POST /api/v1/d365/push-lead` endpoint (lead_id/domain alır, job başlatır)
-- [ ] `push_lead_to_d365` Celery task (şimdilik sadece log yazar)
-- [ ] `d365_sync_status` alanlarını ekleyen migration
-- [ ] Basit unit test'ler
-- [ ] `app/integrations/d365/` klasör yapısı
+**✅ Phase 2.5 — Backend Validation (TAMAMLANDI - %94)**
+- ✅ `POST /api/v1/d365/push-lead` endpoint
+- ✅ `push_lead_to_d365` Celery task
+- ✅ `d365_sync_status` alanları (migration)
+- ✅ `app/integrations/d365/client.py` (D365 Web API client)
+- ✅ `app/integrations/d365/mapping.py` (Hunter → D365 mapping)
+- ✅ `app/integrations/d365/errors.py` (D365-specific exceptions)
+- ✅ Retry + idempotency
+- ✅ Unit testler
+- ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
 
-**Faz 2: D365 Client + Mapping (M - ~1 gün)**
-- [ ] `app/integrations/d365/client.py` (token, create/update)
-- [ ] `app/integrations/d365/mapping.py` (map_lead_to_d365)
-- [ ] Retry + idempotency
-- [ ] Testler:
-  - Mapping unit tests
-  - Client için mock-based tests
-- [ ] `.env` + Prod Engineering Guide'a uygun secret yönetimi
+**⏳ Phase 2.9 — D365 Environment Wiring & Real E2E (PENDING)**
+- **Durum**: D365 tenant hazır olunca yapılacak
+- **Karar**: UI (Phase 3) bu fazı beklemeden başlayabilir
+- **Kapsam**: Tamamen ops/environment işi (kod değişikliği yok)
+- **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md` dosyasına bakın
 
-**Faz 3: UI & Status + Monitoring (S-M - ~1 gün)**
-- [ ] Lead tablosuna `D365` column (badge)
-- [ ] Lead detail modal'a `D365 status` bölümü
-- [ ] "Push to Dynamics" butonu (single + bulk)
-- [ ] Metrics:
-  - `d365_push_total`
-  - `d365_push_fail_total`
-- [ ] Sentry breadcrumb'ler (hangi lead, hangi status)
-
-**Faz 4: Hardening & Guardrails (S - ~0.5 gün)**
-- [ ] D365 down ise:
-  - Task retry + exponential backoff
-  - 3 fail sonrası `error` state, UI'da kırmızı badge
-- [ ] D365 mini-checklist:
-  - Token alınıyor mu?
-  - Lead create çalışıyor mu?
-  - Mapping testleri yeşil mi?
+**▶️ Phase 3 — UI & Status (ŞİMDİ BAŞLAYABİLİR)**
+- [ ] API: Companies/Leads response'a D365 alanlarını ekle
+- [ ] UI: Lead listesine D365 badge
+- [ ] UI: "Push to Dynamics" aksiyonu
+- [ ] UI: Lead detail view'da detaylı D365 kutusu
+- [ ] Monitoring / Logging (minimum)
+- **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md` dosyasına bakın
 
 #### Başarı Kriterleri:
 - ✅ Hunter'dan bir lead, tek tıkla D365'te lead olarak görünebiliyor
@@ -142,23 +133,20 @@
 - ✅ UI'da sync butonu ve status çalışıyor
 - ✅ **D365 down olsa bile Hunter core çalışıyor** (health check'te D365 bağımlılığı yok)
 
-#### Dosyalar (Yeni - Adapter Katmanı):
-- `app/integrations/d365/__init__.py` ⚠️ **YOK - OLUŞTURULACAK**
-- `app/integrations/d365/client.py` ⚠️ **YOK - OLUŞTURULACAK** (D365 Web API client)
-- `app/integrations/d365/mapping.py` ⚠️ **YOK - OLUŞTURULACAK** (Hunter → D365 DTO mapping)
-- `app/integrations/d365/dto.py` ⚠️ **YOK - OLUŞTURULACAK** (D365 data transfer objects)
-- `app/integrations/d365/errors.py` ⚠️ **YOK - OLUŞTURULACAK** (D365-specific exceptions)
-- `app/tasks/d365_push.py` ⚠️ **YOK - OLUŞTURULACAK** (Celery task)
-- `app/api/v1/d365_routes.py` ⚠️ **YOK - OLUŞTURULACAK** (API endpoints)
-- `alembic/versions/XXXX_add_d365_sync_fields.py` ⚠️ **YOK - OLUŞTURULACAK** (DB migration)
-- `alembic/versions/XXXX_add_d365_push_jobs_table.py` ⚠️ **YOK - OLUŞTURULACAK** (audit table)
+#### Dosyalar (Backend - ✅ TAMAMLANDI):
+- ✅ `app/integrations/d365/__init__.py`
+- ✅ `app/integrations/d365/client.py` (D365 Web API client)
+- ✅ `app/integrations/d365/mapping.py` (Hunter → D365 DTO mapping)
+- ✅ `app/integrations/d365/errors.py` (D365-specific exceptions)
+- ✅ `app/tasks/d365_push.py` (Celery task)
+- ✅ `app/api/v1/d365_routes.py` (API endpoints)
+- ✅ `alembic/versions/XXXX_add_d365_sync_fields.py` (DB migration)
 
-#### Dosyalar (Modifiye):
-- `app/api/v1/leads.py` - `d365_status` field ekle
-- `mini-ui/js/d365_actions.js` (veya `.js`) - "Push to Dynamics" butonu + state
-- `mini-ui/index.html` - UI elements
-- `app/main.py` - D365 router ekle
-- `app/config.py` - `HUNTER_D365_ENABLED` feature flag
+#### Dosyalar (UI - ▶️ PHASE 3'TE YAPILACAK):
+- [ ] `app/api/v1/leads.py` - `d365_status` field ekle (response'a)
+- [ ] `mini-ui/js/d365_actions.js` (veya mevcut UI dosyası) - "Push to Dynamics" butonu + state
+- [ ] `mini-ui/index.html` - UI elements
+- [ ] `app/config.py` - `HUNTER_D365_BASE_URL` config ekle (eğer yoksa)
 
 #### Core Freeze Protokolü:
 - ✅ Core modüllere **dokunulmayacak** (`app/core/scorer.py`, `analyzer_*.py`, vb.)
@@ -225,10 +213,13 @@
 ## 📊 **ÖNCELİK SIRASI**
 
 1. **HAMLE 1** (Partner Center Sync) - **1-2 gün** - En hızlı kazanım
-2. **HAMLE 2** (Dynamics 365 Push) - **6-10 gün** - En kritik eksik
+2. **HAMLE 2** (Dynamics 365 Push) - **Revize edildi**:
+   - ✅ **Phase 2.5** (Backend Validation) - **TAMAMLANDI** (%94)
+   - ⏳ **Phase 2.9** (E2E Wiring) - **PENDING** (D365 tenant hazır olunca, ops fazı)
+   - ▶️ **Phase 3** (UI & Status) - **ŞİMDİ BAŞLAYABİLİR** (~1 gün)
 3. **HAMLE 3** (UI Polish) - **3-5 gün** - En görünür iyileştirme
 
-**Toplam Süre**: 10-17 gün (2-3 hafta)
+**Toplam Süre**: Revize edildi - Phase 3 (UI) hemen başlayabilir, Phase 2.9 tenant hazır olunca yapılacak
 
 ---
 
@@ -241,10 +232,10 @@
 - ✅ Error handling robust
 
 ### Hamle 2 Başarısı:
-- ✅ Hunter → D365 push çalışıyor
-- ✅ Duplicate detection çalışıyor
-- ✅ Account merge çalışıyor
-- ✅ UI'da sync butonu ve status çalışıyor
+- ✅ **Phase 2.5**: Backend D365 push çalışıyor (client, mapping, task, API endpoint)
+- ✅ **Phase 2.5**: Duplicate detection çalışıyor (upsert by domain/email)
+- ⏳ **Phase 2.9**: E2E test (D365 tenant hazır olunca)
+- ▶️ **Phase 3**: UI'da sync butonu ve status çalışıyor (şimdi başlayacak)
 
 ### Hamle 3 Başarısı:
 - ✅ UI "profesyonel" görünüyor

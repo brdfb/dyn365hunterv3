@@ -55,6 +55,10 @@ export function renderLeadsTable(leads) {
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
                     ${lead.readiness_score !== null && lead.readiness_score !== undefined ? lead.readiness_score : '-'}
                 </td>
+                <td class="leads-table__cell leads-table__cell--d365 score-clickable" 
+                    ${lead.domain && lead.domain !== '-' ? `data-domain="${escapeHtml(lead.domain)}"` : ''}>
+                    ${getD365Badge(lead.d365_sync_status, lead.d365_sync_error)}
+                </td>
                 <td class="leads-table__cell leads-table__cell--actions">
                     ${lead.domain && lead.domain !== '-' 
                         ? `<button type="button" class="sales-button" data-domain="${escapeHtml(lead.domain)}" title="Sales Summary">📞 Sales</button>`
@@ -264,6 +268,220 @@ function getReferralBadge(referral_type) {
     const badgeClass = `referral-badge referral-badge--${cssType}`;
     
     return `<span class="${badgeClass}" title="Partner Center Referral: ${escapeHtml(description)}">${escapeHtml(label)}</span>`;
+}
+
+/**
+ * Get D365 sync status badge (Phase 3)
+ * Badge colors: not_synced (gray), queued/in_progress (yellow), synced (green), error (red)
+ */
+function getD365Badge(d365_sync_status, d365_sync_error = null) {
+    if (!d365_sync_status || d365_sync_status === 'not_synced') {
+        return '<span class="d365-badge d365-badge--not-synced" title="Dynamics 365: Not synced">-</span>';
+    }
+    
+    const status = d365_sync_status.toLowerCase();
+    let badgeClass = 'd365-badge';
+    let icon = '';
+    let tooltip = '';
+    
+    switch (status) {
+        case 'queued':
+        case 'in_progress':
+            badgeClass += ' d365-badge--queued';
+            icon = '⏳';
+            tooltip = 'Dynamics 365: Queued/In Progress';
+            break;
+        case 'synced':
+            badgeClass += ' d365-badge--synced';
+            icon = '✅';
+            tooltip = 'Dynamics 365: Synced';
+            break;
+        case 'error':
+            badgeClass += ' d365-badge--error';
+            icon = '❌';
+            tooltip = `D365 Error: ${d365_sync_error ? escapeHtml(d365_sync_error.substring(0, 100)) : 'Unknown error'}`;
+            break;
+        default:
+            badgeClass += ' d365-badge--not-synced';
+            tooltip = 'Dynamics 365: Not synced';
+    }
+    
+    return `<span class="${badgeClass}" title="${tooltip}">${icon}</span>`;
+}
+
+/**
+ * Load and render D365 panel in score breakdown modal (Phase 3)
+ */
+async function loadD365Panel(domain) {
+    const panelId = `d365-panel-${domain}`;
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    
+    try {
+        // Fetch lead data to get D365 fields
+        const API_BASE_URL = window.HUNTER_API_BASE_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_BASE_URL}/api/v1/leads/${encodeURIComponent(domain)}`);
+        
+        if (!response.ok) {
+            panel.innerHTML = '<div class="d365-panel__error">D365 bilgisi yüklenemedi</div>';
+            return;
+        }
+        
+        const lead = await response.json();
+        renderD365Panel(panel, lead);
+    } catch (error) {
+        logError('Failed to load D365 panel:', error);
+        panel.innerHTML = '<div class="d365-panel__error">D365 bilgisi yüklenemedi</div>';
+    }
+}
+
+/**
+ * Render D365 panel content (Phase 3)
+ */
+function renderD365Panel(panel, lead) {
+    const status = lead.d365_sync_status || 'not_synced';
+    const lastSync = lead.d365_sync_last_at;
+    const leadId = lead.d365_lead_id;
+    const leadUrl = lead.d365_lead_url;
+    const companyId = lead.company_id;
+    
+    let html = '';
+    
+    // Status badge
+    html += `<div class="score-breakdown__item">
+        <span class="score-breakdown__label">Status</span>
+        <span class="score-breakdown__value">${getD365Badge(status)}</span>
+    </div>`;
+    
+    // Last sync time
+    if (lastSync) {
+        const syncDate = new Date(lastSync);
+        const timeAgo = getTimeAgo(syncDate);
+        html += `<div class="score-breakdown__item">
+            <span class="score-breakdown__label">Last Sync</span>
+            <span class="score-breakdown__value" title="${syncDate.toLocaleString('tr-TR')}">${timeAgo}</span>
+        </div>`;
+    }
+    
+    // Open in Dynamics link
+    if (leadUrl && leadId) {
+        html += `<div class="score-breakdown__item">
+            <span class="score-breakdown__label">D365 Link</span>
+            <span class="score-breakdown__value">
+                <a href="${escapeHtml(leadUrl)}" target="_blank" rel="noopener noreferrer" class="d365-link">
+                    🔗 Open in Dynamics
+                </a>
+            </span>
+        </div>`;
+    }
+    
+    // Push to Dynamics button (if not synced or error)
+    if (status === 'not_synced' || status === 'error') {
+        if (companyId) {
+            html += `<div class="score-breakdown__item" style="margin-top: 1rem;">
+                <button type="button" class="form__button d365-push-button" 
+                    data-company-id="${companyId}" 
+                    data-domain="${escapeHtml(lead.domain)}"
+                    style="width: 100%;">
+                    🚀 Push to Dynamics
+                </button>
+            </div>`;
+        }
+    }
+    
+    panel.innerHTML = html;
+    
+    // Bind push button
+    const pushButton = panel.querySelector('.d365-push-button');
+    if (pushButton) {
+        pushButton.addEventListener('click', async () => {
+            const companyId = parseInt(pushButton.dataset.companyId);
+            const domain = pushButton.dataset.domain;
+            await handleD365Push(companyId, domain, pushButton);
+        });
+    }
+}
+
+/**
+ * Get human-readable time ago string
+ */
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Az önce';
+    if (diffMins < 60) return `${diffMins} dakika önce`;
+    if (diffHours < 24) return `${diffHours} saat önce`;
+    if (diffDays < 7) return `${diffDays} gün önce`;
+    return date.toLocaleDateString('tr-TR');
+}
+
+/**
+ * Handle D365 push action (Phase 3)
+ */
+async function handleD365Push(companyId, domain, button) {
+    if (!button) return;
+    
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = '⏳ Pushing...';
+    
+    try {
+        const { pushLeadToD365 } = await import('./api.js');
+        await pushLeadToD365(companyId);
+        
+        // Optimistic UI update
+        button.textContent = '✅ Queued';
+        button.style.backgroundColor = '#d4edda';
+        
+        // Refresh lead data to get updated status
+        setTimeout(async () => {
+            await loadD365Panel(domain);
+            // Refresh leads table to update badge
+            if (window.refreshLeads) {
+                await window.refreshLeads();
+            }
+        }, 1000);
+    } catch (error) {
+        logError('D365 push failed:', error);
+        button.textContent = '❌ Error';
+        button.style.backgroundColor = '#f8d7da';
+        button.disabled = false;
+        
+        // Show error toast
+        showToast(error.message || 'D365 push failed', 'error');
+    }
+}
+
+/**
+ * Show toast notification (Phase 3)
+ */
+function showToast(message, type = 'info') {
+    // Simple toast implementation
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: ${type === 'error' ? '#f8d7da' : '#d4edda'};
+        color: ${type === 'error' ? '#721c24' : '#155724'};
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 /**
@@ -777,6 +995,17 @@ export function showScoreBreakdown(breakdown, domain) {
         html += `</div>`;
     }
 
+    // Phase 3: D365 Integration Panel
+    // Note: D365 data comes from lead response, not breakdown
+    // We'll fetch lead data separately or pass it as parameter
+    html += `<div class="score-breakdown__section" style="margin-top: 1rem; border-top: 2px solid #e0e0e0; padding-top: 1rem;">
+        <div class="score-breakdown__section-title">Dynamics 365</div>
+        <div id="d365-panel-${escapeHtml(domain)}" class="d365-panel">
+            <!-- D365 panel content will be populated by showD365Panel function -->
+            <div class="d365-panel__loading">Yükleniyor...</div>
+        </div>
+    </div>`;
+    
     html += `<div class="score-breakdown__section" style="margin-top: 1rem;">
         <button type="button" id="btn-export-pdf" class="form__button" style="width: 100%;">
             📄 PDF İndir
@@ -787,6 +1016,9 @@ export function showScoreBreakdown(breakdown, domain) {
     
     content.innerHTML = html;
     modal.style.display = 'block';
+    
+    // Phase 3: Load D365 panel data (fetch lead data to get D365 fields)
+    loadD365Panel(domain);
     
     // Gün 3: Bind PDF export button
     const pdfButton = document.getElementById('btn-export-pdf');

@@ -19,6 +19,7 @@ from app.integrations.d365.errors import (
     D365RateLimitError,
     D365DuplicateError,
 )
+from app.core.d365_metrics import track_push_success, track_push_failed
 
 
 @celery_app.task(bind=True, name="push_lead_to_d365", max_retries=3)
@@ -38,6 +39,9 @@ def push_lead_to_d365(self, lead_id: int):
     Returns:
         Dict with status and D365 lead ID if successful
     """
+    import time
+    start_time = time.time()
+    
     if not settings.d365_enabled:
         logger.warning(
             "d365_disabled",
@@ -151,12 +155,17 @@ def push_lead_to_d365(self, lead_id: int):
         company.d365_sync_error = None
         db.commit()
         
+        # Phase 3: Track success metrics
+        duration = time.time() - start_time
+        track_push_success(duration)
+        
         logger.info(
             "d365_push_success",
             message="Lead pushed to D365 successfully",
             lead_id=lead_id,
             domain=domain,
-            d365_lead_id=d365_lead_id
+            d365_lead_id=d365_lead_id,
+            duration=duration
         )
         
         return {
@@ -182,6 +191,9 @@ def push_lead_to_d365(self, lead_id: int):
         
     except (D365AuthenticationError, D365APIError, D365DuplicateError) as e:
         # Non-retryable errors
+        # Phase 3: Track failure metrics
+        track_push_failed()
+        
         logger.error(
             "d365_push_failed",
             message="D365 push failed (non-retryable)",
@@ -200,6 +212,10 @@ def push_lead_to_d365(self, lead_id: int):
         }
         
     except Exception as e:
+        # Phase 3: Track failure metrics (only on final failure, not retries)
+        if self.request.retries >= self.max_retries:
+            track_push_failed()
+        
         logger.error(
             "d365_push_error",
             message="D365 push task failed (unexpected error)",

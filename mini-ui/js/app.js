@@ -285,6 +285,9 @@ async function init() {
     // Load initial data
     await loadKPIs();  // G19: Use new KPIs endpoint
     await loadLeads();
+    
+    // Phase 3: Expose refreshLeads to window for D365 push handler
+    window.refreshLeads = refreshLeads;
 }
 
 /**

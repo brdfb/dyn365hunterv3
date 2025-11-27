@@ -231,6 +231,12 @@ export function renderReferralDetail(detail) {
 
                 <section class="referral-detail__section">
                     <h4>İlgili Kişi</h4>
+                    ${!contact.name && !contact.email && teamMembers.length === 0
+                        ? `<p class="referral-detail__muted" style="margin-bottom: 1rem; font-style: italic;">
+                            Primary contact bilgisi Partner Center API'den gelmedi.
+                        </p>`
+                        : ''
+                    }
                     <dl>
                         <div><dt>İsim</dt><dd>${formatValue(contact.name)}</dd></div>
                         <div><dt>E-posta</dt><dd>${contact.email ? `<a href="mailto:${escapeHtml(contact.email)}">${escapeHtml(contact.email)}</a>` : '<span class="referral-detail__muted">-</span>'}</dd></div>

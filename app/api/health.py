@@ -11,6 +11,7 @@ from app.core.tasks import get_bulk_metrics
 from app.core.error_tracking import get_error_metrics
 from app.core.deprecated_monitoring import get_deprecated_metrics
 from app.core.partner_center_metrics import get_partner_center_metrics
+from app.core.d365_metrics import get_d365_metrics
 import redis
 
 router = APIRouter(tags=["health"])
@@ -142,6 +143,7 @@ async def metrics_endpoint():
         error_metrics = get_error_metrics()
         deprecated_metrics = get_deprecated_metrics()
         partner_center_metrics = get_partner_center_metrics()
+        d365_metrics = get_d365_metrics()
         
         return {
             "cache": cache_metrics,
@@ -150,6 +152,7 @@ async def metrics_endpoint():
             "errors": error_metrics,
             "deprecated_endpoints": deprecated_metrics,
             "partner_center": partner_center_metrics,
+            "d365": d365_metrics,
         }
     except Exception as e:
         raise HTTPException(

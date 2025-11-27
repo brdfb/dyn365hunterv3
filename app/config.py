@@ -81,6 +81,7 @@ class Settings(BaseSettings):
     # Dynamics 365 Integration (Feature flag: disabled by default)
     d365_enabled: bool = False
     d365_base_url: Optional[str] = None  # D365 Web API base URL (e.g., https://yourorg.crm.dynamics.com)
+    d365_app_id: Optional[str] = None  # D365 App ID (optional, for generating lead URLs)
     d365_client_id: Optional[str] = None  # Azure AD OAuth client ID
     d365_client_secret: Optional[str] = None  # Azure AD OAuth client secret
     d365_tenant_id: Optional[str] = None  # Azure AD tenant ID
