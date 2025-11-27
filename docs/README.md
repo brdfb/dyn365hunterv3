@@ -9,7 +9,7 @@
 | **"Production'a çıkabilir miyim?"** | `docs/active/GO-NO-GO-CHECKLIST-v1.0.md` |
 | **"Hunter'ın şu anki durumu ne?"** | `docs/active/HUNTER-STATE-v1.0.md` |
 | **"G21 refactor'ın durumu ne?"** | `docs/active/G21-ROADMAP-CURRENT.md` |
-| **"Post-MVP'de ne yapacağız?"** | `docs/active/POST-MVP-STRATEGY.md` |
+| **"Post-MVP'de ne yapacağız?"** | `docs/plans/2025-01-30-POST-MVP-STRATEGY.md` |
 | **"Sales Engine nasıl kullanılır?"** | `docs/sales/SALES-GUIDE.md` |
 | **"Sales Engine v1.1 Intelligence Layer nedir?"** | `docs/active/SALES-ENGINE-V1.1.md` |
 | **"CSP P-Model nedir? P1-P6 nasıl hesaplanıyor?"** | `docs/archive/2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` (tasarım) + `docs/archive/2025-01-29-CSP-P-MODEL-IMPLEMENTATION-PLAN.md` (implementation - completed) |
@@ -81,10 +81,10 @@ API contract documentation:
 ### Active Documentation
 
 #### Core Status & Strategy Documents (v1.0)
-- `GO-NO-GO-CHECKLIST-v1.0.md` - **Production Go/No-Go Checklist** - "Çıkabilir miyim?" sorusuna tek dosyadan cevap
 - `HUNTER-STATE-v1.0.md` - **Sistem Durum Özeti** - Hunter v1.0'ın tek resmi durum dokümanı
+- `CRITICAL-3-HAMLE-PRODUCT-READY.md` - **Acil Aksiyon Planı** - 3 hamle ile product-ready'e ulaşma planı
 - `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap** - Mimari refactor ve entegrasyon yol haritası (güncel durum)
-- `POST-MVP-STRATEGY.md` - **Post-MVP Strategy** - v1.0 sonrası 3 ana iş paketi (IP Enrichment, Partner Center, Dynamics 365)
+- `CORE-FREEZE-D365-PUSH-PLAN.md` - **Core Freeze + D365 Push Planı** - Core koruma ve D365 entegrasyon mimarisi
 
 #### Reference Guides
 **Location:** `docs/reference/`
@@ -94,11 +94,15 @@ API contract documentation:
 - `IP-ENRICHMENT-DOCKER-SETUP.md` - IP enrichment Docker setup guide
 
 #### Production Readiness Documentation
+**Location:** `docs/reference/`
 - `PRODUCTION-ENGINEERING-GUIDE-V1.md` - **Main SRE runbook** - Health checks, monitoring, deployment strategies (see Related Documents section for deployment guides)
 - `PRODUCTION-DEPLOYMENT-GUIDE.md` - Step-by-step deployment guide
+- `PRODUCTION-DEPLOYMENT-SUMMARY.md` - Production deployment summary (✅ Moved from active - 2025-01-30)
 - `PRODUCTION-DEPLOYMENT-CHECKLIST.md` - Pre-deployment checklist
 - `PRODUCTION-CHECKLIST-RUNBOOK.md` - Operational runbook (2-hour checklist)
 - `PRODUCTION-MONITORING-WATCH.md` - Production monitoring watch guide (first 1-2 days after deployment)
+- `MINI-UI-PRE-PROD-CHECKLIST.md` - Mini UI pre-production checklist (✅ Moved from active - 2025-01-30)
+- `SECURITY-SECRET-ROTATION-CHECKLIST.md` - Security secret rotation checklist (✅ Moved from active - 2025-01-30)
 - `ROLLBACK-PLAN.md` - Rollback procedures
 - `SMOKE-TESTS-RUNBOOK.md` - Smoke tests runbook
 - `TROUBLESHOOTING-GUIDE.md` - Troubleshooting guide
@@ -106,8 +110,11 @@ API contract documentation:
 
 #### Feature Documentation (Active)
 - `SALES-ENGINE-V1.1.md` - Sales Engine v1.1 Intelligence Layer dokümantasyonu
-- `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` - Partner Center & Leads Tab tutarsızlık analizi (✅ Çözüldü - Solution 1)
-- `SOLUTION-1-UI-CONSISTENCY-CHECK.md` - Solution 1 UI consistency check raporu (✅ Tamamlandı - 2025-01-30)
+
+#### Feature Documentation (Archived - 2025-01-30)
+- ✅ **Archived** - `2025-01-30-PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` - Partner Center & Leads Tab tutarsızlık analizi (✅ Çözüldü - Solution 1)
+- ✅ **Archived** - `2025-01-30-SOLUTION-1-UI-CONSISTENCY-CHECK.md` - Solution 1 UI consistency check raporu (✅ Tamamlandı - 2025-01-30)
+- ✅ **Archived** - `2025-01-30-SOLUTION-2-MULTIPLE-REFERRALS-AGGREGATE-PLAN.md` - Solution 2 multiple referrals aggregate plan (✅ Tamamlandı - MVP - 2025-01-30)
 
 #### Feature Documentation (Archived)
 - ✅ **Archived** - `2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` - CSP Commercial Segment & Heat tasarımı (6 kategori, rule-based) - ✅ Completed (2025-01-29)
@@ -121,12 +128,14 @@ API contract documentation:
 - ✅ **Archived** - `2025-01-28-STABILIZATION-SPRINT-PLAN-v1.0.md` - Stabilization Sprint plan (3 gün) - ✅ Completed (2025-01-28)
 - ✅ **Archived** - `2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md` - UI stabilization checklist (Gün 3) - ✅ Completed (2025-01-28)
 
-#### Integration Roadmap Documentation (NEW - 2025-01-28)
+#### Integration Roadmap Documentation
+**Location:** `docs/plans/`
 - `2025-01-28-INTEGRATION-ROADMAP-v1.0.md` - Integration Roadmap: Correct sequence for external integrations
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day (All tasks ✅)
   - **Phase 2**: ✅ **COMPLETED** - Partner Center Referrals (P1) - 100% completed (2025-01-30)
     - ✅ Core components completed (Tasks 2.1, 2.2, 2.3)
     - ✅ **API Endpoints completed** (Task 2.4 - 2025-01-30) - `POST /api/referrals/sync` + Celery task
+- `2025-01-30-POST-MVP-STRATEGY.md` - Post-MVP Strategy - v1.0 sonrası 3 ana iş paketi (✅ Moved from active - 2025-01-30)
     - ✅ **Backend tests completed** (Task 2.4 - 2025-01-30) - 7/7 tests passing (endpoint + Celery task tests)
     - ✅ **UI Integration completed** (Task 2.5 - 2025-01-30) - Referral column with badges (co-sell: blue, marketplace: green, solution-provider: orange)
     - ✅ **Background Sync completed** (Task 2.6 - 2025-01-30) - Celery Beat schedule (10 min prod, 30s dev)
@@ -135,7 +144,11 @@ API contract documentation:
     - **Status**: ✅ **Phase 2 Complete** - Backend, UI, and background sync fully implemented and tested
     - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe)
     - **Remaining**: Scoring Pipeline Integration (Azure Tenant ID override + Co-sell boost) - Future enhancement
-  - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
+  - **Phase 3**: ✅ Backend %94 completed (Phase 2.5), ✅ Phase 3 (UI) completed, ⏳ Phase 2.9 (E2E) runbook ready - Dynamics 365 Integration (P2)
+    - ✅ **Phase 2.5**: Backend implementation completed (API, Celery task, D365 client, mapping, DB migration)
+    - ✅ **Phase 3**: UI integration completed (badge, push button, detail modal, status fields)
+    - ✅ **Roast Sprint**: Pre-D365 hotfix sprint completed (5/5 tasks: security, idempotency, token cache, session lifecycle, retry backoff)
+    - ⏳ **Phase 2.9**: E2E runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`) - Tenant setup pending
   - **Key Principle**: UI stability → Data ingestion → CRM integration
 - `PARTNER-CENTER-PREPARATION.md` - **Partner Center Integration Preparation Guide** (2025-01-30) - Comprehensive preparation checklist for Tasks 2.4, 2.5, 2.6
 - `2025-01-28-INTEGRATION-TASKS.md` - Exact task list with branch names and acceptance criteria
@@ -208,7 +221,7 @@ API contract documentation:
   - ✅ Phase 3: Read-Only Mode (2025-01-28) - Write endpoints disabled (410 Gone)
   - ⏸ Phase 4: Dynamics Migration (PAUSED - overlaps with Integration Roadmap Phase 3)
   - ◻ Phase 5-6: Monitoring & Cleanup (Pending)
-- 📋 **Post-MVP Strategy**: `POST-MVP-STRATEGY.md` - 3 ana iş paketi
+- 📋 **Post-MVP Strategy**: `plans/2025-01-30-POST-MVP-STRATEGY.md` - 3 ana iş paketi (✅ Moved from active - 2025-01-30)
   1. IP Enrichment (G20) - Derinlik
   2. Partner Center Referrals Sync - Kaynak
   3. Dynamics 365 Sales Integration - Pipeline
@@ -227,7 +240,11 @@ API contract documentation:
     - **Feature Flag**: `partner_center_enabled=False` (disabled by default, MVP-safe, production-ready)
     - **Metrics**: Partner Center metrics exposed via `/healthz/metrics` endpoint
     - **Remaining**: Scoring Pipeline Integration (Future enhancement)
-  - ⏳ Phase 3: Dynamics 365 Integration (P2) - Pending (6-10 days)
+  - ✅ Phase 3: Dynamics 365 Integration (P2) - Backend %94 + UI completed, Phase 2.9 E2E runbook ready
+    - ✅ Phase 2.5: Backend implementation (API, Celery task, D365 client, mapping)
+    - ✅ Phase 3: UI integration (badge, push button, detail modal)
+    - ✅ Roast Sprint: Pre-D365 hotfix sprint (5/5 tasks completed)
+    - ⏳ Phase 2.9: E2E runbook ready, tenant setup pending
 - 📋 P2 Backlog: Sync-first refactor, Repository pattern, N+1 query prevention
 
 ### Archived Documentation
@@ -350,7 +367,11 @@ All completed planning documentation has been moved to `docs/archive/`:
 - `INTEGRATION-ROADMAP.md` - Integration Roadmap: UI Stabilization → Partner Center → Dynamics 365 - 🔄 In Progress (2025-01-28)
   - **Phase 1**: ✅ Completed - Mini UI Stabilization (P0.5) - 1 day
   - **Phase 2**: ✅ Completed - Partner Center Referrals (P1) - 2-3 days (2025-01-30)
-  - **Phase 3**: ⏳ Pending - Dynamics 365 Integration (P2) - 6-10 days
+  - **Phase 3**: ✅ Backend %94 completed (Phase 2.5), ✅ Phase 3 (UI) completed, ⏳ Phase 2.9 (E2E) runbook ready - Dynamics 365 Integration (P2)
+    - ✅ **Phase 2.5**: Backend implementation completed (API, Celery task, D365 client, mapping, DB migration)
+    - ✅ **Phase 3**: UI integration completed (badge, push button, detail modal, status fields)
+    - ✅ **Roast Sprint**: Pre-D365 hotfix sprint completed (5/5 tasks: security, idempotency, token cache, session lifecycle, retry backoff)
+    - ⏳ **Phase 2.9**: E2E runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`) - Tenant setup pending
 - `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ **COMPLETED** (2025-01-30) - All tasks completed (2.1-2.6), all tests passing
 - `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
 

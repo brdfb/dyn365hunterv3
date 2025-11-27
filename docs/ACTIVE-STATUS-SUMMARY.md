@@ -8,9 +8,10 @@
 ## ⚠️ **MEVCUT DURUM**
 
 ### Dosya Sayısı
-- **Mevcut:** 21 dosya (+2: PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md, SOLUTION-1-UI-CONSISTENCY-CHECK.md)
+- **Mevcut:** 9 dosya (2025-01-30 D365 phase cleanup sonrası)
+- **Önceki:** 13 dosya (2025-01-30)
 - **Hedef:** 5-7 dosya (documentation guardrails)
-- **Durum:** ⚠️ **3x fazla** - Cleanup gerekiyor
+- **Durum:** ⚠️ **Hala fazla** - Daha fazla cleanup gerekiyor (hedef 5-7'ye yaklaşıldı)
 
 ---
 
@@ -24,11 +25,10 @@
 - **Dosyalar:** `HUNTER-STATE-v1.0.md`, `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md`, `SOLUTION-1-UI-CONSISTENCY-CHECK.md`
 
 ### Dynamics 365
-- **Durum:** ❌ Sıfır kod
-- **Plan:** Var, uygulama yok
-- **Mimari:** Adapter Pattern (Core Freeze + Integration Layer)
-- **Aksiyon:** Hamle 2 - 6-10 gün (4 faz: S + M + S-M + S)
-- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`
+- **Durum:** ✅ Backend %94 tamamlandı (Phase 2.5), ✅ Phase 3 (UI) tamamlandı, ⏳ Phase 2.9 (E2E) runbook hazır
+- **Plan:** Adapter Pattern (Core Freeze + Integration Layer)
+- **Aksiyon:** Phase 2.9 E2E wiring (tenant setup bekleniyor)
+- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`, `D365-PHASE-2.9-E2E-RUNBOOK.md`, `PRE-D365-ROAST-SPRINT-TASK-BOARD.md`
 
 ### Core Freeze
 - **Durum:** ✅ **AKTİF** (2025-01-30)
@@ -53,30 +53,39 @@
 
 **Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30)
 
-### 📝 **Hamle 1 Dosyaları** (4 dosya - Archive edilebilir)
-4. `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
-5. `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
-6. `HAMLE-1-EXECUTION-RUNBOOK.md`
-7. `HAMLE-1-REFERRAL-DETAILS-PLAN.md`
+### ✅ **Hamle 1 Dosyaları** (4 dosya - ✅ Archive edildi - 2025-01-30)
+- `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → `archive/2025-01-30-HAMLE-1-PRODUCTION-DEPLOYMENT.md`
+- `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` → `archive/2025-01-30-HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
+- `HAMLE-1-EXECUTION-RUNBOOK.md` → `archive/2025-01-30-HAMLE-1-EXECUTION-RUNBOOK.md`
+- `HAMLE-1-REFERRAL-DETAILS-PLAN.md` → `archive/2025-01-30-HAMLE-1-REFERRAL-DETAILS-PLAN.md`
 
-**Öneri:** Hamle 1 tamamlandığında archive edilmeli
+**Durum:** ✅ **Archive edildi** (2025-01-30)
 
-### 📊 **Strateji Dosyaları** (3 dosya)
-8. `POST-MVP-STRATEGY.md` - Post-MVP strateji
-9. `KALAN-ISLER-PRIORITY.md` - Öncelik listesi
-10. `NO-BREAK-REFACTOR-PLAN.md` - Refactor planı
+### 📊 **Strateji Dosyaları** (2 dosya)
+- `KALAN-ISLER-PRIORITY.md` - Öncelik listesi (aktif)
+- `NO-BREAK-REFACTOR-PLAN.md` - Refactor planı (aktif)
 
-### 🚀 **Production Dosyaları** (2 dosya - Reference'a taşınabilir)
-11. `PRODUCTION-DEPLOYMENT-SUMMARY.md`
-12. `MINI-UI-PRE-PROD-CHECKLIST.md`
+### ✅ **Post-MVP Strategy** (1 dosya - ✅ Plans'a taşındı - 2025-01-30)
+- `POST-MVP-STRATEGY.md` → `plans/2025-01-30-POST-MVP-STRATEGY.md`
 
-**Öneri:** Reference klasörüne taşınmalı
+**Durum:** ✅ **Plans klasörüne taşındı** (2025-01-30)
 
-### 🔧 **Diğer** (4 dosya)
-13. `SALES-ENGINE-V1.1.md` - Feature dokümantasyonu
-14. `SECURITY-SECRET-ROTATION-CHECKLIST.md` - Security checklist
-15. `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` - ✅ Çözüldü (Solution 1)
-16. `SOLUTION-1-UI-CONSISTENCY-CHECK.md` - ✅ Tamamlandı (2025-01-30)
+### ✅ **Production Dosyaları** (3 dosya - ✅ Reference'a taşındı - 2025-01-30)
+- `PRODUCTION-DEPLOYMENT-SUMMARY.md` → `reference/PRODUCTION-DEPLOYMENT-SUMMARY.md`
+- `MINI-UI-PRE-PROD-CHECKLIST.md` → `reference/MINI-UI-PRE-PROD-CHECKLIST.md`
+- `SECURITY-SECRET-ROTATION-CHECKLIST.md` → `reference/SECURITY-SECRET-ROTATION-CHECKLIST.md`
+
+**Durum:** ✅ **Reference klasörüne taşındı** (2025-01-30)
+
+### ✅ **Solution Dosyaları** (3 dosya - ✅ Archive edildi - 2025-01-30)
+- `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` → `archive/2025-01-30-PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md`
+- `SOLUTION-1-UI-CONSISTENCY-CHECK.md` → `archive/2025-01-30-SOLUTION-1-UI-CONSISTENCY-CHECK.md`
+- `SOLUTION-2-MULTIPLE-REFERRALS-AGGREGATE-PLAN.md` → `archive/2025-01-30-SOLUTION-2-MULTIPLE-REFERRALS-AGGREGATE-PLAN.md`
+
+**Durum:** ✅ **Archive edildi** (2025-01-30 - Solution 1 ve Solution 2 tamamlandı)
+
+### 🔧 **Diğer** (1 dosya)
+- `SALES-ENGINE-V1.1.md` - Feature dokümantasyonu (aktif)
 
 ---
 
@@ -90,8 +99,9 @@
 **Durum:** ✅ **Tutarlı**
 
 ### Dynamics 365 Durumu
-- ✅ `HUNTER-STATE-v1.0.md`: ❌ SIFIR KOD
-- ✅ `CRITICAL-3-HAMLE-PRODUCT-READY.md`: Sıfır kod - Sadece plan var
+- ✅ `HUNTER-STATE-v1.0.md`: ✅ Backend %94 tamamlandı, ✅ Phase 3 (UI) tamamlandı, ⏳ Phase 2.9 (E2E) pending
+- ✅ `CRITICAL-3-HAMLE-PRODUCT-READY.md`: Backend tamamlandı, Phase 2.9 runbook hazır
+- ✅ `G21-ROADMAP-CURRENT.md`: Phase 4 paused, Phase 2.9 E2E runbook hazır
 
 **Durum:** ✅ **Tutarlı**
 
@@ -100,11 +110,15 @@
 ## ⚠️ **SORUNLAR**
 
 ### 1. Dosya Sayısı Fazla
-- **Mevcut:** 21 dosya
+- **Mevcut:** 9 dosya (2025-01-30 D365 phase cleanup sonrası)
+- **Önceki:** 13 dosya (2025-01-30)
 - **Hedef:** 5-7 dosya
-- **Çözüm:** Archive edilebilir dosyaları temizle
-  - Solution 1 dosyaları archive edilebilir (tamamlandı)
-  - Hamle 1 dosyaları archive edilebilir (tamamlandığında)
+- **Çözüm:** Tamamlanmış phase dosyaları archive edildi
+  - ✅ Solution 1 ve Solution 2 dosyaları archive edildi (2025-01-30)
+  - ✅ Hamle 1 dosyaları archive edildi (2025-01-30)
+  - ✅ D365 Phase 2.5 dosyaları archive edildi (2025-01-30)
+  - ✅ D365 Phase 3 dosyası archive edildi (2025-01-30)
+  - ✅ D365 Phase 2.9 eski wiring dosyası archive edildi (2025-01-30 - yeni runbook var)
 
 ### 2. Manuel Kontrol Gerekiyor
 - Tutarlılık kontrolü manuel
@@ -121,8 +135,10 @@
 
 ### Kısa Vadeli (1-2 gün)
 1. ✅ Bu status dosyasını oluştur (tamamlandı)
-2. ⏳ Hamle 1 dosyalarını archive et (Hamle 1 tamamlandığında)
-3. ⏳ Production dosyalarını reference'a taşı
+2. ✅ Hamle 1 dosyalarını archive et (tamamlandı - 2025-01-30)
+3. ✅ Production dosyalarını reference'a taşı (tamamlandı - 2025-01-30)
+4. ✅ Solution dosyalarını archive et (tamamlandı - 2025-01-30)
+5. ✅ D365 phase dosyalarını archive et (tamamlandı - 2025-01-30)
 
 ### Orta Vadeli (1 hafta)
 1. ⏳ Otomatik tutarlılık kontrol scripti oluştur
@@ -175,11 +191,16 @@
 
 **Son Güncelleme:** 2025-01-30  
 **Son Değişiklikler:**
-- ✅ Solution 1 tamamlandı (link status & referral ID enhancement)
-- ✅ UI consistency check tamamlandı
-- ⚠️ Dosya sayısı 21'e çıktı (cleanup gerekiyor)
+- ✅ Solution 1 ve Solution 2 dosyaları archive edildi (2025-01-30)
+- ✅ Hamle 1 dosyaları archive edildi (2025-01-30)
+- ✅ Production dosyaları reference klasörüne taşındı (2025-01-30)
+- ✅ POST-MVP-STRATEGY.md plans klasörüne taşındı (2025-01-30)
+- ✅ D365 Phase 2.5 dosyaları archive edildi (2025-01-30)
+- ✅ D365 Phase 3 dosyası archive edildi (2025-01-30)
+- ✅ D365 Phase 2.9 eski wiring dosyası archive edildi (2025-01-30 - yeni runbook var)
+- ✅ Dosya sayısı 13'ten 9'a düştü (D365 phase cleanup - 2025-01-30)
+- ⚠️ Hala 9 dosya var (hedef 5-7) - Daha fazla cleanup gerekiyor
 
 **Sıradaki Kontrol:** 
-- Solution 1 dosyalarını archive et (tamamlandı)
-- Hamle 1 tamamlandığında (archive işlemleri)
+- Active dosya sayısını 5-7'ye düşür (Roast Sprint board ve diğer tamamlanmış dokümanlar değerlendirilebilir)
 
