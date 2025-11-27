@@ -413,3 +413,24 @@ export async function createLeadFromReferral(referralId, companyNameOverride = n
     return await response.json();
 }
 
+/**
+ * Fetch detailed Partner Center referral info
+ */
+export async function fetchReferralDetail(referralId, includeRaw = true) {
+    const params = new URLSearchParams();
+    if (includeRaw) {
+        params.append('include_raw', 'true');
+    }
+
+    const url = `${API_BASE_URL}/api/v1/partner-center/referrals/${encodeURIComponent(referralId)}${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        const errorMessage = await getErrorMessage(response);
+        logError('Fetch referral detail failed:', errorMessage);
+        throw new Error(errorMessage);
+    }
+
+    return await response.json();
+}
+

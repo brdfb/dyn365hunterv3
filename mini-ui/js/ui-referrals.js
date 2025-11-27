@@ -9,24 +9,33 @@ import { escapeHtml } from './utils.js';
 export function renderReferralsTable(referrals) {
     const tbody = document.getElementById('referrals-table-body');
     const emptyState = document.getElementById('referrals-empty-state');
+    const tableWrapper = document.getElementById('referrals-table-wrapper');
     
-    if (!referrals || referrals.length === 0) {
-        tbody.innerHTML = '';
-        emptyState.style.display = 'block';
+    if (!tbody) {
+        logError('Referrals table body not found');
         return;
     }
     
-    emptyState.style.display = 'none';
+    if (!referrals || referrals.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        if (tableWrapper) tableWrapper.style.display = 'none';
+        return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    if (tableWrapper) tableWrapper.style.display = 'block';
     
     tbody.innerHTML = referrals.map(referral => {
         const linkStatusBadge = getLinkStatusBadge(referral.link_status);
         const referralTypeBadge = getReferralBadge(referral.referral_type);
         const statusBadge = getStatusBadge(referral.status);
         
+        const companyName = referral.company_name || referral.customer_name || '-';
         return `
             <tr class="leads-table__row">
-                <td class="leads-table__cell">
-                    ${escapeHtml(referral.company_name || referral.customer_name || '-')}
+                <td class="leads-table__cell leads-table__cell--company" title="${companyName !== '-' ? escapeHtml(companyName) : ''}">
+                    ${escapeHtml(companyName)}
                 </td>
                 <td class="leads-table__cell leads-table__cell--domain">
                     ${referral.domain ? escapeHtml(referral.domain) : '<span style="color: #999; font-style: italic;">Domain yok</span>'}
@@ -49,17 +58,208 @@ export function renderReferralsTable(referrals) {
                     ${referral.synced_at ? new Date(referral.synced_at).toLocaleString('tr-TR') : '-'}
                 </td>
                 <td class="leads-table__cell leads-table__cell--actions">
-                    ${referral.link_status === 'unlinked' 
+                    <button type="button" class="referral-action-button referral-action-button--detail" data-referral-id="${escapeHtml(referral.referral_id)}" title="Detayları göster">🔍 Detay</button>
+                    ${referral.link_status === 'unlinked' || !referral.link_status
                         ? `<button type="button" class="referral-action-button referral-action-button--link" data-referral-id="${escapeHtml(referral.referral_id)}" data-domain="${referral.domain ? escapeHtml(referral.domain) : ''}" title="Link to existing lead">🔗 Link</button>
                            ${referral.domain ? `<button type="button" class="referral-action-button referral-action-button--create" data-referral-id="${escapeHtml(referral.referral_id)}" title="Create lead from referral">➕ Create Lead</button>` : ''}`
                         : referral.link_status === 'auto_linked'
                         ? `<span style="color: #27ae60; font-size: 0.875rem;">✓ Linked</span>`
+                        : referral.link_status === 'multi_candidate'
+                        ? `<span style="color: #f39c12; font-size: 0.875rem;">Multiple</span>`
                         : '-'
                     }
                 </td>
             </tr>
         `;
     }).join('');
+}
+
+const REFERRAL_DETAIL_SELECTORS = {
+    modal: 'referral-detail-modal',
+    content: 'referral-detail-content',
+    error: 'referral-detail-error',
+    loading: 'referral-detail-loading',
+};
+
+export function openReferralDetailModal() {
+    const modal = document.getElementById(REFERRAL_DETAIL_SELECTORS.modal);
+    const errorEl = document.getElementById(REFERRAL_DETAIL_SELECTORS.error);
+    const content = document.getElementById(REFERRAL_DETAIL_SELECTORS.content);
+    if (modal) {
+        modal.style.display = 'block';
+    }
+    if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+    }
+    if (content) {
+        content.innerHTML = '';
+    }
+}
+
+export function closeReferralDetailModal() {
+    const modal = document.getElementById(REFERRAL_DETAIL_SELECTORS.modal);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+export function setReferralDetailLoading(isLoading) {
+    const loadingEl = document.getElementById(REFERRAL_DETAIL_SELECTORS.loading);
+    if (!loadingEl) return;
+    loadingEl.classList.toggle('hidden', !isLoading);
+}
+
+export function setReferralDetailError(message) {
+    const errorEl = document.getElementById(REFERRAL_DETAIL_SELECTORS.error);
+    if (!errorEl) return;
+    if (message) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    } else {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+    }
+}
+
+export function renderReferralDetail(detail) {
+    const content = document.getElementById(REFERRAL_DETAIL_SELECTORS.content);
+    if (!content) return;
+
+    const contact = detail.contact || {};
+    const deal = detail.deal || {};
+    const teamMembers = detail.team_members || [];
+
+    const formatValue = (value) => value ? escapeHtml(String(value)) : '<span class="referral-detail__muted">-</span>';
+
+    const teamHtml = teamMembers.length
+        ? `<ul class="referral-detail__team">
+                ${teamMembers.map(member => `
+                    <li>
+                        <strong>${formatValue(member.name || '-')}</strong>
+                        ${member.role ? `<span class="referral-detail__muted">(${escapeHtml(member.role)})</span>` : ''}
+                        ${member.email ? `<br><a href="mailto:${escapeHtml(member.email)}">${escapeHtml(member.email)}</a>` : ''}
+                        ${member.phone ? `<br><span>${escapeHtml(member.phone)}</span>` : ''}
+                    </li>
+                `).join('')}
+           </ul>`
+        : '<p class="referral-detail__muted">Takım üyesi bilgisi yok.</p>';
+
+    const rawJson = detail.raw_data
+        ? `<pre class="referral-detail__json">${escapeHtml(JSON.stringify(detail.raw_data, null, 2))}</pre>`
+        : '<p class="referral-detail__muted">Ham JSON verisi dahil edilmedi.</p>';
+
+    const syncedAt = detail.synced_at
+        ? new Date(detail.synced_at).toLocaleString('tr-TR')
+        : null;
+
+    const estimatedValueDisplay = (() => {
+        if (deal.estimated_value === null || deal.estimated_value === undefined) {
+            return '<span class="referral-detail__muted">-</span>';
+        }
+        const numericValue = typeof deal.estimated_value === 'number'
+            ? deal.estimated_value
+            : parseFloat(deal.estimated_value);
+        if (!Number.isNaN(numericValue)) {
+            return `${escapeHtml(numericValue.toLocaleString('tr-TR'))} ${escapeHtml(deal.currency || detail.currency || 'USD')}`;
+        }
+        return escapeHtml(String(deal.estimated_value));
+    })();
+
+    content.innerHTML = `
+        <div class="referral-detail">
+            <div class="referral-detail__header">
+                <div>
+                    <h3>${escapeHtml(detail.company_name || detail.customer_name || 'İsimsiz Referral')}</h3>
+                    <p class="referral-detail__muted">Referral ID: ${escapeHtml(detail.referral_id)}</p>
+                </div>
+                <div class="referral-detail__badges">
+                    ${getReferralBadge(detail.referral_type)}
+                    ${getStatusBadge(detail.status)}
+                    ${detail.substatus ? `<span class="referral-detail__chip">${escapeHtml(detail.substatus)}</span>` : ''}
+                </div>
+            </div>
+
+            <div class="referral-detail__grid">
+                <section class="referral-detail__section">
+                    <h4>Müşteri</h4>
+                    <dl>
+                        <div><dt>Şirket</dt><dd>${formatValue(detail.company_name || detail.customer_name)}</dd></div>
+                        <div><dt>Ülke</dt><dd>${formatValue(detail.customer_country)}</dd></div>
+                        <div><dt>Organizasyon</dt><dd>${formatValue(detail.organization_size)}</dd></div>
+                        <div><dt>Domain</dt><dd>${formatValue(detail.domain || detail.raw_domain)}</dd></div>
+                        <div><dt>Direction</dt><dd>${formatValue(detail.direction)}</dd></div>
+                        <div><dt>Link Status</dt><dd>${formatValue(detail.link_status)}</dd></div>
+                        <div><dt>Synced At</dt><dd>${syncedAt ? escapeHtml(syncedAt) : '<span class="referral-detail__muted">-</span>'}</dd></div>
+                    </dl>
+                </section>
+
+                <section class="referral-detail__section">
+                    <h4>İlgili Kişi</h4>
+                    <dl>
+                        <div><dt>İsim</dt><dd>${formatValue(contact.name)}</dd></div>
+                        <div><dt>E-posta</dt><dd>${contact.email ? `<a href="mailto:${escapeHtml(contact.email)}">${escapeHtml(contact.email)}</a>` : '<span class="referral-detail__muted">-</span>'}</dd></div>
+                        <div><dt>Telefon</dt><dd>${formatValue(contact.phone)}</dd></div>
+                        <div><dt>Ünvan</dt><dd>${formatValue(contact.title)}</dd></div>
+                    </dl>
+                </section>
+
+                <section class="referral-detail__section">
+                    <h4>Lead Detayları</h4>
+                    <dl>
+                        <div><dt>Lead Adı</dt><dd>${formatValue(deal.lead_name)}</dd></div>
+                        <div><dt>Lead ID</dt><dd>${formatValue(deal.lead_id)}</dd></div>
+                        <div><dt>Estimated Close</dt><dd>${formatValue(deal.estimated_close_date)}</dd></div>
+                        <div><dt>Estimated Value</dt><dd>${estimatedValueDisplay}</dd></div>
+                        <div><dt>Notlar</dt><dd>${formatValue(deal.notes)}</dd></div>
+                    </dl>
+                </section>
+            </div>
+
+            <section class="referral-detail__section">
+                <h4>Team Members</h4>
+                ${teamHtml}
+            </section>
+
+            <section class="referral-detail__section referral-detail__section--raw">
+                <details>
+                    <summary>Ham JSON Verisi</summary>
+                    ${rawJson}
+                </details>
+            </section>
+        </div>
+    `;
+}
+
+function setupReferralDetailModal() {
+    const modal = document.getElementById(REFERRAL_DETAIL_SELECTORS.modal);
+    if (!modal) return;
+
+    const closeBtn = document.getElementById('referral-detail-modal-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeReferralDetailModal);
+    }
+
+    const overlay = modal.querySelector('.modal__overlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeReferralDetailModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            closeReferralDetailModal();
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupReferralDetailModal);
+} else {
+    setupReferralDetailModal();
 }
 
 /**

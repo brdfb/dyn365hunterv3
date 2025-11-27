@@ -42,10 +42,9 @@
         </div>
     </section>
 
-    <!-- Main Content -->
-    <main class="main">
-        <!-- Tab Navigation -->
-        <div class="tabs">
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <div class="tabs__container">
             <button type="button" class="tabs__button tabs__button--active" data-tab="leads">
                 📋 Leads
             </button>
@@ -53,7 +52,10 @@
                 🔗 Partner Center Referrals
             </button>
         </div>
+    </div>
 
+    <!-- Main Content -->
+    <main class="main">
         <!-- Leads Tab Content -->
         <div id="tab-leads" class="tab-content tab-content--active">
         <!-- Left Block: Forms -->
@@ -177,7 +179,7 @@
                             <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--domain" data-sort="domain" title="Domain'e göre sırala">
                                 Domain <span class="sort-icon"></span>
                             </th>
-                            <th class="leads-table__cell leads-table__cell--header">
+                            <th class="leads-table__cell leads-table__cell--header leads-table__cell--company">
                                 Şirket
                             </th>
                             <th class="leads-table__cell leads-table__cell--header leads-table__cell--sortable leads-table__cell--provider" data-sort="provider" title="Provider'a göre sırala">
@@ -296,13 +298,13 @@
                     <table id="referrals-table" class="leads-table">
                         <thead class="leads-table__head">
                             <tr class="leads-table__row">
-                                <th class="leads-table__cell leads-table__cell--header">Company</th>
-                                <th class="leads-table__cell leads-table__cell--header">Domain</th>
-                                <th class="leads-table__cell leads-table__cell--header">Referral Type</th>
-                                <th class="leads-table__cell leads-table__cell--header">Status</th>
-                                <th class="leads-table__cell leads-table__cell--header">Link Status</th>
-                                <th class="leads-table__cell leads-table__cell--header">Deal Value</th>
-                                <th class="leads-table__cell leads-table__cell--header">Synced At</th>
+                                <th class="leads-table__cell leads-table__cell--header leads-table__cell--company">Company</th>
+                                <th class="leads-table__cell leads-table__cell--header leads-table__cell--domain">Domain</th>
+                                <th class="leads-table__cell leads-table__cell--header leads-table__cell--referral">Referral Type</th>
+                                <th class="leads-table__cell leads-table__cell--header" style="width: 120px;">Status</th>
+                                <th class="leads-table__cell leads-table__cell--header" style="width: 130px;">Link Status</th>
+                                <th class="leads-table__cell leads-table__cell--header" style="width: 140px;">Deal Value</th>
+                                <th class="leads-table__cell leads-table__cell--header" style="width: 160px;">Synced At</th>
                                 <th class="leads-table__cell leads-table__cell--header leads-table__cell--actions">İşlemler</th>
                             </tr>
                         </thead>
@@ -345,6 +347,25 @@
             </nav>
         </div>
     </footer>
+
+    <!-- Referral Detail Modal -->
+    <div id="referral-detail-modal" class="modal" style="display: none;">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h2 class="modal__title">Partner Center Detayı</h2>
+                <button type="button" class="modal__close" id="referral-detail-modal-close">&times;</button>
+            </div>
+            <div class="modal__body">
+                <div class="score-modal__loading hidden" id="referral-detail-loading">
+                    <div class="score-modal__loading-spinner"></div>
+                    <div class="score-modal__loading-text">Yükleniyor...</div>
+                </div>
+                <div id="referral-detail-error" class="referral-detail__error" style="display: none;"></div>
+                <div id="referral-detail-content"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Score Breakdown Modal (G19) -->
     <div id="score-breakdown-modal" class="modal" style="display: none;">

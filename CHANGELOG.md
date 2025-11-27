@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: ✅ **Fixed** - Sync button and status indicator now working
 
 ### Added
+- **Partner Center Referral Detail Modal** (2025-01-30) - Tek tıkla referral detaylarını gösteren modal
+  - **Backend**: `GET /api/v1/partner-center/referrals/{referral_id}` endpoint'i customer/contact/deal özetleri + opsiyonel ham JSON döner
+  - **Frontend**: Referral tablosuna “Detay” butonu, modal içinde özet + ham JSON görünümü, cache ve loading state
+  - **Files**: `app/api/referrals.py`, `app/schemas/referrals.py`, `mini-ui/index.html`, `mini-ui/js/api.js`, `mini-ui/js/app.js`, `mini-ui/js/ui-referrals.js`, `mini-ui/styles.css`
+  - **Status**: ✅ **Completed** - Microsoft Partner Center’dan gelen tüm alanlar UI’da hızlıca incelenebiliyor
+
+### Added
 - **Hamle 1: Partner Center Production Deployment Plan** (2025-01-30) - Complete production deployment guide
   - **Execution Runbook**: `docs/active/HAMLE-1-EXECUTION-RUNBOOK.md` - Step-by-step commands for Partner Center activation
   - **Production Ready Plan**: `docs/active/HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` - Detailed analysis and checklist

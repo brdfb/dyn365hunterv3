@@ -1,8 +1,8 @@
 // App - Global state, initialization, orchestration
 
-import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary, syncPartnerCenterReferrals, fetchReferralInbox, linkReferralToLead, createLeadFromReferral } from './api.js';
+import { fetchLeads, fetchKPIs, fetchDashboard, fetchScoreBreakdown, fetchSalesSummary, syncPartnerCenterReferrals, fetchReferralInbox, linkReferralToLead, createLeadFromReferral, fetchReferralDetail } from './api.js';
 import { renderLeadsTable, renderStats, renderKPIs, showLoading, hideLoading, showError, hideError, showScoreBreakdown, hideScoreBreakdown, showScoreBreakdownError, showScoreModalLoading, hideScoreModalLoading, setTableLoading, setFiltersLoading, setExportLoading, showSalesSummary, hideSalesSummary, showSalesSummaryError, showSalesModalLoading, hideSalesModalLoading } from './ui-leads.js';
-import { renderReferralsTable, renderReferralPagination, showReferralLoading, hideReferralLoading, showReferralError, hideReferralError } from './ui-referrals.js';
+import { renderReferralsTable, renderReferralPagination, showReferralLoading, hideReferralLoading, showReferralError, hideReferralError, openReferralDetailModal, renderReferralDetail, setReferralDetailLoading, setReferralDetailError } from './ui-referrals.js';
 import { bindCsvUploadForm, bindScanDomainForm } from './ui-forms.js';
 import { log, warn, error as logError } from './logger.js';
 import { escapeHtml } from './utils.js';
@@ -49,7 +49,8 @@ window.state = {
     breakdownCache: {},  // { domain: breakdownData }
     // Pagination cache - prevent duplicate requests for same page/filters
     lastLeadsRequest: null,  // { filters, timestamp } - track last request to prevent duplicates
-    currentTab: 'leads'  // Phase 2: Current active tab
+    currentTab: 'leads',  // Phase 2: Current active tab
+    referralDetailCache: {}  // Cache referral detail responses by referral_id
 };
 
 /**
@@ -907,7 +908,15 @@ function switchTab(tabName) {
     
     // Load data for active tab
     if (tabName === 'referrals') {
-        loadReferrals();
+        // Only load if not already loaded or if filters changed
+        if (window.state.referrals.length === 0 || !window.state.referralFilters) {
+            loadReferrals();
+        }
+    } else if (tabName === 'leads') {
+        // Refresh leads if needed
+        if (window.state.leads.length === 0) {
+            loadLeads();
+        }
     }
 }
 
@@ -918,8 +927,17 @@ function bindReferralFilters() {
     const filterControls = document.querySelectorAll('.js-referral-filter-control');
     filterControls.forEach(control => {
         if (control.type === 'text' || control.tagName === 'INPUT') {
+            // Debounce search input
+            let searchTimeout;
+            control.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    applyReferralFilters();
+                }, 500); // 500ms debounce
+            });
             control.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
+                    clearTimeout(searchTimeout);
                     applyReferralFilters();
                 }
             });
@@ -959,13 +977,16 @@ function bindReferralFilters() {
         });
     }
     
-    // Page number clicks
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('pagination__page') && e.target.dataset.page) {
-            window.state.referralFilters.page = parseInt(e.target.dataset.page);
-            loadReferrals();
-        }
-    });
+    // Page number clicks (use event delegation for dynamically created buttons)
+    const referralsPagination = document.getElementById('referrals-pagination');
+    if (referralsPagination) {
+        referralsPagination.addEventListener('click', (e) => {
+            if (e.target.classList.contains('pagination__page') && e.target.dataset.page) {
+                window.state.referralFilters.page = parseInt(e.target.dataset.page);
+                loadReferrals();
+            }
+        });
+    }
 }
 
 /**
@@ -1031,9 +1052,16 @@ async function loadReferrals() {
         renderReferralPagination(window.state.referralPagination);
         
         hideReferralLoading();
+        
+        // Show info toast if no referrals found
+        if (data.total === 0 && window.state.referralFilters.search) {
+            showToast('Arama kriterlerine uygun referral bulunamadı.', 'info');
+        }
     } catch (error) {
         logError('Failed to load referrals:', error);
-        showReferralError(error.message || 'Referral\'lar yüklenirken hata oluştu.');
+        const errorMessage = error.message || 'Referral\'lar yüklenirken hata oluştu.';
+        showReferralError(errorMessage);
+        showToast(errorMessage, 'error');
         hideReferralLoading();
     }
 }
@@ -1043,46 +1071,100 @@ async function loadReferrals() {
  */
 function bindReferralActions() {
     document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('referral-action-button--detail')) {
+            const referralId = e.target.dataset.referralId;
+            if (!referralId) return;
+
+            openReferralDetailModal();
+            setReferralDetailLoading(true);
+            setReferralDetailError('');
+
+            const cache = window.state.referralDetailCache || {};
+            const cachedDetail = cache[referralId];
+            if (cachedDetail) {
+                renderReferralDetail(cachedDetail);
+                setReferralDetailLoading(false);
+                return;
+            }
+
+            try {
+                const detail = await fetchReferralDetail(referralId, true);
+                cache[referralId] = detail;
+                window.state.referralDetailCache = cache;
+                renderReferralDetail(detail);
+            } catch (error) {
+                logError('Referral detail fetch failed:', error);
+                setReferralDetailError(error.message || 'Detaylar yüklenemedi.');
+                showToast(`Referral detayı yüklenemedi: ${error.message}`, 'error');
+            } finally {
+                setReferralDetailLoading(false);
+            }
+            return;
+        }
+
         // Link referral to lead
         if (e.target.classList.contains('referral-action-button--link')) {
             const referralId = e.target.dataset.referralId;
             const domain = e.target.dataset.domain;
+            const button = e.target;
             
             if (!domain) {
-                alert('Bu referral\'ın domain\'i yok. Önce domain eklemelisiniz.');
+                showToast('Bu referral\'ın domain\'i yok. Önce domain eklemelisiniz.', 'error');
                 return;
             }
             
+            // Better UX: Use prompt but with better validation
             const leadDomain = prompt('Link edilecek lead domain\'ini girin:', domain);
-            if (!leadDomain) return;
+            if (!leadDomain || !leadDomain.trim()) {
+                return;
+            }
+            
+            // Disable button during operation
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Linking...';
             
             try {
-                await linkReferralToLead(referralId, leadDomain);
-                alert('Referral başarıyla link edildi!');
+                const result = await linkReferralToLead(referralId, leadDomain.trim());
+                showToast(`Referral başarıyla "${result.domain}" domain'ine link edildi!`, 'success');
                 loadReferrals();  // Refresh list
             } catch (error) {
-                alert(`Link işlemi başarısız: ${error.message}`);
+                logError('Link referral failed:', error);
+                showToast(`Link işlemi başarısız: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = originalText;
             }
         }
         
         // Create lead from referral
         if (e.target.classList.contains('referral-action-button--create')) {
             const referralId = e.target.dataset.referralId;
+            const button = e.target;
             
             if (!confirm('Bu referral\'dan yeni bir lead oluşturmak istediğinize emin misiniz?')) {
                 return;
             }
             
+            // Disable button during operation
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Creating...';
+            
             try {
-                await createLeadFromReferral(referralId);
-                alert('Lead başarıyla oluşturuldu!');
+                const result = await createLeadFromReferral(referralId);
+                showToast(`Lead başarıyla oluşturuldu! (Domain: ${result.domain})`, 'success');
                 loadReferrals();  // Refresh list
                 // Also refresh leads if on leads tab
                 if (window.state.currentTab === 'leads') {
                     loadLeads();
                 }
             } catch (error) {
-                alert(`Lead oluşturma başarısız: ${error.message}`);
+                logError('Create lead from referral failed:', error);
+                showToast(`Lead oluşturma başarısız: ${error.message}`, 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = originalText;
             }
         }
     });

@@ -20,6 +20,7 @@ from app.schemas.referrals import (
     LinkReferralResponse,
     CreateLeadFromReferralRequest,
     CreateLeadFromReferralResponse,
+    ReferralDetailResponse,
 )
 
 
@@ -369,4 +370,113 @@ async def create_lead_from_referral(
         lead_id=company.id,
         domain=company.domain,
     )
+
+
+@router.get("/{referral_id}", response_model=ReferralDetailResponse)
+async def get_referral_detail(
+    referral_id: str,
+    include_raw: bool = Query(
+        False, description="Include raw Partner Center payload for debugging", alias="include_raw"
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Get full detail for a Partner Center referral (for modal view).
+
+    Returns structured summary (status, contact, deal) + optional raw JSON.
+    """
+    if not settings.partner_center_enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="Partner Center integration is disabled. Enable feature flag to use this endpoint.",
+        )
+
+    referral = (
+        db.query(PartnerCenterReferral)
+        .filter(PartnerCenterReferral.referral_id == referral_id)
+        .first()
+    )
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    raw_data = referral.raw_data or {}
+    customer_profile = raw_data.get("customerProfile") or {}
+    details_data = raw_data.get("details") or {}
+    contact_data = raw_data.get("contact") or {}
+
+    def _full_name(obj: dict) -> Optional[str]:
+        name = obj.get("name")
+        if name:
+            return name
+        first = obj.get("firstName") or ""
+        last = obj.get("lastName") or ""
+        full = f"{first} {last}".strip()
+        return full if full else None
+
+    contact_info = {
+        "name": _full_name(contact_data),
+        "email": contact_data.get("email"),
+        "phone": contact_data.get("phoneNumber") or contact_data.get("phone"),
+        "title": contact_data.get("jobTitle") or contact_data.get("title"),
+    }
+
+    deal_info = {
+        "lead_name": details_data.get("leadName") or raw_data.get("name"),
+        "lead_id": raw_data.get("leadId") or details_data.get("leadId"),
+        "estimated_close_date": details_data.get("estimatedCloseDate"),
+        "estimated_value": None,
+        "currency": details_data.get("currency") or referral.currency,
+        "notes": details_data.get("notes") or raw_data.get("notes"),
+    }
+
+    estimated_value = details_data.get("estimatedValue")
+    if estimated_value is not None:
+        try:
+            deal_info["estimated_value"] = float(estimated_value)
+        except (TypeError, ValueError):
+            deal_info["estimated_value"] = estimated_value
+    elif referral.deal_value is not None:
+        deal_info["estimated_value"] = float(referral.deal_value)
+
+    team_members = []
+    for member in customer_profile.get("team") or []:
+        team_members.append(
+            {
+                "name": _full_name(member),
+                "email": member.get("email"),
+                "role": member.get("role") or member.get("title"),
+                "phone": member.get("phoneNumber"),
+            }
+        )
+
+    organization_size = customer_profile.get("organizationSize")
+    if not organization_size:
+        organization_size = raw_data.get("organizationSize")
+
+    customer_country = (customer_profile.get("address") or {}).get("country")
+
+    response = ReferralDetailResponse(
+        referral_id=referral.referral_id,
+        referral_type=referral.referral_type,
+        status=referral.status,
+        substatus=referral.substatus,
+        direction=referral.direction,
+        link_status=referral.link_status,
+        company_name=referral.company_name,
+        customer_name=referral.customer_name,
+        customer_country=customer_country,
+        organization_size=organization_size,
+        domain=referral.domain,
+        raw_domain=referral.raw_domain,
+        deal_value=float(referral.deal_value) if referral.deal_value else None,
+        currency=referral.currency,
+        synced_at=referral.synced_at.isoformat() if referral.synced_at else None,
+        contact=contact_info,
+        deal=deal_info,
+        team_members=team_members,
+        raw_data=raw_data if include_raw else None,
+    )
+
+    return response
 
