@@ -190,8 +190,9 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 - Phase 4 (Dynamics Migration), **Integration Roadmap Phase 3** ile birlikte ele alınacak.
 
 - **Integration Roadmap Phase 2 (Partner Center)** ✅ **Completed** (2025-01-30):
-  - Backend: API client, referral ingestion, sync endpoint, Celery task
-  - UI: Referral column, referral type filter, sync button, sync status indicator
+  - Backend: API client, referral ingestion, sync endpoint, referral detail endpoint, Celery task
+  - UI: Referral column, referral type filter, sync button, sync status indicator, referral detail modal
+  - Referral Detail Modal: Detay butonu, modal content, action buttons (copy, send to D365, open in PC)
   - Background Sync: Celery Beat schedule (10 min prod, 30s dev)
   - Status: Production-ready, feature flag OFF (MVP-safe)
 

@@ -312,6 +312,8 @@ sorularına cevap verebilmesi.
 
   - ✅ UI entegrasyonu tamamlandı (referral column, referral type filter, sync button, sync status indicator)
 
+  - ✅ **Referral Detail Modal** (2025-01-30): Detay butonu, modal, action buttons (copy, send to D365, open in PC) tamamlandı
+
   - ✅ Background sync (Celery task) tamamlandı
 
   - ✅ Feature flag: OFF (MVP-safe, production-ready)

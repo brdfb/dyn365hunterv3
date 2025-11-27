@@ -65,13 +65,17 @@
 - ✅ UI'da referral'lar görünüyor
 - ✅ Background sync otomatik çalışıyor (10 min prod, 30s dev)
 - ✅ Error handling robust (auth, rate limit, network)
+- ✅ **Referral Detail Modal** (2025-01-30): Detay butonu, modal, action buttons (copy, send to D365, open in PC) tamamlandı
 
 #### Dosyalar:
 - `app/config.py` - Feature flag kontrolü
 - `app/core/partner_center.py` - OAuth client
 - `app/core/referral_ingestion.py` - Sync logic
 - `app/core/tasks.py` - Celery task
-- `mini-ui/js/app.js` - Sync button handler
+- `app/api/referrals.py` - Referral detail endpoint (`GET /api/v1/partner-center/referrals/{referral_id}`)
+- `mini-ui/js/app.js` - Sync button handler, referral detail modal handler
+- `mini-ui/js/ui-referrals.js` - Referral detail modal rendering, action buttons
+- `mini-ui/index.html` - Referral detail modal HTML
 - `.env` - Feature flag ve credentials
 
 ---

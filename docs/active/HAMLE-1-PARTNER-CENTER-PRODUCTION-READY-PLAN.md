@@ -55,6 +55,7 @@
    - ✅ Referral column (lead listesinde badge'ler)
    - ✅ Referral type filter (dropdown)
    - ✅ Referral inbox tab (referral listesi)
+   - ✅ **Referral Detail Modal** (2025-01-30): Detay butonu, modal content, action buttons (copy, send to D365, open in PC)
 
 8. **Scripts**:
    - ✅ `scripts/partner_center_device_code_flow.py` - Initial auth script
