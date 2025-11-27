@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Pre-D365 Roast Sprint: Critical Security & Reliability Fixes** (2025-01-30) - 5 critical fixes before D365 production connection
+  - **Security Fix**: SQL/OData Injection prevention in D365 client
+    - OData filter query properly escaped (single quote escape: `'` → `''`)
+    - URL encoding for safe URL construction
+    - Prevents injection attacks via email parameter
+  - **Idempotency Fix**: D365 push task idempotent to prevent duplicate leads
+    - Pre-check: If `d365_lead_id` exists, verify lead exists in D365 before push
+    - Skip push if lead already exists (returns `{"status": "skipped", "reason": "already_exists"}`)
+    - Graceful handling for rate limits and errors during verification
+  - **Token Cache Migration**: Redis-based distributed token cache for D365
+    - Multi-worker safe: Single token acquisition with Redis distributed lock (SETNX)
+    - Graceful degradation: Falls back to in-memory cache if Redis unavailable
+    - Prevents rate limit issues from concurrent token requests
+  - **DB Session Lifecycle Fix**: Context manager pattern for all Celery tasks
+    - Job-level and batch-level sessions for proper connection management
+    - Prevents connection pool exhaustion in long-running tasks
+    - Automatic cleanup with `with SessionLocal() as db:` pattern
+  - **Retry Backoff + Jitter**: Centralized retry utilities with exponential backoff
+    - New module: `app/core/retry_utils.py` with `compute_backoff_with_jitter()` and `clamp_retry_after()`
+    - Exponential backoff with jitter (0-10s random) and cap (max 3600s)
+    - Applied to D365 push tasks and Partner Center API calls
+    - Prevents "thundering herd" scenarios on API endpoints
+  - **Files**: `app/integrations/d365/client.py`, `app/tasks/d365_push.py`, `app/core/partner_center.py`, `app/core/tasks.py`, `app/core/retry_utils.py` (NEW), `tests/test_retry_utils.py` (NEW)
+  - **Test Coverage**: 11 new retry_utils tests, 4 D365 injection tests, 3 D365 idempotency tests, 4 Redis token cache tests, 1 Partner Center retry test
+  - **Status**: ✅ **Completed** - All 5 tasks completed, ready for D365 Phase 2.9 (E2E wiring)
+
 - **Partner Center: Solution 2 - Multiple Referrals Aggregate (MVP)** (2025-01-30) - Aggregate information for domains with multiple Partner Center referrals
   - **Backend API Enhancements**:
     - Added `referral_count` field (total number of referrals for a domain)

@@ -267,6 +267,7 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - **Rate Limiting**: Redis-based distributed rate limiting (P1-2) - Multi-worker support with fallback
 - **Caching**: Redis-based distributed caching (P1-3) - DNS, WHOIS, Provider, Scoring, Scan cache
 - **Bulk Operations**: Batch processing optimization (P1-4) - Rate-limit aware batch processing with deadlock prevention
+- **Retry Logic**: Exponential backoff with jitter (`app/core/retry_utils.py`) - Centralized retry utilities for D365 and Partner Center API calls, prevents thundering herd scenarios
 - **Logging**: Structured logging with PII masking (2025-01-28) - JSON format in production, contextual logging, domain/email masking
 - **DNS Analysis**: dnspython
 - **WHOIS**: python-whois
