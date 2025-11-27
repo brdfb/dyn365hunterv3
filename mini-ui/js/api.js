@@ -143,7 +143,7 @@ export async function ingestDomain(domain, companyName = null) {
  * Sync Partner Center referrals
  */
 export async function syncPartnerCenterReferrals() {
-    const response = await fetch(`${API_BASE_URL}/api/referrals/sync`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/partner-center/referrals/sync`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
