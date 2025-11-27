@@ -106,6 +106,8 @@ API contract documentation:
 
 #### Feature Documentation (Active)
 - `SALES-ENGINE-V1.1.md` - Sales Engine v1.1 Intelligence Layer dokümantasyonu
+- `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` - Partner Center & Leads Tab tutarsızlık analizi (✅ Çözüldü - Solution 1)
+- `SOLUTION-1-UI-CONSISTENCY-CHECK.md` - Solution 1 UI consistency check raporu (✅ Tamamlandı - 2025-01-30)
 
 #### Feature Documentation (Archived)
 - ✅ **Archived** - `2025-01-29-CSP-COMMERCIAL-SEGMENT-DESIGN.md` - CSP Commercial Segment & Heat tasarımı (6 kategori, rule-based) - ✅ Completed (2025-01-29)

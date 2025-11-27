@@ -8,9 +8,9 @@
 ## ⚠️ **MEVCUT DURUM**
 
 ### Dosya Sayısı
-- **Mevcut:** 15 dosya (+1: CORE-FREEZE-D365-PUSH-PLAN.md)
+- **Mevcut:** 21 dosya (+2: PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md, SOLUTION-1-UI-CONSISTENCY-CHECK.md)
 - **Hedef:** 5-7 dosya (documentation guardrails)
-- **Durum:** ⚠️ **2x fazla** - Cleanup gerekiyor
+- **Durum:** ⚠️ **3x fazla** - Cleanup gerekiyor
 
 ---
 
@@ -18,9 +18,10 @@
 
 ### Partner Center
 - **Backend:** ✅ Tamamlanmış (2025-01-30)
+- **Solution 1:** ✅ Tamamlandı (2025-01-30) - Link status & referral ID enhancement, UI consistency fixed
 - **Production:** ⚠️ Aktif değil (feature flag OFF)
 - **Aksiyon:** Hamle 1 - Aktifleştirme gerekiyor
-- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`
+- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md`, `SOLUTION-1-UI-CONSISTENCY-CHECK.md`
 
 ### Dynamics 365
 - **Durum:** ❌ Sıfır kod
@@ -71,9 +72,11 @@
 
 **Öneri:** Reference klasörüne taşınmalı
 
-### 🔧 **Diğer** (2 dosya)
+### 🔧 **Diğer** (4 dosya)
 13. `SALES-ENGINE-V1.1.md` - Feature dokümantasyonu
 14. `SECURITY-SECRET-ROTATION-CHECKLIST.md` - Security checklist
+15. `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md` - ✅ Çözüldü (Solution 1)
+16. `SOLUTION-1-UI-CONSISTENCY-CHECK.md` - ✅ Tamamlandı (2025-01-30)
 
 ---
 
@@ -97,9 +100,11 @@
 ## ⚠️ **SORUNLAR**
 
 ### 1. Dosya Sayısı Fazla
-- **Mevcut:** 14 dosya
+- **Mevcut:** 21 dosya
 - **Hedef:** 5-7 dosya
 - **Çözüm:** Archive edilebilir dosyaları temizle
+  - Solution 1 dosyaları archive edilebilir (tamamlandı)
+  - Hamle 1 dosyaları archive edilebilir (tamamlandığında)
 
 ### 2. Manuel Kontrol Gerekiyor
 - Tutarlılık kontrolü manuel
@@ -169,5 +174,12 @@
 ---
 
 **Son Güncelleme:** 2025-01-30  
-**Sıradaki Kontrol:** Hamle 1 tamamlandığında (archive işlemleri)
+**Son Değişiklikler:**
+- ✅ Solution 1 tamamlandı (link status & referral ID enhancement)
+- ✅ UI consistency check tamamlandı
+- ⚠️ Dosya sayısı 21'e çıktı (cleanup gerekiyor)
+
+**Sıradaki Kontrol:** 
+- Solution 1 dosyalarını archive et (tamamlandı)
+- Hamle 1 tamamlandığında (archive işlemleri)
 
