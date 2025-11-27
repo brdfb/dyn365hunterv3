@@ -115,27 +115,29 @@ class PartnerCenterClient:
         Build standard OData query parameters for Partner Center Referrals API.
         
         Standard query template:
-        GET {base_url}/{api_version}/engagements/referrals?$filter=direction eq '{direction}' and status eq '{status}'&$top={top}
+        GET {base_url}/{api_version}/engagements/referrals?$filter=direction eq '{direction}'&$top={top}
+        
+        NOTE: Status filter removed (2025-01-30) - fetch all statuses (Active, Closed, New, etc.)
+        Status filtering can be done in UI or application layer after data is stored.
         
         Args:
             direction: Filter by direction ('Incoming' or 'Outgoing'). Default: from config
-            status: Filter by status (e.g., 'Active', 'Pending', 'New'). Default: from config
+            status: DEPRECATED - No longer used. All statuses are fetched. Kept for backward compatibility.
             top: Maximum number of results to return. Default: from config
-        
+            
         Returns:
             Dictionary with OData query parameters ($filter, $top, $orderby)
         """
         # Use config defaults if not provided
         direction = direction or settings.partner_center_referral_default_direction
-        status = status or settings.partner_center_referral_default_status
+        # status filter removed - fetch all statuses
         top = top or settings.partner_center_referral_default_top
         
-        # Build filter expression
+        # Build filter expression (only direction, no status filter)
         filter_parts = []
         if direction:
             filter_parts.append(f"direction eq '{direction}'")
-        if status:
-            filter_parts.append(f"status eq '{status}'")
+        # Status filter removed - fetch all statuses
         
         params = {
             "$top": top,
@@ -352,7 +354,7 @@ class PartnerCenterClient:
     def get_referrals(
         self,
         direction: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[str] = None,  # DEPRECATED - No longer used. All statuses are fetched.
         top: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
@@ -361,11 +363,14 @@ class PartnerCenterClient:
         Uses standard query template with configurable defaults.
         Handles OData pagination via @odata.nextLink.
         
+        NOTE: Status filter removed (2025-01-30) - fetches all statuses (Active, Closed, New, etc.)
+        Status filtering can be done in UI or application layer after data is stored.
+        
         Args:
             direction: Filter by direction ('Incoming' or 'Outgoing'). Default: from config
-            status: Filter by status (e.g., 'Active', 'Pending', 'New'). Default: from config
+            status: DEPRECATED - No longer used. All statuses are fetched. Kept for backward compatibility.
             top: Maximum number of results per page. Default: from config
-        
+            
         Returns:
             Flat list of all referral dictionaries (all pages combined)
             

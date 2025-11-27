@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Partner Center: Fetch All Statuses** (2025-01-30) - Removed status filter to fetch all referral statuses
+  - **API Query**: Removed status filter from `build_referral_query()` - now fetches all statuses (Active, Closed, New, etc.)
+  - **Ingestion Filter**: Removed status and substatus filters from `sync_referrals_from_partner_center()` - only direction='Incoming' filter remains
+  - **Rationale**: Store all referral data in database, filtering can be done in UI or application layer
+  - **Impact**: All 250 referrals (88 Active, 162 Closed) are now saved to database instead of only Active ones
+  - **Files**: `app/core/partner_center.py`, `app/core/referral_ingestion.py`
+  - **Status**: ✅ **Completed** - All statuses are now fetched and stored
+
 ### Fixed
 - **Partner Center Sync API Endpoint Fix** (2025-01-30) - Corrected sync endpoint path in UI
   - **Bug**: UI was calling `/api/referrals/sync` which returned 404 Not Found

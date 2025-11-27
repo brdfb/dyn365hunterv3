@@ -627,8 +627,7 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         skipped_reasons = {
             "duplicate": 0,
             "direction_outgoing": 0,
-            "status_closed": 0,
-            "substatus_excluded": 0,
+            # status_closed and substatus_excluded removed (2025-01-30) - all statuses accepted
         }
         # Phase 1: domain_not_found is no longer a skip reason (referrals are saved anyway)
         
@@ -640,23 +639,23 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
         # Process each referral independently
         for referral in referrals:
             try:
-                # 1. Ingestion Filter Rules (Phase 4.3)
+                # 1. Ingestion Filter Rules (Updated 2025-01-30)
                 # Only process if:
-                # - direction = 'Incoming'
-                # - status IN ('New', 'Active')
-                # - substatus NOT IN ('Declined','Lost','Expired','Error')
-                # - domain IS NOT NULL (checked later)
+                # - direction = 'Incoming' (required)
+                # - All statuses are accepted (Active, Closed, New, etc.) - filtering can be done in UI
+                # - All substatuses are accepted - filtering can be done in UI
+                # - Domain extraction is optional - referrals are saved even without domain (Phase 1)
                 
                 direction = referral.get("direction")
                 status = referral.get("status")
                 substatus = referral.get("substatus")
                 
-                # Filter: direction must be 'Incoming'
+                # Filter: direction must be 'Incoming' (only filter - all statuses accepted)
                 if direction != "Incoming":
                     total_skipped += 1
                     skipped_reasons.setdefault("direction_outgoing", 0)
                     skipped_reasons["direction_outgoing"] += 1
-                    logger.warning(
+                    logger.debug(
                         "partner_center_referral_skipped",
                         referral_id=referral.get("id"),
                         reason="direction_outgoing",
@@ -664,32 +663,11 @@ def sync_referrals_from_partner_center(db: Session) -> Dict[str, int]:
                     )
                     continue
                 
-                # Filter: status must be 'New' or 'Active'
-                if status not in ("New", "Active"):
-                    total_skipped += 1
-                    skipped_reasons.setdefault("status_closed", 0)
-                    skipped_reasons["status_closed"] += 1
-                    logger.warning(
-                        "partner_center_referral_skipped",
-                        referral_id=referral.get("id"),
-                        reason="status_closed",
-                        status=status,
-                    )
-                    continue
+                # Status filter removed (2025-01-30) - accept all statuses (Active, Closed, New, etc.)
+                # Status filtering can be done in UI or application layer after data is stored
                 
-                # Filter: substatus must NOT be in excluded list
-                excluded_substatuses = {"Declined", "Lost", "Expired", "Error"}
-                if substatus in excluded_substatuses:
-                    total_skipped += 1
-                    skipped_reasons.setdefault("substatus_excluded", 0)
-                    skipped_reasons["substatus_excluded"] += 1
-                    logger.warning(
-                        "partner_center_referral_skipped",
-                        referral_id=referral.get("id"),
-                        reason="substatus_excluded",
-                        substatus=substatus,
-                    )
-                    continue
+                # Substatus filter removed (2025-01-30) - accept all substatuses
+                # Substatus filtering can be done in UI or application layer after data is stored
                 
                 # 2. Lead tipi detection
                 referral_type = detect_referral_type(referral)
