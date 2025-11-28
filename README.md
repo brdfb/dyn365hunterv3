@@ -36,9 +36,17 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
 - 🔒 **Backup Integrity Check**: Automatic backup validation before deployment
 - 📝 **Script Logging**: Critical scripts log to `./logs/scripts/` for audit trail
 
+**D365 Integration Status** (2025-01-30):
+- ✅ **D365 Lead Push PoC**: Completed - Hunter → D365 Lead Push working
+  - End-to-end flow: API endpoint → Celery task → D365 API → Database sync
+  - 8 fields successfully pushed (3 core + 5 custom Hunter fields)
+  - Option Set value mapping implemented (string → integer)
+  - Error handling, retry logic, and logging validated
+  - **Reference**: `docs/archive/2025-01-30-D365-PUSH-POC-TASK-LIST.md`
+
 **Post-MVP Roadmap**:
 - 🅿️ **Partner Center Integration** (Phase 2) - Parked (Post-MVP)
-- 🔄 **Dynamics 365 Integration** (Phase 3) - Planned (Post-MVP)
+- 🔄 **Dynamics 365 Integration** (Phase 3) - PoC Complete, Production Integration Pending
 - 🔄 **G21 Phase 4-6** - Architecture refactor continuation (Post-MVP)
 
 ---

@@ -79,6 +79,9 @@ class Company(Base):
     d365_sync_error = Column(
         Text(), nullable=True
     )  # Last error message if sync failed
+    d365_sync_attempt_count = Column(
+        Integer, nullable=True, server_default="0", index=True
+    )  # P0-3: Number of D365 push attempts (for debugging)
     updated_at = Column(
         TIMESTAMP(timezone=True),
         server_default=func.now(),

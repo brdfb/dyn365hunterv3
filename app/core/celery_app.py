@@ -10,6 +10,7 @@ celery_app = Celery(
 
 # Import tasks to register them
 from app.core import tasks  # noqa: E402, F401
+from app.tasks import d365_push  # noqa: E402, F401
 
 # Celery configuration
 celery_app.conf.update(

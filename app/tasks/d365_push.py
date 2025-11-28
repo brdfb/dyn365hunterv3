@@ -21,6 +21,8 @@ from app.integrations.d365.errors import (
 )
 from app.core.d365_metrics import track_push_success, track_push_failed
 from app.core.retry_utils import compute_backoff_with_jitter
+from app.core.priority import calculate_priority_score
+from app.core.enrichment_service import build_infra_summary
 
 
 @celery_app.task(bind=True, name="push_lead_to_d365", max_retries=3)
@@ -136,7 +138,12 @@ def push_lead_to_d365(self, lead_id: int):
                 lr.priority_label,
                 c.d365_lead_id,
                 c.d365_sync_status,
-                pcr.referral_id
+                c.d365_sync_last_at,
+                c.d365_sync_error,
+                c.d365_sync_attempt_count,
+                pcr.referral_id,
+                pcr.azure_tenant_id,
+                pcr.referral_type
             FROM leads_ready lr
             LEFT JOIN companies c ON lr.company_id = c.id
             LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
@@ -156,6 +163,12 @@ def push_lead_to_d365(self, lead_id: int):
                 )
                 return {"status": "error", "error": "Lead not found"}
             
+            # Calculate priority score (P0-1: Priority Score mapping)
+            priority_score = calculate_priority_score(row.segment, row.readiness_score)
+            
+            # Build infrastructure summary (IP enrichment)
+            infrastructure_summary = build_infra_summary(row.domain, db)
+            
             # Convert row to dict
             lead_data = {
             "company_id": row.company_id,
@@ -167,13 +180,24 @@ def push_lead_to_d365(self, lead_id: int):
             "contact_emails": row.contact_emails,
             "readiness_score": row.readiness_score,
             "segment": row.segment,
+            "priority_score": priority_score,  # P0-1: Priority Score (1-7)
+            "infrastructure_summary": infrastructure_summary,  # IP enrichment summary
             "technical_heat": row.technical_heat,
             "commercial_segment": row.commercial_segment,
             "commercial_heat": row.commercial_heat,
             "priority_category": row.priority_category,
             "priority_label": row.priority_label,
-                "referral_id": row.referral_id if hasattr(row, "referral_id") else None,
+            "d365_sync_last_at": row.d365_sync_last_at if hasattr(row, "d365_sync_last_at") else None,
+            "d365_sync_error": row.d365_sync_error if hasattr(row, "d365_sync_error") else None,
+            "d365_sync_attempt_count": row.d365_sync_attempt_count if hasattr(row, "d365_sync_attempt_count") else None,
+            "d365_sync_status": row.d365_sync_status if hasattr(row, "d365_sync_status") else None,
+            "referral_id": row.referral_id if hasattr(row, "referral_id") else None,
+            "azure_tenant_id": row.azure_tenant_id if hasattr(row, "azure_tenant_id") else None,  # P1-4: Partner Center enriched
+            "referral_type": row.referral_type if hasattr(row, "referral_type") else None,  # P1-4: Partner Center enriched
             }
+            
+            # P0-3: Increment sync attempt count
+            company.d365_sync_attempt_count = (company.d365_sync_attempt_count or 0) + 1
             
             # Update status to in_progress
             company.d365_sync_status = "in_progress"

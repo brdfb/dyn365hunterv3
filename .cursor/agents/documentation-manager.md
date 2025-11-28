@@ -32,6 +32,11 @@ Comprehensive documentation management agent that automatically updates document
 - **Planning Docs**: Archive completed planning docs to `docs/archive/`
 - **Token Efficiency**: Archive immediately when work is complete
 - **Reference Guides**: Reference guides are in `docs/reference/` (not in `docs/active/`)
+  - **D365 Lead Documentation** (2025-01-30):
+    - `docs/reference/LEAD-DATA-DICTIONARY.md` - Full data dictionary with logical names (`hnt_` prefix confirmed)
+    - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and technical blueprint
+    - `docs/reference/LEAD-VIEWS.md` - View configuration and recommended views
+    - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
 - **Hamle Completion Cleanup**: Hamle 1 tamamlandığında 4 dosya archive et:
   - `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
   - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
@@ -206,6 +211,10 @@ scripts/manage_docs.sh list
   - `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section (reset policy)
   - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
   - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
+  - **D365 Lead Field Mapping** (2025-01-30):
+    - `docs/reference/LEAD-DATA-DICTIONARY.md` - All D365 Lead fields with logical names (`hnt_` prefix)
+    - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and field placement
+    - `app/integrations/d365/mapping.py` - Hunter → D365 field mapping implementation
 
 ### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
 - **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets

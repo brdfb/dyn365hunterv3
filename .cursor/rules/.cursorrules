@@ -282,6 +282,46 @@
   - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
   - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
 
+### D365 Lead Field Mapping Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Logical Name Format**: All custom Hunter fields use `hnt_` prefix (confirmed from D365 Power Apps interface)
+  - **Format**: `hnt_<field_name>` (camelCase)
+  - **Examples**: `hnt_finalscore`, `hnt_segment`, `hnt_referralid`, `hnt_processingstatus`
+  - **Source**: `docs/reference/LEAD-DATA-DICTIONARY.md` (v1.1 - confirmed from D365)
+- **⚠️ Field Mapping Reference**: Always use `app/integrations/d365/mapping.py` for Hunter → D365 field mapping
+  - **Function**: `map_lead_to_d365(lead_data: Dict[str, Any])`
+  - **Logical Names**: Use `hnt_` prefix (not `<prefix>_hunter_*`)
+  - **Example**: `hnt_finalscore` (not `hunter_score` or `new_hunter_score`)
+- **⚠️ Missing Fields**: Some fields from `mapping.py` not found in D365 (may be calculated or not yet implemented)
+  - **Missing**: `hunter_priority_category`, `hunter_priority_label`, `hunter_technical_heat`, `hunter_commercial_segment`, `hunter_commercial_heat`, `hunter_is_partner_center_referral`
+  - **Workaround**: `hunter_is_partner_center_referral` may be calculated from `hnt_referralid` (if not null = Yes)
+  - **Action**: Check `docs/reference/LEAD-DATA-DICTIONARY.md` for confirmed field list before adding new fields
+- **⚠️ Searchable Fields**: Some MLT fields are not searchable (for performance)
+  - **Not Searchable**: `hnt_infrasummary`, `hnt_m365matchtags`, `hnt_HunterMLWeightJSON`
+  - **Searchable**: Most other fields (scores, status, IDs, etc.)
+  - **Reference**: `docs/reference/LEAD-DATA-DICTIONARY.md` - Searchable column
+- **D365 Field Creation Policy** (MANDATORY):
+  - ❌ **DO NOT**: Create D365 fields without checking `docs/reference/LEAD-DATA-DICTIONARY.md` first
+  - ❌ **DO NOT**: Use logical names without `hnt_` prefix (confirmed prefix)
+  - ❌ **DO NOT**: Add fields to `mapping.py` without verifying they exist in D365
+  - ✅ **DO**: Check `docs/reference/LEAD-DATA-DICTIONARY.md` for field list and logical names
+  - ✅ **DO**: Use `hnt_` prefix for all custom Hunter fields
+  - ✅ **DO**: Update `docs/reference/LEAD-DATA-DICTIONARY.md` when new fields are added to D365
+  - ✅ **DO**: Update `app/integrations/d365/mapping.py` to match D365 field names
+- **Form Architecture Reference**:
+  - ✅ **DO**: Check `docs/reference/LEAD-FORM-ARCHITECTURE.md` for form structure and section placement
+  - ✅ **DO**: Follow form tree structure when adding new fields to forms
+  - ✅ **DO**: Place fields in appropriate sections (Hunter Intelligence, Partner Center, AI & Sync Analytics, Advanced Debug)
+- **View Configuration Reference**:
+  - ✅ **DO**: Check `docs/reference/LEAD-VIEWS.md` for view configuration and recommended views
+  - ✅ **DO**: Use confirmed logical names (`hnt_*`) in view column definitions
+  - ✅ **DO**: Follow filter and sort criteria patterns from recommended views
+- **Reference Documentation**:
+  - `docs/reference/LEAD-DATA-DICTIONARY.md` - Full field list with logical names, data types, searchable properties (v1.1)
+  - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure, sections, tabs, control types (v1.1)
+  - `docs/reference/LEAD-VIEWS.md` - View configuration, filters, sort criteria, recommended views (v1.0)
+  - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
+  - `app/integrations/d365/mapping.py` - Hunter → D365 field mapping implementation
+
 ### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
 - **⚠️ Production Database Reset Protection**: `scripts/reset_db_with_alembic.sh` **MUST** block production database resets
   - **Requirement**: Script checks `DATABASE_URL` for `prod|production` patterns
@@ -341,6 +381,9 @@ Before marking code as done, verify:
 - [ ] **API SQL queries** don't SELECT columns that may not exist in view (use dynamic checking or `getattr()`)
 - [ ] **Script safety guards** are present (production reset protection, deployment guards, backup integrity check)
 - [ ] **Production scripts** require explicit force flags (`FORCE_PRODUCTION=yes`, `FORCE_PRODUCTION_RESET=yes`)
+- [ ] **D365 field mapping** uses confirmed logical names (`hnt_` prefix) from `docs/reference/LEAD-DATA-DICTIONARY.md`
+- [ ] **D365 field creation** checked against `docs/reference/LEAD-DATA-DICTIONARY.md` before adding new fields
+- [ ] **Form placement** follows `docs/reference/LEAD-FORM-ARCHITECTURE.md` structure and section guidelines
 
 ## Common Patterns
 
@@ -433,6 +476,11 @@ When a phase is completed (TODO status = "Completed"):
 - `docs/reference/` - Reference guides (development, setup, troubleshooting) - NOT in `docs/active/`
   - **New**: `DEV-PROD-DIFFERENCES.md` (2025-01-30) - Dev vs Prod environment comparison
   - **New**: `D365-PHASE-2.9-E2E-RUNBOOK.md` reference added to docs/README.md
+  - **D365 Lead Documentation** (2025-01-30):
+    - `docs/reference/LEAD-DATA-DICTIONARY.md` - Full data dictionary with logical names (`hnt_` prefix confirmed from D365)
+    - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure, sections, tabs, control types
+    - `docs/reference/LEAD-VIEWS.md` - View configuration, filters, sort criteria, recommended views
+    - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
 - `docs/prompts/` - Important prompts (date-prefixed, archive when done)
   - **Recent**: Roast sprint prompts saved (2025-01-30)
     - `2025-01-30-cursor-roast-prompt-v1.0.md`

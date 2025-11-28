@@ -38,6 +38,11 @@ Efficient documentation lifecycle management to optimize token usage and maintai
 - Current acceptance criteria
 - **Feature documentation** - New features (provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, notes/tags/favorites, rescan, alerts, IP enrichment)
 - **Reference guides** - Development environment, testing, troubleshooting guides (moved to `docs/reference/`)
+  - **D365 Lead Documentation** (2025-01-30):
+    - `docs/reference/LEAD-DATA-DICTIONARY.md` - Full data dictionary with logical names (`hnt_` prefix confirmed)
+    - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and technical blueprint
+    - `docs/reference/LEAD-VIEWS.md` - View configuration and recommended views
+    - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
 - **Status Summary** - `ACTIVE-STATUS-SUMMARY.md` (tek bakışta tüm active dosyaların durumu)
 
 ## Prompt Management
@@ -163,6 +168,33 @@ Efficient documentation lifecycle management to optimize token usage and maintai
   - `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` - Migration Flow section (reset policy)
   - `docs/reference/TROUBLESHOOTING-GUIDE.md` - Database Reset Issues section
   - `docs/archive/legacy-migrations/README.md` - Why legacy migrations are deprecated
+  - **D365 Lead Field Mapping** (2025-01-30):
+    - `docs/reference/LEAD-DATA-DICTIONARY.md` - All D365 Lead fields with logical names (`hnt_` prefix)
+    - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and field placement
+    - `docs/reference/LEAD-VIEWS.md` - View configuration and recommended views
+    - `app/integrations/d365/mapping.py` - Hunter → D365 field mapping implementation
+
+### D365 Lead Field Mapping Guardrails (CRITICAL - Added 2025-01-30)
+- **⚠️ Logical Name Format**: All custom Hunter fields use `hnt_` prefix (confirmed from D365 Power Apps interface)
+  - **Format**: `hnt_<field_name>` (camelCase)
+  - **Examples**: `hnt_finalscore`, `hnt_segment`, `hnt_referralid`, `hnt_processingstatus`
+  - **Source**: `docs/reference/LEAD-DATA-DICTIONARY.md` (v1.1 - confirmed from D365)
+- **⚠️ Field Mapping Reference**: Always use `app/integrations/d365/mapping.py` for Hunter → D365 field mapping
+  - **Function**: `map_lead_to_d365(lead_data: Dict[str, Any])`
+  - **Logical Names**: Use `hnt_` prefix (not `<prefix>_hunter_*`)
+  - **Example**: `hnt_finalscore` (not `hunter_score` or `new_hunter_score`)
+- **⚠️ Missing Fields**: Some fields from `mapping.py` not found in D365 (may be calculated or not yet implemented)
+  - **Missing**: `hunter_priority_category`, `hunter_priority_label`, `hunter_technical_heat`, `hunter_commercial_segment`, `hunter_commercial_heat`, `hunter_is_partner_center_referral`
+  - **Workaround**: `hunter_is_partner_center_referral` may be calculated from `hnt_referralid` (if not null = Yes)
+  - **Action**: Check `docs/reference/LEAD-DATA-DICTIONARY.md` for confirmed field list before adding new fields
+- **D365 Field Creation Policy** (MANDATORY):
+  - ❌ **DO NOT**: Create D365 fields without checking `docs/reference/LEAD-DATA-DICTIONARY.md` first
+  - ❌ **DO NOT**: Use logical names without `hnt_` prefix (confirmed prefix)
+  - ❌ **DO NOT**: Add fields to `mapping.py` without verifying they exist in D365
+  - ✅ **DO**: Check `docs/reference/LEAD-DATA-DICTIONARY.md` for field list and logical names
+  - ✅ **DO**: Use `hnt_` prefix for all custom Hunter fields
+  - ✅ **DO**: Update `docs/reference/LEAD-DATA-DICTIONARY.md` when new fields are added to D365
+  - ✅ **DO**: Update `app/integrations/d365/mapping.py` to match D365 field names
 
 ## Commands
 

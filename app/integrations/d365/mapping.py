@@ -4,26 +4,146 @@ from typing import Dict, Any, Optional, List
 from app.core.logging import logger
 
 
+def _map_segment_to_option_set_value(segment: Optional[str]) -> Optional[int]:
+    """
+    Map Hunter segment to D365 Option Set integer value.
+    
+    D365 Option Set values (typical):
+    - Migration: 0
+    - Existing: 1
+    - Cold: 2
+    - Skip: 3
+    
+    Args:
+        segment: Hunter segment string (Migration, Existing, Cold, Skip)
+        
+    Returns:
+        Option Set integer value or None
+    """
+    if not segment:
+        return None
+    
+    mapping = {
+        "Migration": 0,
+        "Existing": 1,
+        "Cold": 2,
+        "Skip": 3,
+    }
+    
+    return mapping.get(segment)
+
+
+def _map_tenant_size_to_option_set_value(tenant_size: Optional[str]) -> Optional[int]:
+    """
+    Map Hunter tenant_size to D365 Option Set integer value.
+    
+    D365 Option Set values (typical):
+    - Small: 0
+    - Medium: 1
+    - Large: 2
+    
+    Args:
+        tenant_size: Hunter tenant_size string (small, medium, large)
+        
+    Returns:
+        Option Set integer value or None
+    """
+    if not tenant_size:
+        return None
+    
+    # Normalize to lowercase
+    tenant_size_lower = tenant_size.lower()
+    
+    mapping = {
+        "small": 0,
+        "medium": 1,
+        "large": 2,
+    }
+    
+    return mapping.get(tenant_size_lower)
+
+
+def _map_source_to_option_set_value(source: Optional[str]) -> Optional[int]:
+    """
+    Map Hunter source to D365 Option Set integer value.
+    
+    D365 Option Set values (typical):
+    - Manual: 0
+    - Partner Center: 1
+    - Import: 2
+    
+    Args:
+        source: Hunter source string (Manual, Partner Center, Import)
+        
+    Returns:
+        Option Set integer value or None
+    """
+    if not source:
+        return None
+    
+    mapping = {
+        "Manual": 0,
+        "Partner Center": 1,
+        "Import": 2,
+    }
+    
+    return mapping.get(source)
+
+
+def _map_processing_status_to_option_set_value(status: Optional[str]) -> Optional[int]:
+    """
+    Map processing status to D365 Option Set integer value.
+    
+    D365 Option Set values (typical):
+    - Idle: 0
+    - Working: 1
+    - Completed: 2
+    - Error: 3
+    
+    Args:
+        status: Processing status string (Idle, Working, Completed, Error)
+        
+    Returns:
+        Option Set integer value or None
+    """
+    if not status:
+        return None
+    
+    mapping = {
+        "Idle": 0,
+        "Working": 1,
+        "Completed": 2,
+        "Error": 3,
+    }
+    
+    return mapping.get(status)
+
+
 def map_lead_to_d365(lead_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Map Hunter lead data to D365 Lead entity.
+    Map Hunter lead data to D365 Lead entity (24 fields, PoC).
     
-    Maps all relevant Hunter fields to D365 Lead entity, including:
-    - Basic info (subject, company name, website, email)
-    - Hunter custom fields (score, segment, priority, infrastructure, etc.)
-    - Provider and tenant size information
+    Maps Hunter fields to D365 Lead entity using hnt_* prefix (confirmed from D365).
+    Only includes fields that exist in D365 (Post-MVP: 6 fields excluded).
     
     Args:
         lead_data: Hunter lead data dictionary (from leads_ready view)
                   Expected fields:
                   - domain, canonical_name, provider, tenant_size
-                  - readiness_score, segment, priority_category, priority_label
+                  - readiness_score, segment, priority_score
                   - infrastructure_summary (from IP enrichment)
                   - contact_emails (JSONB array)
-                  - referral_id (if from Partner Center)
+                  - referral_id, azure_tenant_id, referral_type (if from Partner Center)
+                  - d365_sync_attempt_count, d365_sync_last_at, d365_sync_error, d365_sync_status
         
     Returns:
         D365 Lead entity payload (ready for D365 Web API)
+        
+    Note:
+        Post-MVP fields (excluded from PoC):
+        - priority_category, priority_label, technical_heat
+        - commercial_segment, commercial_heat
+        - is_partner_center_referral (calculated from referral_id)
     """
     domain = lead_data.get("domain", "")
     if not domain:
@@ -44,25 +164,81 @@ def map_lead_to_d365(lead_data: Dict[str, Any]) -> Dict[str, Any]:
     if primary_email:
         d365_payload["emailaddress1"] = primary_email
     
-    # Hunter custom fields (these need to be created in D365 as custom fields)
-    # Format: hunter_* prefix for custom fields
+    # Hunter custom fields (D365 uses hnt_* prefix - confirmed from LEAD-DATA-DICTIONARY.md)
+    # Only include fields that exist in D365 (24 fields, Post-MVP: 6 fields excluded)
     hunter_fields = {
-        "hunter_score": lead_data.get("readiness_score"),
-        "hunter_segment": lead_data.get("segment"),
-        "hunter_priority_category": lead_data.get("priority_category"),
-        "hunter_priority_label": lead_data.get("priority_label"),
-        "hunter_infrastructure": lead_data.get("infrastructure_summary"),
-        "hunter_provider": lead_data.get("provider"),
-        "hunter_tenant_size": lead_data.get("tenant_size"),
-        "hunter_technical_heat": lead_data.get("technical_heat"),
-        "hunter_commercial_segment": lead_data.get("commercial_segment"),
-        "hunter_commercial_heat": lead_data.get("commercial_heat"),
+        # Hunter Intelligence Fields (Section 2)
+        "hnt_finalscore": lead_data.get("readiness_score"),  # Hunter Final Score
+        "hnt_priorityscore": lead_data.get("priority_score"),  # Hunter Priority Score (1-7)
+        "hnt_segment": _map_segment_to_option_set_value(lead_data.get("segment")),  # Hunter Segment (Option Set - mapped to integer)
+        "hnt_provider": lead_data.get("provider"),  # Hunter Provider
+        "hnt_huntertenantsize": _map_tenant_size_to_option_set_value(lead_data.get("tenant_size")),  # Hunter Tenant Size (Option Set - mapped to integer)
+        "hnt_infrasummary": lead_data.get("infrastructure_summary"),  # Hunter Infrastructure Summary
+        
+        # Post-MVP: Excluded fields (not in D365 yet):
+        # - hnt_prioritycategory (priority_category)
+        # - hnt_prioritylabel (priority_label)
+        # - hnt_technicalheat (technical_heat)
+        # - hnt_commercialsegment (commercial_segment)
+        # - hnt_commercialheat (commercial_heat)
+        # - hnt_ispartnercenterreferral (calculated from hnt_referralid)
     }
     
-    # Add referral ID if available (Partner Center integration)
+    # Partner Center Fields (Section 3)
     referral_id = lead_data.get("referral_id")
     if referral_id:
-        hunter_fields["hunter_referral_id"] = referral_id
+        hunter_fields["hnt_referralid"] = referral_id  # Hunter Referral ID
+    
+    azure_tenant_id = lead_data.get("azure_tenant_id")
+    if azure_tenant_id:
+        hunter_fields["hnt_tenantid"] = azure_tenant_id  # Hunter Tenant ID
+    
+    referral_type = lead_data.get("referral_type")
+    if referral_type:
+        # "hnt_referraltype": referral_type  # Hunter Referral Type (Option Set - needs value mapping)
+        # TODO: Add referral_type to Option Set value mapping when values are known
+        pass
+    
+    # Hunter Source (calculated) - Option Set with integer mapping
+    source_value = "Partner Center" if referral_id else "Manual"
+    source_option_value = _map_source_to_option_set_value(source_value)
+    if source_option_value is not None:
+        hunter_fields["hnt_source"] = source_option_value  # Hunter Source (Option Set - mapped to integer)
+    
+    # Hunter Processing Status (Option Set - mapped to integer)
+    processing_status_str = _map_processing_status(lead_data.get("d365_sync_status"))
+    processing_status_value = _map_processing_status_to_option_set_value(processing_status_str)
+    if processing_status_value is not None:
+        hunter_fields["hnt_processingstatus"] = processing_status_value  # Hunter Processing Status (Option Set - mapped to integer)
+    
+    # Hunter M365 Fit Score (if provider is M365)
+    provider = lead_data.get("provider")
+    if provider == "M365":
+        readiness_score = lead_data.get("readiness_score")
+        if readiness_score is not None:
+            hunter_fields["hnt_m365fitscore"] = readiness_score
+    
+    # Sync & Operations Fields (Section 4)
+    sync_attempt_count = lead_data.get("d365_sync_attempt_count")
+    if sync_attempt_count is not None:
+        hunter_fields["hnt_syncattemptcount"] = sync_attempt_count  # Hunter Sync Attempt Count
+    
+    last_sync_time = lead_data.get("d365_sync_last_at")
+    if last_sync_time:
+        hunter_fields["hnt_lastsynctime"] = last_sync_time  # Hunter Last Sync Time
+    
+    sync_error = lead_data.get("d365_sync_error")
+    if sync_error:
+        hunter_fields["hnt_syncerrormessage"] = sync_error  # Hunter Sync Error Message
+    
+    # processing_status = _map_processing_status(lead_data.get("d365_sync_status"))
+    # if processing_status:
+    #     hunter_fields["hnt_processingstatus"] = processing_status  # Hunter Processing Status (Option Set - needs value mapping)
+    # Temporarily excluded - Option Set requires integer value
+    
+    # Note: hnt_d365leadid is set after push (from D365 response), not in mapping
+    # Note: hnt_pushstatus is calculated, not in mapping
+    # Note: hnt_confidence is calculated (Post-MVP enhancement)
     
     # Only include non-None fields
     for key, value in hunter_fields.items():
@@ -79,6 +255,35 @@ def map_lead_to_d365(lead_data: Dict[str, Any]) -> Dict[str, Any]:
     )
     
     return d365_payload
+
+
+def _map_processing_status(sync_status: Optional[str]) -> Optional[str]:
+    """
+    Map D365 sync status to processing status enum.
+    
+    Maps:
+    - pending → Idle
+    - in_progress → Working
+    - synced → Completed
+    - error → Error
+    
+    Args:
+        sync_status: D365 sync status from companies table
+        
+    Returns:
+        Processing status string (Idle, Working, Completed, Error) or None
+    """
+    if not sync_status:
+        return "Idle"
+    
+    mapping = {
+        "pending": "Idle",
+        "in_progress": "Working",
+        "synced": "Completed",
+        "error": "Error",
+    }
+    
+    return mapping.get(sync_status, "Idle")
 
 
 def _extract_primary_email(lead_data: Dict[str, Any]) -> Optional[str]:

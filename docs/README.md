@@ -19,6 +19,10 @@
 | **"Production deployment nasıl yapılır?"** | `docs/reference/PRODUCTION-DEPLOYMENT-GUIDE.md` |
 | **"Production monitoring nasıl yapılır?"** | `docs/reference/PRODUCTION-MONITORING-WATCH.md` |
 | **"Hangi branch'i kullanmalıyım?"** | `docs/reference/BRANCH-MANAGEMENT.md` |
+| **"D365 Lead field'ları neler? Logical name'ler ne?"** | `docs/reference/LEAD-DATA-DICTIONARY.md` |
+| **"D365 Lead form yapısı nasıl?"** | `docs/reference/LEAD-FORM-ARCHITECTURE.md` |
+| **"D365 Lead view'leri nasıl yapılandırılır?"** | `docs/reference/LEAD-VIEWS.md` |
+| **"D365 Option Set value mapping nasıl çalışır?"** | `docs/reference/D365-OPTION-SET-MAPPING.md` |
 
 ---
 
@@ -92,6 +96,11 @@ API contract documentation:
 - `WSL-GUIDE.md` - WSL2 setup and configuration guide
 - `DOCKER-TROUBLESHOOTING.md` - Docker troubleshooting guide
 - `IP-ENRICHMENT-DOCKER-SETUP.md` - IP enrichment Docker setup guide
+- **D365 Lead Documentation** (2025-01-30):
+  - `LEAD-DATA-DICTIONARY.md` - Full data dictionary with logical names (`hnt_` prefix confirmed from D365)
+  - `LEAD-FORM-ARCHITECTURE.md` - Form structure, sections, tabs, control types (technical blueprint)
+  - `LEAD-VIEWS.md` - View configuration, filters, sort criteria, recommended views
+  - `LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
 
 #### Production Readiness Documentation
 **Location:** `docs/reference/`

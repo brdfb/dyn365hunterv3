@@ -8,6 +8,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **D365 Lead Push PoC - Option Set Value Mapping** (2025-01-30)
+  - Option Set fields now properly mapped to integer values for D365 API
+  - Added mapping functions: `_map_segment_to_option_set_value()`, `_map_tenant_size_to_option_set_value()`, `_map_source_to_option_set_value()`, `_map_processing_status_to_option_set_value()`
+  - Fields now included in payload: `hnt_segment`, `hnt_huntertenantsize`, `hnt_source`, `hnt_processingstatus`
+  - Mapping values: Segment (Migration=0, Existing=1, Cold=2, Skip=3), Tenant Size (Small=0, Medium=1, Large=2), Source (Manual=0, Partner Center=1, Import=2), Processing Status (Idle=0, Working=1, Completed=2, Error=3)
+
+### Completed
+- **D365 Lead Push PoC** (2025-01-30) - ✅ **SUCCESSFUL**
+  - Hunter → D365 Lead Push end-to-end flow working
+  - 8 fields successfully pushed (3 core + 5 custom Hunter fields)
+  - Celery task integration completed
+  - Error handling and logging validated
+  - Database sync state management working
+  - **Note**: Option Set fields require integer values (mapping added)
+  - **Post-MVP**: 6 additional fields (priority_category, priority_label, technical_heat, commercial_segment, commercial_heat, is_partner_center_referral)
+
+### Added
+- **D365 Lead Documentation** (2025-01-30) - Complete data dictionary, form architecture, and views documentation
+  - **LEAD-DATA-DICTIONARY.md** - Full field list with logical names (`hnt_` prefix confirmed from D365 Power Apps interface)
+    - 24 custom Hunter fields documented with data types, searchable properties, and source field mappings
+    - Field mapping reference to `app/integrations/d365/mapping.py`
+    - Missing fields identified (from mapping.py but not in D365)
+  - **LEAD-FORM-ARCHITECTURE.md** - Form structure, sections, tabs, control types (technical blueprint)
+    - Complete form tree structure with logical names
+    - Section details and field placement guidelines
+    - Control types and form behavior documentation
+  - **LEAD-VIEWS.md** - View configuration, filters, sort criteria, recommended views
+    - Standard views (My Open Leads, All Leads, Qualified Leads)
+    - Recommended Hunter Intelligence views (3 views)
+    - Recommended Partner Center views (2 views)
+  - **LEAD-TABLE-FORM-ANALYSIS.md** - Original analysis document (v1.0)
+  - **Guardrails Added**: D365 Lead Field Mapping Guardrails in `.cursor/rules/.cursorrules` and `.cursor/rules/doc-management.mdc`
+    - Logical name format enforcement (`hnt_` prefix)
+    - Field creation policy (check data dictionary before creating fields)
+    - Form architecture and view configuration references
+  - **Reference**: All D365 Lead documentation in `docs/reference/` (reference guides, not in `docs/active/`)
+
 - **Pre-D365 Roast Sprint: Critical Security & Reliability Fixes** (2025-01-30) - 5 critical fixes before D365 production connection
   - **Security Fix**: SQL/OData Injection prevention in D365 client
     - OData filter query properly escaped (single quote escape: `'` → `''`)
