@@ -387,6 +387,10 @@ A simple web interface for demo and internal use:
 - **P-Model Priority Badges** (Phase 3 - 2025-01-29) - P1-P6 renkli badge'ler, priority_label tooltip'leri
 - **Score Breakdown Modal** (G19 + Phase 3) - Detaylı skor analizi, CSP P-Model paneli, provider-specific açıklamalar
 - **Partner Center Integration** (2025-01-30) - Referral column with badges, referral type filter, sync button, sync status indicator
+- **HAMLE 1: Partner Center Sync Aktifleştirme** (2025-01-30) - 🔄 Kod incelemesi tamamlandı (~85% complete)
+  - ✅ OAuth credentials, feature flag, authentication, manual sync test tamamlandı
+  - ✅ UI HTML yapısı doğrulandı, error handling kod incelemesi tamamlandı
+  - 🔄 UI JS functionality ve error handling manuel testleri kaldı
 - CSV/Excel/PDF export
 - Dashboard statistics (KPI)
 - **13+ ana özellik** - Upload, Scan, Table, Export, Search, Sorting, Pagination, Score Breakdown, Toast Notifications, Tooltips, P-Model Badges, CSP P-Model Panel, Partner Center Integration
