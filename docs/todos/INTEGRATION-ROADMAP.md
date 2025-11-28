@@ -84,12 +84,12 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 **MVP Yaklaşımı**: Minimal API client (50-70 satır), polling (10 min prod, 30s dev), sadece sync endpoint, lead listesine 1 kolon.
 
-**Progress**: 100% (6/6 tasks completed)
+**Progress**: 100% (6/6 tasks completed + Referral Detail Modal completed)
 - ✅ Task 2.1: Partner Center API Client - COMPLETED (2025-01-28)
 - ✅ Task 2.2: Referral Data Model - COMPLETED (2025-01-28)
 - ✅ Task 2.3: Referral Ingestion - COMPLETED (2025-01-28) - Scoring pipeline integration PENDING (future enhancement)
-- ✅ Task 2.4: API Endpoints - COMPLETED (2025-01-30) - 7/7 tests passing
-- ✅ Task 2.5: UI Integration - COMPLETED (2025-01-30) - Referral column, referral type filter, sync button, sync status indicator
+- ✅ Task 2.4: API Endpoints - COMPLETED (2025-01-30) - 7/7 tests passing + Referral detail endpoint (`GET /api/v1/partner-center/referrals/{referral_id}`)
+- ✅ Task 2.5: UI Integration - COMPLETED (2025-01-30) - Referral column, referral type filter, sync button, sync status indicator, referral detail modal
 - ✅ Task 2.6: Background Sync - COMPLETED (2025-01-30) - 10/10 tests passing
 
 **Status Note**: ✅ **COMPLETED** - Feature flag default OFF (MVP-safe, production-ready), all tests passing (59/59 tests).
@@ -144,7 +144,7 @@ Implement correct engineering sequence for Hunter integration with external syst
   - [x] API tests: 3/3 passing
   - [ ] ⏳ **Future Enhancement**: Referrals section to Mini UI (post-MVP)
   - [ ] ⏳ **Future Enhancement**: Referral status badges (post-MVP)
-  - [ ] ⏳ **Future Enhancement**: Referral detail modal (post-MVP)
+  - [x] ✅ **Referral detail modal** (2025-01-30): Detay butonu, modal content, action buttons (copy, send to D365, open in PC) - **COMPLETED**
 
 - [x] **Task 2.6**: Background Sync (MVP: Polling, Dev Override) ✅ **COMPLETED** (2025-01-30)
   - [x] Create Celery task for periodic referral sync
@@ -180,7 +180,7 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ### Phase 3: Dynamics 365 Integration (P2) 🔄 **IN PROGRESS**
 
-**Status**: 🔄 **In Progress** (Backend %94 + UI completed, E2E runbook ready)  
+**Status**: 🔄 **In Progress** (Backend %94 + UI completed, Push PoC completed, E2E runbook ready)  
 **Duration**: 6-10 days (4 faz: S + M + S-M + S = ~1 hafta)  
 **Risk**: 4/10  
 **Priority**: P2  
@@ -196,6 +196,13 @@ Implement correct engineering sequence for Hunter integration with external syst
   - API response'a D365 alanları eklendi
 - ✅ **Roast Sprint**: Completed (2025-01-30)
   - 5/5 critical fixes completed (security, idempotency, token cache, session lifecycle, retry backoff)
+- ✅ **D365 Lead Push PoC**: Completed (2025-01-30)
+  - End-to-end flow working: API → Celery → D365 API → Database sync
+  - 8 fields successfully pushed (3 core + 5 custom Hunter fields)
+  - Option Set value mapping implemented (string → integer)
+  - Error handling, retry logic, and logging validated
+  - **Archive**: `docs/archive/2025-01-30-D365-PUSH-POC-TASK-LIST.md`
+  - **Reference**: `docs/reference/D365-OPTION-SET-MAPPING.md`
 - ⏳ **Phase 2.9 (E2E)**: Runbook ready, tenant setup pending
   - Step-by-step runbook: `D365-PHASE-2.9-E2E-RUNBOOK.md`
   - Tenant & App Registration, Hunter config, Manual E2E tests, Go/No-Go gate
@@ -293,10 +300,11 @@ Implement correct engineering sequence for Hunter integration with external syst
 - **Status**: Phase 2 Complete - Feature flag default OFF (MVP-safe), can be enabled when ready
 - **Remaining**: Scoring Pipeline Integration (Azure Tenant ID override + Co-sell boost) - Future enhancement
 
-**Phase 3 Status**: 🔄 **IN PROGRESS** (Backend %94 + UI completed, E2E runbook ready)
+**Phase 3 Status**: 🔄 **IN PROGRESS** (Backend %94 + UI completed, Push PoC completed, E2E runbook ready)
 - ✅ Phase 2.5 (Backend): %94 completed (API, Celery task, D365 client, mapping, DB migration)
 - ✅ Phase 3 (UI): Completed (badge, push button, detail modal, status fields)
 - ✅ Roast Sprint: Completed (5/5 tasks: security, idempotency, token cache, session lifecycle, retry backoff)
+- ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working, Option Set mapping implemented
 - ⏳ Phase 2.9 (E2E): Runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`), tenant setup pending
 
 **Next Steps**:
@@ -306,6 +314,7 @@ Implement correct engineering sequence for Hunter integration with external syst
    - ✅ Phase 2.5 (Backend): %94 completed
    - ✅ Phase 3 (UI): Completed
    - ✅ Roast Sprint: Completed (5/5 tasks)
+   - ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working
    - ⏳ Phase 2.9 (E2E): Runbook ready, execute when tenant is ready
 
 ---

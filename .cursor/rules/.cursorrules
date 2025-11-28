@@ -19,6 +19,7 @@
 - **✅ Partner Center Phase 2**: ✅ Completed (2025-01-30) - Integration Roadmap Phase 2 (Tasks 2.1-2.6 + Phase 4-6 productization + Phase 7 production enablement completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
 - **✅ Pre-D365 Roast Sprint**: ✅ Completed (2025-01-30) - 5/5 critical fixes (security, idempotency, token cache, session lifecycle, retry backoff)
 - **🔄 Dynamics 365 Integration**: 🔄 In Progress (2025-01-30) - Backend %94 completed (Phase 2.5), UI completed (Phase 3), E2E runbook ready (Phase 2.9)
+- **✅ D365 Lead Push PoC**: ✅ **COMPLETED** (2025-01-30) - Hunter → D365 Lead Push working, Option Set mapping implemented
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20), CSP P-Model (2025-01-29)
 
 ## Code Style & Standards
@@ -320,6 +321,7 @@
   - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure, sections, tabs, control types (v1.1)
   - `docs/reference/LEAD-VIEWS.md` - View configuration, filters, sort criteria, recommended views (v1.0)
   - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
+  - `docs/reference/D365-OPTION-SET-MAPPING.md` - Option Set value mapping guide (string → integer, added 2025-01-30)
   - `app/integrations/d365/mapping.py` - Hunter → D365 field mapping implementation
 
 ### Script Safety Guardrails (CRITICAL - Added 2025-01-30)
@@ -481,6 +483,7 @@ When a phase is completed (TODO status = "Completed"):
     - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure, sections, tabs, control types
     - `docs/reference/LEAD-VIEWS.md` - View configuration, filters, sort criteria, recommended views
     - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
+    - `docs/reference/D365-OPTION-SET-MAPPING.md` - Option Set value mapping guide (string → integer, added 2025-01-30)
 - `docs/prompts/` - Important prompts (date-prefixed, archive when done)
   - **Recent**: Roast sprint prompts saved (2025-01-30)
     - `2025-01-30-cursor-roast-prompt-v1.0.md`

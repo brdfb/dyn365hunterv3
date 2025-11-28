@@ -9,9 +9,10 @@
 
 ### Dosya Sayısı
 - **Mevcut:** 9 dosya (2025-01-30 D365 phase cleanup sonrası)
-- **Önceki:** 13 dosya (2025-01-30)
+- **Güncel:** 9 dosya (2025-01-30 D365 Push PoC sonrası - 2 dosya archive edildi)
 - **Hedef:** 5-7 dosya (documentation guardrails)
 - **Durum:** ⚠️ **Hala fazla** - Daha fazla cleanup gerekiyor (hedef 5-7'ye yaklaşıldı)
+- **Son Archive:** D365-PHASE-1-BACKEND-FIXES-COMPLETE.md, D365-LEAD-FIELDS-CRITIQUE.md (2025-01-30)
 
 ---
 

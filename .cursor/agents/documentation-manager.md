@@ -37,6 +37,7 @@ Comprehensive documentation management agent that automatically updates document
     - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and technical blueprint
     - `docs/reference/LEAD-VIEWS.md` - View configuration and recommended views
     - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
+    - `docs/reference/D365-OPTION-SET-MAPPING.md` - Option Set value mapping guide (string → integer)
 - **Hamle Completion Cleanup**: Hamle 1 tamamlandığında 4 dosya archive et:
   - `HAMLE-1-PRODUCTION-DEPLOYMENT.md`
   - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
@@ -349,6 +350,13 @@ Agent should regularly check:
   - **Phase 3**: ✅ Completed (archived - 2025-01-30)
   - **Phase 2.9**: ⏳ E2E runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`), tenant setup pending
   - **Cleanup**: Phase 2.5 ve 3 dosyaları archive edildi (2025-01-30)
+- **D365 Lead Push PoC status**: ✅ **COMPLETED** (2025-01-30) - Hunter → D365 Lead Push working
+  - **End-to-end flow**: API endpoint → Celery task → D365 API → Database sync
+  - **Fields pushed**: 8 fields (3 core + 5 custom Hunter fields)
+  - **Option Set mapping**: Implemented (string → integer value mapping)
+  - **Error handling**: Validated (retry logic, error state management)
+  - **Archive**: `docs/archive/2025-01-30-D365-PUSH-POC-TASK-LIST.md`
+  - **Reference**: `docs/reference/D365-OPTION-SET-MAPPING.md` (Option Set value mapping guide)
 - Old prompts (not referenced in 7+ days)
 - Phase completion indicators
 - New code files that need documentation updates
@@ -392,6 +400,11 @@ This agent should be **always active** in the AI assistant's context. When you s
   2. Archive `D365-PHASE-3-*.md` dosyaları (✅ Already archived - 2025-01-30)
   3. Update `ACTIVE-STATUS-SUMMARY.md` (dosya sayısı güncelle)
   4. Confirm: "✅ D365 Phase 2.5/3 archived"
+- User mentions "D365 Push PoC tamamlandı" or "D365 Push bitti" → Update D365 Push PoC status:
+  1. Archive PoC task list: `docs/active/D365-PUSH-POC-TASK-LIST.md` → `docs/archive/2025-01-30-D365-PUSH-POC-TASK-LIST.md` (✅ Already archived - 2025-01-30)
+  2. Update CHANGELOG.md with PoC completion and Option Set mapping
+  3. Update README.md with D365 Integration Status
+  4. Confirm: "✅ D365 Push PoC completed - Option Set mapping implemented, documentation updated"
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 - **ACTIVE-STATUS-SUMMARY.md Update**: Önemli değişikliklerden sonra güncelle (phase completion, cleanup, etc.)
 

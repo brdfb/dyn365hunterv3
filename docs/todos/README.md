@@ -18,6 +18,7 @@ This folder contains TODO lists and task tracking documents.
     - ✅ Phase 2.5 (Backend): %94 completed
     - ✅ Phase 3 (UI): Completed
     - ✅ Roast Sprint: Completed (5/5 tasks)
+    - ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working
     - ⏳ Phase 2.9 (E2E): Runbook ready, tenant setup pending
 
 **Recently Completed:**

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Completed
+- **Partner Center Referral Detail Features** (2025-01-30) - ✅ **COMPLETED**
+  - Referral detail endpoint: `GET /api/v1/partner-center/referrals/{referral_id}` implemented
+  - Referral detail modal UI completed with action buttons (copy, send to D365, open in PC)
+  - Endpoint includes structured summary (status, contact, deal) + optional raw JSON payload
+  - **Status**: Backend and UI fully functional, feature flag OFF (awaiting activation)
+
 ### Added
 - **D365 Lead Push PoC - Option Set Value Mapping** (2025-01-30)
   - Option Set fields now properly mapped to integer values for D365 API

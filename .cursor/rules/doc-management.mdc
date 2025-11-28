@@ -43,6 +43,7 @@ Efficient documentation lifecycle management to optimize token usage and maintai
     - `docs/reference/LEAD-FORM-ARCHITECTURE.md` - Form structure and technical blueprint
     - `docs/reference/LEAD-VIEWS.md` - View configuration and recommended views
     - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md` - Original analysis document (v1.0)
+    - `docs/reference/D365-OPTION-SET-MAPPING.md` - Option Set value mapping guide (string → integer, added 2025-01-30)
 - **Status Summary** - `ACTIVE-STATUS-SUMMARY.md` (tek bakışta tüm active dosyaların durumu)
 
 ## Prompt Management
