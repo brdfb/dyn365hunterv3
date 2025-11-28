@@ -8,12 +8,12 @@
 ## ⚠️ **MEVCUT DURUM**
 
 ### Dosya Sayısı
-- **Mevcut:** 20 dosya (2025-01-30 HAMLE 2 dokümantasyonu eklendi)
-- **Güncel:** 20 dosya (2025-01-30 HAMLE 2 - 5 yeni dosya eklendi)
+- **Mevcut:** 12 dosya (2025-01-30 cleanup sonrası)
+- **Güncel:** 12 dosya (2025-01-30 HAMLE 1 ve test dosyaları archive edildi)
 - **Hedef:** 5-7 dosya (documentation guardrails)
-- **Durum:** ⚠️ **Çok Fazla** - HAMLE 2 dev testleri tamamlandı, production'a geçmeden önce cleanup gerekiyor
-- **Son Ekleme:** HAMLE-2-EXECUTION-CHECKLIST.md, HAMLE-2-E2E-TEST-RESULTS.md, HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md, HAMLE-2-UI-BADGE-LINK-TEST.md, HAMLE-2-GO-NOGO-DECISION.md (2025-01-30)
-- **Son Archive:** D365-PHASE-1-BACKEND-FIXES-COMPLETE.md, D365-LEAD-FIELDS-CRITIQUE.md (2025-01-30)
+- **Durum:** ⚠️ **Hala Fazla** - Production deployment sonrası daha fazla cleanup gerekiyor
+- **Son Ekleme:** HAMLE-2-EXECUTION-CHECKLIST.md, HAMLE-2-GO-NOGO-DECISION.md (2025-01-30)
+- **Son Archive:** HAMLE-1-* (5 dosya), HAMLE-2-*-TEST-RESULTS.md (3 dosya), PRE-D365-ROAST-SPRINT-TASK-BOARD.md (2025-01-30)
 
 ---
 
@@ -42,7 +42,8 @@
   - 🔄 Go/No-Go Decision: ✅ GO (production'a geçiş için hazır)
 - **Plan:** Adapter Pattern (Core Freeze + Integration Layer)
 - **Aksiyon:** 🔄 Production deployment hazırlığı (HAMLE 2 dev testleri tamamlandı)
-- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`, `D365-PHASE-2.9-E2E-RUNBOOK.md`, `HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md`, `HAMLE-2-UI-BADGE-LINK-TEST.md`, `HAMLE-2-GO-NOGO-DECISION.md`
+- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`, `D365-PHASE-2.9-E2E-RUNBOOK.md`, `HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-GO-NOGO-DECISION.md`
+- **Archive edilen test dosyaları:** `HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md`, `HAMLE-2-UI-BADGE-LINK-TEST.md` (2025-01-30)
 
 ### Core Freeze
 - **Durum:** ✅ **AKTİF** (2025-01-30)
@@ -75,14 +76,14 @@
 
 **Durum:** ✅ **Archive edildi** (2025-01-30)
 
-### 🔄 **Hamle 1 Yeni Dosyaları** (5 dosya - 🔄 Aktif - 2025-01-30)
-- `HAMLE-1-EXECUTION-PLAN.md` - Execution plan (7 adım, kod incelemesi tamamlandı)
-- `HAMLE-1-UI-TEST-CHECKLIST.md` - UI test checklist
-- `HAMLE-1-UI-TEST-RESULTS.md` - Browser test sonuçları
-- `HAMLE-1-ERROR-HANDLING-TEST.md` - Error handling test planı
-- `HAMLE-1-SUMMARY.md` - Özet ve durum
+### ✅ **Hamle 1 Dosyaları** (5 dosya - ✅ Archive edildi - 2025-01-30)
+- `HAMLE-1-EXECUTION-PLAN.md` → `archive/2025-01-30-HAMLE-1-EXECUTION-PLAN.md`
+- `HAMLE-1-UI-TEST-CHECKLIST.md` → `archive/2025-01-30-HAMLE-1-UI-TEST-CHECKLIST.md`
+- `HAMLE-1-UI-TEST-RESULTS.md` → `archive/2025-01-30-HAMLE-1-UI-TEST-RESULTS.md`
+- `HAMLE-1-ERROR-HANDLING-TEST.md` → `archive/2025-01-30-HAMLE-1-ERROR-HANDLING-TEST.md`
+- `HAMLE-1-SUMMARY.md` → `archive/2025-01-30-HAMLE-1-SUMMARY.md`
 
-**Durum:** 🔄 **Aktif** - Kod incelemesi tamamlandı, manuel testler kaldı (~85% complete)
+**Durum:** ✅ **Archive edildi** (2025-01-30 - HAMLE 1 tamamlandı)
 
 ### 📊 **Strateji Dosyaları** (2 dosya)
 - `KALAN-ISLER-PRIORITY.md` - Öncelik listesi (aktif)
@@ -225,10 +226,16 @@
 - ✅ D365 Phase 2.5 dosyaları archive edildi (2025-01-30)
 - ✅ D365 Phase 3 dosyası archive edildi (2025-01-30)
 - ✅ D365 Phase 2.9 eski wiring dosyası archive edildi (2025-01-30 - yeni runbook var)
-- ⚠️ Dosya sayısı 20'ye çıktı (HAMLE 2 dokümantasyonu eklendi - 2025-01-30)
-- ⚠️ Hala 20 dosya var (hedef 5-7) - Production deployment sonrası cleanup gerekiyor
+- ✅ HAMLE 1 dosyaları archive edildi (5 dosya - 2025-01-30)
+- ✅ HAMLE 2 test sonuçları archive edildi (3 dosya - 2025-01-30)
+- ✅ PRE-D365-ROAST-SPRINT-TASK-BOARD.md archive edildi (2025-01-30)
+- ✅ Dosya sayısı 20'den 12'ye düştü (HAMLE 1 ve test dosyaları archive edildi - 2025-01-30)
+  - HAMLE 1 dosyaları: 5 dosya archive edildi
+  - HAMLE 2 test sonuçları: 3 dosya archive edildi
+  - PRE-D365-ROAST-SPRINT-TASK-BOARD.md: Archive edildi
+- ⚠️ Hala 12 dosya var (hedef 5-7) - Production deployment sonrası daha fazla cleanup gerekiyor
 
 **Sıradaki Kontrol:** 
-- Production deployment sonrası HAMLE 2 test dosyalarını archive et
-- PRE-D365-ROAST-SPRINT-TASK-BOARD.md archive edilebilir (Roast Sprint tamamlandı)
+- Production deployment sonrası HAMLE 2 execution checklist ve Go/No-Go decision archive edilebilir
+- KALAN-ISLER-PRIORITY.md ve NO-BREAK-REFACTOR-PLAN.md değerlendirilebilir
 
