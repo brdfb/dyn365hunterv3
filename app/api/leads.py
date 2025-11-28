@@ -148,6 +148,9 @@ async def export_leads(
             lr.commercial_heat,
             lr.priority_category,
             lr.priority_label,
+            lr.d365_lead_id,
+            lr.d365_sync_status,
+            lr.d365_sync_last_at,
             MAX(pcr.referral_type) AS referral_type,
             -- Calculate aggregated link_status: normalize NULL to 'none' when no referrals, 'unlinked' when referral exists but status is NULL
             -- Also normalize 'auto_linked' to 'linked' for consistency
@@ -216,7 +219,7 @@ async def export_leads(
     query += " AND lr.readiness_score IS NOT NULL"
 
     # GROUP BY is needed for aggregate functions (aggregated_link_status, primary_referral_id)
-    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label"
+    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label, lr.d365_lead_id, lr.d365_sync_status, lr.d365_sync_last_at"
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
@@ -415,6 +418,9 @@ async def get_leads(
             lr.commercial_heat,
             lr.priority_category,
             lr.priority_label,
+            lr.d365_lead_id,
+            lr.d365_sync_status,
+            lr.d365_sync_last_at,
             MAX(pcr.referral_type) AS referral_type,
             -- Calculate aggregated link_status: normalize NULL to 'none' when no referrals, 'unlinked' when referral exists but status is NULL
             -- Also normalize 'auto_linked' to 'linked' for consistency
@@ -483,7 +489,7 @@ async def get_leads(
     query += " AND lr.readiness_score IS NOT NULL"
 
     # GROUP BY is needed for aggregate functions (aggregated_link_status, primary_referral_id)
-    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label"
+    query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label, lr.d365_lead_id, lr.d365_sync_status, lr.d365_sync_last_at"
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score

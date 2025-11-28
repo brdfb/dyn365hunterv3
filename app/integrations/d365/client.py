@@ -412,6 +412,78 @@ class D365Client:
             )
             return None
 
+    async def update_lead_fields(
+        self,
+        lead_id: str,
+        fields: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Update specific fields on an existing D365 lead.
+        
+        Args:
+            lead_id: D365 lead ID (GUID)
+            fields: Dictionary of field names and values to update
+            
+        Returns:
+            Updated lead entity response
+            
+        Raises:
+            D365APIError: If API call fails
+            D365RateLimitError: If rate limit exceeded
+        """
+        token = self._get_access_token()
+        api_url = f"{self.base_url}/api/data/{self.api_version}/leads({lead_id})"
+        
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "OData-MaxVersion": "4.0",
+            "OData-Version": "4.0",
+            "Prefer": "return=representation",
+        }
+        
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.patch(api_url, json=fields, headers=headers)
+                
+                if response.status_code == 204:
+                    # PATCH successful (204 No Content), get updated lead
+                    get_response = await client.get(api_url, headers=headers)
+                    if get_response.status_code == 200:
+                        return get_response.json()
+                    else:
+                        # Return minimal response if get fails
+                        return {"leadid": lead_id}
+                elif response.status_code == 200:
+                    # Some D365 endpoints return 200 with representation (if Prefer header worked)
+                    try:
+                        return response.json()
+                    except Exception:
+                        # If no JSON, get the lead separately
+                        get_response = await client.get(api_url, headers=headers)
+                        if get_response.status_code == 200:
+                            return get_response.json()
+                        else:
+                            return {"leadid": lead_id}
+                elif response.status_code == 429:
+                    raise D365RateLimitError("Rate limit exceeded")
+                else:
+                    error_text = response.text
+                    logger.error(
+                        "d365_lead_update_fields_failed",
+                        status_code=response.status_code,
+                        lead_id=lead_id,
+                        error=error_text
+                    )
+                    raise D365APIError(f"Update fields failed: {response.status_code} - {error_text}")
+        
+        except httpx.TimeoutException as e:
+            logger.error("d365_request_timeout", error=str(e))
+            raise D365APIError(f"Request timeout: {str(e)}") from e
+        except httpx.RequestError as e:
+            logger.error("d365_request_error", error=str(e))
+            raise D365APIError(f"Request error: {str(e)}") from e
+
     async def _find_lead_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """
         Find existing lead by email address.

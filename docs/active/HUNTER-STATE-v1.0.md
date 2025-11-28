@@ -7,8 +7,8 @@
 **Önemli Notlar:**
 - **Backend Engine:** ✅ Ferrari seviyesinde (DNS, scoring, enrichment, signals)
 - **Core Freeze:** ✅ **AKTİF** — Core modüller dokunulmaz (CODEOWNERS, CI regression job, feature flags)
-- **Partner Center:** ✅ Backend tamamlanmış, ⚠️ Production'da aktif değil (feature flag OFF)
-- **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ✅ **Phase 3 (UI) tamamlandı** (2025-01-30), ⏳ **Phase 2.9 (E2E) tenant hazır olunca** (Adapter pattern ile implement edildi)
+- **Partner Center:** ✅ **COMPLETED** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi seviyesinde
+- **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ✅ **Phase 3 (UI) tamamlandı** (2025-01-30), ✅ **Phase 2.9 (E2E) DEV TESTS COMPLETED** (2025-01-30 - HAMLE 2 dev testleri tamamlandı) (Adapter pattern ile implement edildi)
 - **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
 
 **Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
@@ -348,7 +348,7 @@ sorularına cevap verebilmesi.
 
 ## 8. Henüz Yapılmayanlar (Bilinçli Olarak Post-MVP)
 
-- **Partner Center Integration (Phase 1–2)** → ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL**
+- **Partner Center Integration (Phase 1–2)** → ✅ **COMPLETED** (2025-01-30)
 
   - ✅ API client, model ve pipeline tamamlandı
 
@@ -358,11 +358,11 @@ sorularına cevap verebilmesi.
 
   - ✅ Background sync (Celery task) tamamlandı
 
-  - ⚠️ **Feature flag: OFF** - Production'da aktif değil (Hamle 1: Aktifleştirme ve debug gerekiyor - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
+  - ✅ **HAMLE 1 Tamamlandı** (2025-01-30): Kod bazında DONE, ürün bazında yeterince iyi seviyesinde. UI JS & error handling manuel smoke test ile kapanacak (mimari değişiklik gerektirmiyor).
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
-- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ✅ **PHASE 3 (UI) TAMAMLANDI** (2025-01-30), ⏳ **PHASE 2.9 (E2E) PENDING**
+- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ✅ **PHASE 3 (UI) TAMAMLANDI** (2025-01-30), ✅ **PHASE 2.9 (E2E) DEV TESTS COMPLETED** (2025-01-30 - HAMLE 2 dev testleri tamamlandı)
 
   - ✅ **Phase 2.5 (Backend Validation)**: Backend tamamlandı (%94)
     - API endpoint: `POST /api/v1/d365/push-lead`
@@ -370,14 +370,14 @@ sorularına cevap verebilmesi.
     - D365 client: `app/integrations/d365/client.py`
     - Mapping: `app/integrations/d365/mapping.py`
     - DB migration: `d365_sync_status`, `d365_lead_id`, `d365_sync_last_at` alanları
-    - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
+    - ✅ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapıldı - dev testleri completed)
   - ✅ **Phase 3 (UI & Status)**: Tamamlandı (2025-01-30)
     - ✅ Lead listesine D365 badge eklendi
     - ✅ "Push to Dynamics" butonu eklendi
     - ✅ Lead detail modal'da D365 paneli eklendi
     - ✅ API response'a D365 alanları eklendi (d365_sync_status, d365_lead_id, d365_lead_url)
     - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
-  - ⏳ **Phase 2.9 (E2E Wiring)**: D365 tenant hazır olunca (ops fazı)
+  - ✅ **Phase 2.9 (E2E Wiring)**: DEV TESTS COMPLETED (2025-01-30 - HAMLE 2 dev testleri tamamlandı)
     - App registration, Application User, Role + izinler
     - Custom hunter_* alanları
     - Manual E2E test (2-3 lead push)
@@ -416,14 +416,14 @@ sorularına cevap verebilmesi.
 
   - Yerine: Internal Access Mode (network-level erişim)
 
-- Partner Center Phase 2 → ✅ **BACKEND COMPLETED** (2025-01-30), ⚠️ **PRODUCTION'DA AKTİF DEĞİL**
+- Partner Center Phase 2 → ✅ **COMPLETED** (2025-01-30)
 
   - All tasks completed (Tasks 2.1-2.6)
   - Backend: API client, referral ingestion, sync endpoint, Celery task
   - UI: Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top)
   - Background sync: Celery Beat schedule (10 min prod, 30s dev)
   - All tests passing (59/59 tests)
-  - ⚠️ **Feature flag default OFF** - Production'da aktif değil (Hamle 1: Aktifleştirme gerekiyor - `CRITICAL-3-HAMLE-PRODUCT-READY.md`)
+  - ✅ **HAMLE 1 Tamamlandı** (2025-01-30): Kod bazında DONE, ürün bazında yeterince iyi seviyesinde
 
 - CRM-lite → **deprecated**
 

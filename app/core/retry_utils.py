@@ -33,12 +33,13 @@ def compute_backoff_with_jitter(
     # Exponential backoff: base * (2 ** attempt)
     backoff = base_seconds * (2 ** attempt)
     
-    # Cap at max_seconds
+    # Cap at max_seconds (before jitter to ensure total doesn't exceed max significantly)
     backoff = min(backoff, max_seconds)
     
     # Add random jitter to prevent thundering herd
     jitter = random.uniform(0, jitter_max)
     
+    # Final result: backoff + jitter (may slightly exceed max_seconds due to jitter, but that's acceptable)
     return backoff + jitter
 
 

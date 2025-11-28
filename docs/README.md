@@ -23,6 +23,9 @@
 | **"D365 Lead form yapısı nasıl?"** | `docs/reference/LEAD-FORM-ARCHITECTURE.md` |
 | **"D365 Lead view'leri nasıl yapılandırılır?"** | `docs/reference/LEAD-VIEWS.md` |
 | **"D365 Option Set value mapping nasıl çalışır?"** | `docs/reference/D365-OPTION-SET-MAPPING.md` |
+| **"HAMLE 2 (D365 E2E Wiring) durumu ne?"** | `docs/active/HAMLE-2-EXECUTION-CHECKLIST.md` |
+| **"HAMLE 2 test sonuçları ne?"** | `docs/active/HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md` |
+| **"HAMLE 2 production'a geçebilir miyim?"** | `docs/active/HAMLE-2-GO-NOGO-DECISION.md` |
 
 ---
 

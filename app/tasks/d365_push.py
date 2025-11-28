@@ -219,9 +219,35 @@ def push_lead_to_d365(self, lead_id: int):
             # Update company with D365 status
             company.d365_lead_id = d365_lead_id
             company.d365_sync_status = "synced"
-            company.d365_sync_last_at = datetime.now()
+            sync_last_at = datetime.now()
+            company.d365_sync_last_at = sync_last_at
             company.d365_sync_error = None
             db.commit()
+            
+            # Update D365 lead with post-push fields (hnt_d365leadid, hnt_lastsynctime)
+            # These fields are set after push to maintain sync state in D365
+            try:
+                post_push_fields = {
+                    "hnt_d365leadid": d365_lead_id,  # Self-reference: D365 Lead ID in D365
+                    "hnt_lastsynctime": sync_last_at.isoformat(),  # Last sync timestamp
+                }
+                asyncio.run(client.update_lead_fields(d365_lead_id, post_push_fields))
+                logger.debug(
+                    "d365_post_push_update",
+                    message="Post-push fields updated in D365",
+                    lead_id=lead_id,
+                    d365_lead_id=d365_lead_id
+                )
+            except Exception as e:
+                # Non-critical: Post-push update failed, but push was successful
+                logger.warning(
+                    "d365_post_push_update_failed",
+                    message="Post-push fields update failed (non-critical)",
+                    lead_id=lead_id,
+                    d365_lead_id=d365_lead_id,
+                    error=str(e)
+                )
+                # Continue - push was successful, post-push update is optional
             
             # Phase 3: Track success metrics
             duration = time.time() - start_time

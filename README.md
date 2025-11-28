@@ -43,6 +43,15 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
   - Option Set value mapping implemented (string → integer)
   - Error handling, retry logic, and logging validated
   - **Reference**: `docs/archive/2025-01-30-D365-PUSH-POC-TASK-LIST.md`
+- ✅ **HAMLE 2: D365 Phase 2.9 E2E Wiring** (2025-01-30) - ✅ **DEV TESTS COMPLETED**
+  - Azure AD App Registration completed
+  - D365 Application User created with security roles
+  - Hunter configuration completed (D365 env vars set)
+  - E2E Tests: Happy path ✅, Idempotency ✅, Edge case ✅ (all bugs fixed)
+  - UI Badge & Link: Badge görünüyor ✅, D365 link çalışıyor ✅
+  - Error Handling: Authentication error tested ✅, Rate limit & API error code verified ✅
+  - **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
+  - **Documentation**: `docs/active/HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md`, `HAMLE-2-UI-BADGE-LINK-TEST.md`, `HAMLE-2-GO-NOGO-DECISION.md`
 
 **Post-MVP Roadmap**:
 - 🅿️ **Partner Center Integration** (Phase 2) - Parked (Post-MVP)

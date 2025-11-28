@@ -1,7 +1,8 @@
 # D365 Phase 2.9 — E2E Wiring Runbook
 
-**Status:** ⏳ **PENDING** (Roast Sprint completed, ready for tenant setup)  
+**Status:** 🔄 **IN PROGRESS** (HAMLE 2 başlatıldı - 2025-01-30)  
 **Created:** 2025-01-30  
+**Updated:** 2025-01-30 (HAMLE 2'ye geçiş kararı)  
 **Goal:** Hunter → D365 bağlantısını production-ready hale getirmek
 
 ---
@@ -495,6 +496,9 @@ If all checklist items pass:
 ## 📝 Notes
 
 - **Created:** 2025-01-30
-- **Status:** Pending (waiting for tenant setup)
-- **Next:** Execute runbook when D365 tenant is ready
+- **Updated:** 2025-01-30 (HAMLE 2'ye geçiş kararı)
+- **Status:** In Progress (HAMLE 2 başlatıldı)
+- **Decision:** HAMLE 1 tamamlandı (kod bazında DONE, ürün bazında yeterince iyi) → HAMLE 2'ye geçildi
+- **Rationale:** Pipeline'ın gerçek değeri D365'e indiğin anda açılıyor. Partner Center tarafı şu anda "kod bazında DONE, ürün bazında yeterince iyi" seviyesinde.
+- **Next:** Execute runbook - Azure AD App Registration, D365 Application User, Hunter config, feature flag, manual E2E testler
 

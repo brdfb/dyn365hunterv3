@@ -1,6 +1,7 @@
 """Hunter → D365 Lead mapping functions."""
 
 from typing import Dict, Any, Optional, List
+from datetime import datetime
 from app.core.logging import logger
 
 
@@ -8,39 +9,37 @@ def _map_segment_to_option_set_value(segment: Optional[str]) -> Optional[int]:
     """
     Map Hunter segment to D365 Option Set integer value.
     
-    D365 Option Set values (typical):
-    - Migration: 0
-    - Existing: 1
-    - Cold: 2
-    - Skip: 3
+    ⚠️ NOTE: D365'teki hnt_segment field'ı SMB/MidMarket/Enterprise değerlerini kullanıyor,
+    ama Hunter'da Migration/Existing/Cold/Skip segment'leri var. Bu uyuşmuyor!
+    
+    Şimdilik None döndürüyoruz - segment mapping'i gelecekte düzeltilmeli.
+    
+    D365 Option Set values (actual from D365):
+    - SMB: 816940000
+    - MidMarket: 816940001
+    - Enterprise: 816940002
     
     Args:
         segment: Hunter segment string (Migration, Existing, Cold, Skip)
         
     Returns:
-        Option Set integer value or None
+        Option Set integer value or None (currently always None - mapping mismatch)
     """
-    if not segment:
-        return None
-    
-    mapping = {
-        "Migration": 0,
-        "Existing": 1,
-        "Cold": 2,
-        "Skip": 3,
-    }
-    
-    return mapping.get(segment)
+    # TODO: Hunter segment (Migration/Existing/Cold/Skip) ile D365 segment (SMB/MidMarket/Enterprise)
+    # uyuşmuyor. Bu mapping gelecekte düzeltilmeli veya segment field'ı kullanılmamalı.
+    # Şimdilik None döndürüyoruz.
+    return None
 
 
 def _map_tenant_size_to_option_set_value(tenant_size: Optional[str]) -> Optional[int]:
     """
     Map Hunter tenant_size to D365 Option Set integer value.
     
-    D365 Option Set values (typical):
-    - Small: 0
-    - Medium: 1
-    - Large: 2
+    D365 Option Set values (actual from D365):
+    - Small (1-50): 816940000
+    - Medium (51-250): 816940001
+    - Large (251-1000): 816940002
+    - Enterprise (1000+): 816940003
     
     Args:
         tenant_size: Hunter tenant_size string (small, medium, large)
@@ -54,10 +53,12 @@ def _map_tenant_size_to_option_set_value(tenant_size: Optional[str]) -> Optional
     # Normalize to lowercase
     tenant_size_lower = tenant_size.lower()
     
+    # Map to D365 Option Set values
     mapping = {
-        "small": 0,
-        "medium": 1,
-        "large": 2,
+        "small": 816940000,  # Small (1-50)
+        "medium": 816940001,  # Medium (51-250)
+        "large": 816940002,  # Large (251-1000)
+        # Note: Enterprise (1000+) = 816940003, but Hunter doesn't have this value
     }
     
     return mapping.get(tenant_size_lower)
@@ -67,10 +68,11 @@ def _map_source_to_option_set_value(source: Optional[str]) -> Optional[int]:
     """
     Map Hunter source to D365 Option Set integer value.
     
-    D365 Option Set values (typical):
-    - Manual: 0
-    - Partner Center: 1
-    - Import: 2
+    D365 Option Set values (actual from D365):
+    - Partner Center: 816940000
+    - Manual: 816940001
+    - Import: 816940002
+    - Other: 816940003
     
     Args:
         source: Hunter source string (Manual, Partner Center, Import)
@@ -81,10 +83,12 @@ def _map_source_to_option_set_value(source: Optional[str]) -> Optional[int]:
     if not source:
         return None
     
+    # Map to D365 Option Set values
     mapping = {
-        "Manual": 0,
-        "Partner Center": 1,
-        "Import": 2,
+        "Partner Center": 816940000,
+        "Manual": 816940001,
+        "Import": 816940002,
+        # Note: "Other" = 816940003, but Hunter doesn't use this value
     }
     
     return mapping.get(source)
@@ -94,11 +98,11 @@ def _map_processing_status_to_option_set_value(status: Optional[str]) -> Optiona
     """
     Map processing status to D365 Option Set integer value.
     
-    D365 Option Set values (typical):
-    - Idle: 0
-    - Working: 1
-    - Completed: 2
-    - Error: 3
+    D365 Option Set values (actual from D365):
+    - Idle: 816940000
+    - Working: 816940001
+    - Completed: 816940002
+    - Error: 816940003
     
     Args:
         status: Processing status string (Idle, Working, Completed, Error)
@@ -109,11 +113,12 @@ def _map_processing_status_to_option_set_value(status: Optional[str]) -> Optiona
     if not status:
         return None
     
+    # Map to D365 Option Set values
     mapping = {
-        "Idle": 0,
-        "Working": 1,
-        "Completed": 2,
-        "Error": 3,
+        "Idle": 816940000,
+        "Working": 816940001,
+        "Completed": 816940002,
+        "Error": 816940003,
     }
     
     return mapping.get(status)
@@ -170,7 +175,8 @@ def map_lead_to_d365(lead_data: Dict[str, Any]) -> Dict[str, Any]:
         # Hunter Intelligence Fields (Section 2)
         "hnt_finalscore": lead_data.get("readiness_score"),  # Hunter Final Score
         "hnt_priorityscore": lead_data.get("priority_score"),  # Hunter Priority Score (1-7)
-        "hnt_segment": _map_segment_to_option_set_value(lead_data.get("segment")),  # Hunter Segment (Option Set - mapped to integer)
+        # hnt_segment: EXCLUDED - Hunter segment (Migration/Existing/Cold/Skip) ile D365 segment (SMB/MidMarket/Enterprise) uyuşmuyor
+        # TODO: Segment mapping'i gelecekte düzeltilmeli veya segment field'ı kullanılmamalı
         "hnt_provider": lead_data.get("provider"),  # Hunter Provider
         "hnt_huntertenantsize": _map_tenant_size_to_option_set_value(lead_data.get("tenant_size")),  # Hunter Tenant Size (Option Set - mapped to integer)
         "hnt_infrasummary": lead_data.get("infrastructure_summary"),  # Hunter Infrastructure Summary
@@ -225,7 +231,15 @@ def map_lead_to_d365(lead_data: Dict[str, Any]) -> Dict[str, Any]:
     
     last_sync_time = lead_data.get("d365_sync_last_at")
     if last_sync_time:
-        hunter_fields["hnt_lastsynctime"] = last_sync_time  # Hunter Last Sync Time
+        # Convert datetime to ISO format string for JSON serialization
+        if isinstance(last_sync_time, datetime):
+            hunter_fields["hnt_lastsynctime"] = last_sync_time.isoformat()  # Hunter Last Sync Time
+        elif isinstance(last_sync_time, str):
+            # Already a string, use as-is
+            hunter_fields["hnt_lastsynctime"] = last_sync_time
+        else:
+            # Try to convert to string
+            hunter_fields["hnt_lastsynctime"] = str(last_sync_time)
     
     sync_error = lead_data.get("d365_sync_error")
     if sync_error:

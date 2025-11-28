@@ -858,6 +858,11 @@ body {
     text-align: center;
 }
 
+.leads-table__cell--d365 {
+    width: 80px;
+    text-align: center;
+}
+
 .leads-table__cell--actions {
     width: 120px;
     text-align: center;
@@ -1837,6 +1842,11 @@ body {
 
 .sales-button:active {
     transform: translateY(0);
+}
+
+.leads-table__cell--d365 {
+    width: 80px;
+    text-align: center;
 }
 
 .leads-table__cell--actions {

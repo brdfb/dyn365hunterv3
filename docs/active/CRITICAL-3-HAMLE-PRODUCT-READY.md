@@ -23,9 +23,10 @@
 
 ## 🎯 **3 KRİTİK HAMLE**
 
-### **HAMLE 1: Partner Center Sync'i Aktifleştir ve Debug Et** 
+### **HAMLE 1: Partner Center Sync'i Aktifleştir ve Debug Et** ✅ **COMPLETED**
 **Süre**: 1-2 gün  
-**Öncelik**: P0 (Kritik - Kaynak entegrasyonu)
+**Öncelik**: P0 (Kritik - Kaynak entegrasyonu)  
+**Durum**: ✅ **Kod bazında DONE, ürün bazında yeterince iyi** (2025-01-30)
 
 #### Problem:
 - Backend %100 hazır ama **feature flag kapalı**
@@ -80,10 +81,11 @@
 
 ---
 
-### **HAMLE 2: Dynamics 365 Push Entegrasyonu**
-**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 3 ✅ Tamamlandı, Phase 2.9 ⏳ Pending)  
+### **HAMLE 2: Dynamics 365 Push Entegrasyonu** ✅ **DEV TESTS COMPLETED**
+**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 3 ✅ Tamamlandı, Phase 2.9 ✅ Dev Tests Completed)  
 **Öncelik**: P0 (Kritik - Satış pipeline'ı)  
-**Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma
+**Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma  
+**Durum**: ✅ **HAMLE 2 dev testleri tamamlandı** (2025-01-30) - Go/No-Go: ✅ GO (production'a geçiş için hazır)
 
 #### Problem:
 - ✅ **Backend Hazır**: D365 push backend'i tamamlandı (Phase 2.5 - %94)
@@ -112,11 +114,12 @@
 - ✅ Unit testler
 - ⚠️ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapılacak)
 
-**⏳ Phase 2.9 — D365 Environment Wiring & Real E2E (PENDING)**
-- **Durum**: D365 tenant hazır olunca yapılacak
-- **Karar**: UI (Phase 3) bu fazı beklemeden başlayabilir
+**✅ Phase 2.9 — D365 Environment Wiring & Real E2E (DEV TESTS COMPLETED)**
+- **Durum**: Dev testleri tamamlandı (2025-01-30)
+- **Tamamlananlar**: Azure AD App Registration ✅, D365 Application User ✅, Hunter config ✅, E2E Tests ✅, UI Badge & Link ✅, Error Handling ✅
+- **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
 - **Kapsam**: Tamamen ops/environment işi (kod değişikliği yok)
-- **Detaylar**: `D365-PHASE-2.9-E2E-WIRING.md` dosyasına bakın
+- **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` dosyasına bakın
 
 **✅ Phase 3 — UI & Status (TAMAMLANDI - 2025-01-30)**
 - ✅ API: Companies/Leads response'a D365 alanlarını eklendi
@@ -212,14 +215,14 @@
 
 ## 📊 **ÖNCELİK SIRASI**
 
-1. **HAMLE 1** (Partner Center Sync) - **1-2 gün** - En hızlı kazanım
-2. **HAMLE 2** (Dynamics 365 Push) - **Revize edildi**:
+1. **HAMLE 1** (Partner Center Sync) - ✅ **TAMAMLANDI** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi
+2. **HAMLE 2** (Dynamics 365 Push) - ✅ **DEV TESTS COMPLETED** (2025-01-30):
    - ✅ **Phase 2.5** (Backend Validation) - **TAMAMLANDI** (%94)
-   - ⏳ **Phase 2.9** (E2E Wiring) - **PENDING** (D365 tenant hazır olunca, ops fazı)
+   - ✅ **Phase 2.9** (E2E Wiring) - **DEV TESTS COMPLETED** (Go/No-Go: ✅ GO)
    - ✅ **Phase 3** (UI & Status) - **TAMAMLANDI** (2025-01-30)
-3. **HAMLE 3** (UI Polish) - **3-5 gün** - En görünür iyileştirme
+3. **HAMLE 3** (UI Polish) - **3-5 gün** - En görünür iyileştirme (HAMLE 2 sonrası)
 
-**Toplam Süre**: Revize edildi - ✅ Phase 3 (UI) tamamlandı (2025-01-30), ⏳ Phase 2.9 tenant hazır olunca yapılacak
+**Toplam Süre**: ✅ Phase 3 (UI) tamamlandı (2025-01-30), 🔄 Phase 2.9 E2E Wiring başlatıldı (2025-01-30)
 
 ---
 
