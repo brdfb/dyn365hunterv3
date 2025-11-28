@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### In Progress
+- **HAMLE 1: Partner Center Sync Aktifleştirme** (2025-01-30) - 🔄 **KOD İNCELEMESİ TAMAMLANDI**
+  - OAuth credentials kontrolü tamamlandı (CLIENT_ID, TENANT_ID mevcut)
+  - Feature flag aktifleştirme tamamlandı (`HUNTER_PARTNER_CENTER_ENABLED=true`)
+  - Initial authentication tamamlandı (Token cache mevcut, token başarıyla alındı)
+  - Manual sync test tamamlandı (739 referral, 17 M365 company database'de)
+  - UI feedback kontrolü tamamlandı (HTML yapısı doğrulandı, browser test yapıldı)
+  - Error handling doğrulama tamamlandı (Kod incelemesi tamamlandı)
+  - **Durum**: Kod incelemesi %100 tamamlandı, manuel testler kaldı (~85% complete)
+  - **Dokümantasyon**: `docs/active/HAMLE-1-EXECUTION-PLAN.md`, `HAMLE-1-UI-TEST-CHECKLIST.md`, `HAMLE-1-ERROR-HANDLING-TEST.md`, `HAMLE-1-SUMMARY.md`
+
 ### Completed
 - **Partner Center Referral Detail Features** (2025-01-30) - ✅ **COMPLETED**
   - Referral detail endpoint: `GET /api/v1/partner-center/referrals/{referral_id}` implemented

@@ -8,10 +8,11 @@
 ## ⚠️ **MEVCUT DURUM**
 
 ### Dosya Sayısı
-- **Mevcut:** 9 dosya (2025-01-30 D365 phase cleanup sonrası)
-- **Güncel:** 9 dosya (2025-01-30 D365 Push PoC sonrası - 2 dosya archive edildi)
+- **Mevcut:** 14 dosya (2025-01-30 HAMLE 1 dokümantasyonu eklendi)
+- **Güncel:** 14 dosya (2025-01-30 HAMLE 1 - 5 yeni dosya eklendi)
 - **Hedef:** 5-7 dosya (documentation guardrails)
-- **Durum:** ⚠️ **Hala fazla** - Daha fazla cleanup gerekiyor (hedef 5-7'ye yaklaşıldı)
+- **Durum:** ⚠️ **Fazla** - HAMLE 1 tamamlanınca archive edilecek
+- **Son Ekleme:** HAMLE-1-EXECUTION-PLAN.md, HAMLE-1-UI-TEST-CHECKLIST.md, HAMLE-1-UI-TEST-RESULTS.md, HAMLE-1-ERROR-HANDLING-TEST.md, HAMLE-1-SUMMARY.md (2025-01-30)
 - **Son Archive:** D365-PHASE-1-BACKEND-FIXES-COMPLETE.md, D365-LEAD-FIELDS-CRITIQUE.md (2025-01-30)
 
 ---
@@ -21,9 +22,13 @@
 ### Partner Center
 - **Backend:** ✅ Tamamlanmış (2025-01-30)
 - **Solution 1:** ✅ Tamamlandı (2025-01-30) - Link status & referral ID enhancement, UI consistency fixed
-- **Production:** ⚠️ Aktif değil (feature flag OFF)
-- **Aksiyon:** Hamle 1 - Aktifleştirme gerekiyor
-- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `PARTNER-CENTER-LEADS-TAB-INCONSISTENCY-ANALYSIS.md`, `SOLUTION-1-UI-CONSISTENCY-CHECK.md`
+- **HAMLE 1:** 🔄 **KOD İNCELEMESİ TAMAMLANDI** (2025-01-30) - ~85% complete, manuel testler kaldı
+  - ✅ OAuth credentials, feature flag, authentication, manual sync test tamamlandı
+  - ✅ UI HTML yapısı doğrulandı, error handling kod incelemesi tamamlandı
+  - 🔄 UI JS functionality ve error handling manuel testleri kaldı
+- **Production:** ⚠️ Aktif değil (feature flag ON ama manuel testler kaldı)
+- **Aksiyon:** Hamle 1 - Manuel testler tamamlanınca production'a geçilebilir
+- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `HAMLE-1-EXECUTION-PLAN.md`, `HAMLE-1-SUMMARY.md`
 
 ### Dynamics 365
 - **Durum:** ✅ Backend %94 tamamlandı (Phase 2.5), ✅ Phase 3 (UI) tamamlandı, ⏳ Phase 2.9 (E2E) runbook hazır
@@ -54,13 +59,22 @@
 
 **Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30)
 
-### ✅ **Hamle 1 Dosyaları** (4 dosya - ✅ Archive edildi - 2025-01-30)
+### ✅ **Hamle 1 Eski Dosyaları** (4 dosya - ✅ Archive edildi - 2025-01-30)
 - `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → `archive/2025-01-30-HAMLE-1-PRODUCTION-DEPLOYMENT.md`
 - `HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md` → `archive/2025-01-30-HAMLE-1-PARTNER-CENTER-PRODUCTION-READY-PLAN.md`
 - `HAMLE-1-EXECUTION-RUNBOOK.md` → `archive/2025-01-30-HAMLE-1-EXECUTION-RUNBOOK.md`
 - `HAMLE-1-REFERRAL-DETAILS-PLAN.md` → `archive/2025-01-30-HAMLE-1-REFERRAL-DETAILS-PLAN.md`
 
 **Durum:** ✅ **Archive edildi** (2025-01-30)
+
+### 🔄 **Hamle 1 Yeni Dosyaları** (5 dosya - 🔄 Aktif - 2025-01-30)
+- `HAMLE-1-EXECUTION-PLAN.md` - Execution plan (7 adım, kod incelemesi tamamlandı)
+- `HAMLE-1-UI-TEST-CHECKLIST.md` - UI test checklist
+- `HAMLE-1-UI-TEST-RESULTS.md` - Browser test sonuçları
+- `HAMLE-1-ERROR-HANDLING-TEST.md` - Error handling test planı
+- `HAMLE-1-SUMMARY.md` - Özet ve durum
+
+**Durum:** 🔄 **Aktif** - Kod incelemesi tamamlandı, manuel testler kaldı (~85% complete)
 
 ### 📊 **Strateji Dosyaları** (2 dosya)
 - `KALAN-ISLER-PRIORITY.md` - Öncelik listesi (aktif)

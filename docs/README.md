@@ -90,6 +90,14 @@ API contract documentation:
 - `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap** - Mimari refactor ve entegrasyon yol haritası (güncel durum)
 - `CORE-FREEZE-D365-PUSH-PLAN.md` - **Core Freeze + D365 Push Planı** - Core koruma ve D365 entegrasyon mimarisi
 
+#### HAMLE 1: Partner Center Sync Aktifleştirme (2025-01-30)
+- `HAMLE-1-EXECUTION-PLAN.md` - **Execution Plan** - 7 adımlı aktivasyon planı (kod incelemesi tamamlandı)
+- `HAMLE-1-UI-TEST-CHECKLIST.md` - **UI Test Checklist** - UI feedback test checklist
+- `HAMLE-1-UI-TEST-RESULTS.md` - **UI Test Results** - Browser test sonuçları (HTML verified, JS manual test gerekiyor)
+- `HAMLE-1-ERROR-HANDLING-TEST.md` - **Error Handling Test Plan** - Error handling test senaryoları ve kod incelemesi
+- `HAMLE-1-SUMMARY.md` - **Özet** - HAMLE 1 tamamlanma durumu ve sonraki adımlar
+- **Durum**: Kod incelemesi %100 tamamlandı, manuel testler kaldı (~85% complete)
+
 #### Reference Guides
 **Location:** `docs/reference/`
 - `DEVELOPMENT-ENVIRONMENT.md` - Development environment setup guide
