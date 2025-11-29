@@ -30,6 +30,9 @@ async def get_leads_v1(
     provider: Optional[str] = Query(
         None, description="Filter by provider (M365, Google, etc.)"
     ),
+    referral_type: Optional[str] = Query(
+        None, description="Filter by Partner Center referral type (co-sell, marketplace, solution-provider)"
+    ),
     favorite: Optional[bool] = Query(
         None,
         description="Filter by favorites (true = only favorites, false = all leads)",
@@ -56,6 +59,7 @@ async def get_leads_v1(
         segment=segment,
         min_score=min_score,
         provider=provider,
+        referral_type=referral_type,
         favorite=favorite,
         sort_by=sort_by,
         sort_order=sort_order,

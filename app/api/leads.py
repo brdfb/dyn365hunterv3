@@ -500,12 +500,14 @@ async def get_leads(
         WHERE 1=1
     """
     # Add same filters to count query
+    # NOTE: params dictionary is already populated above, so we just add the filter conditions
     if segment:
         count_query += " AND lr.segment = :segment"
     if min_score is not None:
         count_query += " AND lr.readiness_score >= :min_score"
     if provider:
         count_query += " AND lr.provider = :provider"
+    # referral_type is already added to params above (line 476), just add filter condition
     if referral_type:
         count_query += " AND pcr.referral_type = :referral_type"
     if search:
