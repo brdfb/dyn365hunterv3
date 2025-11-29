@@ -8,6 +8,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Fresh Start Script for End Users** (2025-01-30) - Complete automated setup script for clean installation
+  - **Script**: `scripts/fresh_start.sh` - One-command setup for end users
+    - Prerequisites check (Docker, Docker Compose)
+    - Environment file preparation (`.env` from `.env.example`)
+    - Environment variables validation (via `check_env_completeness.sh`)
+    - Docker services startup (build and start containers)
+    - Health checks (PostgreSQL, Redis, API)
+    - Database migrations (Alembic upgrade head)
+    - Optional integration setup (Partner Center, D365)
+    - Final verification (all services status)
+  - **Documentation**: `docs/reference/FRESH-START-GUIDE.md` - Complete setup guide
+    - Quick start (automated script)
+    - Manual step-by-step installation
+    - Troubleshooting section
+    - Integration setup instructions
+    - Post-installation verification
+  - **Features**:
+    - Non-interactive mode support (CI/CD friendly)
+    - Environment variable control (`FORCE_RESET_ENV`, `ENABLE_INTEGRATIONS`)
+    - Terminal detection for interactive prompts
+    - Comprehensive error handling
+  - **Files**: `scripts/fresh_start.sh`, `docs/reference/FRESH-START-GUIDE.md`, `README.md`
+  - **Status**: ✅ **Added** - End users can now do clean setup with single command
+
+- **Container Tools Module** (2025-01-30) - Container Python scripts moved to `app/tools/` for permanent solution
+  - **New Module**: `app/tools/` - Python module for container utility scripts
+    - `app/tools/__init__.py` - Module initialization
+    - `app/tools/partner_center_device_code_flow.py` - Partner Center Device Code Flow authentication
+    - `app/tools/sync_partner_center.py` - Partner Center manual sync script
+    - `app/tools/d365_smoketest.py` - D365 smoke test script
+    - `app/tools/test_d365_error_handling.py` - D365 error handling test script
+  - **Documentation**: `docs/reference/TOOLS-USAGE.md` - Tools usage guide
+    - Available tools list
+    - Usage examples
+    - Migration notes (from `scripts/` to `app/tools/`)
+    - Verification steps
+  - **Benefits**:
+    - Scripts automatically included in Docker image (via `app/` directory copy)
+    - Consistent structure (all container scripts under `app/`)
+    - Module-based execution (`python -m app.tools.*`)
+    - No more `docker cp` workarounds needed
+  - **Files**: `app/tools/*.py`, `docs/reference/TOOLS-USAGE.md`
+  - **Status**: ✅ **Added** - Container scripts now permanently available in Docker image
+
+### Changed
 - **Hunter Roadmap Mode – Context & Doc Rules** (2025-01-30) - Context management and documentation rules for Hunter project
   - **Global Mod: Roadmap Mode (Prod INACTIVE)**: Default mode is Roadmap/Feature Development, Production Go/No-Go docs are INACTIVE
   - **Aktif Context Kaynağı**: Priority file reading order for new chat/context situations
