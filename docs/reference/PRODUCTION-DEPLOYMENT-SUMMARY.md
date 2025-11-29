@@ -47,7 +47,7 @@ HUNTER_PARTNER_CENTER_SYNC_INTERVAL=600  # Production: 10 minutes
 **Komut**:
 ```bash
 # Production container'a bağlan
-docker-compose exec api python scripts/partner_center_device_code_flow.py
+docker-compose exec api python -m app.tools.partner_center_device_code_flow
 ```
 
 **Adımlar**:

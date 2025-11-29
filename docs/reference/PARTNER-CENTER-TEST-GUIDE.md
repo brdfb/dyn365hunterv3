@@ -235,7 +235,7 @@ docker-compose exec postgres psql -U dyn365hunter -d dyn365hunter -c "\d partner
 
 ```bash
 # Setup script'i çalıştır (eğer varsa)
-docker-compose exec api python -m scripts.sync_partner_center
+docker-compose exec api python -m app.tools.sync_partner_center
 
 # VEYA manuel olarak Python ile:
 docker-compose exec api python
