@@ -76,12 +76,13 @@
 
 ## 📋 **DOSYA KATEGORİLERİ**
 
-### ✅ **Kritik Durum Dosyaları** (3 dosya - Tutarlı)
+### ✅ **Kritik Durum Dosyaları** (4 dosya - Tutarlı)
 1. `HUNTER-STATE-v1.0.md` - Sistem durumu (tek resmi kaynak)
 2. `CRITICAL-3-HAMLE-PRODUCT-READY.md` - Acil aksiyon planı (Roadmap Mode)
 3. `G21-ROADMAP-CURRENT.md` - Mimari roadmap
+4. `DEVELOPMENT-ROADMAP.md` - Merkezi roadmap (tüm aktif TODO'lar ve planlar)
 
-**Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30), Prod Go/No-Go inactive
+**Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30), Prod Go/No-Go inactive, merkezi roadmap oluşturuldu
 
 **Not:** `PRODUCTION-READINESS-FINAL-CHECKLIST.md` → Archive edildi (2025-01-30) - Prod Go/No-Go inactive
 
@@ -102,14 +103,21 @@
 
 **Durum:** ✅ **Archive edildi** (2025-01-30 - HAMLE 1 tamamlandı)
 
-### 📊 **Strateji Dosyaları** (2 dosya)
-- `KALAN-ISLER-PRIORITY.md` - Öncelik listesi (aktif)
-- `NO-BREAK-REFACTOR-PLAN.md` - Refactor planı (aktif)
+### ✅ **Merkezi Roadmap** (1 dosya - ✅ Yeni oluşturuldu - 2025-01-30)
+- `DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar tek yerde
+  - ✅ Tamamlananlar özeti
+  - ✅ Aktif öncelikler (P0/P1/P2)
+  - ✅ G21 Architecture Refactor durumu
+  - ✅ Integration Roadmap durumu
+  - ✅ Post-MVP enhancements listesi
+  - ✅ İlgili dokümanlara cross-reference'lar
+
+**Durum:** ✅ **Oluşturuldu** (2025-01-30) - KALAN-ISLER-PRIORITY.md ve YARIM-KALAN-ISLER-LISTESI.md içerikleri buraya taşındı
 
 ### ✅ **Post-MVP Strategy** (1 dosya - ✅ Plans'a taşındı - 2025-01-30)
 - `POST-MVP-STRATEGY.md` → `plans/2025-01-30-POST-MVP-STRATEGY.md`
 
-**Durum:** ✅ **Plans klasörüne taşındı** (2025-01-30)
+**Durum:** ✅ **Plans klasörüne taşındı** (2025-01-30) - Merkezi roadmap referansı eklendi
 
 ### ✅ **Production Dosyaları** (3 dosya - ✅ Reference'a taşındı - 2025-01-30)
 - `PRODUCTION-DEPLOYMENT-SUMMARY.md` → `reference/PRODUCTION-DEPLOYMENT-SUMMARY.md`
@@ -125,9 +133,6 @@
 
 **Durum:** ✅ **Archive edildi** (2025-01-30 - Solution 1 ve Solution 2 tamamlandı)
 
-### 🔧 **Strateji Dosyaları** (2 dosya)
-- `KALAN-ISLER-PRIORITY.md` - Öncelik listesi (aktif)
-- `NO-BREAK-REFACTOR-PLAN.md` - Refactor planı (aktif)
 
 ---
 
@@ -153,10 +158,11 @@
 
 ## ⚠️ **SORUNLAR**
 
-### 1. Dosya Sayısı Fazla
-- **Mevcut:** 9 dosya (2025-01-30 Prod Go/No-Go inactive sonrası)
+### 1. Dosya Sayısı ✅ **HEDEF ARALIĞINDA**
+- **Mevcut:** 6 dosya (2025-01-30 cleanup sonrası)
 - **Önceki:** 19 dosya (2025-01-30 Prod Go/No-Go cleanup öncesi)
 - **Hedef:** 5-7 dosya
+- **Durum:** ✅ **HEDEF ARALIĞINDA** (6 dosya)
 - **Çözüm:** Tamamlanmış phase dosyaları ve Prod Go/No-Go dokümanları archive edildi
   - ✅ Solution 1 ve Solution 2 dosyaları archive edildi (2025-01-30)
   - ✅ Hamle 1 dosyaları archive edildi (2025-01-30)
@@ -164,6 +170,8 @@
   - ✅ D365 Phase 3 dosyası archive edildi (2025-01-30)
   - ✅ D365 Phase 2.9 eski wiring dosyası archive edildi (2025-01-30 - yeni runbook var)
   - ✅ Prod Go/No-Go dokümanları archive edildi (10 dosya - 2025-01-30)
+  - ✅ Overlap dosyalar archive edildi (KALAN-ISLER-PRIORITY.md, YARIM-KALAN-ISLER-LISTESI.md, NO-BREAK-REFACTOR-PLAN.md - 2025-01-30)
+  - ✅ Merkezi roadmap oluşturuldu (DEVELOPMENT-ROADMAP.md - 2025-01-30)
 
 ### 2. Manuel Kontrol Gerekiyor
 - Tutarlılık kontrolü manuel
@@ -206,10 +214,10 @@
 - ✅ Status dosyaları var (reference için)
 
 ### ⚠️ **Zor Taraflar**
-- ⚠️ Çok fazla dosya (14 dosya, hedef 5-7)
 - ⚠️ Manuel kontrol gerekiyor (otomatik script yok)
-- ⚠️ Dağınık bilgi (farklı dosyalarda aynı bilgi)
-- ⚠️ Archive edilmesi gereken dosyalar aktif klasöründe
+- ✅ Dosya sayısı hedef aralığında (6 dosya, hedef 5-7) ✅
+- ✅ Merkezi roadmap oluşturuldu (dağınık bilgi birleştirildi) ✅
+- ✅ Archive edilmesi gereken dosyalar archive edildi ✅
 
 ### 📈 **İyileştirme Potansiyeli**
 - 📈 Otomatik kontrol scripti → %80 kolaylık artışı
@@ -220,16 +228,18 @@
 
 ## 🎯 **SONUÇ**
 
-**Mevcut Durum:** ⚠️ **ORTA ZORLUKTA**
+**Mevcut Durum:** ✅ **KOLAY**
 
 - ✅ Kritik dosyalar tutarlı ve güncel
-- ⚠️ Dosya sayısı fazla (cleanup gerekiyor)
-- ⚠️ Manuel kontrol gerekiyor (otomatik script yok)
+- ✅ Dosya sayısı hedef aralığında (6 dosya, hedef 5-7)
+- ✅ Merkezi roadmap oluşturuldu (DEVELOPMENT-ROADMAP.md)
+- ✅ Sistematik cross-reference'lar var
+- ⚠️ Manuel kontrol gerekiyor (otomatik script yok - gelecek iyileştirme)
 
-**Hedef Durum:** ✅ **KOLAY**
+**Hedef Durum:** ✅ **KOLAY** (Hedefe ulaşıldı)
 
-- ✅ 5-7 aktif dosya
-- ✅ Otomatik tutarlılık kontrolü
+- ✅ 5-7 aktif dosya (6 dosya ✅)
+- ✅ Merkezi roadmap (DEVELOPMENT-ROADMAP.md)
 - ✅ Sistematik cross-reference'lar
 
 ---
@@ -272,6 +282,10 @@
 - ✅ DEVELOPMENT-ROADMAP.md oluşturuldu (merkezi TODO/plan dosyası)
 - ✅ Tamamlanmış işler archive edildi (LEADS-500-BUG-FIX.md)
 - ✅ Overlap dosyalar archive edildi (YARIM-KALAN-ISLER-LISTESI.md, KALAN-ISLER-PRIORITY.md, NO-BREAK-REFACTOR-PLAN.md)
-- ✅ Reference dosyası taşındı (ENVIRONMENT-ARCHITECTURE.md → reference/)
+- ✅ Reference dosyaları taşındı (ENVIRONMENT-ARCHITECTURE.md, G21-DEPENDENCY-MAP.md, SALES-SUMMARY-V1-CONTRACT.md → reference/)
+- ✅ G21 phase completion reports archive edildi (PHASE0-COMPLETION.md, PHASE1-COMPLETION.md, usage_metrics.json)
+- ✅ Integration plans archive edildi (INTEGRATION-ROADMAP-v1.0.md, INTEGRATION-TASKS.md, GOLDEN-DATASET-CRITIQUE.md)
+- ✅ Roast prompts archive edildi (4 cursor-roast dosyası)
+- ✅ Boş klasörler temizlendi (g21-phase0-metrics, api)
 - ✅ Dosya sayısı 6'ya düştü (hedef: 5-7) ✅
 

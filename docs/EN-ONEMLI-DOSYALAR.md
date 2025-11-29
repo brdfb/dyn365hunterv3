@@ -161,14 +161,18 @@
 
 ---
 
-### 12. **KALAN-ISLER-PRIORITY.md** ⭐
-**Konum:** `docs/active/KALAN-ISLER-PRIORITY.md`  
-**Önemi:** Kalan işler öncelik listesi  
+### 12. **DEVELOPMENT-ROADMAP.md** ⭐⭐
+**Konum:** `docs/active/DEVELOPMENT-ROADMAP.md`  
+**Önemi:** 🔥 **MERKEZİ ROADMAP** - Tüm aktif TODO'lar ve planlar tek yerde  
 **İçerik:**
-- Öncelikli işler
-- Task listesi
+- Tamamlananlar özeti
+- Aktif öncelikler (P0/P1/P2)
+- G21 Architecture Refactor durumu
+- Integration Roadmap durumu
+- Post-MVP enhancements listesi
+- İlgili dokümanlara cross-reference'lar
 
-**Ne Zaman Bakılır:** Öncelik belirleme için
+**Ne Zaman Bakılır:** Aktif işleri ve planları görmek için (KALAN-ISLER-PRIORITY.md ve YARIM-KALAN-ISLER-LISTESI.md içerikleri buraya taşındı)
 
 ---
 
@@ -287,13 +291,15 @@
 ---
 
 ### 21. **INTEGRATION-ROADMAP.md** ⭐
-**Konum:** `docs/todos/INTEGRATION-ROADMAP.md`  
-**Önemi:** Integration roadmap TODO  
+**Konum:** `docs/archive/2025-01-30-INTEGRATION-ROADMAP.md` (Archived)  
+**Önemi:** Integration roadmap TODO (✅ COMPLETED - 2025-01-30)  
 **İçerik:**
-- Integration phase'leri
+- Integration phase'leri (Phase 1-3 completed)
 - Task listesi
 
-**Ne Zaman Bakılır:** Integration takibi için
+**Ne Zaman Bakılır:** Integration geçmişi için (archived - tamamlandı)
+
+**Not:** Güncel durum için `docs/active/DEVELOPMENT-ROADMAP.md` dosyasına bakın
 
 ---
 
@@ -315,9 +321,9 @@
 - `SMOKE-TESTS-RUNBOOK.md`
 
 ### 📊 **Strateji ve Planlama (P1)**
+- `DEVELOPMENT-ROADMAP.md` (Merkezi roadmap - tüm aktif TODO'lar ve planlar)
 - `G21-ROADMAP-CURRENT.md` (Roadmap Mode - Prod Go/No-Go inactive)
 - `POST-MVP-STRATEGY.md` (plans klasöründe)
-- `KALAN-ISLER-PRIORITY.md` (Prod Go/No-Go inactive)
 - `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (✅ Completed - Archived)
 - `D365-PHASE-2.9-E2E-RUNBOOK.md` (Reference)
 
@@ -349,6 +355,11 @@
 
 **Son Güncelleme:** 2025-01-30 (Prod Go/No-Go inactive, roadmap moduna geçildi)  
 **Not:** 
+- `DEVELOPMENT-ROADMAP.md` → Oluşturuldu (2025-01-30) - Merkezi roadmap
+- `KALAN-ISLER-PRIORITY.md` → Archive edildi (2025-01-30 - içerik DEVELOPMENT-ROADMAP.md'ye taşındı)
+- `YARIM-KALAN-ISLER-LISTESI.md` → Archive edildi (2025-01-30 - içerik DEVELOPMENT-ROADMAP.md'ye taşındı)
+- `NO-BREAK-REFACTOR-PLAN.md` → Archive edildi (2025-01-30 - G21 roadmap ile overlap)
+- `INTEGRATION-ROADMAP.md` → Archive edildi (2025-01-30 - COMPLETED)
 - `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → Archive edildi (2025-01-30)
 - `POST-MVP-STRATEGY.md` → Plans klasörüne taşındı (2025-01-30)
 - Prod Go/No-Go dokümanları → Archive edildi (10 dosya - 2025-01-30)

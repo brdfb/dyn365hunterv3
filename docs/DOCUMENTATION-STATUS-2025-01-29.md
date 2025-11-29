@@ -2,7 +2,8 @@
 
 **Tarih:** 2025-01-29  
 **Kontrol:** docs/ klasörü içerik güncelliği kontrolü ve cleanup  
-**Durum:** ✅ **TÜM CLEANUP İŞLEMLERİ TAMAMLANDI**
+**Durum:** ✅ **TÜM CLEANUP İŞLEMLERİ TAMAMLANDI**  
+**Not:** Bu dosya tarihsel referans için korunuyor. Güncel durum için `docs/ACTIVE-STATUS-SUMMARY.md` dosyasına bakın (2025-01-30 güncellemesi).
 
 ---
 
