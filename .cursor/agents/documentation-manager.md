@@ -140,8 +140,9 @@ scripts/manage_docs.sh list
 
 ### Documentation Guardrails
 - **Active Docs Limit**: Maximum 5-7 files in `docs/active/` (enforced)
-  - **Current**: 9 files (2025-01-30) - Target: 5-7 files
-  - **Progress**: 13 → 9 files (D365 phase cleanup completed - 2025-01-30)
+  - **Current**: 6 files (2025-01-30 cleanup sonrası) - Target: 5-7 files ✅
+  - **Progress**: 19 → 10 → 6 files (cleanup completed - 2025-01-30)
+  - **Central Roadmap**: `DEVELOPMENT-ROADMAP.md` created (2025-01-30) - consolidates KALAN-ISLER-PRIORITY.md and YARIM-KALAN-ISLER-LISTESI.md content
 - **Reference Guides**: Reference guides (development, setup, troubleshooting) are in `docs/reference/` (not in `docs/active/`)
   - **New**: `DEV-PROD-DIFFERENCES.md` added to reference (2025-01-30)
 - **Archive Immediately**: Archive completed phase docs immediately (don't wait)
@@ -293,7 +294,7 @@ scripts/manage_docs.sh list
    - Archive UI checklist: `docs/active/UI-STABILIZATION-CHECKLIST-v1.0.md` → `docs/archive/2025-01-28-UI-STABILIZATION-CHECKLIST-v1.0.md`
    - Update CHANGELOG.md with stabilization changes (under `[Unreleased]` or current version)
    - Update README.md Features section (mark stabilization as ✅)
-   - Update `docs/active/KALAN-ISLER-PRIORITY.md` (mark stabilization as completed)
+   - Update `docs/active/DEVELOPMENT-ROADMAP.md` (mark stabilization as completed - KALAN-ISLER-PRIORITY.md content moved here)
 3. Confirm: "✅ Stabilization Sprint completed - Documentation archived, CHANGELOG updated"
 
 ### Example 4: Important Decision
@@ -407,6 +408,7 @@ This agent should be **always active** in the AI assistant's context. When you s
   4. Confirm: "✅ D365 Push PoC completed - Option Set mapping implemented, documentation updated"
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 - **ACTIVE-STATUS-SUMMARY.md Update**: Önemli değişikliklerden sonra güncelle (phase completion, cleanup, etc.)
+- **DEVELOPMENT-ROADMAP.md Update**: Aktif TODO'lar ve planlar değiştiğinde güncelle (merkezi roadmap)
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
 
