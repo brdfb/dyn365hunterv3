@@ -401,9 +401,9 @@ When a phase is completed (TODO status = "Completed"):
 
 1. Is this in MVP scope? (Check Cut List)
 2. **Is this in the correct Post-MVP sprint?** (Check `docs/plans/2025-11-14-FINAL-ROADMAP.md`)
-3. **Is this a P1 performance/infrastructure task?** (✅ Completed - 2025-01-28 - Check `docs/active/KALAN-ISLER-PRIORITY.md`)
+3. **Is this a P1 performance/infrastructure task?** (✅ Completed - 2025-01-28 - Check `docs/active/DEVELOPMENT-ROADMAP.md` for current priorities)
 4. **Is this a Stabilization Sprint task?** (✅ Completed - 2025-01-28 - v1.1-stable released)
-5. **Is this a G21 Architecture Refactor task?** (🔄 In Progress - 2025-01-28 - Check `docs/active/NO-BREAK-REFACTOR-PLAN.md`)
+5. **Is this a G21 Architecture Refactor task?** (🔄 In Progress - 2025-01-28 - Check `docs/active/G21-ROADMAP-CURRENT.md` or `docs/active/DEVELOPMENT-ROADMAP.md`)
 6. Does this require external API calls? (Handle timeouts/errors)
 7. Will this log PII? (Only log domain)
 8. Is this testable? (Write tests using `db_session` and `client` fixtures)

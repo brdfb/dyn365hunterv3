@@ -469,9 +469,11 @@ When a phase is completed (TODO status = "Completed"):
 
 ### Documentation Structure
 - `docs/active/` - Current phase documentation (keep minimal, max 5-7 files)
-  - **Current**: 9 files (2025-01-30) - Target: 5-7 files
-  - **Recent cleanup**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
-  - **Files**: HUNTER-STATE-v1.0.md, CRITICAL-3-HAMLE-PRODUCT-READY.md, CORE-FREEZE-D365-PUSH-PLAN.md, D365-PHASE-2.9-E2E-RUNBOOK.md, G21-ROADMAP-CURRENT.md, KALAN-ISLER-PRIORITY.md, NO-BREAK-REFACTOR-PLAN.md, PRE-D365-ROAST-SPRINT-TASK-BOARD.md, SALES-ENGINE-V1.1.md
+  - **Current**: 6 files (2025-01-30 cleanup sonrası) - Target: 5-7 files ✅
+  - **Recent cleanup**: D365 Phase 2.5, 3, 2.9 (old wiring) archived, overlap dosyalar archive edildi (2025-01-30)
+  - **Files**: HUNTER-STATE-v1.0.md, CRITICAL-3-HAMLE-PRODUCT-READY.md, G21-ROADMAP-CURRENT.md, DEVELOPMENT-ROADMAP.md, FEATURE-DEVELOPMENT-STATUS.md, HUNTER-CONTEXT-PACK-v1.0.md
+  - **Archived**: KALAN-ISLER-PRIORITY.md, YARIM-KALAN-ISLER-LISTESI.md, NO-BREAK-REFACTOR-PLAN.md (içerik DEVELOPMENT-ROADMAP.md'ye taşındı - 2025-01-30)
+  - **Archived**: CORE-FREEZE-D365-PUSH-PLAN.md, SALES-ENGINE-V1.1.md, D365-PHASE-2.9-E2E-RUNBOOK.md (reference'a taşındı - 2025-01-30)
 - `docs/archive/` - Completed phase documentation (date-prefixed)
   - **Recent**: D365 Phase 2.5, 3, 2.9 (old wiring) archived (2025-01-30)
   - **Recent**: Hamle 1 dosyaları archived (2025-01-30)
@@ -491,7 +493,8 @@ When a phase is completed (TODO status = "Completed"):
     - `2025-01-30-cursor-roast-results-v1.0.md`
     - `2025-01-30-cursor-roast-results-v1.1-pro.md`
 - `docs/todos/` - TODO lists (archive when phase complete)
-  - **Current**: INTEGRATION-ROADMAP.md (Phase 3 IN PROGRESS), G21-architecture-refactor.md (Phase 4 PAUSED)
+  - **Current**: G21-architecture-refactor.md (Phase 4 PAUSED)
+  - **Archived**: INTEGRATION-ROADMAP.md (✅ COMPLETED - 2025-01-30) - İçerik DEVELOPMENT-ROADMAP.md'ye taşındı
   - **Status**: Phase 3 (D365) - ✅ DEV TESTS COMPLETED (2025-01-30) - Backend %94 + UI completed, Phase 2.9 DEV TESTS COMPLETED (Go/No-Go: ✅ GO)
 - `docs/plans/` - Project plans
 
@@ -557,17 +560,18 @@ When a phase is completed (TODO status = "Completed"):
 - **Strategy**: Zero-downtime, additive-first approach
 - **Phases**: 6 phases (Preparation → Deprecation → Sales Engine → Read-Only → Migration → Cleanup)
 - **Risk Level**: 0-5% (with proper execution)
-- **Reference**: `docs/active/NO-BREAK-REFACTOR-PLAN.md` (detailed plan)
+- **Reference**: `docs/archive/2025-01-30-NO-BREAK-REFACTOR-PLAN.md` (archived - G21 roadmap ile overlap), `docs/active/G21-ROADMAP-CURRENT.md` (güncel roadmap)
 - **Architectural Decision**: `docs/prompts/2025-01-28-hunter-architecture-refactor-decision.md`
 - **TODO**: `docs/todos/G21-architecture-refactor.md`
+- **Central Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` (merkezi roadmap - tüm aktif TODO'lar ve planlar)
 
 ## Questions to Ask Before Implementing
 
 1. Is this in MVP scope? (Check Cut List)
 2. **Is this in the correct Post-MVP sprint?** (Check `docs/plans/2025-11-14-FINAL-ROADMAP.md`)
-3. **Is this a P1 performance/infrastructure task?** (Check `docs/active/KALAN-ISLER-PRIORITY.md` and `docs/active/P1-IMPLEMENTATION-PLAYBOOK.md`)
+3. **Is this a P1 performance/infrastructure task?** (✅ Completed - 2025-01-28 - Check `docs/active/DEVELOPMENT-ROADMAP.md` for current priorities)
 4. **Is this a Stabilization Sprint task?** (✅ Completed - 2025-01-28 - v1.1-stable released)
-5. **Is this a G21 Architecture Refactor task?** (🔄 In Progress - 2025-01-28 - Check `docs/active/NO-BREAK-REFACTOR-PLAN.md`)
+5. **Is this a G21 Architecture Refactor task?** (🔄 In Progress - 2025-01-28 - Check `docs/active/G21-ROADMAP-CURRENT.md` or `docs/active/DEVELOPMENT-ROADMAP.md`)
 6. Does this require external API calls? (Handle timeouts/errors)
 7. Will this log PII? (Only log domain)
 8. Is this testable? (Write tests)
