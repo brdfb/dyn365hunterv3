@@ -164,11 +164,11 @@ Tüm kritik işler tamamlandı:
 - [ ] Smoke tests (production'da)
 - [ ] Monitoring setup (Sentry, logs, metrics)
 
-### Post-Release (1 hafta):
-- [ ] Success criteria validation:
-  - [ ] Dynamics sync success rate > 90%
-  - [ ] Pipeline accuracy > 95%
-  - [ ] Error recovery automatic
+### Post-Release (1 hafta - production deployment sonrası):
+- [ ] Success criteria validation (production'da validate edilecek):
+  - [ ] Dynamics sync success rate > 90% (production'da ölçülecek)
+  - [ ] Pipeline accuracy > 95% (production'da ölçülecek)
+  - [ ] Error recovery automatic (code verified ✅, production'da test edilecek)
 - [ ] Performance monitoring:
   - [ ] API response time <1s
   - [ ] Query count (N+1 yok mu?)

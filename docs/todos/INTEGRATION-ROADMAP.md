@@ -1,10 +1,11 @@
 # Integration Roadmap - TODO
 
 **Date Created**: 2025-01-28  
-**Status**: In Progress  
+**Status**: ✅ **COMPLETED** (2025-01-30 - Production Ready)  
 **Priority**: P0.5 → P1 → P2  
-**Estimated Duration**: 9-14 days total  
-**Risk Level**: Low → Medium (with proper execution)
+**Estimated Duration**: 9-14 days total (Completed in ~2 days)  
+**Risk Level**: Low → Medium (with proper execution)  
+**Production Readiness**: ✅ **PRODUCTION READY** → PROD SAFE MODE RELEASE hazır
 
 ---
 
@@ -180,7 +181,7 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ### Phase 3: Dynamics 365 Integration (P2) ✅ **COMPLETED**
 
-**Status**: ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, 3 senaryo, Go/No-Go: ✅ GO)  
+**Status**: ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, 3 senaryo, Go/No-Go: ✅ GO, PROD öncesi kritik işler tamamlandı)  
 **Duration**: 6-10 days (4 faz: S + M + S-M + S = ~1 hafta)  
 **Risk**: 4/10  
 **Priority**: P2  
@@ -211,10 +212,15 @@ Implement correct engineering sequence for Hunter integration with external syst
   - UI Badge & Link: Badge görünüyor ✅, D365 link çalışıyor ✅
   - Error Handling: Authentication error tested ✅, Rate limit & API error code verified ✅
   - **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
-  - **Step-by-step runbook**: `D365-PHASE-2.9-E2E-RUNBOOK.md`
+  - **Step-by-step runbook**: `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (reference guide)
+  - **PROD Öncesi Kritik İşler**: ✅ **COMPLETED** (2025-01-30)
+    - ✅ Retry + Error Handling FINAL (Error categorization, retry metrics, DLQ, manual retry endpoints)
+    - ✅ Basic N+1 Optimization (COUNT(*) optimization, SQL sort optimization)
+    - ✅ UI Polish — Minimum Viable (Design system, button styles, loading/error states, toast notifications)
+  - **Production Readiness**: ✅ **PRODUCTION READY** (Tüm kritik işler tamamlandı) → PROD SAFE MODE RELEASE hazır
 
-**Not:** Detaylı mimari plan için `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.  
-**E2E Runbook:** `D365-PHASE-2.9-E2E-RUNBOOK.md` (tenant setup için step-by-step guide)
+**Not:** Detaylı mimari plan için `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).  
+**E2E Runbook:** `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (tenant setup için step-by-step guide - reference)
 
 #### Tasks (4 Faz)
 
@@ -289,9 +295,9 @@ Implement correct engineering sequence for Hunter integration with external syst
 
 ## 📊 Progress Tracking
 
-**Current Phase**: Phase 3 (Dynamics 365 Integration) ✅ **COMPLETED** (2025-01-30 - Production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO)
+**Current Phase**: Phase 3 (Dynamics 365 Integration) ✅ **COMPLETED** (2025-01-30 - Production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO, PROD öncesi kritik işler tamamlandı, Production Ready)
 
-**Completed**: 3/3 phases (Phase 1 ✅ Completed 2025-01-28, Phase 2 ✅ Completed 2025-01-30, Phase 3 ✅ DEV TESTS COMPLETED 2025-01-30)
+**Completed**: 3/3 phases (Phase 1 ✅ Completed 2025-01-28, Phase 2 ✅ Completed 2025-01-30, Phase 3 ✅ COMPLETED 2025-01-30 - Production Ready)
 
 **Phase 1 Status**: ✅ **COMPLETED** (2025-01-28)
 - All tasks done (Task 1.1-1.5 ✅)
@@ -306,12 +312,12 @@ Implement correct engineering sequence for Hunter integration with external syst
 - **Status**: Phase 2 Complete - Feature flag default OFF (MVP-safe), can be enabled when ready
 - **Remaining**: Scoring Pipeline Integration (Azure Tenant ID override + Co-sell boost) - Future enhancement
 
-**Phase 3 Status**: ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, 3 senaryo)
+**Phase 3 Status**: ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, 3 senaryo, PROD öncesi kritik işler tamamlandı)
 - ✅ Phase 2.5 (Backend): %94 completed (API, Celery task, D365 client, mapping, DB migration)
 - ✅ Phase 3 (UI): Completed (badge, push button, detail modal, status fields)
 - ✅ Roast Sprint: Completed (5/5 tasks: security, idempotency, token cache, session lifecycle, retry backoff)
 - ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working, Option Set mapping implemented
-- ✅ Phase 2.9 (E2E): DEV TESTS COMPLETED (2025-01-30)
+- ✅ Phase 2.9 (E2E): ✅ COMPLETED (2025-01-30)
   - Azure AD App Registration completed
   - D365 Application User created
   - Hunter config completed
@@ -319,17 +325,24 @@ Implement correct engineering sequence for Hunter integration with external syst
   - UI Badge & Link: Badge görünüyor ✅, D365 link çalışıyor ✅
   - Error Handling: Authentication error tested ✅, Rate limit & API error code verified ✅
   - **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
+- ✅ **PROD Öncesi Kritik İşler**: ✅ **COMPLETED** (2025-01-30)
+  - ✅ Retry + Error Handling FINAL (Error categorization, retry metrics, DLQ, manual retry endpoints)
+  - ✅ Basic N+1 Optimization (COUNT(*) optimization, SQL sort optimization)
+  - ✅ UI Polish — Minimum Viable (Design system, button styles, loading/error states, toast notifications)
+- ✅ **Production Readiness**: ✅ **PRODUCTION READY** (Tüm kritik işler tamamlandı) → PROD SAFE MODE RELEASE hazır
 
 **Next Steps**:
 1. ✅ Phase 1 completed - All tasks done (Task 1.1-1.5 ✅)
 2. ✅ Phase 2: Partner Center Referrals - **COMPLETED** (2025-01-30)
-3. ✅ Phase 3: Dynamics 365 Integration - **DEV TESTS COMPLETED** (2025-01-30)
+3. ✅ Phase 3: Dynamics 365 Integration - **COMPLETED** (2025-01-30)
    - ✅ Phase 2.5 (Backend): %94 completed
    - ✅ Phase 3 (UI): Completed
    - ✅ Roast Sprint: Completed (5/5 tasks)
    - ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working
    - ✅ Phase 2.9 (E2E): ✅ COMPLETED (2025-01-30) - Production-grade E2E testleri tamamlandı (3 senaryo), Go/No-Go: ✅ GO
-4. 🔄 Production deployment (HAMLE 2 dev testleri tamamlandı, production'a geçiş hazır)
+   - ✅ PROD Öncesi Kritik İşler: ✅ COMPLETED (2025-01-30) - Retry + Error Handling FINAL, Basic N+1 Optimization, UI Polish Minimum
+   - ✅ Production Readiness: ✅ PRODUCTION READY → PROD SAFE MODE RELEASE hazır
+4. 🔄 Production deployment (Production Ready - PROD SAFE MODE RELEASE yapılabilir)
 
 ---
 
@@ -356,7 +369,9 @@ Implement correct engineering sequence for Hunter integration with external syst
 ### Phase 3 (Dynamics)
 - [x] ✅ Dev tests completed (E2E tests, UI tests, error handling tests)
 - [x] ✅ Go/No-Go Decision: ✅ GO (production'a geçiş için hazır)
-- [ ] Production deployment (pending)
+- [x] ✅ PROD Öncesi Kritik İşler: ✅ COMPLETED (Retry + Error Handling FINAL, Basic N+1 Optimization, UI Polish Minimum)
+- [x] ✅ Production Readiness: ✅ PRODUCTION READY → PROD SAFE MODE RELEASE hazır
+- [ ] Production deployment (Production Ready - PROD SAFE MODE RELEASE yapılabilir)
 - [ ] Dynamics sync success rate > 90% (production'da validate edilecek)
 - [ ] Pipeline accuracy > 95% (production'da validate edilecek)
 - [ ] Error recovery automatic (code verified, production'da test edilecek)
