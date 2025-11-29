@@ -23,9 +23,10 @@ Comprehensive documentation management agent that automatically updates document
 
 ### 4. Regular Maintenance
 - **ACTIVE-STATUS-SUMMARY.md Check**: Düzenli kontrol et (haftalık veya önemli değişikliklerden sonra)
-  - Dosya sayısı kontrolü (hedef: 5-7 dosya)
+  - Dosya sayısı kontrolü (hedef: 5-7 dosya) - ✅ Current: 6 files (2025-01-30)
   - Tutarlılık kontrolü (Partner Center, Dynamics 365, UI durumları)
   - Cleanup önerileri kontrolü
+- **DEVELOPMENT-ROADMAP.md**: Merkezi roadmap (tüm aktif TODO'lar ve planlar) - KALAN-ISLER-PRIORITY.md ve YARIM-KALAN-ISLER-LISTESI.md içerikleri buraya taşındı (2025-01-30)
 - **Weekly Cleanup**: Check for outdated prompts (not referenced in 7+ days)
 - **Archive Old Docs**: Keep `docs/active/` minimal (max 5-7 files, reference guides moved to `docs/reference/`)
 - **Feature Documentation**: Archive feature docs when complete (e.g., PROVIDER-CHANGE-TRACKING.md, DUPLICATE-PREVENTION.md)
@@ -318,9 +319,14 @@ scripts/manage_docs.sh list
 
 Agent should regularly check:
 - **ACTIVE-STATUS-SUMMARY.md** (📊 **NEW** - 2025-01-30): Düzenli kontrol et - Tek bakışta tüm active dosyaların durumu
-  - Dosya sayısı kontrolü (hedef: 5-7 dosya)
+  - Dosya sayısı kontrolü (hedef: 5-7 dosya) - ✅ Current: 6 files (2025-01-30)
   - Tutarlılık kontrolü (Partner Center, Dynamics 365, UI durumları)
   - Cleanup önerileri (archive edilebilir dosyalar)
+- **DEVELOPMENT-ROADMAP.md** (📋 **NEW** - 2025-01-30): Merkezi roadmap - Tüm aktif TODO'lar ve planlar tek yerde
+  - Feature Development durumu
+  - G21 Architecture Refactor durumu
+  - Integration Roadmap durumu
+  - Post-MVP enhancements listesi
 - TODO files status changes
 - Active documentation count (should be < 7 files, reference guides are in `docs/reference/`)
 - Feature documentation in `docs/active/` (should be archived when complete)
@@ -408,6 +414,7 @@ This agent should be **always active** in the AI assistant's context. When you s
   4. Confirm: "✅ D365 Push PoC completed - Option Set mapping implemented, documentation updated"
 - User mentions "G21 tamamlandı" → Run G21 completion workflow
 - **ACTIVE-STATUS-SUMMARY.md Update**: Önemli değişikliklerden sonra güncelle (phase completion, cleanup, etc.)
+- **DEVELOPMENT-ROADMAP.md Update**: Aktif TODO'lar ve planlar değiştiğinde güncelle (merkezi roadmap)
 - **DEVELOPMENT-ROADMAP.md Update**: Aktif TODO'lar ve planlar değiştiğinde güncelle (merkezi roadmap)
 
 **DO NOT WAIT** for user to ask - update documentation immediately after code changes.
