@@ -22,6 +22,160 @@
 - **✅ D365 Lead Push PoC**: ✅ **COMPLETED** (2025-01-30) - Hunter → D365 Lead Push working, Option Set mapping implemented
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20), CSP P-Model (2025-01-29)
 
+## Hunter Roadmap Mode – Context & Doc Rules
+
+**⚠️ CRITICAL**: Bu kurallar **Dyn365Hunter / Hunter** projesi için geçerlidir ve **her yeni chat / yeni context** durumunda uygulanmalıdır.
+
+### 1. Global Mod: Roadmap Mode (Prod INACTIVE)
+
+- Varsayılan mod **Roadmap / Feature Development** modudur.
+
+- **Prod Go/No-Go, Pre-Deployment, Production-Ready** dokümanları şu anda **INACTIVE** kabul edilmelidir:
+
+  - `docs/archive/2025-01-30-PRE-DEPLOYMENT-*`
+
+  - `docs/archive/2025-01-30-PRODUCTION-*`
+
+  - `docs/archive/2025-01-30-HAMLE-2-*-GO-NOGO-*`
+
+- Bu dokümanları sadece kullanıcı **özellikle** açar veya referans verirse dikkate al.
+
+- Kendi kendine "prod'a çıkalım mı, Go/No-Go nedir?" tartışması başlatma.
+
+### 2. Aktif Context Kaynağı (Yeni Chat / Yeni Context)
+
+Hunter'la ilgili herhangi bir işte, özellikle **yeni chat** veya **boş context** durumunda:
+
+1. Önce bu dosyaları **yüksek öncelikle** oku ve bağlamı bunlara göre kur:
+
+   - `docs/active/HUNTER-CONTEXT-PACK-v1.0.md`
+
+   - `docs/active/HUNTER-STATE-v1.0.md`
+
+   - `docs/active/FEATURE-DEVELOPMENT-STATUS.md`
+
+   - `docs/reference/ENVIRONMENT-ARCHITECTURE.md`
+
+2. Ardından, aktif işler ve öncelikler için:
+
+   - `docs/active/DEVELOPMENT-ROADMAP.md` (merkezi roadmap - KALAN-ISLER-PRIORITY.md ve YARIM-KALAN-ISLER-LISTESI.md içerikleri buraya taşındı)
+
+   - `docs/active/G21-ROADMAP-CURRENT.md` (G21 architecture refactor için)
+
+   - `docs/active/CRITICAL-3-HAMLE-PRODUCT-READY.md` (3 kritik hamle için)
+
+   - `docs/active/LEADS-500-BUG-FIX.md` (bug fix durumu için)
+
+3. D365 ve Lead yapısı ile ilgili teknik detay gerekiyorsa:
+
+   - `docs/reference/LEAD-DATA-DICTIONARY.md`
+
+   - `docs/reference/LEAD-FORM-ARCHITECTURE.md`
+
+   - `docs/reference/LEAD-VIEWS.md`
+
+   - `docs/reference/LEAD-TABLE-FORM-ANALYSIS.md`
+
+   - `docs/reference/D365-OPTION-SET-MAPPING.md`
+
+Bu dosyalar, Hunter'ın **tek doğruluk kaynağı (single source of truth)** olarak kabul edilmelidir.
+
+### 3. Dev vs Prod Ayrımı
+
+- `docs/reference/ENVIRONMENT-ARCHITECTURE.md` içeriğine göre:
+
+  - Mevcut çalışma ortamı **local dev** (Windows + Docker Desktop + WSL2 Linux konteyner).
+
+  - **Gerçek production environment tanımlanmamış** kabul edilir.
+
+- Varsayılan varsayım:
+
+  - Tüm komutlar, script'ler ve testler **development/staging** bağlamında çalıştırılmalı.
+
+  - "Production'a deploy edelim" önerisini **kendin üretme**; sadece kullanıcı açıkça isterse tartış.
+
+### 4. D365 & Partner Center State Kuralları
+
+Context okuması sonrası şu state'i esas al:
+
+- **D365 Integration**
+
+  - Backend: `app/integrations/d365/*`, `app/tasks/d365_push.py`, `app/api/v1/d365_routes.py` → **CODE-COMPLETE**
+
+  - UI: D365 badge + "Push to Dynamics" butonu → **READY**
+
+  - Feature flag: `d365_enabled = False` → **bilinçli olarak devre dışı (MVP-safe)**
+
+  - Yorum: "D365 entegrasyonu var, kod tamam, ama default olarak kapalı."
+
+- **Partner Center Integration**
+
+  - Phase 2 + Phase 4–7 (Integration Roadmap) → **COMPLETED**
+
+  - G21 Roadmap içindeki Phase 4–5 (Dynamics Migration + Monitoring) → **PAUSED / PARTIAL**
+
+  - Yorum: Partner Center entegrasyonu tamam; G21 refactor fazları ayrı roadmap.
+
+Bu state'i bozacak şekilde "D365 hiç yazılmamış", "PC entegrasyonu yok" gibi yorumlar yapma.
+
+### 5. Dokümantasyon Yönetimi ile Uyum
+
+- `doc-management.mdc` ve genel doküman lifecycle kuralları geçerlidir:
+
+  - `docs/active/` → **aktif faz** için birincil kaynak
+
+  - `docs/archive/` → **tarihsel referans**, düşük öncelik
+
+  - `docs/reference/` → teknik referans, şema, mimari
+
+  - `docs/todos/` → görev listeleri (bittiyse arşive taşınmış olabilir)
+
+Bu kurallara göre:
+
+- Önce `docs/active/` ve `docs/reference/` altındaki dosyaları kullan.
+
+- `docs/archive/` içeriğini, kullanıcı özellikle istemedikçe sadece arka plan bilgisi olarak gör.
+
+### 6. Çalışma Stili (Hunter Modu)
+
+- Kullanıcının mod sistemi (MOD.EXEC, MOD.PLAN, MOD.FIX, MOD.CORE, MOD.SHORT, vb.) aktif:
+
+  - Mesajın başında mod varsa, cevabı o moda göre şekillendir.
+
+- FILT kuralı geçerli:
+
+  1. Core backend / mimari
+
+  2. Data / scoring
+
+  3. API
+
+  4. UI
+
+  5. Sales/CRM
+
+  6. Diğer konular
+
+- Gereksiz teori yazma; Hunter görevlerinde **uygulanabilir, kısa, net** çözümler ver.
+
+- Prod / Go-No-Go konusu **kullanıcı sormadıkça** açma.
+
+### 7. Yeni Chat / Yeni Task Özeti
+
+Yeni bir Cursor task'ında Hunter geçtiğinde:
+
+1. `docs/active/HUNTER-CONTEXT-PACK-v1.0.md` + `docs/active/HUNTER-STATE-v1.0.md` → genel bağlam
+
+2. `docs/active/FEATURE-DEVELOPMENT-STATUS.md` → hangi özellikler bitti / eksik?
+
+3. `docs/active/DEVELOPMENT-ROADMAP.md` → hangi işi yapıyoruz? (KALAN-ISLER-PRIORITY.md ve YARIM-KALAN-ISLER-LISTESI.md içerikleri buraya taşındı)
+
+4. Gerekirse `docs/reference/ENVIRONMENT-ARCHITECTURE.md` → dev/prod ayrımı
+
+5. İşe uygun code/doc dosyalarını buradan sonra seç.
+
+**Amaç**: Her yeni context'te Hunter'ın mevcut state'ini **yeniden keşfetmek yerine** bu dosyalara dayanarak hızlıca doğru moda geçmek.
+
 ## Code Style & Standards
 
 ### Python

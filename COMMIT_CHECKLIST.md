@@ -52,6 +52,15 @@
 - [x] Ready for push
 - [x] Pushed to origin/main
 
+## ✅ Context & Documentation Rules
+- [x] Hunter Roadmap Mode rules added to `.cursor/rules/.cursorrules`
+- [x] Context management rules documented (priority file reading order)
+- [x] Dev vs Prod separation rules documented
+- [x] D365 & Partner Center state rules documented
+- [x] Documentation management priority order documented
+- [x] Work style (Hunter Modu) rules documented
+- [x] New chat/task summary process documented
+
 ## Commit Message Suggestion (v1.0.0)
 
 ```

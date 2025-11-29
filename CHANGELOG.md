@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Hunter Roadmap Mode – Context & Doc Rules** (2025-01-30) - Context management and documentation rules for Hunter project
+  - **Global Mod: Roadmap Mode (Prod INACTIVE)**: Default mode is Roadmap/Feature Development, Production Go/No-Go docs are INACTIVE
+  - **Aktif Context Kaynağı**: Priority file reading order for new chat/context situations
+    - High priority: `HUNTER-CONTEXT-PACK-v1.0.md`, `HUNTER-STATE-v1.0.md`, `FEATURE-DEVELOPMENT-STATUS.md`, `ENVIRONMENT-ARCHITECTURE.md`
+    - Active work: `DEVELOPMENT-ROADMAP.md` (central roadmap), `G21-ROADMAP-CURRENT.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`
+    - D365 technical: `LEAD-DATA-DICTIONARY.md`, `LEAD-FORM-ARCHITECTURE.md`, `LEAD-VIEWS.md`, `D365-OPTION-SET-MAPPING.md`
+  - **Dev vs Prod Ayrımı**: Current environment is local dev (Windows + Docker Desktop + WSL2), no real production environment defined
+  - **D365 & Partner Center State Rules**: D365 is CODE-COMPLETE (feature flag OFF, MVP-safe), Partner Center is COMPLETED
+  - **Dokümantasyon Yönetimi**: Priority order: `docs/active/` → `docs/reference/` → `docs/archive/` (low priority unless user requests)
+  - **Çalışma Stili (Hunter Modu)**: MOD system support (MOD.EXEC, MOD.PLAN, MOD.FIX, etc.), FILT rule (Core → Data → API → UI → Sales → Other)
+  - **Yeni Chat / Yeni Task Özeti**: 5-step context setup process for new Cursor tasks
+  - **Files**: `.cursor/rules/.cursorrules` - Hunter Roadmap Mode section added
+  - **Status**: ✅ **Added** - Context management rules active for all new chats/tasks
+
 ### Fixed
 - **Leads Endpoint 500 Error** (2025-01-30) - ✅ **FIXED**
   - Fixed `GET /api/v1/leads` endpoint returning 500 Internal Server Error
