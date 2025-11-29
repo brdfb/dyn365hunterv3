@@ -362,18 +362,29 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
    **Troubleshooting:** See [WSL Guide](docs/active/WSL-GUIDE.md) for common issues and solutions.
 
 3. **Run setup script:**
+   
+   **Hızlı Kurulum (Önerilen - Son Kullanıcı İçin):**
+   ```bash
+   bash scripts/fresh_start.sh
+   ```
+   
+   Bu script:
+   - ✅ Ön gereksinimleri kontrol eder (Docker, Docker Compose)
+   - ✅ `.env` dosyasını hazırlar
+   - ✅ Environment değişkenlerini kontrol eder
+   - ✅ Docker servislerini başlatır
+   - ✅ Servis sağlık kontrollerini yapar
+   - ✅ Veritabanı migrasyonlarını çalıştırır
+   - ✅ Entegrasyon kurulumunu (opsiyonel) yapar
+   - ✅ Son doğrulamayı yapar
+   
+   **Geliştirici Kurulumu:**
    ```bash
    bash setup_dev.sh
    # Or with venv: bash setup_dev.sh --with-venv
    ```
-
-   This will:
-   - Check Docker availability
-   - Create `.env` from `.env.example`
-   - Start Docker Compose services (PostgreSQL, Redis, API, Worker)
-   - Wait for PostgreSQL and Redis to be ready
-   - Run database schema migration (via Alembic)
-   - Verify `/healthz` endpoint
+   
+   **Detaylı Rehber:** `docs/reference/FRESH-START-GUIDE.md`
 
 4. **Verify installation:**
    ```bash
