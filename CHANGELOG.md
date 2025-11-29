@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Leads Endpoint 500 Error** (2025-01-30) - ✅ **FIXED**
+  - Fixed `GET /api/v1/leads` endpoint returning 500 Internal Server Error
+  - Root cause: `referral_type` parameter missing in `app/api/v1/leads.py` `get_leads_v1` function
+  - Fix: Added `referral_type` parameter to `get_leads_v1` and passed to `get_leads` function
+  - Error: `psycopg2.ProgrammingError: can't adapt type 'Query'` resolved
+  - Status: ✅ **FIXED** - All leads endpoint tests passing (200 OK)
+  - Impact: Production blocker removed
+  - Files: `app/api/v1/leads.py`, `app/api/leads.py`
+  - Documentation: `docs/active/LEADS-500-BUG-FIX.md`
+
 ### Completed
 - **PROD Öncesi Kritik İşler** (2025-01-30) - ✅ **COMPLETED**
   - ✅ **Retry + Error Handling FINAL** - Error categorization, retry metrics, DLQ tracking, manual retry endpoints eklendi
