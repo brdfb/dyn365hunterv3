@@ -47,7 +47,7 @@
 
 ---
 
-### 2. HAMLE 2: D365 Phase 2.9 E2E Wiring & Tenant Setup ✅ **DEV TESTS COMPLETED** (2025-01-30)
+### 2. HAMLE 2: D365 Phase 2.9 E2E Wiring & Tenant Setup ✅ **COMPLETED** (2025-01-30)
 
 **Durum**: Backend %94 + UI completed, Push PoC completed, E2E runbook ready  
 **Süre**: 1-2 gün (ops fazı)  
@@ -67,22 +67,73 @@
 - [x] Error handling testler ✅ (Authentication error tested, Rate limit & API error code verified)
 - [x] Go/No-Go gate: ✅ GO (production'a geçiş için hazır)
 
-**Durum:** ✅ Dev testleri %100 tamamlandı, production deployment hazırlığı
+**Durum:** ✅ **COMPLETED** (2025-01-30) - Production-grade E2E testler tamamlandı (3 senaryo), Go/No-Go: ✅ GO, production deployment hazırlığı
 
 **Dosyalar:**
-- `docs/active/D365-PHASE-2.9-E2E-RUNBOOK.md` - Step-by-step runbook
+- `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` - Step-by-step runbook (reference guide)
 - `.env` - D365 credentials
 - `app/config.py` - Feature flag kontrolü
 
-**Referans**: `docs/active/D365-PHASE-2.9-E2E-RUNBOOK.md`
+**Referans**: `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (reference guide)
+
+---
+
+## 🚀 PROD ÖNCESİ KRİTİK İŞLER ✅ **TAMAMLANDI** (2025-01-30)
+
+### 3. Retry + Error Handling FINAL ✅ **COMPLETED** (2025-01-30)
+**Süre**: 30-40 dakika  
+**Öncelik**: P0 (Kritik - Production kalitesi)  
+**Durum**: ✅ **TAMAMLANDI** - Production-grade retry ve error handling
+
+**Tamamlananlar:**
+- [x] Error categorization eklendi (`categorize_error()` fonksiyonu)
+- [x] Retry metrics eklendi (`track_retry_attempt()`, `track_retry_success()`, `track_retry_failed()`)
+- [x] DLQ tracking eklendi (max retry sonrası)
+- [x] Manual retry endpoints eklendi (`POST /api/v1/d365/retry/{lead_id}`, `POST /api/v1/d365/retry-bulk`)
+- [x] Error category tracking eklendi (auth, rate_limit, validation, network, unknown)
+- [x] Transient vs permanent error ayrımı eklendi
+
+**Referans**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+
+---
+
+### 4. Basic N+1 Optimization ✅ **COMPLETED** (2025-01-30)
+**Süre**: 1 gün (critical-path only)  
+**Öncelik**: P0 (Kritik - Performance)  
+**Durum**: ✅ **TAMAMLANDI** - Critical-path query optimization
+
+**Tamamlananlar:**
+- [x] COUNT(*) optimization eklendi (ayrı COUNT query)
+- [x] SQL sort optimization eklendi (`sort_by != priority_score` için)
+- [x] LIMIT/OFFSET optimization eklendi (SQL-side pagination)
+- [x] Query performance iyileştirmesi (priority score dışı sort'larda sadece gerekli sayfa çekiliyor)
+
+**Referans**: `docs/active/KALAN-ISLER-PRIORITY.md` - N+1 Query Prevention
+
+---
+
+### 5. UI Polish — Minimum Viable ✅ **COMPLETED** (2025-01-30)
+**Süre**: 1 gün  
+**Öncelik**: P0 (Kritik - Kullanıcı güveni)  
+**Durum**: ✅ **TAMAMLANDI** - Minimum viable UI polish
+
+**Tamamlananlar:**
+- [x] Design system eklendi (CSS variables: spacing 4px, 8px, 16px, 24px grid)
+- [x] Color consistency eklendi (CSS variables: primary, secondary, success, error, warning)
+- [x] Button styles eklendi (primary, secondary, success, error variants)
+- [x] Loading states eklendi (spinner, skeleton loading animations)
+- [x] Error states eklendi (error message styling)
+- [x] Success feedback eklendi (toast notification animations)
+
+**Referans**: `docs/active/CRITICAL-3-HAMLE-PRODUCT-READY.md` - HAMLE 3
 
 ---
 
 ## 🔄 IN PROGRESS - Devam Eden İşler
 
-### 3. Integration Roadmap - Phase 3: Dynamics 365 Integration ✅ **DEV TESTS COMPLETED**
+### 6. Integration Roadmap - Phase 3: Dynamics 365 Integration ✅ **COMPLETED**
 
-**Durum**: Backend %94 + UI completed, Push PoC completed, E2E dev testleri completed  
+**Durum**: ✅ **COMPLETED** (2025-01-30) - Production-grade E2E testleri tamamlandı (3 senaryo)  
 **Süre**: Production deployment hazırlığı  
 **Öncelik**: P2
 
@@ -94,8 +145,8 @@
 - [x] Go/No-Go Decision: ✅ GO (production'a geçiş için hazır)
 
 **Kalan İşler:**
-- [ ] Production deployment (HAMLE 2 dev testleri tamamlandı)
-- [ ] Success criteria validation (production'da):
+- [ ] Production deployment (HAMLE 2 completed, 2 kritik iş kaldı)
+- [ ] Success criteria validation (production'da - post-release):
   - [ ] Dynamics sync success rate > 90%
   - [ ] Pipeline accuracy > 95%
   - [ ] Error recovery automatic
@@ -104,7 +155,7 @@
 
 ---
 
-### 4. G21: Architecture Refactor - Phase 4-6 🔄 **PAUSED**
+### 7. G21: Architecture Refactor - Phase 4-6 🔄 **PAUSED**
 
 **Durum**: Phase 0-3 completed, Phase 4 paused (Integration Roadmap Phase 3 overlaps)  
 **Süre**: Post-MVP  
@@ -121,7 +172,7 @@
 
 ## 📋 POST-MVP / FUTURE ENHANCEMENTS
 
-### 5. Partner Center - Scoring Pipeline Integration ⏳ **FUTURE ENHANCEMENT**
+### 8. Partner Center - Scoring Pipeline Integration ⏳ **FUTURE ENHANCEMENT**
 
 **Durum**: Backend hazır, entegrasyon eksik  
 **Süre**: 1-2 gün  
@@ -136,7 +187,7 @@
 
 ---
 
-### 6. D365 - Option Set Value Mapping (Post-MVP Enhancement) ⏳ **PARTIALLY DONE**
+### 9. D365 - Option Set Value Mapping (Post-MVP Enhancement) ⏳ **PARTIALLY DONE**
 
 **Durum**: Mapping fonksiyonları eklendi, D365'teki gerçek value'lar doğrulanmalı  
 **Süre**: 1-2 saat  

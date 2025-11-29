@@ -19,7 +19,16 @@ from app.integrations.d365.errors import (
     D365RateLimitError,
     D365DuplicateError,
 )
-from app.core.d365_metrics import track_push_success, track_push_failed
+from app.core.d365_metrics import (
+    track_push_success, 
+    track_push_failed,
+    track_retry_attempt,
+    track_retry_success,
+    track_retry_failed,
+    track_error_category,
+    track_dlq,
+)
+from app.integrations.d365.errors import categorize_error
 from app.core.retry_utils import compute_backoff_with_jitter
 from app.core.priority import calculate_priority_score
 from app.core.enrichment_service import build_infra_summary
@@ -253,13 +262,18 @@ def push_lead_to_d365(self, lead_id: int):
             duration = time.time() - start_time
             track_push_success(duration)
             
+            # Track retry success if this was a retry
+            if self.request.retries > 0:
+                track_retry_success()
+            
             logger.info(
                 "d365_push_success",
                 message="Lead pushed to D365 successfully",
                 lead_id=lead_id,
                 domain=domain,
                 d365_lead_id=d365_lead_id,
-                duration=duration
+                duration=duration,
+                retry_count=self.request.retries
             )
             
             return {
@@ -270,11 +284,17 @@ def push_lead_to_d365(self, lead_id: int):
         
         except D365RateLimitError as e:
             # Rate limit - retry with exponential backoff
+            error_category = categorize_error(e)
+            track_error_category(error_category)
+            track_retry_attempt()
+            
             logger.warning(
                 "d365_rate_limit",
                 message="D365 rate limit exceeded, will retry",
                 lead_id=lead_id,
-                error=str(e)
+                error=str(e),
+                error_category=error_category,
+                retry_count=self.request.retries
             )
             company.d365_sync_status = "error"
             company.d365_sync_error = f"Rate limit: {str(e)}"
@@ -290,7 +310,8 @@ def push_lead_to_d365(self, lead_id: int):
         
         except (D365AuthenticationError, D365APIError, D365DuplicateError) as e:
             # Non-retryable errors
-            # Phase 3: Track failure metrics
+            error_category = categorize_error(e)
+            track_error_category(error_category)
             track_push_failed()
             
             logger.error(
@@ -298,7 +319,8 @@ def push_lead_to_d365(self, lead_id: int):
                 message="D365 push failed (non-retryable)",
                 lead_id=lead_id,
                 error=str(e),
-                error_type=type(e).__name__
+                error_type=type(e).__name__,
+                error_category=error_category
             )
             company.d365_sync_status = "error"
             company.d365_sync_error = str(e)
@@ -307,21 +329,40 @@ def push_lead_to_d365(self, lead_id: int):
             return {
                 "status": "error",
                 "error": str(e),
-                "error_type": type(e).__name__
+                "error_type": type(e).__name__,
+                "error_category": error_category
             }
         
         except Exception as e:
+            error_category = categorize_error(e)
+            track_error_category(error_category)
+            
             # Phase 3: Track failure metrics (only on final failure, not retries)
             if self.request.retries >= self.max_retries:
                 track_push_failed()
-            
-            logger.error(
-                "d365_push_error",
-                message="D365 push task failed (unexpected error)",
-                lead_id=lead_id,
-                error=str(e),
-                exc_info=True
-            )
+                track_retry_failed()
+                track_dlq()  # Dead letter queue - max retries exhausted
+                
+                logger.error(
+                    "d365_push_dlq",
+                    message="D365 push failed - max retries exhausted (DLQ)",
+                    lead_id=lead_id,
+                    error=str(e),
+                    error_category=error_category,
+                    retry_count=self.request.retries,
+                    exc_info=True
+                )
+            else:
+                track_retry_attempt()
+                logger.error(
+                    "d365_push_error",
+                    message="D365 push task failed (unexpected error, will retry)",
+                    lead_id=lead_id,
+                    error=str(e),
+                    error_category=error_category,
+                    retry_count=self.request.retries,
+                    exc_info=True
+                )
             
             # Update status to error
             try:

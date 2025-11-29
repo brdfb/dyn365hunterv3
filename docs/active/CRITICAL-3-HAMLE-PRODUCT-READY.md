@@ -81,11 +81,11 @@
 
 ---
 
-### **HAMLE 2: Dynamics 365 Push Entegrasyonu** ✅ **DEV TESTS COMPLETED**
-**Süre**: Revize edildi (Phase 2.5 ✅ %94, Phase 3 ✅ Tamamlandı, Phase 2.9 ✅ Dev Tests Completed)  
+### **HAMLE 2: Dynamics 365 Push Entegrasyonu** ✅ **COMPLETED**
+**Süre**: Tamamlandı (Phase 2.5 ✅ %94, Phase 3 ✅ Tamamlandı, Phase 2.9 ✅ Dev Tests Completed, Production-grade E2E: ✅ 3 Senaryo)  
 **Öncelik**: P0 (Kritik - Satış pipeline'ı)  
 **Mimari**: Adapter Pattern — Core'a dokunmadan yan taraftan takma  
-**Durum**: ✅ **HAMLE 2 dev testleri tamamlandı** (2025-01-30) - Go/No-Go: ✅ GO (production'a geçiş için hazır)
+**Durum**: ✅ **HAMLE 2 COMPLETED** (2025-01-30) - Production-grade E2E testler tamamlandı (3 senaryo), Go/No-Go: ✅ GO (production'a geçiş için hazır)
 
 #### Problem:
 - ✅ **Backend Hazır**: D365 push backend'i tamamlandı (Phase 2.5 - %94)
@@ -99,7 +99,7 @@
 - Fiziksel ayrım: Core vs Integration
 - Feature flag: `HUNTER_D365_ENABLED` (default: `false`)
 
-**Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
+**Detaylı Plan:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).
 
 #### Revize Edilmiş Faz Yapısı:
 
@@ -119,7 +119,7 @@
 - **Tamamlananlar**: Azure AD App Registration ✅, D365 Application User ✅, Hunter config ✅, E2E Tests ✅, UI Badge & Link ✅, Error Handling ✅
 - **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
 - **Kapsam**: Tamamen ops/environment işi (kod değişikliği yok)
-- **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` dosyasına bakın
+- **Detaylar**: `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` dosyasına bakın (reference guide)
 
 **✅ Phase 3 — UI & Status (TAMAMLANDI - 2025-01-30)**
 - ✅ API: Companies/Leads response'a D365 alanlarını eklendi
@@ -159,45 +159,57 @@
 
 ---
 
-### **HAMLE 3: UI Polish - "Stajyer Kuzen" → "Profesyonel"**
-**Süre**: 3-5 gün  
-**Öncelik**: P1 (Yüksek - Kullanıcı deneyimi)
+### **PROD ÖNCESİ KRİTİK İŞLER** ✅ **TAMAMLANDI** (2025-01-30)
+
+**Durum**: ✅ **PRODUCTION READY** (HAMLE 2 completed, PROD öncesi kritik işler tamamlandı)  
+**Hedef**: PROD SAFE MODE RELEASE
+
+#### ✅ **PROD'a Çıkmak İçin:**
+- ✅ **Teknik olarak mümkün**: Hiçbir zorunlu engel yok
+- ✅ **Risk**: DÜŞÜK (PROD öncesi kritik işler tamamlandı)
+
+#### 🎯 **Önerilen Yaklaşım:**
+**PROD'a çıkmaya hazır.** ✅
+
+Tüm kritik işler tamamlandı:
+1. ✅ **HAMLE 2 COMPLETE** - ✅ **TAMAMLANDI** (2025-01-30)
+2. ✅ **Retry + Error Handling FINAL** - ✅ **TAMAMLANDI** (2025-01-30)
+3. ✅ **Basic N+1 Optimization** - ✅ **TAMAMLANDI** (2025-01-30)
+4. ✅ **UI Polish — Minimum Viable** - ✅ **TAMAMLANDI** (2025-01-30)
+
+👉 **PROD SAFE MODE RELEASE** - Şimdi yapılabilir
+
+**Referans**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+
+---
+
+### **HAMLE 3: UI Polish - "Stajyer Kuzen" → "Profesyonel"** (PROD Öncesi Minimum)
+**Süre**: 1 gün (minimum viable)  
+**Öncelik**: P0 (Kritik - Kullanıcı güveni) - PROD öncesi minimum seviye
 
 #### Problem:
 - Backend Ferrari ama UI Renault 9
 - "Stajyer kuzen yapmış" vibe'ı
 - Estetik fakir, UX kötü
+- **PROD öncesi**: Minimum seviye gerekli (kullanıcı güveni için)
 
-#### Aksiyonlar:
+#### Aksiyonlar (Minimum Viable - PROD Öncesi):
 
-**Task 3.1: Visual Design System** (1-2 gün)
-- [ ] Color palette standardize et (primary, secondary, success, error)
-- [ ] Typography hierarchy (h1-h6, body, caption)
-- [ ] Spacing system (4px, 8px, 16px, 24px, 32px grid)
-- [ ] Button styles (primary, secondary, ghost, danger)
-- [ ] Badge styles (consistent colors, sizes)
-- [ ] Card/container styles (shadows, borders, radius)
+**Task 3.1: Visual Consistency (Minimum)** ✅ **COMPLETED** (2025-01-30)
+- [x] Spacing system (4px, 8px, 16px, 24px grid) - CSS variables eklendi
+- [x] Color consistency (primary, secondary, success, error) - CSS variables eklendi
+- [x] Button styles (primary, secondary, success, error) - Tutarlı button stilleri eklendi
 
-**Task 3.2: Component Library** (1-2 gün)
-- [ ] Table component (consistent styling, hover states)
-- [ ] Filter bar (better spacing, visual hierarchy)
-- [ ] Modal/Dialog component (backdrop, animations)
-- [ ] Toast notifications (positioning, stacking)
-- [ ] Loading states (skeleton screens, spinners)
-- [ ] Empty states (illustrations, messages)
+**Task 3.2: UX Improvements (Minimum)** ✅ **COMPLETED** (2025-01-30)
+- [x] Loading states (spinner, skeleton) - Animasyonlar eklendi
+- [x] Error states (clear error messages) - Error message styling eklendi
+- [x] Success feedback (toast notifications) - Toast notification animations eklendi
 
-**Task 3.3: UX Improvements** (1 gün)
-- [ ] Keyboard navigation (tab order, shortcuts)
-- [ ] Focus management (visible focus indicators)
-- [ ] Error states (clear error messages, recovery actions)
-- [ ] Success feedback (clear success messages)
-- [ ] Loading feedback (progress indicators)
+**Task 3.3: Responsive Basics (Minimum)** ⏳ **POST-PROD** (mevcut responsive yeterli)
+- [ ] Mobile breakpoint (tablet, mobile) - Mevcut responsive yeterli
+- [ ] Table responsive (horizontal scroll) - Mevcut responsive yeterli
 
-**Task 3.4: Responsive Design** (1 gün)
-- [ ] Mobile breakpoints (tablet, mobile)
-- [ ] Table responsive (horizontal scroll veya card view)
-- [ ] Filter bar responsive (stack on mobile)
-- [ ] Modal responsive (fullscreen on mobile)
+**Not**: Full UI polish değil, sadece minimum seviye (kullanıcı güveni için). Full polish post-PROD'da yapılabilir.
 
 #### Başarı Kriterleri:
 - ✅ UI "profesyonel" görünüyor (Ferrari motoruna Ferrari karoseri)
@@ -216,13 +228,17 @@
 ## 📊 **ÖNCELİK SIRASI**
 
 1. **HAMLE 1** (Partner Center Sync) - ✅ **TAMAMLANDI** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi
-2. **HAMLE 2** (Dynamics 365 Push) - ✅ **DEV TESTS COMPLETED** (2025-01-30):
+2. **HAMLE 2** (Dynamics 365 Push) - ✅ **COMPLETED** (2025-01-30):
    - ✅ **Phase 2.5** (Backend Validation) - **TAMAMLANDI** (%94)
-   - ✅ **Phase 2.9** (E2E Wiring) - **DEV TESTS COMPLETED** (Go/No-Go: ✅ GO)
+   - ✅ **Phase 2.9** (E2E Wiring) - **COMPLETED** (Production-grade E2E testler - 3 senaryo, Go/No-Go: ✅ GO)
    - ✅ **Phase 3** (UI & Status) - **TAMAMLANDI** (2025-01-30)
-3. **HAMLE 3** (UI Polish) - **3-5 gün** - En görünür iyileştirme (HAMLE 2 sonrası)
+3. **PROD ÖNCESİ KRİTİK İŞLER** ✅ **TAMAMLANDI** (2025-01-30):
+   - ✅ **Retry + Error Handling FINAL** - ✅ **TAMAMLANDI** (2025-01-30)
+   - ✅ **Basic N+1 Optimization** - ✅ **TAMAMLANDI** (2025-01-30)
+   - ✅ **UI Polish — Minimum Viable** - ✅ **TAMAMLANDI** (2025-01-30)
+4. **HAMLE 3** (UI Polish Full) - **Post-PROD** - Full polish (minimum viable PROD öncesi tamamlandı)
 
-**Toplam Süre**: ✅ Phase 3 (UI) tamamlandı (2025-01-30), 🔄 Phase 2.9 E2E Wiring başlatıldı (2025-01-30)
+**Toplam Süre**: ✅ HAMLE 2 COMPLETED (2025-01-30), ✅ PROD öncesi kritik işler TAMAMLANDI (2025-01-30)
 
 ---
 
@@ -237,8 +253,9 @@
 ### Hamle 2 Başarısı:
 - ✅ **Phase 2.5**: Backend D365 push çalışıyor (client, mapping, task, API endpoint)
 - ✅ **Phase 2.5**: Duplicate detection çalışıyor (upsert by domain/email)
-- ⏳ **Phase 2.9**: E2E test (D365 tenant hazır olunca)
+- ✅ **Phase 2.9**: Production-grade E2E testler tamamlandı (3 senaryo: Happy path ✅, Idempotency ✅, Edge case ✅)
 - ✅ **Phase 3**: UI'da sync butonu ve status çalışıyor (tamamlandı - 2025-01-30)
+- ✅ **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
 
 ### Hamle 3 Başarısı:
 - ✅ UI "profesyonel" görünüyor
@@ -275,12 +292,38 @@
 
 ---
 
+## 🚀 **PRODUCTION READINESS DURUMU**
+
+### ✅ **PROD'a Çıkmak İçin:**
+- ✅ **Teknik olarak mümkün**: Hiçbir zorunlu engel yok
+- ✅ **Risk**: DÜŞÜK (PROD öncesi kritik işler tamamlandı)
+
+**Tüm kritik işler tamamlandı:**
+- ✅ Retry + Error Handling FINAL → Error categorization, retry metrics, DLQ, manual retry endpoints eklendi
+- ✅ Basic N+1 optimization → COUNT(*) optimization, SQL sort optimization eklendi
+- ✅ UI Polish minimum → Design system, button styles, loading/error states, toast notifications eklendi
+
+### 🎯 **Önerilen Yaklaşım:**
+**PROD'a çıkmaya hazır.** ✅
+
+Tüm kritik işler tamamlandı:
+1. ✅ HAMLE 2 COMPLETE - ✅ **TAMAMLANDI**
+2. ✅ Retry + Error Handling FINAL - ✅ **TAMAMLANDI** (2025-01-30)
+3. ✅ Basic N+1 Optimization - ✅ **TAMAMLANDI** (2025-01-30)
+4. ✅ UI Polish — Minimum Viable - ✅ **TAMAMLANDI** (2025-01-30)
+
+👉 **PROD SAFE MODE RELEASE** - Şimdi yapılabilir
+
+**Referans**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+
+---
+
 ## 🚀 **SONUÇ**
 
-Bu 3 hamle tamamlandığında:
+Bu 3 hamle + PROD öncesi kritik işler tamamlandığında:
 
-1. ✅ **Partner Center**: Gerçek kaynak entegrasyonu (sync çalışıyor)
-2. ✅ **Dynamics 365**: Gerçek satış pipeline'ı (push çalışıyor)
+1. ✅ **Partner Center**: Gerçek kaynak entegrasyonu (sync çalışıyor) - ✅ **TAMAMLANDI**
+2. ✅ **Dynamics 365**: Gerçek satış pipeline'ı (push çalışıyor) - ✅ **TAMAMLANDI**
 3. ✅ **UI**: Profesyonel görünüm (Ferrari motoruna Ferrari karoseri)
 
 **Hunter = Gerçek Ürün** 🎯

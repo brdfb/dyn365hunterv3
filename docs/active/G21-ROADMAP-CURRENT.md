@@ -3,7 +3,7 @@
 **Son güncelleme:** 2025-01-30 (Partner Center ve Dynamics 365 durumları netleştirildi)  
 
 **Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending  
-**Integration Roadmap:** Phase 2 (Partner Center) ✅ COMPLETED (2025-01-30 - Kod bazında DONE, ürün bazında yeterince iyi), Phase 3 (D365) ✅ DEV TESTS COMPLETED (2025-01-30 - HAMLE 2 dev testleri tamamlandı)
+**Integration Roadmap:** Phase 2 (Partner Center) ✅ COMPLETED (2025-01-30 - Kod bazında DONE, ürün bazında yeterince iyi), Phase 3 (D365) ✅ COMPLETED (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO)
 
 ---
 
@@ -19,7 +19,7 @@ G21, Hunter'ı:
 
 için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
 
-**Not:** Integration Roadmap Phase 2 (Partner Center Referrals) ✅ **COMPLETED** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi seviyesinde. Backend, UI, background sync tamamlandı. Partner Center entegrasyonu adapter pattern ile implement edildi. UI JS & error handling manuel smoke test ile kapanacak (mimari değişiklik gerektirmiyor). Phase 3 (D365) ✅ **DEV TESTS COMPLETED** (2025-01-30 - HAMLE 2 dev testleri tamamlandı, Go/No-Go: ✅ GO).
+**Not:** Integration Roadmap Phase 2 (Partner Center Referrals) ✅ **COMPLETED** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi seviyesinde. Backend, UI, background sync tamamlandı. Partner Center entegrasyonu adapter pattern ile implement edildi. UI JS & error handling manuel smoke test ile kapanacak (mimari değişiklik gerektirmiyor). Phase 3 (D365) ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, 3 senaryo, Go/No-Go: ✅ GO).
 
 ---
 
@@ -134,10 +134,10 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
   - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
 - ✅ **PHASE 2.9 (E2E WIRING) DEV TESTS COMPLETED** (2025-01-30 - Go/No-Go: ✅ GO)
   - App registration, Application User, Role + izinler, custom hunter_* alanları
-  - **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook)
+  - **Detaylar**: `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook - reference guide)
   - **Status:** Runbook hazır, tenant setup bekleniyor
 - **Mimari:** Adapter Pattern — Core Freeze + Integration Layer
-- **Detaylı Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın
+- **Detaylı Plan:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived)
 
 ---
 

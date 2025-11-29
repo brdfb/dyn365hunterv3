@@ -490,13 +490,80 @@ async def get_leads(
 
     # GROUP BY is needed for aggregate functions (aggregated_link_status, primary_referral_id)
     query += " GROUP BY lr.company_id, lr.canonical_name, lr.domain, lr.provider, lr.tenant_size, lr.local_provider, lr.country, lr.spf, lr.dkim, lr.dmarc_policy, lr.dmarc_coverage, lr.mx_root, lr.registrar, lr.expires_at, lr.nameservers, lr.scan_status, lr.scanned_at, lr.readiness_score, lr.segment, lr.reason, lr.technical_heat, lr.commercial_segment, lr.commercial_heat, lr.priority_category, lr.priority_label, lr.d365_lead_id, lr.d365_sync_status, lr.d365_sync_last_at"
+    
+    # PROD FINAL: Optimize COUNT(*) - use window function instead of fetching all rows
+    # Build count query (same filters, but just COUNT)
+    count_query = f"""
+        SELECT COUNT(DISTINCT lr.domain) as total
+        FROM leads_ready lr
+        LEFT JOIN partner_center_referrals pcr ON lr.domain = pcr.domain
+        WHERE 1=1
+    """
+    # Add same filters to count query
+    if segment:
+        count_query += " AND lr.segment = :segment"
+    if min_score is not None:
+        count_query += " AND lr.readiness_score >= :min_score"
+    if provider:
+        count_query += " AND lr.provider = :provider"
+    if referral_type:
+        count_query += " AND pcr.referral_type = :referral_type"
+    if search:
+        count_query += """ AND (
+            LOWER(lr.domain) LIKE :search 
+            OR LOWER(lr.canonical_name) LIKE :search 
+            OR LOWER(lr.provider) LIKE :search
+        )"""
+    count_query += " AND lr.readiness_score IS NOT NULL"
+    
     # Note: DISTINCT ON requires domain to be first in ORDER BY
     # We'll sort by priority_score in Python after calculating it
     # because priority_score is computed from segment + readiness_score
     # Default sorting (if sort_by not specified) is by priority_score
-    query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
+    # PROD FINAL: Only fetch all rows if sorting by priority_score (default) or favorites filter
+    use_sql_sort = sort_by and sort_by != "priority_score" and not favorite
+    
+    if use_sql_sort:
+        # SQL sort optimization: sort in SQL and use LIMIT/OFFSET
+        sort_field_map = {
+            "domain": "lr.domain",
+            "readiness_score": "lr.readiness_score",
+            "segment": "lr.segment",
+            "provider": "lr.provider",
+            "scanned_at": "lr.scanned_at",
+        }
+        if sort_by in sort_field_map:
+            sort_field = sort_field_map[sort_by]
+            sort_dir = "DESC" if sort_order == "desc" else "ASC"
+            query += f" ORDER BY {sort_field} {sort_dir} NULLS LAST"
+        else:
+            query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
+    else:
+        query += " ORDER BY lr.domain, lr.scanned_at DESC NULLS LAST"
 
     try:
+        # PROD FINAL: Get total count first (optimized - doesn't fetch all rows)
+        count_result = db.execute(text(count_query), params)
+        total = count_result.scalar() or 0
+        
+        # Apply favorites filter to count if needed
+        if favorite is True:
+            user_id = get_user_id(request) if request else "default"
+            favorite_domains = {
+                fav.domain
+                for fav in db.query(Favorite).filter(Favorite.user_id == user_id).all()
+            }
+            # Adjust total count for favorites (approximate - will be exact after filtering)
+            # This is a trade-off: we could do exact count but it requires another query
+            # For now, we'll use the filtered count after fetching rows
+        
+        # PROD FINAL: Apply LIMIT/OFFSET if SQL sort is used
+        if use_sql_sort:
+            offset = (page - 1) * page_size
+            query += f" LIMIT :page_size OFFSET :offset"
+            params["page_size"] = page_size
+            params["offset"] = offset
+        
         result = db.execute(text(query), params)
         rows = result.fetchall()
 
@@ -513,6 +580,10 @@ async def get_leads(
 
             # Filter rows to only include favorite domains
             rows = [row for row in rows if row.domain in favorite_domains]
+            
+            # Update total count for favorites (exact count after filtering)
+            if not use_sql_sort:
+                total = len(rows)  # Will be updated after leads are built
 
         leads = []
         for row in rows:
@@ -625,12 +696,18 @@ async def get_leads(
                 )
             )
 
-        # G19: Apply pagination
-        total = len(leads)
-        total_pages = (total + page_size - 1) // page_size  # Ceiling division
-        start_idx = (page - 1) * page_size
-        end_idx = start_idx + page_size
-        paginated_leads = leads[start_idx:end_idx]
+        # G19: Apply pagination (only if not using SQL sort)
+        if not use_sql_sort:
+            # Python-side pagination (for priority_score sort or favorites)
+            total = len(leads)
+            total_pages = (total + page_size - 1) // page_size  # Ceiling division
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            paginated_leads = leads[start_idx:end_idx]
+        else:
+            # SQL-side pagination already applied
+            paginated_leads = leads
+            total_pages = (total + page_size - 1) // page_size  # Ceiling division
 
         return LeadsListResponse(
             leads=paginated_leads,

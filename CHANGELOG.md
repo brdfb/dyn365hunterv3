@@ -7,18 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### In Progress
-- **HAMLE 2: D365 Phase 2.9 E2E Wiring** (2025-01-30) - ✅ **DEV TESTS COMPLETED**
+### Completed
+- **PROD Öncesi Kritik İşler** (2025-01-30) - ✅ **COMPLETED**
+  - ✅ **Retry + Error Handling FINAL** - Error categorization, retry metrics, DLQ tracking, manual retry endpoints eklendi
+    - Error categorization: `categorize_error()` fonksiyonu (auth, rate_limit, validation, network, unknown)
+    - Retry metrics: `track_retry_attempt()`, `track_retry_success()`, `track_retry_failed()`
+    - DLQ tracking: Max retry sonrası failed leads için tracking
+    - Manual retry endpoints: `POST /api/v1/d365/retry/{lead_id}`, `POST /api/v1/d365/retry-bulk`
+  - ✅ **Basic N+1 Optimization** - COUNT(*) optimization, SQL sort optimization, LIMIT/OFFSET eklendi
+    - COUNT(*) optimization: Ayrı COUNT query (tüm leads çekilmeden)
+    - SQL sort optimization: `sort_by != priority_score` için SQL sort + LIMIT/OFFSET
+    - Query performance: Priority score dışı sort'larda sadece gerekli sayfa çekiliyor
+  - ✅ **UI Polish — Minimum Viable** - Design system, button styles, loading/error states, toast notifications eklendi
+    - Design system: CSS variables (spacing: 4px, 8px, 16px, 24px grid)
+    - Color consistency: CSS variables (primary, secondary, success, error, warning)
+    - Button styles: Tutarlı button stilleri (primary, secondary, success, error)
+    - Loading states: Spinner ve skeleton loading animasyonları
+    - Error states: Error message styling
+    - Success feedback: Toast notification animasyonları
+  - **Durum**: ✅ **PRODUCTION READY** - PROD öncesi kritik işler tamamlandı
+  - **Dokümantasyon**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+  - **Dosyalar**: `app/integrations/d365/errors.py`, `app/core/d365_metrics.py`, `app/tasks/d365_push.py`, `app/api/v1/d365_routes.py`, `app/api/leads.py`, `mini-ui/styles.css`
+
+### Completed
+- **HAMLE 2: D365 Phase 2.9 E2E Wiring** (2025-01-30) - ✅ **COMPLETED**
+  - Production-grade E2E testler tamamlandı (3 senaryo: Happy path ✅, Idempotency ✅, Edge case ✅)
   - Azure AD App Registration completed
   - D365 Application User created with security roles
   - Hunter configuration completed (D365 env vars set)
-  - E2E Tests: Happy path ✅, Idempotency ✅, Edge case ✅ (all bugs fixed)
   - UI Badge & Link: Badge görünüyor ✅, D365 link çalışıyor ✅
   - Error Handling: Authentication error tested ✅, Rate limit & API error code verified ✅
-  - **Durum**: Dev testleri %100 tamamlandı, Go/No-Go Decision: ✅ GO (production'a geçiş için hazır)
-  - **Dokümantasyon**: `docs/active/HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md`, `HAMLE-2-UI-BADGE-LINK-TEST.md`, `HAMLE-2-GO-NOGO-DECISION.md`
+  - **Go/No-Go Decision**: ✅ GO (production'a geçiş için hazır)
+  - **Durum**: Production deployment hazırlığı
+  - **Dokümantasyon**: `docs/active/HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-GO-NOGO-DECISION.md`
 
-### Completed
 - **HAMLE 1: Partner Center Sync Aktifleştirme** (2025-01-30) - ✅ **COMPLETED**
   - OAuth credentials kontrolü tamamlandı (CLIENT_ID, TENANT_ID mevcut)
   - Feature flag aktifleştirme tamamlandı (`HUNTER_PARTNER_CENTER_ENABLED=true`)

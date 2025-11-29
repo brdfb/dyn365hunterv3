@@ -18,7 +18,7 @@
 - **🔄 G21: Architecture Refactor**: 🔄 In Progress (2025-01-28) - Hunter Slimming to Core Signal Engine (No-Break Refactor Plan)
 - **✅ Partner Center Phase 2**: ✅ Completed (2025-01-30) - Integration Roadmap Phase 2 (Tasks 2.1-2.6 + Phase 4-6 productization + Phase 7 production enablement completed, 59/59 tests passing, feature flag OFF, MVP-safe, production-ready)
 - **✅ Pre-D365 Roast Sprint**: ✅ Completed (2025-01-30) - 5/5 critical fixes (security, idempotency, token cache, session lifecycle, retry backoff)
-- **🔄 Dynamics 365 Integration**: 🔄 In Progress (2025-01-30) - Backend %94 completed (Phase 2.5), UI completed (Phase 3), E2E runbook ready (Phase 2.9)
+- **✅ Dynamics 365 Integration**: ✅ DEV TESTS COMPLETED (2025-01-30) - Backend %94 completed (Phase 2.5), UI completed (Phase 3), Phase 2.9 DEV TESTS COMPLETED (Go/No-Go: ✅ GO)
 - **✅ D365 Lead Push PoC**: ✅ **COMPLETED** (2025-01-30) - Hunter → D365 Lead Push working, Option Set mapping implemented
 - **Completed (Post-MVP)**: Mini UI, CSV export, progress tracking, provider change tracking, duplicate prevention, domain validation, bulk scan, webhook, lead enrichment, notes/tags/favorites, PDF summaries, rescan infrastructure, alerts system, enhanced scoring, domain intelligence (G20), CSP P-Model (2025-01-29)
 
@@ -492,7 +492,7 @@ When a phase is completed (TODO status = "Completed"):
     - `2025-01-30-cursor-roast-results-v1.1-pro.md`
 - `docs/todos/` - TODO lists (archive when phase complete)
   - **Current**: INTEGRATION-ROADMAP.md (Phase 3 IN PROGRESS), G21-architecture-refactor.md (Phase 4 PAUSED)
-  - **Status**: Phase 3 (D365) - Backend %94 + UI completed, E2E runbook ready
+  - **Status**: Phase 3 (D365) - ✅ DEV TESTS COMPLETED (2025-01-30) - Backend %94 + UI completed, Phase 2.9 DEV TESTS COMPLETED (Go/No-Go: ✅ GO)
 - `docs/plans/` - Project plans
 
 ### When to Archive
@@ -577,6 +577,6 @@ When a phase is completed (TODO status = "Completed"):
 12. **Stabilization Sprint**: ✅ Completed (2025-01-28) - v1.1-stable released (Enterprise-Ready / UI-Stable / Integration-Ready)
 13. **G21 Architecture Refactor**: 🔄 In Progress (2025-01-28) - Zero-downtime refactoring, additive-first approach
 14. **Pre-D365 Roast Sprint**: ✅ Completed (2025-01-30) - 5/5 critical fixes (security, idempotency, token cache, session lifecycle, retry backoff)
-15. **D365 Integration**: 🔄 In Progress (2025-01-30) - Backend %94 + UI completed, E2E runbook ready
+15. **D365 Integration**: ✅ DEV TESTS COMPLETED (2025-01-30) - Backend %94 + UI completed, Phase 2.9 DEV TESTS COMPLETED (Go/No-Go: ✅ GO)
 16. **Dev vs Prod Parity**: ✅ Code EQUAL, ⚠️ Configuration DIFFERENT (expected) - See `docs/reference/DEV-PROD-DIFFERENCES.md`
 

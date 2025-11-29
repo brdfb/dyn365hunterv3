@@ -12,7 +12,7 @@
 - **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
 
 **Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
-**Core Freeze + D365 Plan:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
+**Core Freeze + D365 Plan:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).
 
 ---
 
@@ -60,7 +60,7 @@ sorularına cevap verebilmesi.
 - `tests/test_regression_dataset.py`
 - `tests/test_sales_*.py`
 
-**Detaylar:** `CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın.
+**Detaylar:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).
 
 ### 2.1. Analiz Yetkinlikleri
 
@@ -362,7 +362,7 @@ sorularına cevap verebilmesi.
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
 
-- **Dynamics 365 Integration** → ✅ **BACKEND %94 TAMAMLANDI** (Phase 2.5), ✅ **PHASE 3 (UI) TAMAMLANDI** (2025-01-30), ✅ **PHASE 2.9 (E2E) DEV TESTS COMPLETED** (2025-01-30 - HAMLE 2 dev testleri tamamlandı)
+- **Dynamics 365 Integration** → ✅ **HAMLE 2 COMPLETED** (2025-01-30) - Backend %94 (Phase 2.5), UI (Phase 3), Production-grade E2E (Phase 2.9 - 3 senaryo), Go/No-Go: ✅ GO
 
   - ✅ **Phase 2.5 (Backend Validation)**: Backend tamamlandı (%94)
     - API endpoint: `POST /api/v1/d365/push-lead`
@@ -377,11 +377,14 @@ sorularına cevap verebilmesi.
     - ✅ Lead detail modal'da D365 paneli eklendi
     - ✅ API response'a D365 alanları eklendi (d365_sync_status, d365_lead_id, d365_lead_url)
     - **Detaylar**: `D365-PHASE-3-UI-STATUS-TODO.md`
-  - ✅ **Phase 2.9 (E2E Wiring)**: DEV TESTS COMPLETED (2025-01-30 - HAMLE 2 dev testleri tamamlandı)
-    - App registration, Application User, Role + izinler
-    - Custom hunter_* alanları
-    - Manual E2E test (2-3 lead push)
-    - **Detaylar**: `D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook)
+  - ✅ **Phase 2.9 (E2E Wiring)**: ✅ **COMPLETED** (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı)
+    - App registration, Application User, Role + izinler ✅
+    - Custom hunter_* alanları ✅
+    - Production-grade E2E testler (3 senaryo: Happy path ✅, Idempotency ✅, Edge case ✅)
+    - UI Badge & Link test ✅
+    - Error Handling testler ✅
+    - Go/No-Go Decision: ✅ GO
+    - **Detaylar**: `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (step-by-step runbook - reference guide)
   - **Mimari:** Adapter Pattern — Core'a dokunmadan yan taraftan takma
   - Plan: Hunter → D365 Sales:
     - Lead → D365 Lead mapping (tek yönlü push)
@@ -390,7 +393,7 @@ sorularına cevap verebilmesi.
   - İki yönlü sync yok (planlanmış değil)
   - **Detaylar:** 
     - `CRITICAL-3-HAMLE-PRODUCT-READY.md` (Hamle 2 - revize edildi)
-    - `CORE-FREEZE-D365-PUSH-PLAN.md` (Mimari plan)
+    - `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` (Mimari plan - archived)
 
 - **G21 Architecture Refactor (Phase 4–6)**
 

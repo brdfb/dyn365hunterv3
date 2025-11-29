@@ -345,10 +345,10 @@ Agent should regularly check:
   - Task 4: DB Session Lifecycle Fix ✅
   - Task 5: Retry Backoff + Jitter ✅
   - **Cleanup**: Sprint board aktif kalabilir (referans değeri var, decision log içeriyor)
-- **D365 Phase 2.5, 3, 2.9 status**: ✅ Backend %94 completed, ✅ UI completed, ⏳ E2E runbook ready
+- **D365 Phase 2.5, 3, 2.9 status**: ✅ Backend %94 completed, ✅ UI completed, ✅ Phase 2.9 DEV TESTS COMPLETED
   - **Phase 2.5**: ✅ Completed (archived - 2025-01-30)
   - **Phase 3**: ✅ Completed (archived - 2025-01-30)
-  - **Phase 2.9**: ⏳ E2E runbook ready (`D365-PHASE-2.9-E2E-RUNBOOK.md`), tenant setup pending
+  - **Phase 2.9**: ✅ DEV TESTS COMPLETED (2025-01-30) - E2E tests, UI tests, error handling tests completed, Go/No-Go: ✅ GO
   - **Cleanup**: Phase 2.5 ve 3 dosyaları archive edildi (2025-01-30)
 - **D365 Lead Push PoC status**: ✅ **COMPLETED** (2025-01-30) - Hunter → D365 Lead Push working
   - **End-to-end flow**: API endpoint → Celery task → D365 API → Database sync
