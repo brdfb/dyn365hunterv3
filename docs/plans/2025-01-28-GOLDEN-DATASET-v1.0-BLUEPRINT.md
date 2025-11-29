@@ -2,7 +2,8 @@
 
 **Date**: 2025-01-28  
 **Status**: 📋 **Blueprint** (Implementation pending)  
-**Purpose**: Ground truth dataset for scoring engine validation
+**Purpose**: Ground truth dataset for scoring engine validation  
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
 
 ---
 

@@ -24,17 +24,17 @@ Add Sales Engine (sales intelligence layer).
 - [x] Database backup script created (`scripts/g21_phase0_backup.sh`)
 - [x] Git tag script created (`scripts/g21_phase0_git_tag.sh`)
 - [x] Usage metrics collection script created (`scripts/g21_phase0_metrics.sh`)
-- [x] Dependency map created (`docs/g21-phase0-metrics/DEPENDENCY-MAP.md`)
+- [x] Dependency map created (`docs/reference/G21-DEPENDENCY-MAP.md`)
 - [x] **Execute**: Database backup (✅ `backups/backup_pre_refactor_20251116_101321.sql` - 47K)
 - [x] **Execute**: Git tag (✅ `pre-refactor-v1.0.0` - pushed to remote)
-- [x] **Execute**: Usage metrics collection (✅ `docs/g21-phase0-metrics/usage_metrics_20251116_101559.json`)
+- [x] **Execute**: Usage metrics collection (✅ `docs/archive/2025-01-30-G21-usage-metrics.json`)
 - [x] **Analysis**: Notes/Tags/Favorites tables do NOT exist - features never used
 - [x] **Analysis**: Mini UI does not use Notes/Tags/Favorites endpoints
 - [x] **Analysis**: Test suite exists (will be updated in Phase 6)
 - [ ] **Manual**: Check Power Automate flows for Notes/Tags/Favorites usage (non-blocking)
 - [ ] **Manual**: Check external API clients (application logs) (non-blocking)
 
-**Completion Report**: `docs/g21-phase0-metrics/PHASE0-COMPLETION.md`
+**Completion Report**: `docs/archive/2025-01-30-G21-PHASE0-COMPLETION.md` (archived)
 
 ### Phase 1: Deprecation Annotations ✅ **COMPLETED** (2025-11-16)
 - [x] Create `app/core/deprecation.py` (✅ decorator with logging and response headers)
@@ -66,7 +66,7 @@ Add Sales Engine (sales intelligence layer).
 - [x] Core unit tests (38 tests, all passing)
 - [x] API integration tests (7 tests, all passing)
 - [x] Real-world smoke test (3 domains, all validated)
-- [x] API contract documentation (`docs/api/SALES-SUMMARY-V1-CONTRACT.md`)
+- [x] API contract documentation (`docs/reference/SALES-SUMMARY-V1-CONTRACT.md`)
 - [x] Frontend type definitions (TypeScript + JSDoc)
 - [x] Logging/telemetry (`sales_summary_viewed` event)
 - [x] Tuning factor configuration (Phase 2.1)

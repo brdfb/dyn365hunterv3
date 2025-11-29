@@ -1,7 +1,8 @@
 # Hunter — Post-MVP Strategy
 
 **Versiyon:** v1.0 sonrası  
-**Son Güncelleme:** 2025-01-30
+**Son Güncelleme:** 2025-01-30  
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
 
 **Odak:** 3 ana iş paketi  
 

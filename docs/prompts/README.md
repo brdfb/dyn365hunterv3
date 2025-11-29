@@ -2,6 +2,8 @@
 
 This folder contains important prompts, conversation snippets, and **architectural decisions** that should be preserved for reference.
 
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
+
 ## Format
 
 Each prompt file should follow this format:

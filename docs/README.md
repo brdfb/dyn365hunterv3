@@ -80,7 +80,7 @@ Sales team documentation has been organized into a dedicated folder:
 
 ### API Documentation
 
-**Location:** `docs/api/`
+**Location:** `docs/reference/`
 
 API contract documentation:
 - `SALES-SUMMARY-V1-CONTRACT.md` - Sales Summary API v1 contract (stable, UI contract)
@@ -217,11 +217,10 @@ API contract documentation:
   - **Phase 2**: ✅ Completed (2025-01-28) - Sales Engine (Additive)
   - **Phase 3**: ✅ Completed (2025-01-28) - Read-Only Mode (Write endpoints disabled - 410 Gone)
   - **Phase 4**: 🔄 PAUSED - Dynamics Migration (overlaps with Integration Roadmap Phase 3)
-- `docs/g21-phase0-metrics/` - G21 Phase 0 & Phase 1 metrics and completion reports
-  - `PHASE0-COMPLETION.md` - Phase 0 completion report (2025-11-16)
-  - `PHASE1-COMPLETION.md` - Phase 1 completion report (2025-11-16)
-  - `DEPENDENCY-MAP.md` - Dependency analysis for Notes/Tags/Favorites endpoints
-  - `usage_metrics_*.json` - Usage metrics collection data
+- `docs/reference/G21-DEPENDENCY-MAP.md` - G21 Phase 0 dependency analysis (Notes/Tags/Favorites endpoints)
+- `docs/archive/2025-01-30-G21-PHASE0-COMPLETION.md` - Phase 0 completion report (archived)
+- `docs/archive/2025-01-30-G21-PHASE1-COMPLETION.md` - Phase 1 completion report (archived)
+- `docs/archive/2025-01-30-G21-usage-metrics.json` - Usage metrics collection data (archived)
 
 **Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`. **Production Go/No-Go süreci inactive** (2025-01-30) - Altyapı dokümanları arşivde, aktif süreç değil. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup).
 
