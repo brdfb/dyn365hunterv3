@@ -26,11 +26,22 @@ Bu script şunları yapar:
 3. ✅ Environment değişkenlerini kontrol eder
 4. ✅ Docker servislerini başlatır
 5. ✅ Servis sağlık kontrollerini yapar
-6. ✅ Veritabanı migrasyonlarını çalıştırır
-7. ✅ Entegrasyon kurulumunu (opsiyonel) yapar
-8. ✅ Son doğrulamayı yapar
+6. ✅ Veritabanı temizleme (opsiyonel - tüm veriler silinir)
+7. ✅ Veritabanı migrasyonlarını çalıştırır
+8. ✅ Entegrasyon kurulumunu (opsiyonel) yapar
+9. ✅ Son doğrulamayı yapar
 
 **Süre**: ~5-10 dakika (Docker build'e bağlı)
+
+### Veritabanını Temizleyerek Kurulum
+
+Eğer mevcut veritabanındaki kayıtları silmek istiyorsanız:
+
+```bash
+RESET_DATABASE=yes bash scripts/fresh_start.sh
+```
+
+**⚠️ DİKKAT**: Bu komut **TÜM VERİLERİ SİLER**! Sadece development/test ortamlarında kullanın.
 
 ---
 

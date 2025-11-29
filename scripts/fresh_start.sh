@@ -63,13 +63,24 @@ if [ ! -f ".env" ]; then
     fi
 else
     echo -e "${YELLOW}⚠️  .env dosyası zaten mevcut${NC}"
-    read -p "   .env dosyasını sıfırlamak istiyor musunuz? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Non-interactive mode: if FORCE_RESET_ENV is set, reset .env
+    if [ "${FORCE_RESET_ENV}" = "yes" ]; then
         cp .env.example .env
-        echo -e "${GREEN}✅ .env dosyası sıfırlandı${NC}"
+        echo -e "${GREEN}✅ .env dosyası sıfırlandı (FORCE_RESET_ENV=yes)${NC}"
     else
-        echo -e "${BLUE}ℹ️  Mevcut .env dosyası korunuyor${NC}"
+        # Interactive mode: ask user
+        if [ -t 0 ]; then
+            read -p "   .env dosyasını sıfırlamak istiyor musunuz? (y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                cp .env.example .env
+                echo -e "${GREEN}✅ .env dosyası sıfırlandı${NC}"
+            else
+                echo -e "${BLUE}ℹ️  Mevcut .env dosyası korunuyor${NC}"
+            fi
+        else
+            echo -e "${BLUE}ℹ️  Mevcut .env dosyası korunuyor (non-interactive mode)${NC}"
+        fi
     fi
 fi
 echo ""
@@ -81,8 +92,14 @@ echo "----------------------------------------"
 if [ -f "scripts/check_env_completeness.sh" ]; then
     bash scripts/check_env_completeness.sh
     echo ""
-    read -p "   Environment değişkenleri doğru mu? Devam etmek için Enter'a basın... "
-    echo ""
+    # Non-interactive mode: skip prompt
+    if [ -t 0 ]; then
+        read -p "   Environment değişkenleri doğru mu? Devam etmek için Enter'a basın... "
+        echo ""
+    else
+        echo -e "${BLUE}ℹ️  Non-interactive mode: devam ediliyor...${NC}"
+        echo ""
+    fi
 else
     echo -e "${YELLOW}⚠️  check_env_completeness.sh bulunamadı, atlanıyor${NC}"
 fi
@@ -144,8 +161,104 @@ else
 fi
 echo ""
 
-# Step 6: Database migrations
-echo -e "${CYAN}📋 ADIM 6: Veritabanı Migrasyonları${NC}"
+# Step 6: Database reset (optional)
+echo -e "${CYAN}📋 ADIM 6: Veritabanı Temizleme (Opsiyonel)${NC}"
+echo "----------------------------------------"
+
+# Check if database reset is requested
+if [ "${RESET_DATABASE}" = "yes" ]; then
+    echo -e "${YELLOW}⚠️  Veritabanı sıfırlanacak (TÜM VERİLER SİLİNECEK!)${NC}"
+    if [ -f "scripts/reset_db_with_alembic.sh" ]; then
+        echo "🔄 Resmi reset scripti çalıştırılıyor..."
+        FORCE_PRODUCTION_RESET="${FORCE_PRODUCTION_RESET:-}" bash scripts/reset_db_with_alembic.sh
+        echo -e "${GREEN}✅ Veritabanı temizlendi${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Reset scripti bulunamadı, manuel temizleme yapılıyor...${NC}"
+        docker-compose exec -T api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text('DROP SCHEMA IF EXISTS public CASCADE;'))
+        conn.execute(text('CREATE SCHEMA public;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO dyn365hunter;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+        conn.commit()
+    print('✅ Veritabanı temizlendi')
+except Exception as e:
+    print(f'⚠️  Hata: {e}')
+" || docker compose exec -T api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text('DROP SCHEMA IF EXISTS public CASCADE;'))
+        conn.execute(text('CREATE SCHEMA public;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO dyn365hunter;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+        conn.commit()
+    print('✅ Veritabanı temizlendi')
+except Exception as e:
+    print(f'⚠️  Hata: {e}')
+"
+        echo -e "${GREEN}✅ Veritabanı temizlendi${NC}"
+    fi
+else
+    # Interactive mode: ask user
+    if [ -t 0 ]; then
+        read -p "   Veritabanını temizlemek istiyor musunuz? (TÜM VERİLER SİLİNECEK!) (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            if [ -f "scripts/reset_db_with_alembic.sh" ]; then
+                echo "🔄 Resmi reset scripti çalıştırılıyor..."
+                FORCE_PRODUCTION_RESET="${FORCE_PRODUCTION_RESET:-}" bash scripts/reset_db_with_alembic.sh
+                echo -e "${GREEN}✅ Veritabanı temizlendi${NC}"
+            else
+                echo -e "${YELLOW}⚠️  Reset scripti bulunamadı, manuel temizleme yapılıyor...${NC}"
+                docker-compose exec -T api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text('DROP SCHEMA IF EXISTS public CASCADE;'))
+        conn.execute(text('CREATE SCHEMA public;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO dyn365hunter;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+        conn.commit()
+    print('✅ Veritabanı temizlendi')
+except Exception as e:
+    print(f'⚠️  Hata: {e}')
+" || docker compose exec -T api python -c "
+from app.db.session import engine
+from sqlalchemy import text
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text('DROP SCHEMA IF EXISTS public CASCADE;'))
+        conn.execute(text('CREATE SCHEMA public;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO dyn365hunter;'))
+        conn.execute(text('GRANT ALL ON SCHEMA public TO public;'))
+        conn.commit()
+    print('✅ Veritabanı temizlendi')
+except Exception as e:
+    print(f'⚠️  Hata: {e}')
+"
+                echo -e "${GREEN}✅ Veritabanı temizlendi${NC}"
+            fi
+        else
+            echo -e "${BLUE}ℹ️  Veritabanı temizleme atlandı${NC}"
+        fi
+    else
+        echo -e "${BLUE}ℹ️  Veritabanı temizleme atlandı (non-interactive mode, RESET_DATABASE=yes ile aktifleştirebilirsiniz)${NC}"
+    fi
+fi
+echo ""
+
+# Step 7: Database migrations
+echo -e "${CYAN}📋 ADIM 7: Veritabanı Migrasyonları${NC}"
 echo "----------------------------------------"
 
 echo "🔄 Alembic migrasyonları çalıştırılıyor..."
@@ -157,25 +270,35 @@ else
 fi
 echo ""
 
-# Step 7: Integration setup (optional)
-echo -e "${CYAN}📋 ADIM 7: Entegrasyon Kurulumu (Opsiyonel)${NC}"
+# Step 8: Integration setup (optional)
+echo -e "${CYAN}📋 ADIM 8: Entegrasyon Kurulumu (Opsiyonel)${NC}"
 echo "----------------------------------------"
 
 if [ -f "scripts/enable_integrations.sh" ]; then
-    read -p "   Partner Center ve D365 entegrasyonlarını aktifleştirmek istiyor musunuz? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Non-interactive mode: if ENABLE_INTEGRATIONS is set, enable them
+    if [ "${ENABLE_INTEGRATIONS}" = "yes" ]; then
         bash scripts/enable_integrations.sh
     else
-        echo -e "${BLUE}ℹ️  Entegrasyon kurulumu atlandı${NC}"
+        # Interactive mode: ask user
+        if [ -t 0 ]; then
+            read -p "   Partner Center ve D365 entegrasyonlarını aktifleştirmek istiyor musunuz? (y/N): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                bash scripts/enable_integrations.sh
+            else
+                echo -e "${BLUE}ℹ️  Entegrasyon kurulumu atlandı${NC}"
+            fi
+        else
+            echo -e "${BLUE}ℹ️  Entegrasyon kurulumu atlandı (non-interactive mode, ENABLE_INTEGRATIONS=yes ile aktifleştirebilirsiniz)${NC}"
+        fi
     fi
 else
     echo -e "${YELLOW}⚠️  enable_integrations.sh bulunamadı, atlanıyor${NC}"
 fi
 echo ""
 
-# Step 8: Final verification
-echo -e "${CYAN}📋 ADIM 8: Son Doğrulama${NC}"
+# Step 9: Final verification
+echo -e "${CYAN}📋 ADIM 9: Son Doğrulama${NC}"
 echo "----------------------------------------"
 
 echo "🔍 Sistem durumu kontrol ediliyor..."
@@ -221,13 +344,18 @@ echo ""
 echo "2. Logları kontrol edin:"
 echo "   ${CYAN}docker-compose logs -f api${NC}"
 echo ""
-echo "3. Entegrasyonları aktifleştirmek için:"
+echo "3. Veritabanını temizlemek için (tüm veriler silinir):"
+echo "   ${CYAN}RESET_DATABASE=yes bash scripts/fresh_start.sh${NC}"
+echo "   veya:"
+echo "   ${CYAN}bash scripts/reset_db_with_alembic.sh${NC}"
+echo ""
+echo "4. Entegrasyonları aktifleştirmek için:"
 echo "   ${CYAN}bash scripts/enable_integrations.sh${NC}"
 echo ""
-echo "4. Partner Center için ilk authentication:"
+echo "5. Partner Center için ilk authentication:"
 echo "   ${CYAN}docker-compose exec api python -m app.tools.partner_center_device_code_flow${NC}"
 echo ""
-echo "5. Mini UI'ya erişin:"
+echo "6. Mini UI'ya erişin:"
 echo "   ${CYAN}http://localhost:8000${NC}"
 echo ""
 echo "📚 Daha fazla bilgi için:"
