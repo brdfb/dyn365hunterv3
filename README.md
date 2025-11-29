@@ -374,9 +374,16 @@ Dyn365Hunter MVP is a FastAPI-based application that analyzes domains for lead i
    - ✅ Environment değişkenlerini kontrol eder
    - ✅ Docker servislerini başlatır
    - ✅ Servis sağlık kontrollerini yapar
+   - ✅ Veritabanı temizleme (opsiyonel - tüm veriler silinir)
    - ✅ Veritabanı migrasyonlarını çalıştırır
    - ✅ Entegrasyon kurulumunu (opsiyonel) yapar
    - ✅ Son doğrulamayı yapar
+   
+   **Veritabanını Temizleyerek Kurulum:**
+   ```bash
+   RESET_DATABASE=yes bash scripts/fresh_start.sh
+   ```
+   ⚠️ **DİKKAT**: Bu komut **TÜM VERİLERİ SİLER**! Sadece development/test ortamlarında kullanın.
    
    **Geliştirici Kurulumu:**
    ```bash

@@ -26,11 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Post-installation verification
   - **Features**:
     - Non-interactive mode support (CI/CD friendly)
-    - Environment variable control (`FORCE_RESET_ENV`, `ENABLE_INTEGRATIONS`)
+    - Environment variable control (`FORCE_RESET_ENV`, `ENABLE_INTEGRATIONS`, `RESET_DATABASE`)
     - Terminal detection for interactive prompts
     - Comprehensive error handling
+    - Optional database reset (interactive prompt or `RESET_DATABASE=yes` environment variable)
+      - Uses official `reset_db_with_alembic.sh` script if available
+      - Fallback to manual schema drop if script not found
+      - Clear warnings about data deletion
   - **Files**: `scripts/fresh_start.sh`, `docs/reference/FRESH-START-GUIDE.md`, `README.md`
-  - **Status**: ✅ **Added** - End users can now do clean setup with single command
+  - **Status**: ✅ **Added** - End users can now do clean setup with single command (including optional database reset)
 
 - **Container Tools Module** (2025-01-30) - Container Python scripts moved to `app/tools/` for permanent solution
   - **New Module**: `app/tools/` - Python module for container utility scripts
@@ -53,6 +57,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: ✅ **Added** - Container scripts now permanently available in Docker image
 
 ### Changed
+- **Fresh Start Script - Database Reset Option** (2025-01-30) - Added optional database reset to fresh start script
+  - **New Feature**: Step 6 - Database reset (optional)
+    - Interactive prompt: Ask user if they want to reset database (with clear warning)
+    - Non-interactive mode: `RESET_DATABASE=yes` environment variable support
+    - Uses official `reset_db_with_alembic.sh` script if available
+    - Fallback to manual schema drop if script not found
+    - Safety: Clear warnings about data deletion
+  - **Usage**:
+    - Normal setup (keeps existing data): `bash scripts/fresh_start.sh`
+    - Clean setup (resets database): `RESET_DATABASE=yes bash scripts/fresh_start.sh`
+  - **Updated Documentation**: `docs/reference/FRESH-START-GUIDE.md` - Added database reset option section
+  - **Files**: `scripts/fresh_start.sh`, `docs/reference/FRESH-START-GUIDE.md`
+  - **Status**: ✅ **Changed** - Fresh start script now supports optional database reset
+
 - **Container Scripts Location** (2025-01-30) - Moved container Python scripts from `scripts/` to `app/tools/`
   - **Migration**: Container Python scripts relocated for permanent Docker image inclusion
     - `scripts/partner_center_device_code_flow.py` → `app/tools/partner_center_device_code_flow.py`
