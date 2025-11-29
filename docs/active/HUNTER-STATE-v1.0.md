@@ -1,8 +1,8 @@
 # Hunter v1.0 — Sistem Durum Özeti
 
-**Son güncelleme:** 2025-01-30 (Tüm durumlar netleştirildi: Partner Center, Dynamics 365, UI, Backend Engine, Core Freeze)  
+**Son güncelleme:** 2025-01-30 (Prod Go/No-Go inactive, roadmap moduna geçildi)  
 
-**Durum:** Production-ready core engine (v1.0.0)
+**Durum:** Production-ready core engine (v1.0.0) - **Development Roadmap Mode**
 
 **Önemli Notlar:**
 - **Backend Engine:** ✅ Ferrari seviyesinde (DNS, scoring, enrichment, signals)
@@ -10,9 +10,12 @@
 - **Partner Center:** ✅ **COMPLETED** (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi seviyesinde
 - **Dynamics 365:** ✅ **Backend %94 tamamlandı** (Phase 2.5), ✅ **Phase 3 (UI) tamamlandı** (2025-01-30), ✅ **Phase 2.9 (E2E) DEV TESTS COMPLETED** (2025-01-30 - HAMLE 2 dev testleri tamamlandı) (Adapter pattern ile implement edildi)
 - **UI:** ✅ Çalışıyor, ⚠️ Estetik iyileştirme gerekiyor
+- **Production Go/No-Go:** ⏸ **INACTIVE** - Altyapı dokümanları hazır, aktif süreç değil. Gerçek prod deployment yok, sadece roadmap modunda feature development.
 
 **Aksiyon Planı:** Tüm detaylar ve 3 kritik hamle için `CRITICAL-3-HAMLE-PRODUCT-READY.md` dosyasına bakın.  
-**Core Freeze + D365 Plan:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar  
+**Core Freeze + D365 Plan:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` dosyasına bakın (archived).  
+**Production Readiness Docs:** `docs/archive/2025-01-30-*` - Prod dokümanları arşivde, ihtiyaç olursa tekrar açılabilir.
 
 ---
 
@@ -361,8 +364,11 @@ sorularına cevap verebilmesi.
   - ✅ **HAMLE 1 Tamamlandı** (2025-01-30): Kod bazında DONE, ürün bazında yeterince iyi seviyesinde. UI JS & error handling manuel smoke test ile kapanacak (mimari değişiklik gerektirmiyor).
 
   - ⏳ Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil (future enhancement)
+  - ✅ **Phase 4-6: Productization** (2025-01-30) - DB schema revision, filter rules, upsert strategy, summary logging, comprehensive tests (50 tests passing)
+  - ✅ **Phase 7: Production Enablement** (2025-01-30) - Feature flag validation, logging review, metrics exposure, background sync enablement, production checklist
+  - **Test Coverage**: 59/59 passing (37 domain extraction + 7 Phase 4 + 6 client + 6 Phase 5/6 + 3 Phase 3.3 URL-based + 10 Phase 7)
 
-- **Dynamics 365 Integration** → ✅ **HAMLE 2 COMPLETED** (2025-01-30) - Backend %94 (Phase 2.5), UI (Phase 3), Production-grade E2E (Phase 2.9 - 3 senaryo), Go/No-Go: ✅ GO
+- **Dynamics 365 Integration** → ✅ **HAMLE 2 COMPLETED** (2025-01-30) - Backend %100 (Phase 2.5), UI (Phase 3), Production-grade E2E (Phase 2.9 - 3 senaryo), Go/No-Go: ✅ GO
 
   - ✅ **Phase 2.5 (Backend Validation)**: Backend tamamlandı (%94)
     - API endpoint: `POST /api/v1/d365/push-lead`
@@ -370,7 +376,7 @@ sorularına cevap verebilmesi.
     - D365 client: `app/integrations/d365/client.py`
     - Mapping: `app/integrations/d365/mapping.py`
     - DB migration: `d365_sync_status`, `d365_lead_id`, `d365_sync_last_at` alanları
-    - ✅ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapıldı - dev testleri completed)
+    - ✅ **Eksik %6**: Gerçek D365 tenant ile E2E test (Phase 2.9'da yapıldı - dev testleri completed) → Backend %94 → %100
   - ✅ **Phase 3 (UI & Status)**: Tamamlandı (2025-01-30)
     - ✅ Lead listesine D365 badge eklendi
     - ✅ "Push to Dynamics" butonu eklendi
@@ -425,7 +431,9 @@ sorularına cevap verebilmesi.
   - Backend: API client, referral ingestion, sync endpoint, Celery task
   - UI: Referral column with badges, referral type filter, sync button (header), sync status indicator (right-top)
   - Background sync: Celery Beat schedule (10 min prod, 30s dev)
-  - All tests passing (59/59 tests)
+  - ✅ **Phase 4-6: Productization** (2025-01-30) - DB schema revision, filter rules, upsert strategy, summary logging, comprehensive tests (50 tests passing)
+  - ✅ **Phase 7: Production Enablement** (2025-01-30) - Feature flag validation, logging review, metrics exposure, background sync enablement, production checklist
+  - All tests passing (59/59 tests: 37 domain extraction + 7 Phase 4 + 6 client + 6 Phase 5/6 + 3 Phase 3.3 URL-based + 10 Phase 7)
   - ✅ **HAMLE 1 Tamamlandı** (2025-01-30): Kod bazında DONE, ürün bazında yeterince iyi seviyesinde
 
 - CRM-lite → **deprecated**
@@ -442,11 +450,22 @@ sorularına cevap verebilmesi.
 
 - **Tag:** `v1.0.0`
 
-- **Durum:** Production-ready core engine
+- **Durum:** Production-ready core engine - **Development Roadmap Mode**
 
-- **Checklist:** `docs/active/GO-NO-GO-CHECKLIST-v1.0.md` → tüm Must-Have maddeler ✅
+- **Production Go/No-Go:** ⏸ **INACTIVE** (2025-01-30)
+  - Prod readiness dokümanları hazır (arşivde: `docs/archive/2025-01-30-*`)
+  - Aktif prod deployment süreci yok
+  - Odak: Feature development (Leads 500 fix ✅, D365 entegrasyonu ✅, PC Phase 4-5 ✅, UI düzeni ⏳)
+  - Prod konuşmaları "inactive" modda - ihtiyaç olursa tekrar açılır
 
-- **Prod kararı:** GO (2025-01-28)
+- **Leads 500 Bug Fix** → ✅ **FIXED** (2025-01-30)
+  - **Problem**: `GET /api/v1/leads` endpoint 500 Internal Server Error
+  - **Root Cause**: `referral_type` parametresi `get_leads_v1` fonksiyonunda eksikti
+  - **Fix**: `referral_type` parametresi eklendi ve `get_leads` çağrısına geçirildi
+  - **Status**: ✅ **FIXED** - Production deployment için hazır
+  - **Reference**: `docs/active/LEADS-500-BUG-FIX.md`
+
+- **Roadmap:** `docs/active/G21-ROADMAP-CURRENT.md` - Aktif development roadmap
 
 Bu doküman, Hunter v1.0 çekirdeğinin **tek resmi durum özeti** olarak kullanılmalıdır.
 

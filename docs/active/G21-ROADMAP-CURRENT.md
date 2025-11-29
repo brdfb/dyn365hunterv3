@@ -1,9 +1,11 @@
 # G21 — Architecture & Integration Roadmap (Current State)
 
-**Son güncelleme:** 2025-01-30 (Partner Center ve Dynamics 365 durumları netleştirildi)  
+**Son güncelleme:** 2025-01-30 (Prod Go/No-Go inactive, roadmap moduna geçildi)  
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar  
 
 **Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending  
-**Integration Roadmap:** Phase 2 (Partner Center) ✅ COMPLETED (2025-01-30 - Kod bazında DONE, ürün bazında yeterince iyi), Phase 3 (D365) ✅ COMPLETED (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO)
+**Integration Roadmap:** Phase 2 (Partner Center) ✅ COMPLETED (2025-01-30 - Kod bazında DONE, ürün bazında yeterince iyi), Phase 3 (D365) ✅ COMPLETED (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO)  
+**Production Go/No-Go:** ⏸ **INACTIVE** - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup)
 
 ---
 

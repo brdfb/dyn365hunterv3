@@ -1,8 +1,11 @@
 # 🔥 Hunter'ı Gerçek Ürün Yapacak 3 Kritik Hamle
 
 **Tarih**: 2025-01-30  
-**Durum**: Acil Aksiyon Planı  
-**Hedef**: V1 → Gerçek Ürün Dönüşümü
+**Durum**: Development Roadmap Mode (Prod Go/No-Go inactive)  
+**Hedef**: Feature Development (Leads 500 fix ✅, D365 entegrasyonu ✅, PC Phase 4-5 ✅, UI düzeni ⏳)  
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
+
+**Önemli Not:** Prod Go/No-Go süreci **inactive** modda. Altyapı dokümanları hazır (arşivde), ancak gerçek prod deployment yok. Odak tamamen feature development'a kaydırıldı.
 
 ---
 
@@ -161,25 +164,21 @@
 
 ### **PROD ÖNCESİ KRİTİK İŞLER** ✅ **TAMAMLANDI** (2025-01-30)
 
-**Durum**: ✅ **PRODUCTION READY** (HAMLE 2 completed, PROD öncesi kritik işler tamamlandı)  
-**Hedef**: PROD SAFE MODE RELEASE
+**Durum**: ✅ **TAMAMLANDI** (HAMLE 2 completed, PROD öncesi kritik işler tamamlandı)  
+**Hedef**: ⏸ **INACTIVE** - Prod Go/No-Go süreci rafa kaldırıldı, roadmap moduna geçildi
 
-#### ✅ **PROD'a Çıkmak İçin:**
-- ✅ **Teknik olarak mümkün**: Hiçbir zorunlu engel yok
-- ✅ **Risk**: DÜŞÜK (PROD öncesi kritik işler tamamlandı)
+#### ⏸ **Prod Go/No-Go Durumu:**
+- ⏸ **INACTIVE**: Prod readiness dokümanları hazır (arşivde), aktif süreç değil
+- ✅ **Altyapı hazır**: Prod için temel kurallar, rehberler, riskler belirlendi
+- 🎯 **Odak**: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup)
 
-#### 🎯 **Önerilen Yaklaşım:**
-**PROD'a çıkmaya hazır.** ✅
-
-Tüm kritik işler tamamlandı:
+#### ✅ **Tamamlanan İşler:**
 1. ✅ **HAMLE 2 COMPLETE** - ✅ **TAMAMLANDI** (2025-01-30)
 2. ✅ **Retry + Error Handling FINAL** - ✅ **TAMAMLANDI** (2025-01-30)
 3. ✅ **Basic N+1 Optimization** - ✅ **TAMAMLANDI** (2025-01-30)
 4. ✅ **UI Polish — Minimum Viable** - ✅ **TAMAMLANDI** (2025-01-30)
 
-👉 **PROD SAFE MODE RELEASE** - Şimdi yapılabilir
-
-**Referans**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+**Referans**: `docs/archive/2025-01-30-PRODUCTION-READINESS-FINAL-CHECKLIST.md` (arşivde)
 
 ---
 
@@ -294,27 +293,20 @@ Tüm kritik işler tamamlandı:
 
 ## 🚀 **PRODUCTION READINESS DURUMU**
 
-### ✅ **PROD'a Çıkmak İçin:**
-- ✅ **Teknik olarak mümkün**: Hiçbir zorunlu engel yok
-- ✅ **Risk**: DÜŞÜK (PROD öncesi kritik işler tamamlandı)
+**Durum:** ⏸ **INACTIVE** (2025-01-30)
 
-**Tüm kritik işler tamamlandı:**
-- ✅ Retry + Error Handling FINAL → Error categorization, retry metrics, DLQ, manual retry endpoints eklendi
-- ✅ Basic N+1 optimization → COUNT(*) optimization, SQL sort optimization eklendi
-- ✅ UI Polish minimum → Design system, button styles, loading/error states, toast notifications eklendi
+**Açıklama:** Prod Go/No-Go süreci rafa kaldırıldı. Altyapı dokümanları hazır (arşivde: `docs/archive/2025-01-30-*`), ancak gerçek prod deployment yok. Odak tamamen feature development'a kaydırıldı.
 
-### 🎯 **Önerilen Yaklaşım:**
-**PROD'a çıkmaya hazır.** ✅
+**Aktif Roadmap:**
+- ✅ Leads 500 bug fix
+- ✅ D365 Lead Push entegrasyonu
+- ✅ Partner Center Phase 4-5
+- ✅ UI cleanup ve düzen
+- ✅ Scoring improvements
 
-Tüm kritik işler tamamlandı:
-1. ✅ HAMLE 2 COMPLETE - ✅ **TAMAMLANDI**
-2. ✅ Retry + Error Handling FINAL - ✅ **TAMAMLANDI** (2025-01-30)
-3. ✅ Basic N+1 Optimization - ✅ **TAMAMLANDI** (2025-01-30)
-4. ✅ UI Polish — Minimum Viable - ✅ **TAMAMLANDI** (2025-01-30)
+**Prod Dokümanları:** Arşivde (`docs/archive/2025-01-30-*`) - İhtiyaç olursa tekrar açılabilir.
 
-👉 **PROD SAFE MODE RELEASE** - Şimdi yapılabilir
-
-**Referans**: `docs/active/PRODUCTION-READINESS-FINAL-CHECKLIST.md`
+**Referans**: `docs/active/G21-ROADMAP-CURRENT.md` - Aktif development roadmap
 
 ---
 

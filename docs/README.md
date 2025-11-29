@@ -6,7 +6,7 @@
 
 | Soru | Doküman |
 |------|---------|
-| **"Production'a çıkabilir miyim?"** | `docs/active/GO-NO-GO-CHECKLIST-v1.0.md` |
+| **"Production'a çıkabilir miyim?"** | ⏸ **INACTIVE** - Prod Go/No-Go süreci rafa kaldırıldı. Altyapı dokümanları: `docs/archive/2025-01-30-PRODUCTION-*` |
 | **"Hunter'ın şu anki durumu ne?"** | `docs/active/HUNTER-STATE-v1.0.md` |
 | **"G21 refactor'ın durumu ne?"** | `docs/active/G21-ROADMAP-CURRENT.md` |
 | **"Post-MVP'de ne yapacağız?"** | `docs/plans/2025-01-30-POST-MVP-STRATEGY.md` |
@@ -23,9 +23,9 @@
 | **"D365 Lead form yapısı nasıl?"** | `docs/reference/LEAD-FORM-ARCHITECTURE.md` |
 | **"D365 Lead view'leri nasıl yapılandırılır?"** | `docs/reference/LEAD-VIEWS.md` |
 | **"D365 Option Set value mapping nasıl çalışır?"** | `docs/reference/D365-OPTION-SET-MAPPING.md` |
-| **"HAMLE 2 (D365 E2E Wiring) durumu ne?"** | `docs/active/HAMLE-2-EXECUTION-CHECKLIST.md` |
-| **"HAMLE 2 test sonuçları ne?"** | `docs/active/HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md` |
-| **"HAMLE 2 production'a geçebilir miyim?"** | `docs/active/HAMLE-2-GO-NOGO-DECISION.md` |
+| **"HAMLE 2 (D365 E2E Wiring) durumu ne?"** | ✅ **COMPLETED** (2025-01-30) - `docs/archive/2025-01-30-HAMLE-2-EXECUTION-CHECKLIST.md` (Archived) |
+| **"HAMLE 2 test sonuçları ne?"** | ✅ **COMPLETED** (2025-01-30) - `docs/archive/2025-01-30-HAMLE-2-*-TEST-RESULTS.md` (Archived) |
+| **"HAMLE 2 production'a geçebilir miyim?"** | ✅ **GO** (2025-01-30) - `docs/archive/2025-01-30-HAMLE-2-GO-NOGO-DECISION.md` (Archived) - ⏸ Prod Go/No-Go inactive |
 
 ---
 
@@ -88,10 +88,10 @@ API contract documentation:
 ### Active Documentation
 
 #### Core Status & Strategy Documents (v1.0)
-- `HUNTER-STATE-v1.0.md` - **Sistem Durum Özeti** - Hunter v1.0'ın tek resmi durum dokümanı
-- `CRITICAL-3-HAMLE-PRODUCT-READY.md` - **Acil Aksiyon Planı** - 3 hamle ile product-ready'e ulaşma planı
-- `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap** - Mimari refactor ve entegrasyon yol haritası (güncel durum)
-- `CORE-FREEZE-D365-PUSH-PLAN.md` - **Core Freeze + D365 Push Planı** - Core koruma ve D365 entegrasyon mimarisi
+- `HUNTER-STATE-v1.0.md` - **Sistem Durum Özeti** - Hunter v1.0'ın tek resmi durum dokümanı (Prod Go/No-Go inactive)
+- `CRITICAL-3-HAMLE-PRODUCT-READY.md` - **Acil Aksiyon Planı** - 3 hamle ile product-ready'e ulaşma planı (Roadmap Mode)
+- `G21-ROADMAP-CURRENT.md` - **G21 Architecture & Integration Roadmap** - Mimari refactor ve entegrasyon yol haritası (güncel durum, Prod Go/No-Go inactive)
+- `CORE-FREEZE-D365-PUSH-PLAN.md` - **Core Freeze + D365 Push Planı** - Core koruma ve D365 entegrasyon mimarisi → `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` (Archived)
 
 #### HAMLE 1: Partner Center Sync Aktifleştirme (2025-01-30)
 - `HAMLE-1-EXECUTION-PLAN.md` - **Execution Plan** - 7 adımlı aktivasyon planı (kod incelemesi tamamlandı)
@@ -223,12 +223,12 @@ API contract documentation:
   - `DEPENDENCY-MAP.md` - Dependency analysis for Notes/Tags/Favorites endpoints
   - `usage_metrics_*.json` - Usage metrics collection data
 
-**Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`.
+**Note:** Active documentation contains reference guides, production readiness documentation, and current priority/planning documents. Completed sprint plans and implementation playbooks have been moved to `archive/`. Sales Engine documentation has been moved to `docs/sales/`. Planning documentation is in `plans/`. **Production Go/No-Go süreci inactive** (2025-01-30) - Altyapı dokümanları arşivde, aktif süreç değil. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup).
 
 **Current Project Status:**
 - ✅ **v1.0.0 Production-Ready**: Core engine production-ready (2025-01-28)
-  - **Status Document**: `HUNTER-STATE-v1.0.md` - Tek resmi durum özeti
-  - **Go/No-Go Checklist**: `GO-NO-GO-CHECKLIST-v1.0.md` - Tüm Must-Have maddeler ✅
+  - **Status Document**: `HUNTER-STATE-v1.0.md` - Tek resmi durum özeti (Prod Go/No-Go inactive)
+  - **Production Go/No-Go**: ⏸ **INACTIVE** (2025-01-30) - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.
 - ✅ P0 Hardening: Completed (G19)
 - ✅ P1 Performance: Completed (2025-01-28)
 - ✅ Stabilization Sprint: Completed (2025-01-28) - v1.1-stable (Enterprise-Ready / UI-Stable / Integration-Ready)

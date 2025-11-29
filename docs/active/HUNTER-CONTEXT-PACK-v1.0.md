@@ -5,7 +5,9 @@
 **Last Updated:** 2025-01-30  
 **Owner:** Bered  
 **Version:** v1.0.0  
-**Status:** Production-Ready Core Engine
+**Status:** Production-Ready Core Engine - **Development Roadmap Mode**  
+**Production Go/No-Go:** ⏸ **INACTIVE** - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.  
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
 
 **Scope:** Hunter Core Engine → Sales Intelligence → Partner Center → Dynamics 365 → G21 Roadmap → Deployment Standards
 
@@ -510,7 +512,25 @@ PC API → OAuth Client → Referral Ingestion → Lead Creation/Update → DB �
   - Send to D365
   - Open in Partner Center
 
-### 6.6 Known Issues
+### 6.6 Productization & Production Enablement
+
+**Phase 4-6: Productization** ✅ **COMPLETED** (2025-01-30):
+- DB schema revision (referral aggregation fields)
+- Filter rules (referral type, link status)
+- Upsert strategy (idempotent domain-based)
+- Summary logging (sync summary events)
+- Comprehensive tests (50 tests passing)
+
+**Phase 7: Production Enablement** ✅ **COMPLETED** (2025-01-30):
+- Feature flag validation (OFF/ON behavior tested)
+- Logging review (PII-free, JSON-safe)
+- Metrics exposure (`/healthz/metrics` endpoint)
+- Background sync enablement (Celery Beat schedule respects feature flag)
+- Production checklist (`docs/reference/PARTNER-CENTER-PRODUCTION-CHECKLIST.md`)
+
+**Test Coverage**: 59/59 passing (37 domain extraction + 7 Phase 4 + 6 client + 6 Phase 5/6 + 3 Phase 3.3 URL-based + 10 Phase 7)
+
+### 6.7 Known Issues
 
 **Post-MVP Enhancements:**
 - Scoring pipeline'a Azure Tenant ID / Co-sell sinyali tam entegre değil
@@ -522,12 +542,14 @@ PC API → OAuth Client → Referral Ingestion → Lead Creation/Update → DB �
 
 ### 7.1 Status
 
-**Backend:** ✅ **94% COMPLETED** (Phase 2.5 - 2025-01-30)  
+**Backend:** ✅ **100% COMPLETED** (Phase 2.5 - 2025-01-30)  
 **UI:** ✅ **COMPLETED** (Phase 3 - 2025-01-30)  
 **E2E Tests:** ✅ **COMPLETED** (Phase 2.9 - 2025-01-30)  
 **Feature Flag:** OFF (MVP-safe, default: false)
 
 **Durum:** ✅ **HAMLE 2 COMPLETED** - Production-grade E2E testleri tamamlandı (3 senaryo), Go/No-Go: ✅ GO
+
+**Note:** Backend %94 → %100 (Phase 2.9 E2E testleri ile eksik %6 tamamlandı)
 
 ### 7.2 Pipeline Plan
 
@@ -1204,6 +1226,13 @@ IP2PROXY_DB=...
 ## 14) **Known Issues / Open Decisions**
 
 ### 14.1 Known Issues
+
+**Leads 500 Bug Fix** ✅ **FIXED** (2025-01-30):
+- **Problem**: `GET /api/v1/leads` endpoint 500 Internal Server Error
+- **Root Cause**: `referral_type` parametresi `get_leads_v1` fonksiyonunda eksikti
+- **Fix**: `referral_type` parametresi eklendi ve `get_leads` çağrısına geçirildi
+- **Status**: ✅ **FIXED** - Production deployment için hazır
+- **Reference**: `docs/active/LEADS-500-BUG-FIX.md`
 
 **D365 Segment Mapping Mismatch:**
 - Hunter segment (Migration/Existing/Cold/Skip) vs D365 segment (SMB/MidMarket/Enterprise)

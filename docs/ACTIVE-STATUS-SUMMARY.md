@@ -8,11 +8,21 @@
 ## ⚠️ **MEVCUT DURUM**
 
 ### Dosya Sayısı
-- **Mevcut:** 7 dosya (2025-01-30 cleanup sonrası)
-- **Önceki:** 12 dosya (2025-01-30)
+- **Mevcut:** 6 dosya (2025-01-30 cleanup sonrası)
+- **Önceki:** 10 dosya (2025-01-30 cleanup öncesi)
 - **Hedef:** 5-7 dosya (documentation guardrails)
-- **Durum:** ✅ **Hedef Aralıkta** (7 dosya - hedef: 5-7)
-- **Son Archive:** HAMLE-2-EXECUTION-CHECKLIST.md, HAMLE-2-GO-NOGO-DECISION.md, CORE-FREEZE-D365-PUSH-PLAN.md, SALES-ENGINE-V1.1.md (2025-01-30)
+- **Durum:** ✅ **Hedef Aralığında** (6 dosya - hedef: 5-7)
+- **Son Archive:** Prod Go/No-Go dokümanları (10 dosya - 2025-01-30):
+  - PRODUCTION-GO-NO-GO-ANALYSIS.md
+  - PRODUCTION-READINESS-FINAL-CHECKLIST.md
+  - PRODUCTION-DEPLOYMENT-ACTION-PLAN.md
+  - PRE-DEPLOYMENT-REALITY-CHECK.md
+  - PRE-DEPLOYMENT-EXECUTION-LOG.md
+  - PRE-DEPLOYMENT-PROGRESS.md
+  - PRE-DEPLOYMENT-CHECKLIST-EXECUTION.md
+  - PRE-DEPLOYMENT-QUICK-START.md
+  - PRE-DEPLOYMENT-STATUS.md
+  - PRODUCTION-ENVIRONMENT-STATUS.md
 - **Son Taşıma:** D365-PHASE-2.9-E2E-RUNBOOK.md → reference (2025-01-30)
 
 ---
@@ -42,10 +52,12 @@
   - ✅ Go/No-Go Decision: ✅ GO (production'a geçiş için hazır)
 - **Plan:** Adapter Pattern (Core Freeze + Integration Layer)
 - **PROD Öncesi Kritik İşler:** ✅ **TAMAMLANDI** (2025-01-30) - Retry + Error Handling FINAL ✅, Basic N+1 Optimization ✅, UI Polish Minimum ✅
-- **Production Readiness:** ✅ **PRODUCTION READY** (PROD öncesi kritik işler tamamlandı) → PROD SAFE MODE RELEASE hazır
-- **Aksiyon:** ✅ PROD öncesi kritik işler tamamlandı → PROD SAFE MODE RELEASE yapılabilir
-- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `PRODUCTION-READINESS-FINAL-CHECKLIST.md`
-- **Archive edilen dosyalar:** `HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-GO-NOGO-DECISION.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`, `SALES-ENGINE-V1.1.md` (2025-01-30)
+- **Production Go/No-Go:** ⏸ **INACTIVE** (2025-01-30) - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.
+- **Aksiyon:** ✅ Roadmap moduna geçildi - Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup)
+- **Dosyalar:** `HUNTER-STATE-v1.0.md`, `CRITICAL-3-HAMLE-PRODUCT-READY.md`, `G21-ROADMAP-CURRENT.md`
+- **Archive edilen dosyalar:** 
+  - `HAMLE-2-EXECUTION-CHECKLIST.md`, `HAMLE-2-GO-NOGO-DECISION.md`, `CORE-FREEZE-D365-PUSH-PLAN.md`, `SALES-ENGINE-V1.1.md` (2025-01-30)
+  - Prod Go/No-Go dokümanları (10 dosya - 2025-01-30): `PRODUCTION-GO-NO-GO-ANALYSIS.md`, `PRODUCTION-READINESS-FINAL-CHECKLIST.md`, `PRODUCTION-DEPLOYMENT-ACTION-PLAN.md`, `PRE-DEPLOYMENT-*` (7 dosya), `PRODUCTION-ENVIRONMENT-STATUS.md`
 - **Reference'a taşınan:** `D365-PHASE-2.9-E2E-RUNBOOK.md` → `docs/reference/` (2025-01-30)
 - **Archive edilen test dosyaları:** `HAMLE-2-E2E-TEST-RESULTS.md`, `HAMLE-2-ERROR-HANDLING-TEST-RESULTS.md`, `HAMLE-2-UI-BADGE-LINK-TEST.md` (2025-01-30)
 
@@ -64,13 +76,14 @@
 
 ## 📋 **DOSYA KATEGORİLERİ**
 
-### ✅ **Kritik Durum Dosyaları** (4 dosya - Tutarlı)
+### ✅ **Kritik Durum Dosyaları** (3 dosya - Tutarlı)
 1. `HUNTER-STATE-v1.0.md` - Sistem durumu (tek resmi kaynak)
-2. `CRITICAL-3-HAMLE-PRODUCT-READY.md` - Acil aksiyon planı
+2. `CRITICAL-3-HAMLE-PRODUCT-READY.md` - Acil aksiyon planı (Roadmap Mode)
 3. `G21-ROADMAP-CURRENT.md` - Mimari roadmap
-4. `PRODUCTION-READINESS-FINAL-CHECKLIST.md` - Production readiness checklist
 
-**Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30)
+**Durum:** ✅ **Tutarlı** - Tüm durumlar netleştirildi (2025-01-30), Prod Go/No-Go inactive
+
+**Not:** `PRODUCTION-READINESS-FINAL-CHECKLIST.md` → Archive edildi (2025-01-30) - Prod Go/No-Go inactive
 
 ### ✅ **Hamle 1 Eski Dosyaları** (4 dosya - ✅ Archive edildi - 2025-01-30)
 - `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → `archive/2025-01-30-HAMLE-1-PRODUCTION-DEPLOYMENT.md`
@@ -132,24 +145,25 @@
 - ✅ `CRITICAL-3-HAMLE-PRODUCT-READY.md`: ✅ HAMLE 2 COMPLETED (2025-01-30) - Production-grade E2E testleri (3 senaryo), Go/No-Go: ✅ GO
 - ✅ `G21-ROADMAP-CURRENT.md`: ✅ Phase 3 (D365) COMPLETED (2025-01-30) - Production-grade E2E testleri (3 senaryo)
 - ✅ `HAMLE-2-GO-NOGO-DECISION.md`: ✅ GO - Production'a geçiş için hazır (2025-01-30) → Archived
-- ✅ `PRODUCTION-READINESS-FINAL-CHECKLIST.md`: 🔄 PRE-PRODUCTION (2 kritik iş kaldı)
+- ⏸ `PRODUCTION-READINESS-FINAL-CHECKLIST.md`: ⏸ INACTIVE - Prod Go/No-Go süreci rafa kaldırıldı (2025-01-30) → Archived
 
-**Durum:** ✅ **Tutarlı** - HAMLE 2 COMPLETED, PROD öncesi 2 kritik iş kaldı (~2 gün)
+**Durum:** ✅ **Tutarlı** - HAMLE 2 COMPLETED, Prod Go/No-Go inactive, Roadmap moduna geçildi
 
 ---
 
 ## ⚠️ **SORUNLAR**
 
 ### 1. Dosya Sayısı Fazla
-- **Mevcut:** 9 dosya (2025-01-30 D365 phase cleanup sonrası)
-- **Önceki:** 13 dosya (2025-01-30)
+- **Mevcut:** 9 dosya (2025-01-30 Prod Go/No-Go inactive sonrası)
+- **Önceki:** 19 dosya (2025-01-30 Prod Go/No-Go cleanup öncesi)
 - **Hedef:** 5-7 dosya
-- **Çözüm:** Tamamlanmış phase dosyaları archive edildi
+- **Çözüm:** Tamamlanmış phase dosyaları ve Prod Go/No-Go dokümanları archive edildi
   - ✅ Solution 1 ve Solution 2 dosyaları archive edildi (2025-01-30)
   - ✅ Hamle 1 dosyaları archive edildi (2025-01-30)
   - ✅ D365 Phase 2.5 dosyaları archive edildi (2025-01-30)
   - ✅ D365 Phase 3 dosyası archive edildi (2025-01-30)
   - ✅ D365 Phase 2.9 eski wiring dosyası archive edildi (2025-01-30 - yeni runbook var)
+  - ✅ Prod Go/No-Go dokümanları archive edildi (10 dosya - 2025-01-30)
 
 ### 2. Manuel Kontrol Gerekiyor
 - Tutarlılık kontrolü manuel
@@ -220,17 +234,21 @@
 
 ---
 
-**Son Güncelleme:** 2025-01-30 (HAMLE 2 COMPLETED, PROD öncesi kritik işler dokümante edildi)  
+**Son Güncelleme:** 2025-01-30 (Prod Go/No-Go inactive, roadmap moduna geçildi)  
 **Son Değişiklikler:**
 - ✅ HAMLE 1 tamamlandı (2025-01-30) - Kod bazında DONE, ürün bazında yeterince iyi
 - ✅ HAMLE 2 COMPLETED (2025-01-30) - Production-grade E2E testleri tamamlandı (3 senaryo), Go/No-Go: ✅ GO
-- ✅ Production Readiness Final Checklist oluşturuldu (2025-01-30) - PROD öncesi kritik işler dokümante edildi
 - ✅ PROD öncesi kritik işler TAMAMLANDI (2025-01-30):
   - ✅ Retry + Error Handling FINAL - Error categorization, retry metrics, DLQ, manual retry endpoints eklendi
   - ✅ Basic N+1 Optimization - COUNT(*) optimization, SQL sort optimization, LIMIT/OFFSET eklendi
   - ✅ UI Polish — Minimum Viable - Design system, button styles, loading/error states, toast notifications eklendi
-- 📊 Production Readiness Durumu: ✅ **PRODUCTION READY** (PROD öncesi kritik işler tamamlandı) → PROD SAFE MODE RELEASE hazır
-- ✅ Production Readiness Final Checklist oluşturuldu (2025-01-30)
+- ⏸ **Production Go/No-Go:** INACTIVE (2025-01-30) - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.
+- ✅ Prod Go/No-Go dokümanları archive edildi (10 dosya - 2025-01-30):
+  - PRODUCTION-GO-NO-GO-ANALYSIS.md
+  - PRODUCTION-READINESS-FINAL-CHECKLIST.md
+  - PRODUCTION-DEPLOYMENT-ACTION-PLAN.md
+  - PRE-DEPLOYMENT-* (7 dosya)
+  - PRODUCTION-ENVIRONMENT-STATUS.md
 - ✅ Solution 1 ve Solution 2 dosyaları archive edildi (2025-01-30)
 - ✅ Hamle 1 dosyaları archive edildi (2025-01-30)
 - ✅ Production dosyaları reference klasörüne taşındı (2025-01-30)
@@ -241,13 +259,19 @@
 - ✅ HAMLE 1 dosyaları archive edildi (5 dosya - 2025-01-30)
 - ✅ HAMLE 2 test sonuçları archive edildi (3 dosya - 2025-01-30)
 - ✅ PRE-D365-ROAST-SPRINT-TASK-BOARD.md archive edildi (2025-01-30)
-- ✅ Dosya sayısı 20'den 12'ye düştü (HAMLE 1 ve test dosyaları archive edildi - 2025-01-30)
-  - HAMLE 1 dosyaları: 5 dosya archive edildi
-  - HAMLE 2 test sonuçları: 3 dosya archive edildi
-  - PRE-D365-ROAST-SPRINT-TASK-BOARD.md: Archive edildi
-- ⚠️ Hala 12 dosya var (hedef 5-7) - Production deployment sonrası daha fazla cleanup gerekiyor
+- ✅ Dosya sayısı 19'dan 9'a düştü (Prod Go/No-Go dokümanları archive edildi - 2025-01-30)
+- ✅ Dosya sayısı 10'dan 6'ya düştü (Cleanup sonrası - 2025-01-30):
+  - LEADS-500-BUG-FIX.md → Archive (tamamlandı)
+  - YARIM-KALAN-ISLER-LISTESI.md → Archive (içerik DEVELOPMENT-ROADMAP.md'ye taşındı)
+  - KALAN-ISLER-PRIORITY.md → Archive (içerik DEVELOPMENT-ROADMAP.md'ye taşındı)
+  - NO-BREAK-REFACTOR-PLAN.md → Archive (G21 roadmap ile overlap)
+  - ENVIRONMENT-ARCHITECTURE.md → Reference (reference guide)
+- ✅ **Hedef aralığında** (6 dosya - hedef: 5-7)
 
-**Sıradaki Kontrol:** 
-- Production deployment sonrası HAMLE 2 execution checklist ve Go/No-Go decision archive edilebilir
-- KALAN-ISLER-PRIORITY.md ve NO-BREAK-REFACTOR-PLAN.md değerlendirilebilir
+**Son Cleanup (2025-01-30):**
+- ✅ DEVELOPMENT-ROADMAP.md oluşturuldu (merkezi TODO/plan dosyası)
+- ✅ Tamamlanmış işler archive edildi (LEADS-500-BUG-FIX.md)
+- ✅ Overlap dosyalar archive edildi (YARIM-KALAN-ISLER-LISTESI.md, KALAN-ISLER-PRIORITY.md, NO-BREAK-REFACTOR-PLAN.md)
+- ✅ Reference dosyası taşındı (ENVIRONMENT-ARCHITECTURE.md → reference/)
+- ✅ Dosya sayısı 6'ya düştü (hedef: 5-7) ✅
 

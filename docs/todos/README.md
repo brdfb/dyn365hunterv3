@@ -2,28 +2,26 @@
 
 This folder contains TODO lists and task tracking documents.
 
+**Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar tek yerde
+
 ## Current Status
 
 **Active TODOs:**
-- `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (2025-01-28)
+- `G21-architecture-refactor.md` - G21: Architecture Refactor - Hunter Slimming - 🔄 In Progress (Phase 0-3 ✅, Phase 4 ⏸ PAUSED)
   - ✅ Phase 0: Preparation & Snapshot (2025-11-16)
   - ✅ Phase 1: Deprecation Annotations (2025-11-16)
   - ✅ Phase 2: Sales Engine (2025-01-28)
   - ✅ Phase 3: Read-Only Mode (2025-01-28)
-  - 🔄 Phase 4: Dynamics Migration (PAUSED - Integration Roadmap Phase 3 overlaps)
-- `INTEGRATION-ROADMAP.md` - Integration Roadmap - ✅ **COMPLETED** (2025-01-30 - Production Ready)
-  - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
-  - ✅ Phase 2: Partner Center Referrals (P1) - COMPLETED (2025-01-30)
-  - ✅ Phase 3: Dynamics 365 Integration (P2) - **COMPLETED** (2025-01-30 - Production Ready)
-    - ✅ Phase 2.5 (Backend): %94 completed
-    - ✅ Phase 3 (UI): Completed
-    - ✅ Roast Sprint: Completed (5/5 tasks)
-    - ✅ D365 Lead Push PoC: Completed (2025-01-30) - End-to-end flow working
-    - ✅ Phase 2.9 (E2E): ✅ COMPLETED (2025-01-30) - Production-grade E2E testleri (3 senaryo), Go/No-Go: ✅ GO
-    - ✅ PROD Öncesi Kritik İşler: ✅ COMPLETED (2025-01-30) - Retry + Error Handling FINAL, Basic N+1 Optimization, UI Polish Minimum
-    - ✅ Production Readiness: ✅ **PRODUCTION READY** → PROD SAFE MODE RELEASE hazır
+  - ⏸ Phase 4: Dynamics Migration (PAUSED - Integration Roadmap Phase 3 overlaps)
+  - ⏳ Phase 5: Monitoring & Stabilization (Post-MVP)
+  - ⏳ Phase 6: Cleanup (Post-MVP)
+  - **Merkezi Roadmap**: `docs/active/DEVELOPMENT-ROADMAP.md` - Tüm aktif TODO'lar ve planlar
 
 **Recently Completed:**
+- `INTEGRATION-ROADMAP.md` - Integration Roadmap - ✅ **COMPLETED** (2025-01-30 - Production Ready) → Archived
+  - ✅ Phase 1: Mini UI Stabilization (2025-01-28)
+  - ✅ Phase 2: Partner Center Referrals (2025-01-30)
+  - ✅ Phase 3: Dynamics 365 Integration (2025-01-30 - HAMLE 2 COMPLETED)
 - `PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ Completed (2025-01-30) → Archived
 - `PARTNER-CENTER-PHASE2-REFERRALS-V1.md` - Partner Center Referrals Sync v1 Productization - ✅ Completed (2025-01-30) → Archived
 - `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)
@@ -31,6 +29,7 @@ This folder contains TODO lists and task tracking documents.
 
 **Archived TODOs:**
 All completed TODO files have been moved to `docs/archive/`:
+- `2025-01-30-INTEGRATION-ROADMAP.md` - Integration Roadmap - ✅ **COMPLETED** (2025-01-30 - Production Ready)
 - `2025-01-30-PARTNER-CENTER-PHASE2.md` - Partner Center Phase 2 - ✅ Completed (2025-01-30)
 - `2025-01-30-PARTNER-CENTER-PHASE2-REFERRALS-V1.md` - Partner Center Referrals Sync v1 Productization - ✅ Completed (2025-01-30)
 - `G20-IP-Enrichment-Production.md` - G20: IP Enrichment Production Activation - ✅ Completed (2025-01-28)

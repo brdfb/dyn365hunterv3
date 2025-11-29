@@ -134,14 +134,17 @@ Add Sales Engine (sales intelligence layer).
 4. UI integration (Sales Intel tab in lead detail page) - ✅ **COMPLETED** (Sales Summary modal in Mini UI)
 5. Monitor sales feedback for tuning adjustments - Post-MVP
 
-**Production v1.0 Status**: ✅ **GO** - Production'a çıkış onaylandı (2025-01-28)
+**Production v1.0 Status**: ✅ **GO** - Production'a çıkış onaylandı (2025-01-28)  
+**Production Go/No-Go**: ⏸ **INACTIVE** (2025-01-30) - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.
 
 ---
 
 ## 🔗 Related Documents
 
 - `docs/prompts/2025-01-28-hunter-architecture-refactor-decision.md` - Architectural decision
-- `docs/active/NO-BREAK-REFACTOR-PLAN.md` - Detailed implementation plan
+- `docs/archive/2025-01-30-NO-BREAK-REFACTOR-PLAN.md` - Detailed implementation plan (archived)
+- `docs/active/G21-ROADMAP-CURRENT.md` - Current roadmap status
+- `docs/active/DEVELOPMENT-ROADMAP.md` - Merkezi roadmap (tüm aktif TODO'lar)
 
 ---
 

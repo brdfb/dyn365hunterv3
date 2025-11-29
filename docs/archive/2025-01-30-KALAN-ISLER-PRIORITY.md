@@ -659,6 +659,10 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 
 ## 🚦 Production Go/No-Go Checklist
 
+**Durum:** ⏸ **INACTIVE** (2025-01-30) - Prod Go/No-Go süreci rafa kaldırıldı. Altyapı dokümanları hazır (arşivde), ancak gerçek prod deployment yok. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup).
+
+**Referans:** Prod readiness dokümanları arşivde (`docs/archive/2025-01-30-*`) - İhtiyaç olursa tekrar açılabilir.
+
 ### ✅ Prod v1.0 (P0-only) - G19'da Tamamlandı
 
 **Şartlar**: P0 checklist yeşil
@@ -671,7 +675,7 @@ G18 tamamlandı ama bazı optional feature'lar eksik.
 - [x] API key security (bcrypt) aktif ✅ **G19'da**
 - [x] Health checks & probes (liveness/readiness/startup) aktif ✅ **G19'da**
 
-**Sonuç**: ✅ **Production v1.0'a çıkılabilir** - Tüm P0 maddeler G19'da tamamlandı.
+**Sonuç**: ✅ **Production v1.0'a çıkılabilir** - Tüm P0 maddeler G19'da tamamlandı. (Not: Prod Go/No-Go inactive - roadmap modunda)
 
 ---
 

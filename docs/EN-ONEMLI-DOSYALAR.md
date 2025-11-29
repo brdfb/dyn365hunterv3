@@ -34,7 +34,7 @@
 ---
 
 ### 3. **CORE-FREEZE-D365-PUSH-PLAN.md** ⭐⭐⭐
-**Konum:** `docs/active/CORE-FREEZE-D365-PUSH-PLAN.md`  
+**Konum:** `docs/archive/2025-01-30-CORE-FREEZE-D365-PUSH-PLAN.md` (Archived)  
 **Önemi:** 🔥 **MİMARİ PLAN** - Core Freeze + D365 Push mimari planı  
 **İçerik:**
 - Core Freeze protokolü (CODEOWNERS, CI regression job, feature flags)
@@ -43,12 +43,12 @@
 - Core vs Integration fiziksel ayrımı
 - Health check guardrails (D365 down olsa bile Hunter ready)
 
-**Ne Zaman Bakılır:** D365 Push implementasyonu başlamadan önce ve sırasında
+**Ne Zaman Bakılır:** D365 Push implementasyonu başlamadan önce ve sırasında (referans için arşivde)
 
 ---
 
 ### 4. **D365-PHASE-2.9-E2E-RUNBOOK.md** ⭐⭐
-**Konum:** `docs/active/D365-PHASE-2.9-E2E-RUNBOOK.md`  
+**Konum:** `docs/reference/D365-PHASE-2.9-E2E-RUNBOOK.md` (Reference)  
 **Önemi:** D365 Phase 2.9 E2E wiring runbook  
 **İçerik:**
 - Tenant & App Registration (Azure AD + D365)
@@ -57,12 +57,12 @@
 - Error & rate limit senaryoları
 - Go/No-Go gate (Dev → Prod)
 
-**Ne Zaman Bakılır:** D365 tenant setup ve E2E test yaparken
+**Ne Zaman Bakılır:** D365 tenant setup ve E2E test yaparken (reference guide)
 
 ---
 
 ### 5. **PRE-D365-ROAST-SPRINT-TASK-BOARD.md** ⭐⭐
-**Konum:** `docs/active/PRE-D365-ROAST-SPRINT-TASK-BOARD.md`  
+**Konum:** `docs/archive/2025-01-30-PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (Archived)  
 **Önemi:** Pre-D365 hotfix sprint task board (✅ Completed)  
 **İçerik:**
 - 5 kritik fix (security, idempotency, token cache, session lifecycle, retry)
@@ -70,7 +70,7 @@
 - Test plans
 - Decision log
 
-**Ne Zaman Bakılır:** D365 entegrasyonu öncesi hotfix'leri referans almak için
+**Ne Zaman Bakılır:** D365 entegrasyonu öncesi hotfix'leri referans almak için (arşivde)
 
 ---
 
@@ -200,14 +200,14 @@
 ---
 
 ### 15. **SALES-ENGINE-V1.1.md** ⭐
-**Konum:** `docs/active/SALES-ENGINE-V1.1.md`  
+**Konum:** `docs/archive/2025-01-30-SALES-ENGINE-V1.1.md` (Archived)  
 **Önemi:** Sales Engine v1.1 dokümantasyonu  
 **İçerik:**
 - Sales Engine intelligence layer
 - CSP P-Model
 - Commercial Segment & Heat
 
-**Ne Zaman Bakılır:** Sales Engine detayları için
+**Ne Zaman Bakılır:** Sales Engine detayları için (arşivde)
 
 ---
 
@@ -315,11 +315,11 @@
 - `SMOKE-TESTS-RUNBOOK.md`
 
 ### 📊 **Strateji ve Planlama (P1)**
-- `G21-ROADMAP-CURRENT.md`
+- `G21-ROADMAP-CURRENT.md` (Roadmap Mode - Prod Go/No-Go inactive)
 - `POST-MVP-STRATEGY.md` (plans klasöründe)
-- `KALAN-ISLER-PRIORITY.md`
-- `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (✅ Completed)
-- `D365-PHASE-2.9-E2E-RUNBOOK.md`
+- `KALAN-ISLER-PRIORITY.md` (Prod Go/No-Go inactive)
+- `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` (✅ Completed - Archived)
+- `D365-PHASE-2.9-E2E-RUNBOOK.md` (Reference)
 
 ### 👥 **Satış Ekibi (P1)**
 - `SALES-GUIDE.md`
@@ -347,9 +347,14 @@
 
 ---
 
-**Son Güncelleme:** 2025-01-30  
+**Son Güncelleme:** 2025-01-30 (Prod Go/No-Go inactive, roadmap moduna geçildi)  
 **Not:** 
 - `HAMLE-1-PRODUCTION-DEPLOYMENT.md` → Archive edildi (2025-01-30)
 - `POST-MVP-STRATEGY.md` → Plans klasörüne taşındı (2025-01-30)
-- Yeni dosyalar eklendi: `PRE-D365-ROAST-SPRINT-TASK-BOARD.md`, `D365-PHASE-2.9-E2E-RUNBOOK.md`
+- Prod Go/No-Go dokümanları → Archive edildi (10 dosya - 2025-01-30)
+- `CORE-FREEZE-D365-PUSH-PLAN.md` → Archive edildi (2025-01-30)
+- `PRE-D365-ROAST-SPRINT-TASK-BOARD.md` → Archive edildi (2025-01-30)
+- `SALES-ENGINE-V1.1.md` → Archive edildi (2025-01-30)
+- `D365-PHASE-2.9-E2E-RUNBOOK.md` → Reference'a taşındı (2025-01-30)
+- **Production Go/No-Go:** ⏸ INACTIVE - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development.
 
