@@ -5,7 +5,8 @@
 
 **Durum:** Phase 0–3 tamam, Phase 4 paused, Phase 5–6 pending  
 **Integration Roadmap:** Phase 2 (Partner Center) ✅ COMPLETED (2025-01-30 - Kod bazında DONE, ürün bazında yeterince iyi), Phase 3 (D365) ✅ COMPLETED (2025-01-30 - HAMLE 2 production-grade E2E testleri tamamlandı, Go/No-Go: ✅ GO)  
-**Production Go/No-Go:** ⏸ **INACTIVE** - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup)
+**Production Go/No-Go:** ⏸ **INACTIVE** - Altyapı dokümanları hazır (arşivde), aktif süreç değil. Odak: Feature development (Leads 500 fix, D365, PC Phase 4-5, UI cleanup)  
+**UAT Round 1 (2025-01-30):** Manual tests for Partner Center + D365 + Sales Reset
 
 ---
 
@@ -162,6 +163,10 @@ için tasarlanmış mimari refactor ve entegrasyon yol haritasıdır.
   - Hunter spesifik KPI'lar (scan volume, success rate, cache hit rate, vs.)
 
   - Alerting kuralları
+
+**✅ Delivered in UAT 2025-01-30:**
+- Sales Fresh Reset System (`scripts/sales_fresh_reset.sh`, `scripts/sales_health_check.sh`)
+- .env Checker / Config Audit (`scripts/check_env_completeness.sh`)
 
 ---
 

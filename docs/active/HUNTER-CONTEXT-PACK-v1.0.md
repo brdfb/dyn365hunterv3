@@ -980,12 +980,14 @@ Hunter Lead → map_lead_to_d365() → POST Lead → Return leadID → Update sy
 - Default: `false` (MVP-safe)
 - Status: ✅ Backend completed, UI completed, feature flag OFF
 - Activation: Set `HUNTER_PARTNER_CENTER_ENABLED=true` in `.env`
+- **UAT Profile Note:** UAT ortamında `HUNTER_PARTNER_CENTER_ENABLED=true`, `HUNTER_D365_ENABLED=true` olarak ayarlanabilir. Production'da default değerler (`false`) korunur.
 
 **Dynamics 365 Integration:**
 - Flag: `HUNTER_D365_ENABLED`
 - Default: `false` (MVP-safe)
 - Status: ✅ Backend 94% completed, UI completed, E2E tests completed, feature flag OFF
 - Activation: Set `HUNTER_D365_ENABLED=true` in `.env`
+- **UAT Profile Note:** UAT ortamında `HUNTER_PARTNER_CENTER_ENABLED=true`, `HUNTER_D365_ENABLED=true` olarak ayarlanabilir. Production'da default değerler (`false`) korunur.
 
 **IP Enrichment:**
 - Flag: `HUNTER_ENRICHMENT_ENABLED`
@@ -1058,6 +1060,12 @@ IP2PROXY_DB=...
 - [ ] Health probes configured
 - [ ] Monitoring configured (Sentry, metrics)
 - [ ] Smoke tests prepared
+
+**UAT Pre-Deployment (UAT Round için ek adımlar):**
+- [ ] `scripts/sales_fresh_reset.sh` çalıştırıldı (tam sıfırlanmış demo ortamı)
+- [ ] `scripts/sales_health_check.sh` temiz (API/DB/Redis ok)
+- [ ] `.env` checker çalıştırıldı → tüm zorunlu değişkenler OK, Partner Center & D365 flag'leri istenen profilde
+- [ ] UAT bugfix branch açıldı (örn. `bugfix/uat-2025-01-30`) ve baseline tag'lendi
 
 **Deployment:**
 - [ ] Docker images built

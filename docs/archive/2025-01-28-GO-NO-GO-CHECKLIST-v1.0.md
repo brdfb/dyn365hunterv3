@@ -629,7 +629,21 @@
 
 ---
 
-**Last Updated**: 2025-01-28  
+## 🧪 UAT Round için Ek Adımlar
+
+**UAT Round öncesi ek checklist:**
+
+- [ ] `scripts/sales_fresh_reset.sh` çalıştırıldı (tam sıfırlanmış demo ortamı)
+- [ ] `scripts/sales_health_check.sh` temiz (API/DB/Redis ok)
+- [ ] `.env` checker çalıştırıldı → tüm zorunlu değişkenler OK, Partner Center & D365 flag'leri istenen profilde
+  - Script: `scripts/check_env_completeness.sh` veya `python scripts/check_env_completeness.py` (eğer varsa)
+- [ ] UAT bugfix branch açıldı (örn. `bugfix/uat-2025-01-30`) ve baseline tag'lendi
+
+**Not:** Bu adımlar her UAT turunu **aynı ritüelle** çalıştırmak için standartlaştırılmıştır.
+
+---
+
+**Last Updated**: 2025-01-30 (UAT Round ek adımları eklendi)  
 **Version**: v1.0.0  
 **Status**: ✅ **GO** - Production v1.0'a çıkış onaylandı
 

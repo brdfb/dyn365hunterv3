@@ -749,6 +749,62 @@ kubectl exec -it redis-pod -- redis-cli LLEN celery
 
 ## 🔧 Common Operations
 
+### .env Sağlık Kontrolü
+
+**Script:** `scripts/check_env_completeness.sh`
+
+**Kullanım:**
+```bash
+bash scripts/check_env_completeness.sh
+```
+
+**Kontrol Edilenler:**
+
+**Zorunlu Değişkenler:**
+- `DATABASE_URL`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+- `REDIS_URL`
+- `API_HOST`
+- `API_PORT`
+- `LOG_LEVEL`
+- `ENVIRONMENT`
+
+**Opsiyonel (Önerilen):**
+- `HUNTER_SENTRY_DSN`
+- `HUNTER_DB_POOL_SIZE`
+- `HUNTER_DB_MAX_OVERFLOW`
+
+**Feature Flag'ler:**
+- `HUNTER_PARTNER_CENTER_ENABLED` (default: false)
+- `HUNTER_D365_ENABLED` (default: false)
+- `HUNTER_ENRICHMENT_ENABLED` (default: false)
+
+**Koşullu Değişkenler:**
+- Partner Center aktifse: `HUNTER_PARTNER_CENTER_CLIENT_ID`, `HUNTER_PARTNER_CENTER_TENANT_ID`, `HUNTER_PARTNER_CENTER_API_URL`
+- D365 aktifse: `HUNTER_D365_BASE_URL`, `HUNTER_D365_CLIENT_ID`, `HUNTER_D365_CLIENT_SECRET`, `HUNTER_D365_TENANT_ID`
+- IP Enrichment aktifse: `MAXMIND_CITY_DB`, `IP2LOCATION_DB`, `IP2PROXY_DB`
+
+**Uygulama Restart Flow:**
+```bash
+docker-compose restart api worker
+```
+
+**Not:** UAT profili için Partner Center & D365 flag'leri aktifse, reset sonrası da aktif kalır.
+
+### Partner Center Debug Notu
+
+**Script:** `app.partner_center_device_code_flow`
+
+**Amaç:** Sadece **debug/UAT aracı**
+
+**Production Path:** Her zaman **client credentials flow** (Celery + MSAL) kullanılır.
+
+**Not:** Device code flow sadece manuel test ve debug için kullanılır. Production'da otomatik sync Celery task ile yapılır.
+
+---
+
 ### Database Backup
 
 ```bash
