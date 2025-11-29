@@ -53,6 +53,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Status**: ✅ **Added** - Container scripts now permanently available in Docker image
 
 ### Changed
+- **Container Scripts Location** (2025-01-30) - Moved container Python scripts from `scripts/` to `app/tools/`
+  - **Migration**: Container Python scripts relocated for permanent Docker image inclusion
+    - `scripts/partner_center_device_code_flow.py` → `app/tools/partner_center_device_code_flow.py`
+    - `scripts/sync_partner_center.py` → `app/tools/sync_partner_center.py`
+    - `scripts/d365_smoketest.py` → `app/tools/d365_smoketest.py`
+    - `scripts/test_d365_error_handling.py` → `app/tools/test_d365_error_handling.py`
+  - **Updated References**:
+    - `scripts/enable_integrations.sh` - Updated script paths
+    - `docs/reference/INTEGRATIONS-ENABLED-STATUS.md` - Updated usage examples
+    - `docs/reference/PARTNER-CENTER-TEST-GUIDE.md` - Updated command examples
+    - `docs/reference/PRODUCTION-DEPLOYMENT-SUMMARY.md` - Updated authentication commands
+    - `.env.example` - Updated usage comments
+  - **New Usage**:
+    - Old: `docker-compose exec api python scripts/partner_center_device_code_flow.py`
+    - New: `docker-compose exec api python -m app.tools.partner_center_device_code_flow`
+  - **Reason**: `scripts/` directory not copied to Docker image, `app/tools/` automatically included
+  - **Files**: All script references updated, old `app/partner_center_device_code_flow.py` removed
+  - **Status**: ✅ **Changed** - All container scripts now use module-based execution
+
+- **README.md Setup Section** (2025-01-30) - Updated with fresh start script reference
+  - Added "Hızlı Kurulum (Önerilen - Son Kullanıcı İçin)" section
+  - Added `scripts/fresh_start.sh` usage example
+  - Added reference to `docs/reference/FRESH-START-GUIDE.md`
+  - Maintained existing developer setup instructions
+  - **Files**: `README.md`
+  - **Status**: ✅ **Changed** - Setup instructions now include end-user friendly option
+
 - **Hunter Roadmap Mode – Context & Doc Rules** (2025-01-30) - Context management and documentation rules for Hunter project
   - **Global Mod: Roadmap Mode (Prod INACTIVE)**: Default mode is Roadmap/Feature Development, Production Go/No-Go docs are INACTIVE
   - **Aktif Context Kaynağı**: Priority file reading order for new chat/context situations
