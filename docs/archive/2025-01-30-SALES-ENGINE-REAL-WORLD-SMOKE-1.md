@@ -241,3 +241,7 @@ COLD_DOMAIN="atilimyem.com.tr" \
 
 **Recommendation**: ✅ **Ready for production use** with minor optional tuning
 
+---
+
+**Archive Tarihi**: 2025-01-30
+

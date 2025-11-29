@@ -276,7 +276,7 @@ Sales summary views are logged with opportunity potential:
 
 ## Related Documents
 
-- `docs/active/SALES-ENGINE-REAL-WORLD-SMOKE-1.md` - Real-world test results
+- `docs/archive/2025-01-30-SALES-ENGINE-REAL-WORLD-SMOKE-1.md` - Real-world test results
 - `docs/api/SALES-SUMMARY-V1-CONTRACT.md` - API contract
 - `app/core/sales_engine.py` - Implementation
 - `app/data/rules.json` - Segment rules configuration
@@ -326,3 +326,8 @@ Sales summary views are logged with opportunity potential:
 | Google/Yandex/Zoho/Hosting | 60+ | Migration | 1-4 | Migration segment (min_score = 60) |
 | Google/Yandex/Zoho/Hosting | 40-59 | Cold | 5-6 | General Cold rule |
 | Google/Yandex/Zoho/Hosting | 0-39 | Skip | 7 | General Skip rule |
+
+---
+
+**Archive Tarihi**: 2025-01-30
+
